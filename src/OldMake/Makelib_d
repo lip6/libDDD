@@ -1,0 +1,15 @@
+
+
+
+DEBUG=-g
+#DEBUG= -O3 -D NDEBUG
+
+LIB = libDDD_d.a 
+
+include MakeLib.rules
+
+
+
+
+
+
