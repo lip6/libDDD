@@ -16,7 +16,7 @@ using namespace __gnu_cxx;
 #include "SHom.h"
 
 /******************************************************************************/
-
+namespace namespace_SDED {
 #ifdef INST_STL
 long long NBJumps=0;
 long long NBAccess=0;
@@ -28,6 +28,9 @@ static Cache cache;
 static int Hits=0;
 static int Misses=0;
 static size_t Max_SDED=0;
+} //namespace namespace_SDED 
+using namespace namespace_SDED ;
+
 /******************************************************************************/
 class _SDED_GSDD:public _SDED{
 private:
