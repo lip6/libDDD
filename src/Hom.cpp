@@ -377,6 +377,38 @@ public:
   }
 };
 
+/************************** Fixpoint */
+class Fixpoint:public _GHom{
+private:
+  GHom arg;
+public:
+  /* Constructor */
+  Fixpoint(const GHom &a,int ref=0):_GHom(ref),arg(a){}
+  /* Compare */
+  bool operator==(const _GHom &h) const{
+    return arg==((Fixpoint*)&h )->arg ;
+  }
+  size_t hash() const{
+    return 17*::hash<GHom>()(arg);
+  }
+
+  /* Eval */
+  GDDD eval(const GDDD &d)const{
+    GDDD d1=d,d2=d;
+    do {
+      d1=d2;
+      d2=arg(d2);
+    } while (d1 != d2);
+
+    return d;
+  }
+
+  /* Memory Manager */
+  void mark() const{
+    arg.mark();
+  }
+};
+
 /*************************************************************************/
 /*                         Class StrongHom                               */
 /*************************************************************************/
@@ -522,6 +554,10 @@ Hom &Hom::operator=(const GHom &h){
 }
 
 /* Operations */
+GHom fixpoint (const GHom &h) {
+  return GHom(canonical(new Fixpoint(h)));
+}
+
 GHom operator&(const GHom &h1,const GHom &h2){
   return GHom(canonical(new Compose(h1,h2)));
 }
