@@ -4,6 +4,7 @@ using namespace std;
 #include "DDD.h"
 #include "DED.h"
 #include "Hom.h"
+#include "MemoryManager.h"
 
 enum {A, B, C, D,E, F, G} variables;
 char* vn[]= {"A", "B", "C", "D", "E", "F", "G"};
@@ -160,6 +161,8 @@ int main(){
   cout <<"<B=D>(u)="<< endl<<setB_D(u)<<endl;
 
   cout <<"<C=5><A=C><B=D>(u)="<< endl<<(setC_5&setA_C&setB_D)(u)<<endl;
+
+  MemoryManager::pstats();
   
   return 1;
 }

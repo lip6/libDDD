@@ -4,6 +4,7 @@ using namespace std;
 #include "DDD.h"
 #include "DED.h"
 #include "Hom.h"
+#include "MemoryManager.h"
 
 enum {A, B, C, D,E, F, G} variables;
 char* vn[]= {"A", "B", "C", "D", "E", "F", "G"};

@@ -70,5 +70,8 @@ int main(){
   cout<<MemoryManager::nbHom()<<endl;
   cout<<MemoryManager::nbDED()<<endl;
 
+  MemoryManager::pstats();
+
+
   return 1;
 }
