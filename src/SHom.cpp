@@ -466,16 +466,12 @@ GSDD StrongShom::eval(const GSDD &d)const{
     return GSDD::top;
   else{
     int variable=d.variable();
-    
-    GSDD::const_iterator vi=d.begin();
-    GSDD res = phi(variable,*vi->first)(vi->second);
-    GSDD foo;
-    for(vi++; vi!=d.end();vi++){
-      foo =  phi(variable,*vi->first)(vi->second);
-      if (foo != GSDD::null)
-	res = res + foo;
+    set<GSDD> s;
+
+    for(GSDD::const_iterator vi=d.begin();vi!=d.end();vi++){
+      s.insert(phi(variable,*vi->first)(vi->second));
     }
-    return res;
+    return SDED::add(s);
   }
 }
 

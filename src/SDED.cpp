@@ -66,11 +66,11 @@ inline void square_union (map<GSDD,DataSet *> &res,const GSDD & s, DataSet * d) 
 /******************************************************************************/
 class _SDED_Add:public _SDED{
 private:
-  GSDD parameter1;
-  GSDD parameter2;
-  _SDED_Add(const GSDD &g1,const GSDD &g2):parameter1(g1),parameter2(g2){};
+  set<GSDD> parameters;
+  _SDED_Add(const set<GSDD> &d):parameters(d){};
 public:
   static  _SDED *create(const GSDD &g1,const GSDD &g2);
+  static  _SDED *create(const set<GSDD> &d);
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
@@ -85,76 +85,90 @@ public:
 /*********/
 /* Compare */
 size_t _SDED_Add::hash() const{
-  return ::hash<GSDD>()(parameter1)^::hash<GSDD>()(parameter2);
+  size_t res=0;
+  for(set<GSDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
+    res+=::hash<GSDD>()(*si);
+  }
+  return res;
 }
 
 bool _SDED_Add::operator==(const _SDED &e)const{
-  return  ((parameter1==((_SDED_Add*)&e)->parameter1)&&(parameter2==((_SDED_Add*)&e)->parameter2));
+  return (parameters==((_SDED_Add*)&e)->parameters);
 }
 
 /* Transform */
 GSDD _SDED_Add::eval() const{
-  assert(parameter1.variable()==parameter2.variable());
-  int variable=parameter1.variable();
+  assert(parameters.size() > 1);
+  int variable=parameters.begin()->variable();
+  // To compute the result 
   map<GSDD,DataSet *> res;
 
-  // remainder for p1 and p2
-  map<GSDD,DataSet *> rem_p1,rem_p2;
   // for memory collection
   DataSet * tofree;
 
-  // for each son of p1 initialize remainder
-  for (GSDD::Valuation::const_iterator it = parameter1.begin();it != parameter1.end() ; it++) 
-    rem_p1[it->second] = it->first->newcopy();
-  // for each son of p2 initialize remainder
-  for (GSDD::Valuation::const_iterator it = parameter2.begin();it != parameter2.end() ; it++) 
-    rem_p2[it->second] = it->first->newcopy();
+  // The current operand
+  set<GSDD>::const_iterator opit =  parameters.begin();
 
-  GSDD s1Us2 ;
-  // for each son of p1 :   v - a -> s1 
-  for (GSDD::Valuation::const_iterator it = parameter1.begin();it != parameter1.end() ; it++) {
-    // for each son of p2 :   v - b -> s2 
-    for (GSDD::Valuation::const_iterator jt = parameter2.begin();jt != parameter2.end() ; jt++) {
-      // compute a*b
-      DataSet *ainterb = it->first->set_intersect(*jt->first);
-      // if a*b = 0, skip
-      if (ainterb->empty()) {
-	delete ainterb;
-	continue;
-      }
-      //   (a-c) -> s1  + (c-a) -> s2 + (c*a) -> s1+s2
-      // treat (c*a) -> s1+s2
-      s1Us2 = it->second + jt->second;
-      square_union(res,s1Us2,ainterb);
+  // Initialize with copy of first operand
+  for (GSDD::Valuation::const_iterator it = opit->begin();it != opit->end() ; it++) 
+    res[it->second]=it->first->newcopy();
 
-      // treat other terms
-      tofree = rem_p1[it->second];
-      rem_p1[it->second] = rem_p1[it->second]->set_minus(*ainterb);
-      delete tofree;
-      tofree = rem_p2[jt->second];
-      rem_p2[jt->second] = rem_p2[jt->second]->set_minus(*ainterb);
-      delete tofree;
-      delete ainterb;
+  // main loop
+  // Foreach  opit in (operands)
+  for (opit++ ; opit != parameters.end() ; opit++) {
+    // To store non empty intersection results;
+    vector< pair <GSDD,DataSet *> > sums;
+    // To store the remainders (empty intersection with all previous elements)
+    vector< pair <GSDD,DataSet *> > rems;
+    
+    // Foreach arc in current operand  : e-a->A
+    for (GSDD::Valuation::const_iterator arc = opit->begin() ; arc != opit->end() ; arc++ ) {
+      DataSet * a = arc->first->newcopy();
+      // foreach value already in result : e-b->B
+      for (map<GSDD,DataSet *>::iterator resit = res.begin() ; resit != res.end() ; resit ++ ) {
+	// compute a*b
+	DataSet *ainterb = arc->first->set_intersect(*resit->second);
+	// if a*b = 0, skip
+	if (ainterb->empty()) {
+	  delete ainterb;
+	  continue;
+	}
+	// update result : res[cur] -= ainterb :  e- b \ a -> B
+	tofree = resit->second;
+	resit->second = resit->second->set_minus(*ainterb);
+	delete tofree;
+	// add intersection to sums : e- b * a -> A+B
+	sums.push_back( make_pair(resit->first + arc->second , ainterb) );
+	// update current iteration value
+	tofree = a ;
+	a = a->set_minus(*ainterb);
+	delete tofree;
+	if (a->empty()) {
+	  // we can stop
+	  break;
+	}
+	
+      } // end foreach resit in result
+      
+      // if there is a remainder, store it
+      if (! a->empty()) {
+	rems.push_back(make_pair(arc->second,a));
+      } else 
+	delete a;
+    } // end foreach arc in operand
+    
+    // Now process remainders and sums
+    for (vector< pair <GSDD,DataSet *> >::iterator it=sums.begin(); it != sums.end(); it++ ) {
+      square_union(res,it->first,it->second);
+      delete it->second;
     }
-  }
-  
-  // add remainders
-  // for each son of p1 
-  for (map<GSDD,DataSet *>::const_iterator it = rem_p1.begin();it != rem_p1.end() ; it++) {
-    if (! it->second->empty() )      
-      {
-	square_union(res,it->first,it->second);
-      }
-    delete it->second;
-  }
-  // for each son of p2 
-  for (map<GSDD,DataSet *>::const_iterator it = rem_p2.begin();it != rem_p2.end() ; it++) {
-    if (! it->second->empty() )      
-      {
-	square_union(res,it->first,it->second);
-      }
-    delete it->second;
-  }
+    for (vector< pair <GSDD,DataSet *> >::iterator it=rems.begin(); it != rems.end(); it++ ) {
+      square_union(res,it->first,it->second);
+      delete it->second;
+    }
+
+
+  } // end foreach operand
 
   GSDD::Valuation value;
   map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
@@ -164,7 +178,8 @@ GSDD _SDED_Add::eval() const{
   }
   value.reserve(res.size());  
   for (map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
-    value.push_back(make_pair(it->second,it->first));
+    if (! it->second->empty())
+      value.push_back(make_pair(it->second,it->first));
 
   return GSDD(variable,value);
 };
@@ -182,11 +197,39 @@ _SDED *_SDED_Add::create(const GSDD &g1,const GSDD &g2){
   if (g1 == GSDD::one || g2 == GSDD::one || g1 == GSDD::top || g2 == GSDD::top || g1.variable() != g2.variable() ) 
     return new _SDED_GSDD(GSDD::top);
 
-  if (::hash<GSDD>()(g1) < ::hash<GSDD>()(g2))
-    return new _SDED_Add(g1,g2);
-  else
-    return new _SDED_Add(g2,g1);
+  set<GSDD> parameters;
+  parameters.insert(g1);
+  parameters.insert(g2);
+
+  return new _SDED_Add(parameters);
 }
+/* constructor*/
+_SDED *_SDED_Add::create(const set<GSDD> &s){
+  assert(s.size()!=0); // s is not empty
+  set<GSDD> parameters=s;
+  parameters.erase(GSDD::null);
+  if(parameters.size()==1)
+    return new _SDED_GSDD(*parameters.begin());  
+  else { 
+    if(parameters.size()==0)
+      return new _SDED_GSDD(GSDD::null);
+    else if(parameters.find(GSDD::top)!=parameters.end()||parameters.find(GSDD::one)!=parameters.end()){  
+      return new _SDED_GSDD(GSDD::top);
+    }
+    else{ 
+      set<GSDD>::const_iterator si=parameters.begin();
+      int variable = si->variable();
+      for(;(si!=parameters.end())?(variable == si->variable()):false;si++);
+      if(si!=parameters.end())// s contains at least 2 GDDDs with different variables
+	return new _SDED_GSDD(GSDD::top);
+      return new _SDED_Add(parameters);    
+    }
+  }
+
+}
+
+
+
 /******************************************************************************/
 /*                    class _SDED_Mult:public _SDED                             */
 /******************************************************************************/
@@ -598,10 +641,10 @@ GSDD SDED::Shom(const GShom &h,const GSDD&g){
 };
 
 
-// GSDD SDED::add(const set<GSDD> &s){
-//   SDED e(_SDED_Add::create(s));
-//   return e.eval();
-// };
+GSDD SDED::add(const set<GSDD> &s){
+   SDED e(_SDED_Add::create(s));
+   return e.eval();
+};
 
 GSDD operator+(const GSDD &g1,const GSDD &g2){
   SDED e(_SDED_Add::create(g1,g2));
