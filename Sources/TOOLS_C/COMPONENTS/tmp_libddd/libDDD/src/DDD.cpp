@@ -57,6 +57,7 @@ public:
 // to be revised !!!
 
 namespace __gnu_cxx {
+  template<>
   struct hash<_GDDD*> {
     size_t operator()(_GDDD *g) const{
       size_t res=(size_t) g->variable;
@@ -68,6 +69,7 @@ namespace __gnu_cxx {
 }
 
 namespace std {
+  template<>
   struct equal_to<_GDDD*> {
     bool operator()(_GDDD *g1,_GDDD *g2) const{
       return *g1==*g2;

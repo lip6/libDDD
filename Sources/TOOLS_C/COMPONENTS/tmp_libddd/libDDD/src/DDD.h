@@ -102,6 +102,7 @@ public:
 
 /******************************************************************************/
 namespace __gnu_cxx {
+  template<>
 	struct hash<GDDD> {
 		size_t operator()(const GDDD &g) const{
 			return (size_t) g.concret;
@@ -110,6 +111,7 @@ namespace __gnu_cxx {
 }
 
 namespace std {
+  template<>
 	struct equal_to<GDDD> {
 		bool operator()(const GDDD &g1,const GDDD &g2) const{
 			return g1==g2;
@@ -118,6 +120,7 @@ namespace std {
 }
 
 namespace std {
+  template<>
 	struct less<GDDD> {
 		bool operator()(const GDDD &g1,const GDDD &g2) const{
 			return g1<g2;
