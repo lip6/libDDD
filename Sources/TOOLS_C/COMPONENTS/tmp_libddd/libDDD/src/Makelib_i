@@ -1,0 +1,21 @@
+
+
+#DEBUG=-g
+DEBUG= -O3 -D NDEBUG
+LIB = libDDD_i.a 
+CXXFLAGS+= -isystem ../STLProf  -D INST_STL
+
+
+include MakeLib.rules
+
+
+
+
+
+
+
+
+
+
+
+
