@@ -1,0 +1,52 @@
+
+SRCS = DED.cpp DDD.cpp Hom.cpp SDED.cpp SDD.cpp SHom.cpp 
+OBJS = $(SRCS:.cpp=.o)
+DEPS = $(SRCS:.cpp=.d)
+
+CXX = g++
+#CXXFLAGS= -O9  -Wall #-pg
+CXXFLAGS+= $(DEBUG)  -Wall -D DEBUG_EGAL #-pg 
+
+
+#CXXFLAGS+= -isystem /usr/local/include/boost-1_31/boost\
+#	   -isystem /usr/local/include/boost-1_31/boost/pool\
+#	   -isystem /usr/local/include/boost-1_31/boost\
+#	   -isystem /usr/local/include/boost-1_31 
+
+
+all: $(LIB)
+
+$(LIB): $(OBJS)
+	ar ru $(LIB) $(OBJS)
+	ranlib $(LIB)
+
+# implicit rules
+
+.cpp.o:
+	$(CXX) -c $(CXXFLAGS) $<
+
+clean:
+	rm -f $(LIB) *.o *.d *~
+
+cleanobj:
+	rm -f *.o *.d *~
+
+
+%.d: %.cpp
+	@$(SHELL) -ec '$(CXX) -M $(CXXFLAGS) $(INCLUDES) $< \
+                | sed '\''s/\($*\)\.o[ :]*/\1.o $@ : /g'\'' > $@; \
+                [ -s $@ ] || rm -f $@'
+
+-include $(DEPS)        
+
+
+
+
+
+
+
+
+
+
+
+
