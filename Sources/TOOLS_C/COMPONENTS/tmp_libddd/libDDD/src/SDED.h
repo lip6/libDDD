@@ -27,6 +27,7 @@ public:
   /* Memory Manager */
   static  unsigned int statistics();
   static void pstats(bool reinit=true);
+  static void recentGarbage();
   static void garbage(); 
 };
 
@@ -54,8 +55,11 @@ static long long NBAccess;
 public:
   /* Destructor */
   virtual ~_SDED(){};
-  virtual bool dogarbage() {return true;}
-  virtual bool shouldCache() { return true;}
+
+  // to enact dynamic garbage collection mechanism
+  // Returns true if all arguments of the operation of type GSDD have property that (isSon()==true)
+  // This property triggers long term storage
+  virtual bool shouldCache() {return false ;}
 
   /* Compare */
   virtual size_t hash() const =0;
