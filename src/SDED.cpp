@@ -180,6 +180,8 @@ GSDD _SDED_Add::eval() const{
   for (map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
     if (! it->second->empty())
       value.push_back(make_pair(it->second,it->first));
+    else
+      delete  it->second;
 
   return GSDD(variable,value);
 };
