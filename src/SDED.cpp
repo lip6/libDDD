@@ -44,6 +44,23 @@ public:
   GSDD eval() const{return parameter;};
 };
 
+
+/******************** BASIS FOR CANONIZATION OPERATIONS **********************/
+inline void square_union (map<GSDD,DataSet *> &res,const GSDD & s, DataSet * d) {
+  map<GSDD,DataSet *>::iterator kt = res.find(s);
+  if (kt != res.end()) {
+    /* found it in res compute union */
+    DataSet * tofree = kt->second;
+    kt->second  = kt->second->set_union(*d);
+    delete tofree;
+  } else {
+    /* not yet in res, add it */
+    res.insert(make_pair(s,d->newcopy()));
+  }
+}
+
+
+
 /******************************************************************************/
 /*                    class _SDED_Add:public _SDED                              */
 /******************************************************************************/
@@ -83,14 +100,15 @@ GSDD _SDED_Add::eval() const{
 
   // remainder for p1 and p2
   map<GSDD,DataSet *> rem_p1,rem_p2;
-
+  // for memory collection
+  DataSet * tofree;
 
   // for each son of p1 initialize remainder
   for (GSDD::Valuation::const_iterator it = parameter1.begin();it != parameter1.end() ; it++) 
-    rem_p1[it->second] = it->first;
+    rem_p1[it->second] = it->first->newcopy();
   // for each son of p2 initialize remainder
   for (GSDD::Valuation::const_iterator it = parameter2.begin();it != parameter2.end() ; it++) 
-    rem_p2[it->second] = it->first;
+    rem_p2[it->second] = it->first->newcopy();
 
   GSDD s1Us2 ;
   // for each son of p1 :   v - a -> s1 
@@ -100,49 +118,50 @@ GSDD _SDED_Add::eval() const{
       // compute a*b
       DataSet *ainterb = it->first->set_intersect(*jt->first);
       // if a*b = 0, skip
-      if (ainterb->empty()) 
+      if (ainterb->empty()) {
+	delete ainterb;
 	continue;
-
+      }
       //   (a-c) -> s1  + (c-a) -> s2 + (c*a) -> s1+s2
       // treat (c*a) -> s1+s2
       s1Us2 = it->second + jt->second;
-      map<GSDD,DataSet *>::iterator kt = res.find(s1Us2);
-      if (kt != res.end())
-	kt->second  = kt->second->set_union(*ainterb);
-      else
-	res[s1Us2] = ainterb;
+      square_union(res,s1Us2,ainterb);
+
       // treat other terms
+      tofree = rem_p1[it->second];
       rem_p1[it->second] = rem_p1[it->second]->set_minus(*ainterb);
+      delete tofree;
+      tofree = rem_p2[jt->second];
       rem_p2[jt->second] = rem_p2[jt->second]->set_minus(*ainterb);
+      delete tofree;
+      delete ainterb;
     }
   }
   
   // add remainders
   // for each son of p1 
-  for (map<GSDD,DataSet *>::const_iterator it = rem_p1.begin();it != rem_p1.end() ; it++) 
+  for (map<GSDD,DataSet *>::const_iterator it = rem_p1.begin();it != rem_p1.end() ; it++) {
     if (! it->second->empty() )      
       {
-	map<GSDD,DataSet *>::iterator kt = res.find(it->first);
-	if (kt != res.end())
-	  kt->second  = kt->second->set_union(*it->second);
-	else
-	  res[it->first] = it->second ;
+	square_union(res,it->first,it->second);
       }
+    delete it->second;
+  }
   // for each son of p2 
-  for (map<GSDD,DataSet *>::const_iterator it = rem_p2.begin();it != rem_p2.end() ; it++) 
+  for (map<GSDD,DataSet *>::const_iterator it = rem_p2.begin();it != rem_p2.end() ; it++) {
     if (! it->second->empty() )      
       {
-	map<GSDD,DataSet *>::iterator kt = res.find(it->first);
-	if (kt != res.end())
-	  kt->second  = kt->second->set_union(*it->second);
-	else
-	  res[it->first] = it->second ;
+	square_union(res,it->first,it->second);
       }
+    delete it->second;
+  }
 
   GSDD::Valuation value;
   map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
-  if (nullmap != res.end())
+  if (nullmap != res.end()) {
+    delete nullmap->second;
     res.erase(nullmap);
+  }
   value.reserve(res.size());  
   for (map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
     value.push_back(make_pair(it->second,it->first));
@@ -215,22 +234,22 @@ GSDD _SDED_Mult::eval() const{
       // compute a*b
       DataSet *ainterb = it->first->set_intersect(*jt->first);
       // if a*b = 0, skip
-      if (ainterb->empty() ) 
+      if (ainterb->empty() ) {
+	delete ainterb;
 	continue;
-
+      }
       s1inters2 = it->second * jt->second;
-      map<GSDD,DataSet *>::iterator kt = res.find(s1inters2);
-      if (kt != res.end())
-	kt->second  = kt->second->set_union(*ainterb);
-      else
-	res[s1inters2] = ainterb;
+      square_union(res,s1inters2,ainterb);
+      delete ainterb;
     }
   }
 
   GSDD::Valuation value;
   map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
-  if (nullmap != res.end())
+  if (nullmap != res.end()){
+    delete nullmap->second;
     res.erase(nullmap);
+  }
   value.reserve(res.size());  
   for (map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
     value.push_back(make_pair(it->second,it->first));
@@ -296,7 +315,7 @@ GSDD _SDED_Minus::eval() const{
 
   // for each son of p1 initialize remainder
   for (GSDD::Valuation::const_iterator it = parameter1.begin();it != parameter1.end() ; it++) 
-    rem_p1[it->second] = it->first;
+    rem_p1[it->second] = it->first->newcopy();
 
 
   GSDD s1moinss2 ;
@@ -307,35 +326,36 @@ GSDD _SDED_Minus::eval() const{
       // compute a*b
       DataSet * ainterb = it->first->set_intersect(*jt->first);
       // if a*b = 0, skip
-      if (ainterb->empty()) 
+      if (ainterb->empty()) {
+	delete ainterb;
 	continue;
-
+      }
       
       s1moinss2 = it->second - jt->second;
-      map<GSDD,DataSet *>::iterator kt = res.find(s1moinss2);
-      if (kt != res.end())
-	kt->second  = kt->second->set_union(*ainterb);
-      else
-	res[s1moinss2] = ainterb;
+      square_union(res,s1moinss2,ainterb);
+      
+      DataSet * tofree = rem_p1[it->second];
       rem_p1[it->second] = rem_p1[it->second]->set_minus(*ainterb);
+      delete tofree;
+      delete ainterb;
     }
   }
   // add remainders
   // for each son of p1 
-  for (map<GSDD,DataSet *>::const_iterator it = rem_p1.begin();it != rem_p1.end() ; it++) 
+  for (map<GSDD,DataSet *>::const_iterator it = rem_p1.begin();it != rem_p1.end() ; it++) {
     if (! it->second->empty() )      
       {
-	map<GSDD,DataSet *>::iterator kt = res.find(it->first);
-	if (kt != res.end())
-	  kt->second  = kt->second->set_union(*it->second);
-	else
-	  res[it->first] = it->second ;
+	square_union(res,it->first,it->second);
       }
+    delete it->second;
+  }
 
   GSDD::Valuation value;
   map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
-  if (nullmap != res.end())
+  if (nullmap != res.end()) {
+    delete nullmap->second;
     res.erase(nullmap);
+  }
   value.reserve(res.size());  
   for (map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
     value.push_back(make_pair(it->second,it->first));
@@ -398,17 +418,15 @@ GSDD _SDED_Concat::eval() const{
 
   for(GSDD::const_iterator v1=parameter1.begin();v1!=parameter1.end();v1++){
     next = (v1->second)^parameter2 ;
-    kt = res.find(next);
-    if (kt != res.end())
-      kt->second  = kt->second->set_union(*v1->first);
-    else 
-      res[next] = v1->first;
+    square_union(res,next,v1->first);
   }
 
   GSDD::Valuation value;
   map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
-  if (nullmap != res.end())
+  if (nullmap != res.end()) {
+    delete nullmap->second;
     res.erase(nullmap);
+  }
   value.reserve(res.size());  
   for (map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
     value.push_back(make_pair(it->second,it->first));
