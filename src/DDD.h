@@ -27,12 +27,12 @@ class _GDDD;
 class GDDD 
 {
 private:
-  /// To store in unicity tables and cache 
+  /// Open access to hash function computation procedure.
   friend struct hash<GDDD>;
   /// A textual output. 
   /// Don't use it with large number of paths as each element is printed on a different line
   friend ostream& operator<<(ostream &os,const GDDD &g);
-  /// open access to concret for reference counting in DDD.
+  /// Open access to concret for reference counting in DDD.
   friend class DDD;
   /// The real implementation class. All true operations are delagated on this pointer.
   /// Construction/destruction take care of ensuring concret is only instantiated once in memory.
@@ -47,7 +47,8 @@ private:
   /// Another function used in serialization.
   unsigned long int nodeIndex(vector<_GDDD*>)const;
 public:
-  /* Accessors */
+  /// \name Public Accessors 
+  //@{
   /// To hide how arcs are actually stored. Use GDDD::Valuation to refer to arcs type
   typedef vector<pair<int,GDDD> > Valuation;
   /// To hide how arcs are stored. Also for more compact expressions : 
@@ -70,8 +71,10 @@ public:
   ///
   /// returns a past the end iterator
   const_iterator end() const;
-  
-  /* Constructors */
+  //@}
+
+  /// \name Public Constructors 
+  //@{
   /// Construct a GDDD with arguments given.
   /// \todo why is this public ???
   /// \e WARNING Valuation should be sorted according to arc values
@@ -96,8 +99,11 @@ public:
   /// \param val2 highest value labeling an arc
   /// \param d the successor node or defaults to terminal GDDD::one if none provided
   GDDD(int var,int val1,int val2,const GDDD &d=one); //var-[val1,var2]->d
+  //@}
 
-  /* Constants */
+
+  /// \name Terminal nodes defined as constants 
+  //@{
   /// The accepting terminal. This is the basic leaf for accepted sequences.
   static const GDDD one;
   /// The non-accepting terminal. As DDD are a zero-suppressed variant of decision diagrams,
@@ -106,8 +112,10 @@ public:
   /// The approximation terminal. This represents *any* finite set of assignment sequences. 
   /// In a "normal" usage pattern, top terminals should not be produced.
   static const GDDD top;
+  //@}
 
-  /* Compare */
+  /// \name Comparisons for hash and map storage
+  //@{
   /// Comparison between DDD. Note that comparison is based on "concret" address in unicity table.
   /// \param g the node to compare to
   /// \return true if the nodes are equal.
@@ -121,6 +129,7 @@ public:
   /// \param g the node to compare to
   /// \return true if argument g is greater than "this" node.
   bool operator<(const GDDD& g) const{return concret<g.concret;};
+  //@}
 
   /* Accessors */ 
   /// Returns current reference count of a node.
@@ -135,6 +144,9 @@ public:
   long double nbStates() const;
   /// Returns the number of nodes that would be used to represent a DDD if no unicity table was used.
   long double noSharedSize() const;
+
+  /// \name Variable naming.
+  //@{
   /// Sets a variable's name. 
   /// \todo This function should be implemented in a name manager somewhere so that it is common to DDD and SDD variables.
   /// \param var the index of the variable to be named
@@ -145,8 +157,10 @@ public:
   /// \param var the index of the variable to be named
   /// \return the name attached to this variable index
   static const string getvarName( int var );
+  //@}
 
-  /* Memory Management */
+  /// \name Memory Management 
+  //@{
   /// Returns unicity table current size. Gives the number of different nodes created and not yet destroyed.
   static  unsigned int statistics();
   /// For garbage collection internals. Marks a GDDD as in use in garbage collection phase. 
@@ -160,10 +174,14 @@ public:
   static void pstats(bool reinit=true);
   /// Returns the peak size of the DDD unicity table. This value is maintained up to date upon GarbageCollection.
   static size_t peak();
+  //@}
+  /// \name Serialization functions.
+  //@{
   /// Function for serialization. Save a set of DDD to a stream.
   friend void saveDDD(ostream&, vector<DDD>);
   /// Function for deserialization. Load a set of DDD from a stream.
   friend void loadDDD(istream&, vector<DDD>&);
+  //@}
 };
 
 
@@ -190,7 +208,7 @@ GDDD operator-(const GDDD&,const GDDD&);
 /// manipulate DDD, not GDDD.
 /// Reference counting is enabled for DDD, so they will not be destroyed if they 
 /// are still in use upon garbage collection.
-class DDD:public GDDD,public DataSet 
+class DDD : public GDDD, public DataSet 
 {
 public:
   /* Constructors */
@@ -223,21 +241,23 @@ public:
   /// may truly clear the data.
   ~DDD(); 
 
-  /* assignment operator */
+  ///\name Assignment operators.
+  //@{
   /// Overloaded behavior for assignment operator, maintains reference counting.
   DDD &operator=(const GDDD&);
   /// Overloaded behavior for assignment operator, maintains reference counting.
   DDD &operator=(const DDD&);
+  //@}
 
-  /** @defgroup DataSetItf DataSet implementation interface 
-   *  This is the implementation of the DataSet class interface used in SDD context.
-   *  These functions allow to reference DDD from SDD arcs.
-   *  Remember to delete returned values after use. 
-   *
-   *  Note these functions are not resistant to incompatible DataSet types. 
-   *  When these functions have a parameter "b", it should be a reference to a DDD from proper behavior.
-   *  @{  
-   */
+  /// \name DataSet implementation interface 
+  /// This is the implementation of the DataSet class interface used in SDD context.
+  /// These functions allow to reference DDD from SDD arcs.
+  /// \e IMPORTANT Remember to delete returned values after use. 
+  ///
+  ///  Note these functions are not resistant to incompatible DataSet types. 
+  ///  When these functions have a parameter "b", it should be a reference to a DDD from proper behavior.
+  //@{  
+  
   /// Return a new copy of a DDD. 
   virtual DataSet *newcopy () const { return new DDD(*this); }
   /// Compute intersection of two DDD. 
@@ -258,7 +278,7 @@ public:
   virtual size_t set_hash() const;
   /// Textual (human readable) output of a DDD.
   virtual void set_print (ostream &os) const { os << *this; }
-  /** @} */ // end DataSet interface group 
+  //@}
 };
 
 /******************************************************************************/
