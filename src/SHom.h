@@ -20,6 +20,7 @@ class GShom {
 private:
   friend class Shom;
   friend struct hash<GShom>;
+  friend GShom fixpoint(const GShom &);
   friend GShom operator+(const GShom &,const GShom &); 
   friend GShom operator&(const GShom &,const GShom &); // composition
   friend GShom operator*(const GSDD &,const GShom &); 
@@ -65,7 +66,7 @@ public:
 
 
 /* Operations */
-
+GShom fixpoint(const GShom &);
 GShom operator+(const GShom &,const GShom &); 
 GShom operator&(const GShom &,const GShom &); // composition
 GShom operator*(const GSDD &,const GShom &); 
