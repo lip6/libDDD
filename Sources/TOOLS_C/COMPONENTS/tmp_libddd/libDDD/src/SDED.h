@@ -20,8 +20,8 @@ public:
   GSDD eval();
   SDED(_SDED *c):concret(c){};
   bool operator==(const SDED&) const; 
-  // Currently undefined, + is only defined over two SDD not generalized over n
-//  static GSDD add(const set<GSDD> &);
+  
+  static GSDD add(const set<GSDD> &);
   static GSDD Shom(const GShom &,const GSDD&);
 
   /* Memory Manager */
