@@ -54,7 +54,7 @@ public:
     return *ti;
   }
 
-  int size() const{
+  size_t size() const{
     return table.size();
   }
 
