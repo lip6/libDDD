@@ -407,6 +407,41 @@ public:
   }
 };
 
+/************************** Fixpoint */
+class Fixpoint:public _GShom{
+private:
+  GShom arg;
+public:
+  /* Constructor */
+  Fixpoint(const GShom &a,int ref=0):_GShom(ref),arg(a){}
+  /* Compare */
+  bool operator==(const _GShom &h) const{
+    return arg==((Fixpoint*)&h )->arg ;
+  }
+  size_t hash() const{
+    return 17*::hash<GShom>()(arg);
+  }
+
+  /* Eval */
+  GSDD eval(const GSDD &d)const{
+    GSDD d1=d,d2=d;
+    do {
+      d1=d2;
+      d2=arg(d2);
+    } while (d1 != d2);
+
+    return d1;
+  }
+
+  /* Memory Manager */
+  void mark() const{
+    arg.mark();
+  }
+};
+
+
+
+
 } // end namespace H_Homomorphism
 
 using namespace S_Homomorphism;
@@ -561,6 +596,10 @@ Shom &Shom::operator=(const GShom &h){
 }
 
 /* Operations */
+GShom fixpoint (const GShom &h) {
+  return GShom(canonical(new Fixpoint(h)));
+}
+
 GShom operator&(const GShom &h1,const GShom &h2){
   return GShom(canonical(new Compose(h1,h2)));
 }
