@@ -1,4 +1,4 @@
-noinst_PROGRAMS = tst1 tst2 tst3 tst4 tst5 tst6 tst7 tst8 tst9
+noinst_PROGRAMS = tst1 tst2 tst3 tst4 tst5 tst6 tst7 tst8 tst9 tst10
 
 DDD_SRCDIR = $(top_srcdir)/src
 DDD_BUILDDIR = $(top_builddir)/src
@@ -17,7 +17,7 @@ tst6_SOURCES = tst6.cpp
 tst7_SOURCES = tst7.cpp
 tst8_SOURCES = tst8.cpp
 tst9_SOURCES = tst9.cpp
-
+tst10_SOURCES = tst10.cpp
 # tst2_CPPFLAGS = 
 
 
