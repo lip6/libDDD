@@ -28,7 +28,9 @@ private:
   void print(ostream& os,string s) const;
 public:
   GSDD(_GSDD *_g);
+#ifdef OTF_GARBAGE
   virtual ~GSDD () ;
+#endif
   /* Accessors */
   typedef vector<pair<DataSet *,GSDD> > Valuation;
   typedef Valuation::const_iterator const_iterator;
@@ -40,9 +42,10 @@ public:
   GSDD(int variable,Valuation value);
   GSDD():concret(null.concret){};
   GSDD(int var,const DataSet & val,const GSDD &d=one ); //var-val->d
+#ifdef OTF_GARBAGE
   GSDD(const GSDD &);
   GSDD & operator=(const GSDD &);
-
+#endif
   /* Constants */
   static const GSDD one;
   static const GSDD null;
@@ -59,7 +62,6 @@ public:
   // return a pair <SDD nodes,DDD nodes>
   pair<unsigned long int,unsigned long int> node_size() const;
   size_t nbsons () const;
-  bool isSon() const;
   long double GSDD::nbStates() const;
 
 //  Broken right now, dont use me or fixme first
@@ -70,12 +72,15 @@ public:
   static  unsigned int statistics();
   void mark()const;
   static void garbage();
+
+#ifdef OTF_GARBAGE
   // to check out useless intermediate nodes : on the fly garbage collection
   // WARNING : this is not const at all in fact it deletes "concret" and is quite dangerous,
   // only for expert use not a basic library functionality
   void clearNode() const;
   void markAsSon() const;
-
+  bool isSon() const;
+#endif // OTF_GARBAGE
 
   static void pstats(bool reinit=true);
   static size_t peak();
@@ -121,8 +126,9 @@ public:
 // not very nice to access unicity table directly
 #include "UniqueTable.h"
 namespace SDDutil {
+#ifdef OTF_GARBAGE
   void recentGarbage();
-
+#endif // OTF_GARBAGE
   UniqueTable<_GSDD> * getTable ();
   void foreachTable (void (*foo) (const GSDD & g)); 
 }
