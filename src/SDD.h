@@ -51,6 +51,8 @@ public:
   /* Visualisation */ 
   unsigned int refCounter() const;
   unsigned long int size() const;
+  // return a pair <SDD nodes,DDD nodes>
+  pair<unsigned long int,unsigned long int> node_size() const;
   size_t nbsons () const;
   long double GSDD::nbStates() const;
 
@@ -63,6 +65,7 @@ public:
   void mark()const;
   static void garbage(); 
   static void pstats(bool reinit=true);
+  static size_t peak();
 };
 
 ostream& operator<<(ostream &,const GSDD &);

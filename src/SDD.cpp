@@ -88,7 +88,7 @@ namespace std {
 }
 
 // map<int,string> mapVarName;
-
+static size_t Max_SDD=0;
 static UniqueTable<_GSDD> canonical;
 
 /******************************************************************************/
@@ -114,6 +114,13 @@ void _GSDD::mark()const{
   }
 }
 
+size_t GSDD::peak() {
+ if (canonical.size() > Max_SDD) 
+    Max_SDD=canonical.size();  
+
+  return Max_SDD;
+}
+
 void GSDD::pstats(bool reinit)
 {
 #ifdef INST_STL
@@ -128,6 +135,11 @@ void GSDD::pstats(bool reinit)
 
 
 void GSDD::garbage(){
+  if (canonical.size() > Max_SDD) 
+    Max_SDD=canonical.size();  
+
+
+
   // mark phase
   for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
     if((*di)->refCounter!=0)
@@ -212,13 +224,16 @@ unsigned int GSDD::refCounter() const{
 
 class SddSize{
 private:
-  unsigned long int res;
-  unsigned long int d3res;
   set<GSDD> s;
   // Was used to compute number of nodes in referenced datasets as well
   // but dataset doesn't define what we need as it is not necessarily 
-  // a decision diagram implementation => number of nodes = ???
+  // a decision diagram implementation => number of nodes = ??
 //   set<DataSet &> sd3;
+  // trying to repair it : consider we reference only SDD or DDD for now, corresponds to current usage patterns
+  set<GDDD> sd3;
+
+  bool firstError;
+
   void sddsize(const GSDD& g){
     if(s.find(g)==s.end()){
       s.insert(g);
@@ -231,23 +246,41 @@ private:
       
     }
   }
-  void sddsize(const DataSet* g){
+
+  virtual void sddsize(const DataSet* g){
     // Used to work for referenced DDD
-//     if (sd3.find(*g)==sd3.end()) {
-//       sd3.insert(*g);
-//       d3res ++;
-//       for(DataSet::const_iterator gi=g.begin();gi!=g.end();gi++)
-// 	sddsize(gi->second);
-//     }
+    if (typeid(*g) == typeid(SDD) ) {
+      sddsize( GSDD ((SDD &) *g) );
+    } else if (typeid(*g) == typeid(DDD)) {
+      sddsize( GDDD ((DDD &) *g) );
+    } else {
+      if (firstError) {
+	cerr << "Warning : unkown referenced dataset type on arc, node count is inacurate"<<endl;
+	cerr << "Read type :" << typeid(*g).name() <<endl ;
+	firstError = false;
+      }
+    }
+  }
+
+  virtual void sddsize(const GDDD& g){
+      if (sd3.find(g)==sd3.end()) {
+	sd3.insert(g);
+	d3res ++;
+	for(GDDD::const_iterator gi=g.begin();gi!=g.end();gi++)
+	  sddsize(gi->second);
+      }
   }
 
 public:
-  SddSize(){};
+  unsigned long int res;
+  unsigned long int d3res;
+
+  SddSize():firstError(true){};
 //  pair<unsigned long int,unsigned long int> operator()(const GSDD& g){
   unsigned long int operator()(const GSDD& g){
     res=0;
     d3res=0;
-//     sd3.clear();
+    sd3.clear();
     s.clear();
     sddsize(g);
     // we used to return a pair : number of nodes in SDD, number of nodes in referenced data structures
@@ -255,6 +288,13 @@ public:
     return res;
   }
 };
+
+
+pair<unsigned long int,unsigned long int> GSDD::node_size() const{
+  static SddSize sddsize;
+  sddsize(*this);
+  return make_pair(sddsize.res,sddsize.d3res);
+}
 
 // old prototype
 // pair<unsigned long int,unsigned long int> GSDD::size() const{
