@@ -140,6 +140,9 @@ GSDD _SDED_Add::eval() const{
       }
 
   GSDD::Valuation value;
+  map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
+  if (nullmap != res.end())
+    res.erase(nullmap);
   value.reserve(res.size());  
   for (map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
     value.push_back(make_pair(it->second,it->first));
@@ -225,6 +228,9 @@ GSDD _SDED_Mult::eval() const{
   }
 
   GSDD::Valuation value;
+  map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
+  if (nullmap != res.end())
+    res.erase(nullmap);
   value.reserve(res.size());  
   for (map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
     value.push_back(make_pair(it->second,it->first));
@@ -327,6 +333,9 @@ GSDD _SDED_Minus::eval() const{
       }
 
   GSDD::Valuation value;
+  map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
+  if (nullmap != res.end())
+    res.erase(nullmap);
   value.reserve(res.size());  
   for (map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
     value.push_back(make_pair(it->second,it->first));
@@ -392,11 +401,14 @@ GSDD _SDED_Concat::eval() const{
     kt = res.find(next);
     if (kt != res.end())
       kt->second  = kt->second->set_union(*v1->first);
-    else
+    else 
       res[next] = v1->first;
   }
 
   GSDD::Valuation value;
+  map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
+  if (nullmap != res.end())
+    res.erase(nullmap);
   value.reserve(res.size());  
   for (map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
     value.push_back(make_pair(it->second,it->first));
