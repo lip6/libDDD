@@ -11,6 +11,8 @@
 using namespace std;
 using namespace __gnu_cxx;
 
+#include "DataSet.h"
+
 class _GDDD;
 
 /******************************************************************************/
@@ -65,7 +67,7 @@ public:
 ostream& operator<<(ostream &,const GDDD &);
  
 /******************************************************************************/
-class DDD:public GDDD {
+class DDD:public GDDD,public DataSet {
 public:
   /* Constructeur */
   DDD(const DDD &);
@@ -77,6 +79,18 @@ public:
   /* Set */
   DDD &operator=(const GDDD&);
   DDD &operator=(const DDD&);
+
+  // DataSet interface
+  virtual DataSet *newcopy () const { return new DDD(*this); }
+  virtual DataSet *set_intersect (const DataSet & b) const  ;
+  virtual DataSet *set_union (const DataSet & b)  const ;
+  virtual DataSet *set_minus (const DataSet & b) const;
+  virtual bool empty() const;
+  virtual DataSet *empty_set()const;
+  virtual bool set_equal(const DataSet & b) const;
+  virtual size_t set_size() const;
+  virtual size_t set_hash() const;
+  virtual void set_print (ostream &os) const { os << *this; }
 };
 
 /******************************************************************************/
