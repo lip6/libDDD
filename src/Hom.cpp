@@ -555,7 +555,10 @@ Hom &Hom::operator=(const GHom &h){
 
 /* Operations */
 GHom fixpoint (const GHom &h) {
-  return GHom(canonical(new Fixpoint(h)));
+  if (h != GHom::id)
+    return GHom(canonical(new Fixpoint(h)));
+  else
+    return GHom::id;
 }
 
 GHom operator&(const GHom &h1,const GHom &h2){
