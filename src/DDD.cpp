@@ -4,7 +4,7 @@
 #include <vector>
 #include <set>
 // modif
-#include <assert.h>
+#include <cassert>
 #include <ext/hash_map>
 #include <map>
 // modif
@@ -15,6 +15,7 @@ using namespace __gnu_cxx;
 
 #include "DDD.h"
 #include "UniqueTable.h"
+#include "DED.h"
 
 /******************************************************************************/
 /*                             class _GDDD                                     */
@@ -352,14 +353,41 @@ const string GDDD::getvarName(int var)
     tmp<<"var"<< var ;
   else
     tmp<<i->second;
-
-  string res;
-
-  tmp >> res;
-  return res;
+  return tmp.str();
 
 }
 
+
+
+// DataSet interface
+
+DataSet *DDD::set_intersect (const DataSet & b) const {
+  return new DDD((*this) * (*((DDD *) &b)));
+}
+DataSet *DDD::set_union (const DataSet & b)  const {
+  return new DDD(*this + *((DDD *) &b));
+}
+DataSet *DDD::set_minus (const DataSet & b) const {
+  return new DDD(*this - *((DDD *) &b));
+}
+
+bool DDD::empty() const {
+  return this->GDDD::operator==(GDDD::null);
+}
+
+DataSet * DDD::empty_set() const {
+  return new DDD();
+}
+
+bool DDD::set_equal(const DataSet & b) const {
+  return *this == * ((DDD*)& b);
+}
+  
+size_t DDD::set_size() const { return (size_t) nbStates(); }
+
+size_t DDD::set_hash() const {
+  return hash<GDDD>() (*this);
+}
 
 
 
