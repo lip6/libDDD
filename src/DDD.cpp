@@ -362,13 +362,13 @@ const string GDDD::getvarName(int var)
 // DataSet interface
 
 DataSet *DDD::set_intersect (const DataSet & b) const {
-  return new DDD((*this) * (*((DDD *) &b)));
+  return new DDD((*this) * (DDD &) b);
 }
 DataSet *DDD::set_union (const DataSet & b)  const {
-  return new DDD(*this + *((DDD *) &b));
+  return new DDD(*this +(DDD &) b);
 }
 DataSet *DDD::set_minus (const DataSet & b) const {
-  return new DDD(*this - *((DDD *) &b));
+  return new DDD(*this -(DDD &) b);
 }
 
 bool DDD::empty() const {
@@ -380,7 +380,7 @@ DataSet * DDD::empty_set() const {
 }
 
 bool DDD::set_equal(const DataSet & b) const {
-  return *this == * ((DDD*)& b);
+  return *this == (DDD &) b;
 }
   
 size_t DDD::set_size() const { return (size_t) nbStates(); }
