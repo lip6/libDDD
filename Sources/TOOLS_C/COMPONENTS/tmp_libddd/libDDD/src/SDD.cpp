@@ -114,6 +114,19 @@ void _GSDD::mark()const{
   }
 }
 
+void GSDD::pstats(bool reinit)
+{
+#ifdef INST_STL
+  cout << "*\nGSDD : size unicity table =" << canonical.size() << endl;
+  cout << "  Average nb jump in hash table : " << _GSDD::StatJumps() << endl;
+  if (reinit){
+    _GSDD::ResetNbJumps();
+  }
+  canonical.pstat(reinit);
+#endif
+}
+
+
 void GSDD::garbage(){
   // mark phase
   for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
@@ -354,10 +367,10 @@ DataSet *SDD::set_intersect (const DataSet & b) const {
   return new SDD((*this) * (SDD&)b );
 }
 DataSet *SDD::set_union (const DataSet & b)  const {
-  return new SDD(*this + (SDD&)b));
+  return new SDD(*this + (SDD&)b);
 }
 DataSet *SDD::set_minus (const DataSet & b) const {
-  return new SDD(*this - (SDD&)b));
+  return new SDD(*this - (SDD&)b);
 }
 
 bool SDD::empty() const {
