@@ -1,5 +1,5 @@
 # AC_INIT (package, version, [bug-report], [tarname])
-AC_INIT(DDD,1.0)
+AC_INIT(DDD,1.1)
 # We use automake to build makefiles
 AM_INIT_AUTOMAKE(-Wall)
 # programs used to build
