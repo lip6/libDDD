@@ -38,13 +38,13 @@ GSDD operator-(const GSDD&,const GSDD&); // difference
 
 /******************************************************************************/
 namespace __gnu_cxx {
-  struct hash<SDED> {
+  template<>  struct hash<SDED> {
     size_t operator()(const SDED&) const;
   };
 }
 
 namespace std {
-  struct equal_to<SDED> {
+  template<>  struct equal_to<SDED> {
     bool operator()(const SDED&,const SDED&) const;
   };
 }

@@ -37,12 +37,14 @@ GDDD operator-(const GDDD&,const GDDD&); // difference
 
 /******************************************************************************/
 namespace __gnu_cxx {
+  template<>
   struct hash<DED> {
     size_t operator()(const DED&) const;
   };
 }
 
 namespace std {
+  template<>
   struct equal_to<DED> {
     bool operator()(const DED&,const DED&) const;
   };

@@ -142,7 +142,7 @@ using namespace namespace_SHom ;
 
 /* Unique Table */
 namespace __gnu_cxx {
-  struct hash<_GShom*>{
+  template<>  struct hash<_GShom*>{
     size_t operator()(_GShom * _h) const{
       return _h->hash();
     }
@@ -150,7 +150,7 @@ namespace __gnu_cxx {
 }
 
 namespace std {
-  struct equal_to<_GShom*>{
+  template<>  struct equal_to<_GShom*>{
     bool operator()(_GShom * _h1,_GShom * _h2){
       return (typeid(*_h1)==typeid(*_h2)?(*_h1)==(*_h2):false);
     }

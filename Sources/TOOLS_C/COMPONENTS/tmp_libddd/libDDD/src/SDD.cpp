@@ -68,7 +68,7 @@ public:
 // to be revised !!!
 
 namespace __gnu_cxx {
-  struct hash<_GSDD*> {
+  template<>  struct hash<_GSDD*> {
     size_t operator()(_GSDD *g) const{
       size_t res=(size_t) g->variable;
       for(GSDD::const_iterator vi=g->valuation.begin();vi!=g->valuation.end();vi++)
@@ -80,7 +80,7 @@ namespace __gnu_cxx {
 }
 
 namespace std {
-  struct equal_to<_GSDD*> {
+  template<>  struct equal_to<_GSDD*> {
     bool operator()(_GSDD *g1,_GSDD *g2) const{
       return *g1==*g2;
     }

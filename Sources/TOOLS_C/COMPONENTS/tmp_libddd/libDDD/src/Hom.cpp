@@ -139,6 +139,7 @@ void PrintMapJumps(double ratemin=0){
 
 /* Unique Table */
 namespace __gnu_cxx {
+  template<> 
   struct hash<_GHom*>{
     size_t operator()(_GHom * _h) const{
       return _h->hash();
@@ -147,6 +148,7 @@ namespace __gnu_cxx {
 }
 
 namespace std {
+  template<>
   struct equal_to<_GHom*>{
     bool operator()(_GHom * _h1,_GHom * _h2){
       return (typeid(*_h1)==typeid(*_h2)?(*_h1)==(*_h2):false);
