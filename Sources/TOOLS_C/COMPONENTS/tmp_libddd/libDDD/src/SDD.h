@@ -14,8 +14,6 @@ using namespace __gnu_cxx;
 #include "DDD.h"
 #include "DataSet.h"
 
-// arbitrary precision lib to count states
-#include "gmpxx.h"
 
 class _GSDD;
 
@@ -57,7 +55,7 @@ public:
   // return a pair <SDD nodes,DDD nodes>
   pair<unsigned long int,unsigned long int> node_size() const;
   size_t nbsons () const;
-  mpf_class GSDD::nbStates() const;
+  long double GSDD::nbStates() const;
 
 //  Broken right now, dont use me or fixme first
 //  long double GSDD::noSharedSize() const;
@@ -95,7 +93,7 @@ public:
   virtual bool empty() const ;
   virtual DataSet *empty_set()const;
   virtual bool set_equal(const DataSet & b) const;
-  virtual size_t set_size() const;
+  virtual long double set_size() const;
   virtual size_t set_hash() const ;
   void set_print (ostream &os) const { os << *this; }
 };
