@@ -96,6 +96,8 @@ int main(){
   cout<<MemoryManager::nbDDD()<<endl;
   cout<<MemoryManager::nbHom()<<endl;
   cout<<MemoryManager::nbDED()<<endl;
+  MemoryManager::pstats();
+
   return 1;
 }
 
