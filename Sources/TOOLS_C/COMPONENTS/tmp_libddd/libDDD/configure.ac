@@ -20,6 +20,8 @@ AC_CONFIG_FILES([
   Makefile
   demo/Makefile
   src/Makefile
+  doc/Doxyfile
+  doc/Makefile
 ])
 # Do it !! (mandatory)
 AC_OUTPUT
