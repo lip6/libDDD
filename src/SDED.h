@@ -30,11 +30,6 @@ public:
   static void garbage(); 
 };
 
-/* Binary operators */
-GSDD operator^(const GSDD&,const GSDD&); // concatenation
-GSDD operator+(const GSDD&,const GSDD&); // union
-GSDD operator*(const GSDD&,const GSDD&); // intersection
-GSDD operator-(const GSDD&,const GSDD&); // difference
 
 /******************************************************************************/
 namespace __gnu_cxx {
