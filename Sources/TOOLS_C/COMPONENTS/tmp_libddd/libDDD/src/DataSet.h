@@ -9,9 +9,23 @@
 using namespace std;
 
 
+/// This class is an abstraction of a set of data.
+/// Set Decision Diagrams SDD arcs are labeled by a DataSet *, canonization of SDD requires
+/// a set-based interface (union, intersection, set difference), ability to compute a hash key
+/// and test two sets for equality for unicity table purposes, and test for emptiness as SDD are 
+/// both zero suppresed (no path lead to GSDD::null), and empty-set suppressed (no arc labeled by
+/// empty_set is represented)
+///
+/// Additional interface is provided to query/examine the structure, in particular set_size to 
+/// is required to compute the full set size of an SDD, and print (although this last is not essential)
+///  
 /// Concrete DataSet classes should derive from DataSet and fulfill the contract FOR THEIR OWN TYPE
 /// hard or dynamic casting the argument into one's own type is the recommended behavior 
-class DataSet {
+///
+/// \todo recent experiments with V. Beaudenon show maybe some behavior should be put here, 
+/// for instance set_intersect is always empty if incompatible types are compared.
+class DataSet 
+{
  public :
   /// destructor
   virtual ~DataSet() {};
@@ -27,9 +41,9 @@ class DataSet {
   virtual bool empty() const = 0;
   /// returns a pointer to an instance of the empty set
   virtual DataSet *empty_set() const = 0;
-  /// compares two sets for equality
+  /// Compares two sets for equality.
   virtual bool set_equal(const DataSet & b) const =0;
-  /// returns the size (number of elements) in a set
+  /// \return the size (number of elements) in a set
   virtual long double set_size() const = 0;
   /// returns a hash function, used in the SDD hash function computation
   virtual size_t set_hash() const =0;
