@@ -1,0 +1,32 @@
+/// \mainpage
+///
+/// \section overview The Data Decision Diagram Library
+///
+/// libDDD is a data decision diagram library.  It provides algorithms and data
+/// structures to implement symbolic manipulation of data, in particular in the 
+/// context of model-checking
+///
+/// See <a href="http://ddd.lip6.fr/">ddd.lip6.fr</a> for more
+/// information about this project.
+///
+/// \section thisdoc This Document
+///
+/// This document describes all the public data structures and functions
+/// of libDDD.  This aims to be a reference manual, not a tutorial.
+///
+/// If you are new to this manual, start with <a href="modules.html">the
+/// module page</a>.  This is what looks the closest to a table of contents.
+///
+/// \section pointers Handy starting points
+///
+///  TODO
+/// \li spot::ltl::formula  Base class for an LTL formulae.
+/// \li spot::ltl::parse    Parsing a text string into a
+///                         spot::ltl::formula.
+/// \li spot::tgba          Base class for Transition-based
+///                         Generalized Büchi Automaton.
+/// \li spot::ltl_to_tgba_fm  Convert a spot::ltl::formula into a
+///                           spot::tgba.
+/// \li spot::tgba_product    On-the-fly product of two spot::tgba.
+/// \li spot::emptiness_check Base class for all emptiness-check algorithms
+                          
