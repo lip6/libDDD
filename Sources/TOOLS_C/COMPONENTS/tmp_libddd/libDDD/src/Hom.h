@@ -22,6 +22,7 @@ class GHom {
 private:
   friend class Hom;
   friend struct hash<GHom>;
+  friend GHom fixpoint(const GHom &);
   friend GHom operator+(const GHom &,const GHom &); 
   friend GHom operator&(const GHom &,const GHom &); // composition
   friend GHom operator*(const GDDD &,const GHom &); 
@@ -72,7 +73,7 @@ public:
 
 
 /* Operations */
-
+GHom fixpoint(const GHom &);
 GHom operator+(const GHom &,const GHom &); 
 GHom operator&(const GHom &,const GHom &); // composition
 GHom operator*(const GDDD &,const GHom &); 
