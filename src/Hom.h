@@ -16,6 +16,7 @@ typedef std::map<std::string, PairLL > MapJumps;
 
 class _GHom;
 class StrongHom;
+class MyGHom;
 
 class GHom {
 private:
@@ -35,6 +36,11 @@ public:
   GHom():concret(id.concret){};
   GHom(const StrongHom *);
   GHom(StrongHom *);
+  
+  //MyGHom
+  GHom(const MyGHom *);
+  GHom(MyGHom *);
+  //
   GHom(const GDDD& d);   // constant
   GHom(int var, int val, const GHom &h=GHom::id);  // var -- val -> Id
 
@@ -171,6 +177,10 @@ public:
   GDDD eval(const GDDD &)const;  
 };
  
+
+
+class MyGHom:public _GHom{};
+
 #endif /* HOM_H_ */
 
 

@@ -392,5 +392,103 @@ size_t DDD::set_hash() const {
 
 
 
+//My funs
+
+unsigned long int GDDD::nodeIndex(vector<_GDDD*> list) const{
+    assert(this);
+    assert(concret);
+    unsigned long int i=0;
+    for (i=0; i<list.size();i++)
+      if (concret==list[i]) return i;
+    return ULONG_MAX;
+    assert (false);
+}
+
+
+void GDDD::saveNode(ostream& os, vector<_GDDD*>& list)const {
+    assert(this);
+    //assert(concret);
+    unsigned long int index = nodeIndex(list);
+    if (index==ULONG_MAX) {
+
+        if (*this==one) list.push_back(concret);
+        else 
+        if (*this==null) list.push_back(concret);
+        else 
+        if (*this==top) list.push_back(concret);
+        else {
+            assert(concret);
+                for (GDDD::Valuation::const_iterator vi=begin();vi!=end();vi++) 
+                    vi->second.saveNode(os, list);
+                list.push_back(concret);
+        }
+    }
+}
+
+
+
+void saveDDD(ostream& os, vector<DDD> list) {
+    vector<_GDDD*> SavedDDD;
+    for (unsigned int i= 0; i<list.size(); i++) {
+        list[i].saveNode(os, SavedDDD);
+    }
+    os<<SavedDDD.size()<<endl;
+    for (unsigned long int i=0; i<SavedDDD.size();i++) {
+        if (GDDD(SavedDDD[i])==GDDD::one) os<<i<<" one"<<endl;
+        else
+        if (GDDD(SavedDDD[i])==GDDD::null) os<<i<<" null"<<endl;
+        else
+        if (GDDD(SavedDDD[i])==GDDD::top) os<<i<<" top"<<endl;
+        else {
+            os<<i<<"[ "<<SavedDDD[i]->variable;
+            for (GDDD::const_iterator vi=GDDD(SavedDDD[i]).begin();vi!=GDDD(SavedDDD[i]).end();vi++)
+                os<<" "<<vi->first<<" "<<vi->second.nodeIndex(SavedDDD);
+            os<<" ]"<<endl;
+        }
+    }
+        
+    os<<endl<<"Saved:";
+    for (unsigned int i= 0; i<list.size(); i++) os<<" "<<list[i].nodeIndex(SavedDDD);
+    os<<endl;
+    
+}
+
+void loadDDD(istream& is, vector<DDD>& list) {
+    unsigned long int size;
+    unsigned long int index;
+    int var;
+    int val;
+    vector<pair<int,GDDD> > valuation;
+    string temp;
+    is>>size;
+    vector<GDDD> nodes(size);
+    for (unsigned long int i=0;i<size;i++) {
+        is>>index;
+        is>>temp;
+        if (temp==string("one")) {nodes[index]=GDDD::one; /*cout<<"one"<<endl;cout.flush();*/}
+        else if (string(temp)==string("null")) nodes[index]=GDDD::null;
+        else if (string(temp)==string("top")) nodes[index]=GDDD::top;
+        else {
+            assert (temp==string("["));
+            is>>var;
+            is>>temp;
+            while(temp!=string("]")) {
+                val=atoi(temp.c_str());
+                is>>temp;
+                valuation.push_back(pair<int,GDDD>(val,nodes[strtoul(temp.c_str(),NULL,10)]));
+                is>>temp;
+            }
+            nodes[index]=GDDD(var,valuation);
+            valuation.clear();
+        }
+    }
+    is>>temp;
+    assert (temp==string("Saved:"));
+    for(unsigned long int i=0;i<list.size();i++) {
+        is>>index; list[i]=nodes[index];
+    }
+    
+}
+
 
 
