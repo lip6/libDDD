@@ -49,9 +49,9 @@ GShom phi(int var, const DataSet& val) const{
 
 size_t hash() const {return 640061*v;} //TODO
 
-void mark() {
+/*void mark() {
     t.mark();
-}
+}*/
 
 bool operator ==(const StrongShom &s) const {_rebuild *ps = (_rebuild*) &s; return v == ps->v && t == ps->t;}
 };
@@ -85,9 +85,9 @@ GShom phi(int var, const DataSet& val) const{
 
 size_t hash() const {return oldPC+newPC/*+hom*/;}
 
-void mark() const {
+/*void mark() const {
     hom.mark();
-}
+}*/
 
 bool operator ==(const StrongShom &s) const {_updatePC *ps = (_updatePC*) &s; return oldPC == ps->oldPC && newPC == ps->newPC && hom == ps->hom;}
 };
@@ -119,7 +119,7 @@ GShom phi(int var, const DataSet& val) const{
     }
 }
 
-void mark() {essai->set_mark();}
+/*void mark() {essai->set_mark();}*/
 
 size_t hash() const {return 746981*(index^(747547*oldPC+newPC));}
 
