@@ -27,7 +27,7 @@ public:
   /* Memory Manager */
   static  unsigned int statistics();
   static void pstats(bool reinit=true);
-  static void recentGarbage();
+  static void recentGarbage(bool force=false);
   static void garbage(); 
 };
 
