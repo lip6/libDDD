@@ -103,6 +103,16 @@ namespace std {
 static size_t Max_SDD=0;
 static UniqueTable<_GSDD> canonical;
 
+namespace SDDutil {
+  UniqueTable<_GSDD>  * getTable () {return &canonical;}
+  
+  void foreachTable (void (*foo) (const GSDD & g)) {
+    for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
+      (*foo) (GSDD( (*di)));
+    }
+  }
+
+}
 /******************************************************************************/
 /*                             class GSDD                                     */
 /******************************************************************************/
