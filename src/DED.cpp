@@ -1,7 +1,9 @@
+
 /* -*- C++ -*- */
 #include <set>
 #include <map>
 // modif
+#include <assert.h>
 #include <ext/hash_map>
 #include <typeinfo>
 // ajout
@@ -13,8 +15,18 @@ using namespace __gnu_cxx;
 #include "Hom.h"
 
 /******************************************************************************/
+
+
+#ifdef INST_STL
+long long NBJumps=0;
+long long NBAccess=0;
+#endif
+
 typedef hash_map<DED,GDDD> Cache;
 static Cache cache;
+
+static int Hits=0;
+static int Misses=0;
 
 /******************************************************************************/
 class _DED_GDDD:public _DED{
@@ -226,7 +238,7 @@ GDDD _DED_Minus::eval() const{
   int variable=parameter1.variable();
   GDDD::Valuation value;
 
-  map<int,set<GDDD> > map_set;
+  //  map<int,set<GDDD> > map_set;
   GDDD::const_iterator v1=parameter1.begin();
   GDDD::const_iterator v2=parameter2.begin();
   while(v1!=parameter1.end()&&v2!=parameter2.end()){
@@ -335,6 +347,9 @@ private:
   _DED_Hom(const GHom &h,const GDDD &d):hom(h),parameter(d){};
 public: 
   static _DED *create(const GHom &h,const GDDD &d);
+
+  virtual bool shouldCache() { return /*parameter.refCounter()>1 ||*/ parameter.nbsons() > 1 ; }
+
   /* Compare */
   size_t hash() const;
   bool operator==(const _DED &e)const;
@@ -379,6 +394,29 @@ unsigned int DED::statistics() {
   return cache.size();
 }
 
+void DED::pstats(bool reinit)
+{
+  cout << "*\nCache Stats : size=" << cache.size() << endl;
+#ifdef INST_STL
+  cout << "nb jump in hash table : " << NBJumps << "/" << "nbsearch " ;
+  cout << NBAccess << "=" << double (NBJumps)/double(NBAccess)<< endl;
+  if (reinit){
+    NBAccess=0;
+    NBJumps=0;
+  }
+#endif
+  
+  cout << "\nCache hit ratio : " << double (Hits*100) / double(Misses+1+Hits) << "%" << endl;
+  // long hitr=(Hits*100) / (Misses+1+Hits) ;
+  if (reinit){
+    Hits =0;
+    Misses =0;  
+  }  
+
+}
+
+
+
 // Todo
 void DED::garbage(){
   for(Cache::iterator di=cache.begin();di!=cache.end();){
@@ -406,14 +444,35 @@ GDDD DED::eval(){
     delete concret;
     return res;
   }
+  else 
+    if (! concret->shouldCache() ){
+      // we don't need to store it
+      GDDD res=concret->eval(); // compute the result
+      
+      delete concret;
+      Misses++;
+      return res;
+    }
+#ifdef INST_STL
+    NBAccess++;
+    NBJumps++;
+    int temp=0;
+    //    Cache::const_iterator 
+    Cache::const_iterator ci=cache.find(*this, temp); // search e in the cache
+    NBJumps+=temp;
+#else
   Cache::const_iterator ci=cache.find(*this); // search e in the cache
+#endif
+
   if(ci==cache.end()){ // *this is not in the cache
+    Misses++;
     GDDD res=concret->eval(); // compute the result
     cache[*this]=res;
     concret=NULL;
     return res;
   }
   else {// *this is in the cache
+    Hits++;
     delete concret;
     return ci->second;
   }

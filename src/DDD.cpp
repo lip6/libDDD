@@ -4,6 +4,7 @@
 #include <vector>
 #include <set>
 // modif
+#include <assert.h>
 #include <ext/hash_map>
 #include <map>
 // modif
@@ -18,6 +19,12 @@ using namespace __gnu_cxx;
 /******************************************************************************/
 /*                             class _GDDD                                     */
 /******************************************************************************/
+
+#ifdef INST_STL
+static long long NBJumps=0;
+static long long NBAccess=0;
+#endif
+
 class _GDDD{
 public:
   /* Attributs*/
@@ -35,6 +42,14 @@ public:
 
   /* Memory Manager */
   void mark()const;
+
+
+#ifdef INST_STL
+  //for use with instrumented hash tables in STL
+  static void InstrumentNbJumps(int nbjmp){NBJumps+=(1+nbjmp);NBAccess++;}
+  static void ResetNbJumps(){NBJumps=0; NBAccess=0;}
+  static double StatJumps() {if (NBAccess!=0)  return double(NBJumps) / double(NBAccess); return -1;}
+#endif
 };
 
 /******************************************************************************/
@@ -86,26 +101,44 @@ void _GDDD::mark()const{
   }
 }
 
+
+
+void GDDD::pstats(bool reinit)
+{
+#ifdef INST_STL
+  cout << "*\nGDDS : size unicity table =" << canonical.size() << endl;
+  cout << "  Average nb jump in hash table : " << _GDDD::StatJumps() << endl;
+  if (reinit){
+    _GDDD::ResetNbJumps();
+  }
+  canonical.pstat(reinit);
+#endif
+}
+
+
+
 void GDDD::garbage(){
   // mark phase
 
+
+
   for(UniqueTable<_GDDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
-    if(di->second->refCounter!=0)
-      di->second->mark();
+    if((*di)->refCounter!=0)
+      (*di)->mark();
   }
 
   // sweep phase
   
   for(UniqueTable<_GDDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
-    if(!di->second->marking){
+    if(!((*di)->marking)){
       UniqueTable<_GDDD>::Table::iterator ci=di;
       di++;
-      _GDDD *g=ci->second;
+      _GDDD *g=(*ci);
       canonical.table.erase(ci);
       delete g;
     }
     else{
-      di->second->marking=false;
+      (*di)->marking=false;
       di++;
     }
   }
@@ -150,6 +183,10 @@ GDDD::GDDD(int variable,Valuation value){
 /* Accessors */
 int GDDD::variable() const{
   return concret->variable;
+}
+
+size_t GDDD::nbsons () const { 
+  return concret->valuation.size();
 }
 
 GDDD::const_iterator GDDD::begin() const{
