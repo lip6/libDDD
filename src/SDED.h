@@ -27,7 +27,9 @@ public:
   /* Memory Manager */
   static  unsigned int statistics();
   static void pstats(bool reinit=true);
+#ifdef OTF_GARBAGE
   static void recentGarbage(bool force=false);
+#endif // OTF_GARBAGE
   static void garbage(); 
 };
 
@@ -56,10 +58,12 @@ public:
   /* Destructor */
   virtual ~_SDED(){};
 
+#ifdef OTF_GARBAGE
   // to enact dynamic garbage collection mechanism
   // Returns true if all arguments of the operation of type GSDD have property that (isSon()==true)
   // This property triggers long term storage
   virtual bool shouldCache() {return false ;}
+#endif
 
   /* Compare */
   virtual size_t hash() const =0;
