@@ -327,7 +327,7 @@ SDD::SDD(const GSDD &g):GSDD(g.concret){
 }
 
 GSDD::GSDD(int var,const DataSet &val,const GSDD &d):concret(null.concret){ //var-val->d
-  if(d!=null){
+  if(d!=null && ! val.empty() ){
     _GSDD *_g = new _GSDD(var,0);
     // cast to (DataSet*) to lose "const" type
     pair<DataSet *, GSDD> x( val.newcopy(),d);
