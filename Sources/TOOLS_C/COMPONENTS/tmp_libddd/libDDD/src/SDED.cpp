@@ -18,16 +18,18 @@ using namespace __gnu_cxx;
 /******************************************************************************/
 namespace namespace_SDED {
 #ifdef INST_STL
-long long NBJumps=0;
-long long NBAccess=0;
+  long long NBJumps=0;
+  long long NBAccess=0;
 #endif
 
-typedef hash_map<SDED,GSDD> Cache;
-static Cache cache;
-
-static int Hits=0;
-static int Misses=0;
-static size_t Max_SDED=0;
+  typedef hash_map<SDED,GSDD> Cache;
+  static Cache cache;
+  static Cache recentCache;
+  
+  static int Hits=0;
+  static int Misses=0;
+  static size_t Max_SDED=0;
+  static size_t Max_Recent_SDED=0;
 } //namespace namespace_SDED 
 using namespace namespace_SDED ;
 
@@ -41,6 +43,10 @@ public:
   bool  operator==(const _SDED &e)const{
     return (parameter==((_SDED_GSDD*)&e)->parameter);
   };
+
+  bool AllParamsMarkAsRecent() const {return true;};
+  void AllParamsUnmarkAsRecent() const {};
+
   GSDD eval() const{return parameter;};
 };
 
@@ -75,6 +81,13 @@ public:
   size_t hash() const;
   bool operator==(const _SDED &e)const;
 
+  bool shouldCache () {
+    for(set<GSDD>::const_iterator si=parameters.begin();si!=parameters.end();si++)
+      if (! si->isSon()) 
+	return false;
+    return true;
+  }
+
   /* Transform */
   GSDD eval() const;
 
@@ -91,6 +104,8 @@ size_t _SDED_Add::hash() const{
   }
   return res;
 }
+
+
 
 bool _SDED_Add::operator==(const _SDED &e)const{
   return (parameters==((_SDED_Add*)&e)->parameters);
@@ -167,7 +182,8 @@ GSDD _SDED_Add::eval() const{
       delete it->second;
     }
 
-
+//     if ( ! opit->isSon() && ! opit->refCounter() )
+//       opit->clearNode();
   } // end foreach operand
 
   GSDD::Valuation value;
@@ -245,6 +261,10 @@ public:
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
+
+  bool shouldCache () {
+    return  ( parameter1.isSon() &&  parameter2.isSon());
+  }
 
   /* Transform */
   GSDD eval() const;
@@ -331,6 +351,10 @@ public:
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
+
+  bool shouldCache () {
+    return  ( parameter1.isSon() &&  parameter2.isSon());
+  }
 
   /* Transform */
   GSDD eval() const;
@@ -436,6 +460,10 @@ public:
   size_t hash() const;
   bool operator==(const _SDED &e)const;
 
+  bool shouldCache () {
+    return  ( parameter1.isSon() &&  parameter2.isSon()) ;
+  }
+
   /* Transform */
   GSDD eval() const;
 
@@ -502,8 +530,7 @@ private:
 public: 
   static _SDED *create(const GShom &h,const GSDD &d);
 
-  virtual bool dogarbage () { return shom.refCounter() <= 0 && parameter.refCounter() <= 0; }
-  virtual bool shouldCache() { return parameter.refCounter()>1 || parameter.nbsons() > 1 ; }
+  virtual bool shouldCache() { return parameter.isSon()  ; }
 
   /* Compare */
   size_t hash() const;
@@ -528,7 +555,8 @@ bool _SDED_Shom::operator==(const _SDED &e)const{
 
 /* Transform */
 GSDD _SDED_Shom::eval() const{
-  return shom.eval(parameter);
+  GSDD res = shom.eval(parameter);
+  return  res;
 }
 
 /* constructor*/
@@ -571,8 +599,39 @@ void SDED::pstats(bool reinit)
 
 }
 
+static unsigned int  recentLimit = 1024 ;
+void SDED::recentGarbage(){
+  size_t rcSize=recentCache.size();
+  int longTerm = 0;
+  int flSize ;
+  if (rcSize > recentLimit && rcSize > 2*cache.size()) {
+    flSize = cache.size();
+    if (recentCache.size() > Max_Recent_SDED) 
+      Max_Recent_SDED=recentCache.size();  
+    for(Cache::iterator di=recentCache.begin();di!=recentCache.end();){
+      Cache::iterator ci=di;
+      di++;
+      _SDED *d=ci->first.concret;
+      if (d->shouldCache() && ci->second.isSon()) {
+	cache.insert(*ci);
+	recentCache.erase(ci);
+	longTerm++;
+      }      else {
+	recentCache.erase(ci);
+	delete d;
+      }
+    }
+    if ( longTerm < (flSize / 20) )
+      recentLimit*=2;
+    cerr << " Recent SDED cache size was " << rcSize << "/"<< recentLimit<<" Full : "<< cache.size() << "  comitted " << longTerm << " results to storage "<<endl;
+    SDDutil::recentGarbage();
+  }
+};
+
+
 
 void SDED::garbage(){
+  recentGarbage();
   if (cache.size() > Max_SDED) 
     Max_SDED=cache.size();  
   for(Cache::iterator di=cache.begin();di!=cache.end();){
@@ -582,6 +641,14 @@ void SDED::garbage(){
       cache.erase(ci);
       delete d;
   } 
+  for(Cache::iterator di=recentCache.begin();di!=recentCache.end();){
+      Cache::iterator ci=di;
+      di++;
+      _SDED *d=ci->first.concret;
+      recentCache.erase(ci);
+      delete d;
+  } 
+  
 //  cache.clear();
 
 }; 
@@ -600,38 +667,67 @@ GSDD SDED::eval(){
     delete concret;
     return res;
   }
-//  else 
-//     if (! concret->shouldCache() ){
-//       // we don't need to store it
-//       GDDD res=concret->eval(); // compute the result
-      
-//       delete concret;
-//       Misses++;
-//       return res;
-//     }
+  else {
 #ifdef INST_STL
     NBAccess++;
     NBJumps++;
     int temp=0;
     //    Cache::const_iterator 
-    Cache::const_iterator ci=cache.find(*this, temp); // search e in the cache
+    Cache::const_iterator ci=recentCache.find(*this, temp); // search e in the recent storage cache
     NBJumps+=temp;
 #else
-  Cache::const_iterator ci=cache.find(*this); // search e in the cache
+    Cache::const_iterator ci=recentCache.find(*this); // search e in the recent storage cache
 #endif
+    if (ci==recentCache.end()){ // *this is not in the recent storage cache
+      // test if parameters potentially allow long term storage
+      if ( concret->shouldCache() ){
+	// search in long term cache
+#ifdef INST_STL
+	NBAccess++;
+	NBJumps++;
+	temp=0;
+	//    Cache::const_iterator 
+	ci=cache.find(*this, temp); // search e in the long term storage cache
+	NBJumps+=temp;
+#else
+	ci=cache.find(*this); // search e in the long term storage cache
+#endif
+	if (ci==cache.end()){ // *this is not in the long term storage cache
+	  Misses++;  // this constitutes a cache miss (double truly) !!
+	  GSDD res=concret->eval(); // compute the result
+	  // test if result is eligible for long term storage status
+ 	  if ( ! res.isSon() ) {
+	    // Not eligible
+	    recentCache[*this]=res;
+ 	  } else {
+ 	    // eligible
+ 	    cache[*this]=res;
+	    // Should we quick Garbage HERE ???
+	    recentGarbage();
+ 	  }
+	  concret=NULL;
+	  return res;
+	} else {
+	  // found in long term cache
+	  Hits++;
+	  delete concret;
+	  return ci->second;
+	}
 
-  if(ci==cache.end()){ // *this is not in the cache
-    Misses++;
-    GSDD res=concret->eval(); // compute the result
-    cache[*this]=res;
-    concret=NULL;
-    return res;
-  }
-  else {// *this is in the cache
+      } else { // parameters make Shom ineligible for long term storage	
+	
+	Misses++;  // this constitutes a cache miss (simple) !!
+	GSDD res=concret->eval(); // compute the result
+	recentCache[*this]=res;	
+	concret=NULL;
+	return res;
+     }
+  } else {// *this is in the cache
     Hits++;
     delete concret;
     return ci->second;
   }
+  } // end else : not a constant GSDD
 };
 
 

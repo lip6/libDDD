@@ -35,6 +35,7 @@ public:
   mutable unsigned long int refCounter;
   mutable bool marking;
   mutable bool isSon;
+
   /* Constructor */
   _GSDD(int var,int cpt=0):variable(var),refCounter(cpt),marking(false),isSon(false){}; 
   _GSDD(int var,GSDD::Valuation val,int cpt=0):variable(var),valuation(val),refCounter(cpt),marking(false),isSon(false){}; 
@@ -49,7 +50,7 @@ public:
       it->second.concret->isSon = true;
   }
 
-  _GSDD (const _GSDD &g):variable(g.variable),valuation(g.valuation),refCounter(g.refCounter),marking(g.marking) {
+  _GSDD (const _GSDD &g):variable(g.variable),valuation(g.valuation),refCounter(g.refCounter),marking(g.marking),isSon(g.isSon) {
     for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; it++) {
       it->first = it->first->newcopy();
     }
@@ -106,6 +107,7 @@ namespace std {
 
 // map<int,string> mapVarName;
 static size_t Max_SDD=0;
+static hash_map<_GSDD*,int> recent;
 
 
 template<>
@@ -117,14 +119,72 @@ _GSDD* UniqueTable<_GSDD>::operator()(_GSDD *_g){
   } else {
     (*ti)->UpdateSons();
   }
+
+
+  
   return *ti;
 }
 
 static UniqueTable<_GSDD> canonical;
 
 namespace SDDutil {
+  static int lastAvg = 10;
+  void recentGarbage() {
+    size_t rcSize = recent.size();
+    size_t flSize = canonical.table.size();
+    int cleared=0,inuse=0,isson=0,toSon=0,totalRefs=0,min=255,max=0;
+    for (hash_map<_GSDD*,int>::iterator it =  recent.begin(); it != recent.end() ; ) {
+      if ( ! it->first->isSon  ) {
+	// not eligible for long term
+	if ( ! it->second ) {
+	  // AND not in use
+	  hash_map<_GSDD*,int>::iterator jt= it;
+	  it++;
+	  
+	  _GSDD *g=jt->first;;
+	  // Kill from main unicity table
+	  canonical.table.erase(g);
+	  // kill from recent entries
+	  recent.erase(jt);
+	  delete g;
+	  ++cleared;
+	} else {
+	  // NOT ELIGIBLE for long term but still in use : skip entry
+	  totalRefs += it->second;
+	  min =  it->second < min ? it->second : min ;
+	  max =  it->second > max ? it->second : max ;
+	  if (it->second > (2*(lastAvg+1)) ) {
+	    hash_map<_GSDD*,int>::iterator jt= it;
+	    it++;
+	    jt->first->isSon=true;
+	    recent.erase(jt);
+	    ++toSon;
+	    continue;
+	  }
+	  it++;
+	  ++inuse;
+	}
+	
+      } else {
+	// eligible (newly) for long term
+	// kill from recent entries
+	hash_map<_GSDD*,int>::iterator jt= it;
+	it++;
+	recent.erase(jt);
+	++isson;
+      }
+    } // end foreach entry in recent nodes table
+    lastAvg = inuse ? totalRefs / inuse : 1;
+    cerr << "Reduced recent from :" << rcSize << " to " << recent.size() << endl;
+    cerr << "Reduced canonical from :" << flSize << " to " << canonical.table.size() << endl;
+    cerr << "Destroyed : " << cleared << "  inuse : " << inuse << " average use(min/max) :" << lastAvg <<"("<<min<<","<<max<<")"<< " elevated to long term " << toSon << " natural new long term " << isson << endl <<endl; 
+
+  }
+  
   UniqueTable<_GSDD>  * getTable () {return &canonical;}
   
+
+
   void foreachTable (void (*foo) (const GSDD & g)) {
     for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
       (*foo) (GSDD( (*di)));
@@ -206,10 +266,63 @@ ostream& operator<<(ostream &os,const GSDD &g){
   return(os);
 }
 
-GSDD::GSDD(_GSDD *_g):concret(_g){}
+GSDD::GSDD(const GSDD & g) :concret(g.concret) {
+  if ( ! ( concret->refCounter || concret->isSon ) ) {
+    hash_map<_GSDD *,int>::iterator it = recent.find(concret);
+    if (it == recent.end() ) 
+      // create new entry
+      recent.insert(make_pair(concret,1));
+    else
+      ++it->second ;
+  }
+}
+
+GSDD::GSDD(_GSDD *_g):concret(_g){ 
+  if ( ! ( concret->refCounter || concret->isSon ) ) {
+    hash_map<_GSDD *,int>::iterator it = recent.find(concret);
+    if (it == recent.end() ) 
+      // create new entry
+      recent.insert(make_pair(concret,1));
+    else
+      ++it->second ;
+  }
+
+}
 
 GSDD::GSDD(int variable,Valuation value){
- concret=(value.size()!=0)? canonical(new _GSDD(variable,value)): null.concret;
+  if ( ! value.size() ) 
+    concret = null.concret;
+  else {
+    concret = canonical(new _GSDD(variable,value));
+    if ( ! ( concret->refCounter || concret->isSon ) ) {
+      hash_map<_GSDD *,int>::iterator it = recent.find(concret);
+      if (it == recent.end() ) 
+	// create new entry
+	recent.insert(make_pair(concret,1));
+      else
+	++it->second ;
+    }
+  }
+}
+
+
+GSDD::GSDD(int var,const DataSet &val,const GSDD &d):concret(null.concret){ //var-val->d
+  if(d!=null && ! val.empty() ){
+    _GSDD *_g = new _GSDD(var,0);
+    // cast to (DataSet*) to lose "const" type
+    pair<DataSet *, GSDD> x( val.newcopy(),d);
+    _g->valuation.push_back(x);
+    concret=canonical(_g);    
+    if ( ! ( concret->refCounter || concret->isSon ) ) {
+      hash_map<_GSDD *,int>::iterator it = recent.find(concret);
+      if (it == recent.end() ) 
+	// create new entry
+	recent.insert(make_pair(concret,1));
+      else
+	++it->second ;
+    }
+  }
+  //  concret->refCounter++;
 }
 
 
@@ -369,18 +482,29 @@ void GSDD::clearNode() const {
   canonical.table.erase(concret);
 }
 
+void GSDD::markAsSon() const {
+  concret->isSon = true;
+}
+
 void GSDD::garbage(){
+  SDDutil::recentGarbage();
   if (canonical.size() > Max_SDD) 
     Max_SDD=canonical.size();  
 
   MySDDNbStates::clear();
 
-
+  for (hash_map<_GSDD*,int>::iterator it =  recent.begin(); it != recent.end() ; ) {
+    hash_map<_GSDD*,int>::iterator jt= it;
+    it++;
+    recent.erase(jt);
+  }
   // mark phase
   for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
     if((*di)->refCounter!=0)
       (*di)->mark();
   }
+
+  
 
   // sweep phase  
   for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
@@ -420,31 +544,62 @@ SDD::SDD(const SDD &g):GSDD(g.concret){
 
 SDD::SDD(const GSDD &g):GSDD(g.concret){
   (concret->refCounter)++;
+  concret->isSon = true;
 }
 
-GSDD::GSDD(int var,const DataSet &val,const GSDD &d):concret(null.concret){ //var-val->d
-  if(d!=null && ! val.empty() ){
-    _GSDD *_g = new _GSDD(var,0);
-    // cast to (DataSet*) to lose "const" type
-    pair<DataSet *, GSDD> x( val.newcopy(),d);
-    _g->valuation.push_back(x);
-    concret=canonical(_g);
+
+
+GSDD::~GSDD(){
+  if (!(concret->isSon || concret->refCounter) ) {
+    hash_map<_GSDD *,int>::iterator it = recent.find(concret);
+    if (it != recent.end()) {
+      assert(it->second >0);
+      --it->second;
+    }
   }
-  //  concret->refCounter++;
 }
-
 
 SDD::SDD(int var,const DataSet& val,const GSDD &d):GSDD(var,val,d){
   concret->refCounter++;
+  concret->isSon = true;
 }
 SDD::~SDD(){
   assert(concret->refCounter>0);
   concret->refCounter--;
 }
 
+
+GSDD &GSDD::operator=(const GSDD &g){
+  if (g != *this) {
+    // decrement usage for current value
+    if (! concret->isSon ) {
+      hash_map<_GSDD *,int>::iterator it = recent.find(concret);
+      if (it != recent.end()) {
+	assert(it->second >0);
+	--it->second;
+      }
+    }  
+    // copy
+    concret=g.concret;
+    // increment recent usage
+    if ( !  concret->isSon  ) {
+      hash_map<_GSDD *,int>::iterator it = recent.find(concret);
+      if (it == recent.end() ) 
+	// create new entry
+	recent.insert(make_pair(concret,1));
+      else
+	++it->second ;
+    }
+    
+  }
+  return *this;
+}
+
+
 SDD &SDD::operator=(const GSDD &g){
   concret->refCounter--;
   concret=g.concret;
+  concret->isSon = true;
   concret->refCounter++;
   return *this;
 }
@@ -452,6 +607,7 @@ SDD &SDD::operator=(const GSDD &g){
 SDD &SDD::operator=(const SDD &g){
   concret->refCounter--;
   concret=g.concret;
+  concret->isSon = true;
   concret->refCounter++;
   return *this;
 }
