@@ -14,7 +14,6 @@ using namespace __gnu_cxx;
 #include "DDD.h"
 #include "DataSet.h"
 
-
 class _GSDD;
 
 /******************************************************************************/
@@ -23,6 +22,7 @@ private:
   friend struct hash<GSDD>;
   friend ostream& operator<<(ostream &os,const GSDD &g);
   friend class SDD;
+  friend class _GSDD;
   _GSDD *concret;
 
   void print(ostream& os,string s) const;
@@ -56,6 +56,7 @@ public:
   // return a pair <SDD nodes,DDD nodes>
   pair<unsigned long int,unsigned long int> node_size() const;
   size_t nbsons () const;
+  bool isSon() const;
   long double GSDD::nbStates() const;
 
 //  Broken right now, dont use me or fixme first
@@ -65,7 +66,11 @@ public:
   /* Memory Manager */
   static  unsigned int statistics();
   void mark()const;
-  static void garbage(); 
+  static void garbage();
+  // to check out useless intermediate nodes : on the fly garbage collection
+  // WARNING : this is not const at all in fact it deletes "concret" and is quite dangerous,
+  // only for expert use not a basic library functionality
+  void clearNode() const;
   static void pstats(bool reinit=true);
   static size_t peak();
 };
@@ -139,6 +144,9 @@ namespace std {
 		}
 	};
 }
+
+
+
 
 #endif
 
