@@ -516,7 +516,13 @@ GShom::GShom(StrongShom *h):concret(canonical(h)){}
 
 GShom::GShom(const GSDD& d):concret(canonical(new Constant(d))){}
 
-GShom::GShom(int var,const DataSet & val, const GShom &h):concret(canonical(new LeftConcat(GSDD(var,val),h))){}
+GShom::GShom(int var,const DataSet & val, const GShom &h) {
+  if ( ! val.empty() ) {
+    concret=  canonical(new LeftConcat(GSDD(var,val),h));
+  } else {
+    concret = canonical(new Constant(GSDD::null));
+  }
+}
 
 /* Eval */
 GSDD GShom::operator()(const GSDD &d) const{
