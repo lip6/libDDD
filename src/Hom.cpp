@@ -400,7 +400,7 @@ public:
       d2=arg(d2);
     } while (d1 != d2);
 
-    return d;
+    return d1;
   }
 
   /* Memory Manager */
