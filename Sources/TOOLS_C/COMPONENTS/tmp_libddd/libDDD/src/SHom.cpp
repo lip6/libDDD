@@ -14,6 +14,8 @@ using namespace std;
 MapJumps  _GShom::HomJumps;
 #endif
 
+
+namespace namespace_SHom {
 #ifdef INST_STL
 static string TryDemangle(string in)
 {
@@ -134,6 +136,9 @@ void PrintMapJumps(double ratemin=0){
   }
 #endif
 }
+
+} //end namespace namespace_SHom 
+using namespace namespace_SHom ;
 
 /* Unique Table */
 namespace __gnu_cxx {
