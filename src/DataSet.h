@@ -30,7 +30,7 @@ class DataSet {
   // compares two sets for equality
   virtual bool set_equal(const DataSet & b) const =0;
   // returns the size (number of elements) in a set
-  virtual size_t set_size() const = 0;
+  virtual long double set_size() const = 0;
   // returns a hash function, used in the SDD hash function computation
   virtual size_t set_hash() const =0;
   // returns a formatted string description of the set
