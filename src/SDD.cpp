@@ -134,33 +134,6 @@ void GSDD::pstats(bool reinit)
 }
 
 
-void GSDD::garbage(){
-  if (canonical.size() > Max_SDD) 
-    Max_SDD=canonical.size();  
-
-
-
-  // mark phase
-  for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
-    if((*di)->refCounter!=0)
-      (*di)->mark();
-  }
-
-  // sweep phase  
-  for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
-    if(! (*di)->marking){
-      UniqueTable<_GSDD>::Table::iterator ci=di;
-      di++;
-      _GSDD *g=(*ci);
-      canonical.table.erase(ci);
-      delete g;
-    }
-    else{
-      (*di)->marking=false;
-      di++;
-    }
-  }
-}
 
 /* Visualisation*/
 void GSDD::print(ostream& os,string s) const{
@@ -303,10 +276,10 @@ unsigned long int GSDD::size() const{
   return sddsize(*this);
 }
 
-class MyNbStates{
+class MySDDNbStates{
 private:
   int val; // val=0 donne nbState , val=1 donne noSharedSize
-  hash_map<GSDD,long double> s;
+  static hash_map<GSDD,long double> s;
 
   long double nbStates(const GSDD& g){
     if(g==GSDD::one)
@@ -321,25 +294,60 @@ private:
 	  res+=(gi->first->set_size())*nbStates(gi->second)+val;
 	s[g]=res;
 	return res;
-      }
-      else{
+      } else {
 	return i->second;
       }
     }
   }
 
 public:
-  MyNbStates(int v):val(v){};
+  MySDDNbStates(int v):val(v){};
   long double operator()(const GSDD& g){
     long double res=nbStates(g);
-    s.clear();
+//    s.clear();
     return res;
+  }
+
+  static void clear () {
+    s.clear();
   }
 };
 
+hash_map<GSDD,long double> MySDDNbStates::s = hash_map<GSDD,long double> ();
+
 long double GSDD::nbStates() const{
-  static MyNbStates myNbStates(0);
+  static MySDDNbStates myNbStates(0);
   return myNbStates(*this);
+}
+
+
+void GSDD::garbage(){
+  if (canonical.size() > Max_SDD) 
+    Max_SDD=canonical.size();  
+
+  MySDDNbStates::clear();
+
+
+  // mark phase
+  for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
+    if((*di)->refCounter!=0)
+      (*di)->mark();
+  }
+
+  // sweep phase  
+  for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
+    if(! (*di)->marking){
+      UniqueTable<_GSDD>::Table::iterator ci=di;
+      di++;
+      _GSDD *g=(*ci);
+      canonical.table.erase(ci);
+      delete g;
+    }
+    else{
+      (*di)->marking=false;
+      di++;
+    }
+  }
 }
 
 
