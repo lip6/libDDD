@@ -4,6 +4,16 @@
 
 #include "DDD.h"
 
+
+#include <string>
+#include <map>
+/**********************************************************************/
+#ifdef INST_STL
+typedef  std::pair<long long int, long long int> PairLL;
+typedef std::map<std::string, PairLL > MapJumps;
+#endif
+
+
 class _GHom;
 class StrongHom;
 
@@ -48,6 +58,7 @@ public:
 
   /* Memory Manager */
   static  unsigned int statistics();
+  static void pstats(bool reinit=true);
   void mark()const;
   static void garbage(); 
 };
@@ -114,6 +125,10 @@ private:
   mutable bool marking;
   mutable bool immediat;
 public:
+#ifdef INST_STL
+  static MapJumps HomJumps;
+#endif
+  
   /* Destructor*/
   _GHom(int ref=0,bool im=false):refCounter(ref),marking(false),immediat(im){};
   virtual ~_GHom(){};
@@ -127,6 +142,20 @@ public:
 
   /* Memory Manager */
   virtual void mark() const{};
+#ifdef INST_STL
+  virtual void InstrumentNbJumps(int nbjumps)
+  {
+    const char *name=typeid(*this).name();
+    MapJumps::iterator ii;
+    if ((ii=HomJumps.find(string(name)))==HomJumps.end()){
+      HomJumps[string(name)]=PairLL(1L, (long long int) (1+nbjumps));
+    }
+    else {
+      ii->second.first++;
+      ii->second.second+=(1+nbjumps);
+    }
+  }
+#endif
 };
 
 class StrongHom:public _GHom{
