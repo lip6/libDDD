@@ -16,7 +16,7 @@ using namespace __gnu_cxx;
 class _GDDD;
 
 /******************************************************************************/
-class GDDD{
+class GDDD {
 private:
   friend struct hash<GDDD>;
   friend ostream& operator<<(ostream &os,const GDDD &g);
@@ -24,6 +24,9 @@ private:
   _GDDD *concret;
   GDDD(_GDDD *_g);
   void print(ostream& os,string s) const;
+  // My funs
+  void saveNode(ostream&, vector<_GDDD*>& )const;
+  unsigned long int nodeIndex(vector<_GDDD*>)const;
 public:
   /* Accessors */
   typedef vector<pair<int,GDDD> > Valuation;
@@ -62,6 +65,9 @@ public:
   void mark()const;
   static void garbage(); 
   static void pstats(bool reinit=true);
+  //load/Save
+  friend void saveDDD(ostream&, vector<DDD>);
+  friend void loadDDD(istream&, vector<DDD>&);
 };
 
 ostream& operator<<(ostream &,const GDDD &);
