@@ -62,7 +62,7 @@ public:
   static  unsigned int statistics();
   void mark()const;
   static void garbage(); 
-
+  static void pstats(bool reinit=true);
 };
 
 ostream& operator<<(ostream &,const GSDD &);
