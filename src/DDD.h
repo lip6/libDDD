@@ -16,12 +16,13 @@ using namespace __gnu_cxx;
 /// pre-declaration of concrete (private) class implemented in .cpp file
 class _GDDD;
 
-/// This class is the base class representing a Data Decision Diagram
-/// It is composed of a set of arcs labeled by integers that point to successor GDDD nodes
-/// This class does not implement reference counting : GDDD are destroyed on MemoryManager::Garbage
+/// This class is the base class representing a Data Decision Diagram.
+/// It is composed of a set of arcs labeled by integers that point to successor GDDD nodes.
+/// This class does not implement reference counting : 
+/// GDDD are destroyed on MemoryManager::Garbage
 /// unless they are also referenced as DDD.
 /// Note that this class is in fact a kind of smart pointer : operations are delegated on "concret"
-/// the true implementation class (of private type _GDDD) that contains the data and has a single 
+/// the true implementation class (of private hidden type _GDDD) that contains the data and has a single 
 /// memory occurrence thanks to the unicity table.
 class GDDD 
 {
@@ -73,7 +74,7 @@ public:
   /* Constructors */
   /// Construct a GDDD with arguments given.
   /// \todo why is this public ???
-  /// \warn Valuation should be sorted according to arc values
+  /// \e WARNING Valuation should be sorted according to arc values
   /// \param variable the variable labeling the node
   /// \param value the set of arcs of the node
   GDDD(int variable,Valuation value);
@@ -148,10 +149,16 @@ public:
   /* Memory Management */
   /// Returns unicity table current size. Gives the number of different nodes created and not yet destroyed.
   static  unsigned int statistics();
-  /// For garbage collection. Marks a GDDD as in use in garbage collection phase. 
+  /// For garbage collection internals. Marks a GDDD as in use in garbage collection phase. 
+  /// 
   void mark() const;
+  /// For garbage collection.
+  /// \todo describe garbage collection algorithm(s) + mark usage homogeneously in one place.
   static void garbage(); 
+  /// Prints some statistics to std::cout. Mostly used in debug and development phase.
+  /// \todo allow output in other place than cout. Clean up output.
   static void pstats(bool reinit=true);
+  /// Returns the peak size of the DDD unicity table. This value is maintained up to date upon GarbageCollection.
   static size_t peak();
   /// Function for serialization. Save a set of DDD to a stream.
   friend void saveDDD(ostream&, vector<DDD>);
@@ -159,40 +166,99 @@ public:
   friend void loadDDD(istream&, vector<DDD>&);
 };
 
+
+/// Textual output of DDD into a stream in (relatively) human readable format.
 ostream& operator<<(ostream &,const GDDD &);
 /* Binary operators */
-GDDD operator^(const GDDD&,const GDDD&); // concatenation
-GDDD operator+(const GDDD&,const GDDD&); // union
-GDDD operator*(const GDDD&,const GDDD&); // intersection
-GDDD operator-(const GDDD&,const GDDD&); // difference
+/// Operator for concatenation of DDD. See DDD operations documentation section for details.
+/// \todo Write the DDD operations documentation !!
+GDDD operator^(const GDDD&,const GDDD&); 
+/// Operator for union of DDD. See DDD operations documentation section for details.
+/// \todo Write the DDD operations documentation !!
+GDDD operator+(const GDDD&,const GDDD&);
+/// Operator for intersection of DDD. See DDD operations documentation section for details.
+/// \todo Write the DDD operations documentation !!
+GDDD operator*(const GDDD&,const GDDD&); 
+/// Operator for set difference of DDD. See DDD operations documentation section for details.
+/// \todo Write the DDD operations documentation !!
+GDDD operator-(const GDDD&,const GDDD&); 
 
 
  
-/******************************************************************************/
-class DDD:public GDDD,public DataSet {
+/// This class is the public interface for manipulating Data Decision Diagrams.
+/// Except when defining new homomorphisms, a user of the library should only 
+/// manipulate DDD, not GDDD.
+/// Reference counting is enabled for DDD, so they will not be destroyed if they 
+/// are still in use upon garbage collection.
+class DDD:public GDDD,public DataSet 
+{
 public:
-  /* Constructeur */
+  /* Constructors */
+  /// Copy constructor. Constructs a copy, actual data (concret) is not copied.
+  /// RefCounter is updated however.
   DDD(const DDD &);
+  /// Copy constructor from base class GDDD, also default DDD constructor to empty set. 
+  /// Increments refCounter of g.concret.
   DDD(const GDDD &g=GDDD::null);
-  DDD(int var,int val,const GDDD &d=one ); //var-val->d
-  DDD(int var,int val1,int val2,const GDDD &d=one); //var-[val1,var2]->d
+
+  /// The most common way for the user of creating DDD.
+  /// This constructor builds a node with a single arc of the form var-val->d.
+  /// Usually a user will create these single path DDD, possibly by imbrication as in
+  /// DDD(var1, val1, DDD( var2, val2 )). Then compose them using +, -, *, ^ ...
+  /// See also GDDD(var,val,d).
+  /// \param var the variable labeling the node
+  /// \param val the value labeling the arc
+  /// \param d the successor node or defaults to terminal GDDD::one if none provided
+  DDD(int var,int val,const GDDD &d=one ); 
+  /// To create a DDD with arcs covering a range of values.
+  /// This interface creates nodes with a set of arcs bearing the values in the interval 
+  /// [val1,var2] that point to the same successor node d.
+  /// \param var the variable labeling the node
+  /// \param val1 lowest value labeling an arc
+  /// \param val2 highest value labeling an arc
+  /// \param d the successor node or defaults to terminal GDDD::one if none provided  
+  DDD(int var,int val1,int val2,const GDDD &d=one); 
+  /// Destructor, maintains refCount. Note that destroying a DDD does not actually destroy
+  /// any data, it decrements reference count, so that subsequent MemoryManager::garbage call
+  /// may truly clear the data.
   ~DDD(); 
 
-  /* Set */
+  /* assignment operator */
+  /// Overloaded behavior for assignment operator, maintains reference counting.
   DDD &operator=(const GDDD&);
+  /// Overloaded behavior for assignment operator, maintains reference counting.
   DDD &operator=(const DDD&);
 
-  // DataSet interface
+  /** @defgroup DataSetItf DataSet implementation interface 
+   *  This is the implementation of the DataSet class interface used in SDD context.
+   *  These functions allow to reference DDD from SDD arcs.
+   *  Remember to delete returned values after use. 
+   *
+   *  Note these functions are not resistant to incompatible DataSet types. 
+   *  When these functions have a parameter "b", it should be a reference to a DDD from proper behavior.
+   *  @{  
+   */
+  /// Return a new copy of a DDD. 
   virtual DataSet *newcopy () const { return new DDD(*this); }
-  virtual DataSet *set_intersect (const DataSet & b) const  ;
-  virtual DataSet *set_union (const DataSet & b)  const ;
+  /// Compute intersection of two DDD. 
+  virtual DataSet *set_intersect (const DataSet & b) const ;
+  /// Compute union of two DDD. 
+  virtual DataSet *set_union (const DataSet & b)  const;
+  /// Compute set difference of two DDD. 
   virtual DataSet *set_minus (const DataSet & b) const;
+  /// Return true if this is the empty set.
   virtual bool empty() const;
-  virtual DataSet *empty_set()const;
+  /// Returns a pointer to  GDDD::null.
+  virtual DataSet *empty_set() const;
+  /// Compares to DataSet for equality.
   virtual bool set_equal(const DataSet & b) const;
+  /// Compares to DataSet for equality.
   virtual long double set_size() const;
+  /// Returns a hash key for the DDD.
   virtual size_t set_hash() const;
+  /// Textual (human readable) output of a DDD.
   virtual void set_print (ostream &os) const { os << *this; }
+  /** @} */ // end DataSet interface group 
 };
 
 /******************************************************************************/
