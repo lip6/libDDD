@@ -552,6 +552,15 @@ GHom operator-(const GHom &h,const GDDD &d){
   return GHom(canonical(new Minus(h,d)));
 }
 
+/*************************************************************************/
+/*                         Class MyGHom                                    */  
+/*************************************************************************/
+
+/* Constructor */
+GHom::GHom(const MyGHom *h):concret(h){}
+
+GHom::GHom(MyGHom *h):concret(canonical(h)){}
+
 
 
 void GHom::pstats(bool reinit)
