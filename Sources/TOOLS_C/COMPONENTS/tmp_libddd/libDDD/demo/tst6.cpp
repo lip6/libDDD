@@ -4,6 +4,8 @@ using namespace std;
 #include "DDD.h"
 #include "DED.h"
 #include "Hom.h"
+#include "MemoryManager.h"
+
 
 enum {A, B, C, D,E, F, G} variables;
 char* vn[]= {"A", "B", "C", "D", "E", "F", "G"};
@@ -145,6 +147,8 @@ int main(){
   Hom permuteA_C = permute(A,C);
   DDD v=permuteA_C(u);
   cout <<"<A,C=C,A>(u)="<< endl<<v<<endl;
+
+  MemoryManager::pstats();
 
   return 1;
 }

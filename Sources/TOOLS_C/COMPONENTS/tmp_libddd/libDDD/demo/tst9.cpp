@@ -28,6 +28,8 @@ int main(){
   cout<<"d2="<<d2<<endl;
   cout<<"d1-d2="<<d<<endl;
 
+  MemoryManager::pstats();
+
 
   return 1;
 }
