@@ -41,6 +41,9 @@ int main(){
   cout<<MemoryManager::nbHom()<<endl;
   cout<<MemoryManager::nbDED()<<endl;
 
+  // This is not nice at all, but a second garbage is necessary to really clear the nodes
+  // hopefully will be corrected in the future
+  MemoryManager::garbage();
   MemoryManager::pstats();
 
 
