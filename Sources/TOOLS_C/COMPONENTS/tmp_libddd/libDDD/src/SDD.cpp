@@ -279,17 +279,17 @@ unsigned long int GSDD::size() const{
 class MySDDNbStates{
 private:
   int val; // val=0 donne nbState , val=1 donne noSharedSize
-  static hash_map<GSDD,long double> s;
+  static hash_map<GSDD,mpf_class> s;
 
-  long double nbStates(const GSDD& g){
+  mpf_class nbStates(const GSDD& g){
     if(g==GSDD::one)
       return 1;
     else if(g==GSDD::top || g==GSDD::null)
       return 0;
     else{
-      hash_map<GSDD,long double>::const_iterator i=s.find(g);
+      hash_map<GSDD,mpf_class>::const_iterator i=s.find(g);
       if(i==s.end()){
-	long double res=0;
+	mpf_class res=0;
 	for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++)
 	  res+=(gi->first->set_size())*nbStates(gi->second)+val;
 	s[g]=res;
@@ -302,8 +302,8 @@ private:
 
 public:
   MySDDNbStates(int v):val(v){};
-  long double operator()(const GSDD& g){
-    long double res=nbStates(g);
+  mpf_class operator()(const GSDD& g){
+    mpf_class res=nbStates(g);
 //    s.clear();
     return res;
   }
@@ -313,9 +313,9 @@ public:
   }
 };
 
-hash_map<GSDD,long double> MySDDNbStates::s = hash_map<GSDD,long double> ();
+hash_map<GSDD,mpf_class> MySDDNbStates::s = hash_map<GSDD,mpf_class> ();
 
-long double GSDD::nbStates() const{
+mpf_class GSDD::nbStates() const{
   static MySDDNbStates myNbStates(0);
   return myNbStates(*this);
 }
@@ -433,7 +433,7 @@ bool SDD::set_equal(const DataSet & b) const {
   return *this == (SDD&) b;
 }
 
-size_t SDD::set_size() const { return size_t(nbStates()); }
+size_t SDD::set_size() const { return size_t(nbStates().get_ui()); }
 
 size_t SDD::set_hash() const {
   return size_t (concret);
