@@ -33,12 +33,13 @@ public:
   int variable;
   GSDD::Valuation valuation;
   mutable unsigned long int refCounter;
+  mutable unsigned long int tempCounter;
   mutable bool marking;
   mutable bool isSon;
 
   /* Constructor */
-  _GSDD(int var,int cpt=0):variable(var),refCounter(cpt),marking(false),isSon(false){}; 
-  _GSDD(int var,GSDD::Valuation val,int cpt=0):variable(var),valuation(val),refCounter(cpt),marking(false),isSon(false){}; 
+  _GSDD(int var,int cpt=0):variable(var),refCounter(cpt),tempCounter(0),marking(false),isSon(false){}; 
+  _GSDD(int var,GSDD::Valuation val,int cpt=0):variable(var),valuation(val),refCounter(cpt),tempCounter(0),marking(false),isSon(false){}; 
   virtual ~_GSDD () {
     for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; it++) {
       delete it->first;
@@ -50,7 +51,7 @@ public:
       it->second.concret->isSon = true;
   }
 
-  _GSDD (const _GSDD &g):variable(g.variable),valuation(g.valuation),refCounter(g.refCounter),marking(g.marking),isSon(g.isSon) {
+  _GSDD (const _GSDD &g):variable(g.variable),valuation(g.valuation),refCounter(g.refCounter),tempCounter(g.tempCounter),marking(g.marking),isSon(g.isSon) {
     for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; it++) {
       it->first = it->first->newcopy();
     }
@@ -107,7 +108,7 @@ namespace std {
 
 // map<int,string> mapVarName;
 static size_t Max_SDD=0;
-static hash_map<_GSDD*,int> recent;
+static hash_set<_GSDD*> recent;
 
 
 template<>
@@ -119,9 +120,6 @@ _GSDD* UniqueTable<_GSDD>::operator()(_GSDD *_g){
   } else {
     (*ti)->UpdateSons();
   }
-
-
-  
   return *ti;
 }
 
@@ -133,15 +131,15 @@ namespace SDDutil {
     size_t rcSize = recent.size();
     size_t flSize = canonical.table.size();
     int cleared=0,inuse=0,isson=0,toSon=0,totalRefs=0,min=255,max=0;
-    for (hash_map<_GSDD*,int>::iterator it =  recent.begin(); it != recent.end() ; ) {
-      if ( ! it->first->isSon  ) {
+    for (hash_set<_GSDD*>::iterator it =  recent.begin(); it != recent.end() ; ) {
+      if ( ! (*it)->isSon  ) {
 	// not eligible for long term
-	if ( ! it->second ) {
+	if ( ! (*it)->tempCounter ) {
 	  // AND not in use
-	  hash_map<_GSDD*,int>::iterator jt= it;
+	  hash_set<_GSDD*>::iterator jt= it;
 	  it++;
 	  
-	  _GSDD *g=jt->first;;
+	  _GSDD *g=*jt;
 	  // Kill from main unicity table
 	  canonical.table.erase(g);
 	  // kill from recent entries
@@ -150,13 +148,14 @@ namespace SDDutil {
 	  ++cleared;
 	} else {
 	  // NOT ELIGIBLE for long term but still in use : skip entry
-	  totalRefs += it->second;
-	  min =  it->second < min ? it->second : min ;
-	  max =  it->second > max ? it->second : max ;
-	  if (it->second > (2*(lastAvg+1)) ) {
-	    hash_map<_GSDD*,int>::iterator jt= it;
+	  register int cc = (*it)->tempCounter;
+	  totalRefs += cc;
+	  min =  cc < min ? cc : min ;
+	  max =  cc > max ? cc : max ;
+	  if (cc > (2*(lastAvg+1)) ) {
+	    hash_set<_GSDD*>::iterator jt= it;
 	    it++;
-	    jt->first->isSon=true;
+	    (*jt)->isSon=true;
 	    recent.erase(jt);
 	    ++toSon;
 	    continue;
@@ -168,7 +167,7 @@ namespace SDDutil {
       } else {
 	// eligible (newly) for long term
 	// kill from recent entries
-	hash_map<_GSDD*,int>::iterator jt= it;
+	hash_set<_GSDD*>::iterator jt= it;
 	it++;
 	recent.erase(jt);
 	++isson;
@@ -267,24 +266,18 @@ ostream& operator<<(ostream &os,const GSDD &g){
 }
 
 GSDD::GSDD(const GSDD & g) :concret(g.concret) {
-  if ( ! ( concret->refCounter || concret->isSon ) ) {
-    hash_map<_GSDD *,int>::iterator it = recent.find(concret);
-    if (it == recent.end() ) 
-      // create new entry
-      recent.insert(make_pair(concret,1));
-    else
-      ++it->second ;
+  if ( ! concret->isSon  ) {
+    if (!concret->tempCounter)
+      recent.insert(concret);
+    ++ concret->tempCounter;
   }
 }
 
 GSDD::GSDD(_GSDD *_g):concret(_g){ 
-  if ( ! ( concret->refCounter || concret->isSon ) ) {
-    hash_map<_GSDD *,int>::iterator it = recent.find(concret);
-    if (it == recent.end() ) 
-      // create new entry
-      recent.insert(make_pair(concret,1));
-    else
-      ++it->second ;
+  if ( ! concret->isSon  ) {
+    if (!concret->tempCounter)
+      recent.insert(concret);
+    ++ concret->tempCounter;
   }
 
 }
@@ -294,13 +287,10 @@ GSDD::GSDD(int variable,Valuation value){
     concret = null.concret;
   else {
     concret = canonical(new _GSDD(variable,value));
-    if ( ! ( concret->refCounter || concret->isSon ) ) {
-      hash_map<_GSDD *,int>::iterator it = recent.find(concret);
-      if (it == recent.end() ) 
-	// create new entry
-	recent.insert(make_pair(concret,1));
-      else
-	++it->second ;
+    if ( ! concret->isSon  ) {
+      if (!concret->tempCounter)
+	recent.insert(concret);
+      ++ concret->tempCounter;
     }
   }
 }
@@ -313,13 +303,10 @@ GSDD::GSDD(int var,const DataSet &val,const GSDD &d):concret(null.concret){ //va
     pair<DataSet *, GSDD> x( val.newcopy(),d);
     _g->valuation.push_back(x);
     concret=canonical(_g);    
-    if ( ! ( concret->refCounter || concret->isSon ) ) {
-      hash_map<_GSDD *,int>::iterator it = recent.find(concret);
-      if (it == recent.end() ) 
-	// create new entry
-	recent.insert(make_pair(concret,1));
-      else
-	++it->second ;
+    if ( ! concret->isSon  ) {
+      if (!concret->tempCounter)
+	recent.insert(concret);
+      ++ concret->tempCounter;
     }
   }
   //  concret->refCounter++;
@@ -493,8 +480,8 @@ void GSDD::garbage(){
 
   MySDDNbStates::clear();
 
-  for (hash_map<_GSDD*,int>::iterator it =  recent.begin(); it != recent.end() ; ) {
-    hash_map<_GSDD*,int>::iterator jt= it;
+  for (hash_set<_GSDD*>::iterator it =  recent.begin(); it != recent.end() ; ) {
+    hash_set<_GSDD*>::iterator jt= it;
     it++;
     recent.erase(jt);
   }
@@ -550,12 +537,9 @@ SDD::SDD(const GSDD &g):GSDD(g.concret){
 
 
 GSDD::~GSDD(){
-  if (!(concret->isSon || concret->refCounter) ) {
-    hash_map<_GSDD *,int>::iterator it = recent.find(concret);
-    if (it != recent.end()) {
-      assert(it->second >0);
-      --it->second;
-    }
+  if (! concret->isSon ) {
+    assert(concret->tempCounter >0);
+    -- concret->tempCounter ;
   }
 }
 
@@ -573,24 +557,17 @@ GSDD &GSDD::operator=(const GSDD &g){
   if (g != *this) {
     // decrement usage for current value
     if (! concret->isSon ) {
-      hash_map<_GSDD *,int>::iterator it = recent.find(concret);
-      if (it != recent.end()) {
-	assert(it->second >0);
-	--it->second;
-      }
+      assert(concret->tempCounter >0);
+      -- concret->tempCounter ;
     }  
     // copy
     concret=g.concret;
     // increment recent usage
-    if ( !  concret->isSon  ) {
-      hash_map<_GSDD *,int>::iterator it = recent.find(concret);
-      if (it == recent.end() ) 
-	// create new entry
-	recent.insert(make_pair(concret,1));
-      else
-	++it->second ;
+    if ( ! concret->isSon  ) {
+      if (!concret->tempCounter)
+	recent.insert(concret);
+      ++ concret->tempCounter;
     }
-    
   }
   return *this;
 }
