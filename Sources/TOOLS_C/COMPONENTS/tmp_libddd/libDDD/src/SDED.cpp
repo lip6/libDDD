@@ -433,6 +433,9 @@ public:
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
+  bool shouldCache () const {
+    return ( parameter1.refCounter() ||  parameter1.isSon()) ;   
+  }
 
   /* Transform */
   GSDD eval() const;
@@ -463,6 +466,9 @@ GSDD _SDED_Concat::eval() const{
     next = (v1->second)^parameter2 ;
     square_union(res,next,v1->first);
   }
+
+  if (! parameter1.refCounter()&& ! parameter1.isSon())
+    parameter1.clearNode();
 
   GSDD::Valuation value;
   map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
@@ -501,7 +507,7 @@ public:
   static _SDED *create(const GShom &h,const GSDD &d);
 
   virtual bool dogarbage () { return shom.refCounter() <= 0 && parameter.refCounter() <= 0; }
-  virtual bool shouldCache() { return parameter.refCounter()>1 || parameter.nbsons() > 1 ; }
+//  virtual bool shouldCache() { return parameter.refCounter()>1 || parameter.nbsons() > 1 ; }
 
   /* Compare */
   size_t hash() const;
@@ -598,15 +604,15 @@ GSDD SDED::eval(){
     delete concret;
     return res;
   }
-//  else 
-//     if (! concret->shouldCache() ){
-//       // we don't need to store it
-//       GDDD res=concret->eval(); // compute the result
-      
-//       delete concret;
-//       Misses++;
-//       return res;
-//     }
+  else 
+     if (! concret->shouldCache() ){
+       // we don't need to store it
+       GSDD res=concret->eval(); // compute the result
+    
+       delete concret;
+       Misses++;
+       return res;
+     }
 #ifdef INST_STL
     NBAccess++;
     NBJumps++;
