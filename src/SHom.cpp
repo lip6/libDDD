@@ -436,27 +436,31 @@ public:
 
   /* Eval */
   GSDD eval(const GSDD &d)const{
-    int variable=d.variable();
-    set<GSDD> s;
-    GSDD cur,cur2;
-    for(GSDD::const_iterator vi=d.begin();vi!=d.end();vi++){
-      cur= GSDD(variable,*vi->first,vi->second);
-      do { 
-	cur2=cur; 
-	cur=arg(cur);
-      } while (cur != cur2);
-      s.insert(cur);
+    if (d == GSDD::one || d==GSDD::null || d==GSDD::top) {
+      GSDD d1=d,d2=d;
+      do {
+	d1=d2;
+	d2=arg(d2);
+      } while (d1 != d2);
+      
+      return d1;
+    } else {
+      
+      int variable=d.variable();
+      set<GSDD> s;
+      GSDD cur,cur2;
+      for(GSDD::const_iterator vi=d.begin();vi!=d.end();vi++){
+	cur= GSDD(variable,*vi->first,vi->second);
+	do { 
+	  cur2=cur; 
+	  cur=arg(cur);
+	} while (cur != cur2);
+	s.insert(cur);
+      }
+
+    
+      return SDED::add(s);
     }
-
-    return SDED::add(s);
-
-//     GSDD d1=d,d2=d;
-//     do {
-//       d1=d2;
-//       d2=arg(d2);
-//     } while (d1 != d2);
-
-//     return d1;
   }
 
   /* Memory Manager */
