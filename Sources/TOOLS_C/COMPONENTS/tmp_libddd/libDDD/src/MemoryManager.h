@@ -19,5 +19,13 @@ public:
     GHom::garbage();
     GDDD::garbage();
   };
+
+  static void pstats(bool reinit=true){
+    //cout << " Memory Usage " << MemUsage() << " %" << endl;
+    DED::pstats(reinit);
+    GHom::pstats(reinit);
+    GDDD::pstats(reinit);    
+  }
+  
 };
 #endif

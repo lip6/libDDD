@@ -1,0 +1,98 @@
+5/25/2004: 
+	   - Added/Modified Makefiles to generate all version of the library:
+	     - libDDD.a   : optimized
+	     - libDDD_d.a : debug info
+	     - libDDD_p.a : profiling info (compiled with -pg option, then use with gprof)
+	     - libDDD_i.a : instrumented STL for profiling hash tables
+
+	   
+	   - Added instrumented hash table in STL: directory is libddd/STLProf
+	     To use it, link with libDDD_i.a and 
+
+	   - DDD.[h,cpp]
+	     - Added functions: 
+	         size_t nbsons() const;
+			return the number of sons of the current node.
+		 void pstats(bool reinit=true);
+		        print statistics on the use of the hash table
+			if reinit is false, then the counter are not 
+			reinitialized.
+
+	- DED.[h,cpp]
+	 static void pstats(bool reinit=true);
+	     prints hit/misses cache ratio
+	     prints average number of jumps in the hash table
+	     if reinit=false, reinitialize the counters
+	 virtual bool shouldCache();
+	     part of the optimization that avoid caching nodes
+	     with only one son.
+	     (check GDDD DED::eval())
+
+	- Hom.[h,cpp]
+	 static void pstats(bool reinit=true);
+
+	- MemoryManager.h
+	 static void pstats(bool reinit=true);	
+	 This one calls all the pstats functions in the others
+	 storages. Should be used to get all the stats	 
+
+	- UniqueTable.h
+	  hash_map-->hash_set (minor change)
+	  void pstat(bool reinit=true);
+
+
+To compile with instrumented STL:
+   1- compile the sources of the application with options:
+      -D INST_STL (or #define INST_STL before including any DDD library include file)
+      -isystem <dir> where dir is  libddd/STLProf
+
+   2- link with libDDD_i.a
+
+Examples in demo:
+
+For instance in tst6.cpp, 
+    - #include "MemoryManager.h" has been added
+
+    - A call to 'MemoryManager::pstats();' has been added at the end
+      of the main()
+
+The obtained trace is (// are added comments):
+
+Each entry of the hash table is found using the hash function. Entries are
+the beginning of the chained list of elements. The performance of a hash function
+is good if the ratio  <total nb jump in hash table>/ <nb search in table> is
+kept low. The table of statistics by homomorphism can help determine the 'bad'
+hash functions.
+
+The statistics on the hash table describes the average number of jumps in the
+hash table when searching for an element.
+
+///////////////////////////////// begin trace /////////////////////////////////
+
+*
+Cache Stats : size=35              // size of the cache
+nb jump in hash table : 43/nbsearch 41=1.04878  // <total nb jump in hash table>/ <nb search in table>
+ 
+Cache hit ratio : 13.6364%         // Hit/Misses stats on the cache 
+*
+GHom Stats : size unicity table = 25    // number of stored homomorphisms
+NbInsertion(25)*100/NbAccess(32)  = 78	// hit misses ie percent of insertion in hom table
+ 
+ ----------------  MAPPING Jumps on GHOM --------------
+Hom LeftConcat  -->             26/20= 1.3        //  <total nb jump in hash table>/ <nb search in table>
+Hom PermuteFin  -->             3/2= 1.5
+Hom PermuteDown -->             2/2= 1
+Hom Compose     -->             5/4= 1.25
+Hom Permute     -->             1/1= 1
+Hom Identity    -->             1/1= 1
+Hom PermuteUp   -->             2/2= 1
+ 
+ -----  END MAPPING Jumps on GHOM, reseting table -----
+*
+GDDS : size unicity table =43              // nb DDD nodes in the unicity table
+  Average nb jump in hash table : 1.33898  // average jump in hash table
+NbInsertion(43)*100/NbAccess(59)  = 72    // hit misses ie percent of insertion in DDD table
+
+
+/////////////////////////////////  end trace  /////////////////////////////////
+

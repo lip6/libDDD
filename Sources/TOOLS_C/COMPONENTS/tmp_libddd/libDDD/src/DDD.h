@@ -49,6 +49,7 @@ public:
   /* Visualisation */ 
   unsigned int refCounter() const;
   unsigned long int size() const;
+  size_t nbsons () const;
   long double nbStates() const;
   long double noSharedSize() const;
   static void varName(int,const string &);
@@ -58,6 +59,7 @@ public:
   static  unsigned int statistics();
   void mark()const;
   static void garbage(); 
+  static void pstats(bool reinit=true);
 };
 
 ostream& operator<<(ostream &,const GDDD &);
