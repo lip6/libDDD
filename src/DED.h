@@ -25,6 +25,7 @@ public:
 
   /* Memory Manager */
   static  unsigned int statistics();
+  static void pstats(bool reinit=true);
   static void garbage(); 
 };
 
@@ -49,15 +50,31 @@ namespace std {
 
 /******************************************************************************/
 class _DED{
+
+#ifdef INST_STL
+static long long NBJumps;
+static long long NBAccess;
+#endif
+
 public:
   /* Destructor */
   virtual ~_DED(){};
+
+  virtual bool shouldCache() { return true;}
+
   /* Compare */
   virtual size_t hash() const =0;
   virtual bool operator==(const _DED &) const=0;
 
   /* Transform */
   virtual GDDD eval() const=0; 
+
+#ifdef INST_STL
+  static void InstrumentNbJumps(int nboops){NBJumps+=(1+nboops);NBAccess++;}
+  static void ResetNbJumps(){NBJumps=0; NBAccess=0;}
+  static double StatJumps() {if (NBAccess!=0)  return double(NBJumps) / double(NBAccess); return -1;}
+#endif
+
 };
 
 #endif

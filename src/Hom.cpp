@@ -4,6 +4,139 @@
 #include "DED.h"
 #include "UniqueTable.h"
 
+#include <assert.h>
+
+
+#ifdef INST_STL
+MapJumps  _GHom::HomJumps;
+#endif
+
+
+#ifdef INST_STL
+static string TryDemangle(string in)
+{
+  string res=string("");
+  unsigned int idx=0;
+  int state=0;
+  int len=0;
+  bool err=false;
+  int depth=0;
+  
+  while ((idx<in.length())&&(!err)){
+    switch(state){
+    case 0 : //beginning
+      if ((in[idx]>='0')&&(in[idx]<='9')){
+	// decode length
+	len=10*len+(in[idx]-'0');
+      }
+      else {
+	// first char after length
+	res=res+in[idx];
+	len--;
+	state=1;
+      }
+      break;
+
+
+    case 10 : //beginning next (handle 'L')
+      if ((in[idx]>='0')&&(in[idx]<='9')){
+	// decode length
+	len=10*len+(in[idx]-'0');
+      }
+      else 
+	if (in[idx]=='L'){
+	  state=11;
+	  depth++;
+	}
+      else
+	{
+	  // first char after length
+	  res=res+in[idx];
+	  len--;
+	  state=1;
+	}
+      break;
+      
+      
+    case 1:
+      if (len==0){
+	// of name 
+	if ((idx<in.length())&&(in[idx]!='I')&&(in[idx]!='E')){
+	  err=true;
+	}
+	else 
+	  if (in[idx]=='I') {
+	    res=res+'<';
+	    state=10;
+	    len=0;
+	    depth++;
+	  }
+	  else if (in[idx]=='E') {
+	    depth--;
+	    res=res+'>';
+	  }
+	  else {
+	    err=true;
+	  }
+      }
+      else {
+	res=res+in[idx];
+	len--;
+      }
+
+      break;
+
+    case 11:
+      if (in[idx]=='i'){
+	// ok
+      }
+      else 
+      if (in[idx]=='E'){
+	// end 
+	depth--;
+	state=1;
+      }
+      else 
+      if ((in[idx]>='0')&&(in[idx]<='9')) {
+	res=res+in[idx];
+      }
+      else {
+	err=true;
+      }
+      break;
+
+    }
+    idx++;
+  }
+  
+  if ((depth!=0)||(err)){
+    return in;
+  }
+  else {
+    return res;
+  }
+   
+}
+#endif
+
+
+void PrintMapJumps(double ratemin=0){
+#ifdef INST_STL
+  MapJumps::iterator ii;
+  for (ii=_GHom::HomJumps.begin(); ii!=_GHom::HomJumps.end(); ii++){
+    double rate= double(ii->second.second)/double (ii->second.first);
+    if (rate>ratemin){
+      cout << "Hom " << TryDemangle(ii->first) << "\t-->\t\t" << ii->second.second  <<"/" ;
+      cout <<  ii->second.first << "= " << rate  << endl; 
+    }
+  }
+#endif
+}
+
+
+
+
+
 /* Unique Table */
 namespace __gnu_cxx {
   struct hash<_GHom*>{
@@ -322,22 +455,22 @@ void GHom::mark()const{
 void GHom::garbage(){
   // mark phase
   for(UniqueTable<_GHom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
-    if(di->second->refCounter!=0){
-      di->second->marking=true;
-      di->second->mark();
+    if((*di)->refCounter!=0){
+      (*di)->marking=true;
+      (*di)->mark();
     }
   }
   // sweep phase
   for(UniqueTable<_GHom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
-    if(!di->second->marking){
+    if(!((*di)->marking)){
       UniqueTable<_GHom>::Table::iterator ci=di;
       di++;
-      _GHom *g=ci->second;
+      _GHom *g=(*ci);
       canonical.table.erase(ci);
       delete g;
     }
     else{
-      di->second->marking=false;
+      (*di)->marking=false;
       di++;
     }
   }
@@ -420,3 +553,22 @@ GHom operator-(const GHom &h,const GDDD &d){
 }
 
 
+
+void GHom::pstats(bool reinit)
+{
+  cout << "*\nGHom Stats : size unicity table = " <<  canonical.size() << endl;
+#ifdef INST_STL
+  canonical.pstat(reinit);
+  
+  cout << "\n ----------------  MAPPING Jumps on GHOM --------------" << endl;
+  PrintMapJumps();
+  if (reinit){
+    cout << "\n -----  END MAPPING Jumps on GHOM, reseting table -----" << endl;
+    _GHom::HomJumps.clear();
+  }
+  else
+    {
+      cout << "\n -----  END MAPPING Jumps on GHOM   --------" << endl; 
+    }
+#endif
+}
