@@ -4,6 +4,7 @@ using namespace std;
 #include "DDD.h"
 #include "DED.h"
 #include "Hom.h"
+#include "MemoryManager.h"
 
 enum {A, B, C, D,E, F, G} variables;
 char* vn[]= {"A", "B", "C", "D", "E", "F", "G"};
@@ -69,6 +70,8 @@ int main(){
   cout <<"<!B++>(u)="<< endl<<fb(u)<<endl;
   cout <<"<!C++>(u)="<< endl<<fc(u)<<endl;
   cout <<"<!D++>(u)="<< endl<<fd(u)<<endl;
-  
+
+  MemoryManager::pstats();
+
   return 1;
 }

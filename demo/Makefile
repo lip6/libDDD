@@ -6,7 +6,7 @@ DIR = ../src
 all: $(EXE)
 
 %.exe: %.cpp
-	g++ -g $< -I$(DIR) -L$(DIR) -lDDD -o $@
+	g++ -g $< -I$(DIR) -L$(DIR) -D INST_STL -isystem ../STLProf -lDDD_i -o $@
 
 clean:
 	rm -f $(LIB) *.exe *.res *~
