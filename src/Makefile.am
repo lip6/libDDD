@@ -1,5 +1,5 @@
-lib_LIBRARIES = libDDD.a libDDD_i.a libDDD_d.a libDDD_p.a 
-
+lib_LIBRARIES = libDDD.a  libDDD_d.a libDDD_p.a 
+# libDDD_i.a  BROKEN WITH GCC 3.4
 GMPLIBDIR = /home/thierry/PNDDD/RdPDDD/gmp-4.1.2/.libs
 GMPINCDIR = /home/thierry/PNDDD/RdPDDD/gmp-4.1.2
 
