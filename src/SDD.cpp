@@ -351,13 +351,13 @@ SDD &SDD::operator=(const SDD &g){
 // DataSet interface
 
 DataSet *SDD::set_intersect (const DataSet & b) const {
-  return new SDD((*this) * (*((SDD *) &b)));
+  return new SDD((*this) * (SDD&)b );
 }
 DataSet *SDD::set_union (const DataSet & b)  const {
-  return new SDD(*this + *((SDD *) &b));
+  return new SDD(*this + (SDD&)b));
 }
 DataSet *SDD::set_minus (const DataSet & b) const {
-  return new SDD(*this - *((SDD *) &b));
+  return new SDD(*this - (SDD&)b));
 }
 
 bool SDD::empty() const {
@@ -369,7 +369,7 @@ DataSet * SDD::empty_set() const {
 }
 
 bool SDD::set_equal(const DataSet & b) const {
-  return *this == * ((SDD*)& b);
+  return *this == (SDD&) b;
 }
 
 size_t SDD::set_size() const { return size_t(nbStates()); }
