@@ -381,6 +381,8 @@ GSDD::GSDD(int var,const DataSet &val,const GSDD &d):concret(null.concret){ //va
     pair<DataSet *, GSDD> x( val.newcopy(),d);
     _g->valuation.push_back(x);
     concret=canonical(_g);
+    if (concret != _g)
+      delete x.first;
   }
   //  concret->refCounter++;
 }
