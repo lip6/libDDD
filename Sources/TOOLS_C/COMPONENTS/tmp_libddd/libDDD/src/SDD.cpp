@@ -34,14 +34,19 @@ public:
   GSDD::Valuation valuation;
   mutable unsigned long int refCounter;
   mutable bool marking;
-
+  mutable bool isSon;
   /* Constructor */
-  _GSDD(int var,int cpt=0):variable(var),refCounter(cpt),marking(false){}; 
-  _GSDD(int var,GSDD::Valuation val,int cpt=0):variable(var),valuation(val),refCounter(cpt),marking(false){}; 
+  _GSDD(int var,int cpt=0):variable(var),refCounter(cpt),marking(false),isSon(false){}; 
+  _GSDD(int var,GSDD::Valuation val,int cpt=0):variable(var),valuation(val),refCounter(cpt),marking(false),isSon(false){}; 
   virtual ~_GSDD () {
     for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; it++) {
       delete it->first;
     }
+  }
+
+  void UpdateSons () const {
+    for (GSDD::Valuation::const_iterator it= valuation.begin(); it != valuation.end() ; it++) 
+      it->second.concret->isSon = true;
   }
 
   _GSDD (const _GSDD &g):variable(g.variable),valuation(g.valuation),refCounter(g.refCounter),marking(g.marking) {
@@ -101,6 +106,20 @@ namespace std {
 
 // map<int,string> mapVarName;
 static size_t Max_SDD=0;
+
+
+template<>
+_GSDD* UniqueTable<_GSDD>::operator()(_GSDD *_g){
+  pair<hash_set<_GSDD*>::iterator, bool> ref=table.insert(_g); 
+  hash_set<_GSDD*>::iterator ti=ref.first;
+  if (!ref.second){
+    delete _g;
+  } else {
+    (*ti)->UpdateSons();
+  }
+  return *ti;
+}
+
 static UniqueTable<_GSDD> canonical;
 
 namespace SDDutil {
@@ -190,7 +209,7 @@ ostream& operator<<(ostream &os,const GSDD &g){
 GSDD::GSDD(_GSDD *_g):concret(_g){}
 
 GSDD::GSDD(int variable,Valuation value){
-  concret=(value.size()!=0)? canonical(new _GSDD(variable,value)): null.concret;
+ concret=(value.size()!=0)? canonical(new _GSDD(variable,value)): null.concret;
 }
 
 
@@ -202,6 +221,10 @@ int GSDD::variable() const{
 
 size_t GSDD::nbsons () const { 
   return concret->valuation.size();
+}
+
+bool GSDD::isSon () const {
+  return concret->isSon;
 }
 
 GSDD::const_iterator GSDD::begin() const{
@@ -342,6 +365,9 @@ long double GSDD::nbStates() const{
   return myNbStates(*this);
 }
 
+void GSDD::clearNode() const {
+  canonical.table.erase(concret);
+}
 
 void GSDD::garbage(){
   if (canonical.size() > Max_SDD) 
