@@ -1,0 +1,19 @@
+CONTENU
+	alire : ce fichier
+	src : contient la bibiotheque DDD
+	demo: contient des exemples de programmes
+	doc : contient un manuel de reference
+
+INSTALLATION
+1. Aller dans le repertoire src
+2. Compiler la bibiotheque DDD : make
+3. Deplacer les fichiers *.h et libDDD.a a votre gout
+
+EXEMPLE
+Dans le repertoire demo 6 exemples de programme vous sont propose. Le Makefile vous permet directement de compiler un ou tous ces exemples :
+- la commande make produit 6 executables tsti.exe pour i=1..6
+- la commande make tsti.exe produit l'executable tsti.exe pour i=1..6
+
+PROBLEME
+Envoyez moi un mail : couvreur@labri.fr
+
