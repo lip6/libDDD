@@ -77,6 +77,7 @@ namespace std {
 
 map<int,string> mapVarName;
 
+static size_t Max_DDD=0;
 static UniqueTable<_GDDD> canonical;
 
 /******************************************************************************/
@@ -102,10 +103,17 @@ void _GDDD::mark()const{
   }
 }
 
+size_t GDDD::peak() {
+  if (canonical.size() > Max_DDD) 
+    Max_DDD=canonical.size();  
+
+  return Max_DDD;
+}
 
 
 void GDDD::pstats(bool reinit)
 {
+  cout << "Peak number of DDD nodes in unicity table :" << Max_DDD << endl; 
 #ifdef INST_STL
   cout << "*\nGDDS : size unicity table =" << canonical.size() << endl;
   cout << "  Average nb jump in hash table : " << _GDDD::StatJumps() << endl;
@@ -120,7 +128,8 @@ void GDDD::pstats(bool reinit)
 
 void GDDD::garbage(){
   // mark phase
-
+  if (canonical.size() > Max_DDD) 
+    Max_DDD=canonical.size();  
 
 
   for(UniqueTable<_GDDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){

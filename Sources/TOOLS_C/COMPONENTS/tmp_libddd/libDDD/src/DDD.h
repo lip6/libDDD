@@ -65,6 +65,7 @@ public:
   void mark()const;
   static void garbage(); 
   static void pstats(bool reinit=true);
+  static size_t peak();
   //load/Save
   friend void saveDDD(ostream&, vector<DDD>);
   friend void loadDDD(istream&, vector<DDD>&);
