@@ -1,5 +1,5 @@
 
-SRCS = DED.cpp DDD.cpp Hom.cpp 
+SRCS = DED.cpp DDD.cpp Hom.cpp SDED.cpp SDD.cpp SHom.cpp 
 OBJS = $(SRCS:.cpp=.o)
 DEPS = $(SRCS:.cpp=.d)
 
