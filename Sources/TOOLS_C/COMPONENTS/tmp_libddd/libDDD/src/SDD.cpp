@@ -38,6 +38,18 @@ public:
   /* Constructor */
   _GSDD(int var,int cpt=0):variable(var),refCounter(cpt),marking(false){}; 
   _GSDD(int var,GSDD::Valuation val,int cpt=0):variable(var),valuation(val),refCounter(cpt),marking(false){}; 
+  virtual ~_GSDD () {
+    for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; it++) {
+      delete it->first;
+    }
+  }
+
+  _GSDD (const _GSDD &g):variable(g.variable),valuation(g.valuation),refCounter(g.refCounter),marking(g.marking) {
+    for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; it++) {
+      it->first = it->first->newcopy();
+    }
+  }
+
 
   /* Compare */
   bool operator==(const _GSDD& g) const 
@@ -381,8 +393,6 @@ GSDD::GSDD(int var,const DataSet &val,const GSDD &d):concret(null.concret){ //va
     pair<DataSet *, GSDD> x( val.newcopy(),d);
     _g->valuation.push_back(x);
     concret=canonical(_g);
-    if (concret != _g)
-      delete x.first;
   }
   //  concret->refCounter++;
 }
