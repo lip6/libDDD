@@ -17,10 +17,6 @@ using namespace __gnu_cxx;
 #include "UniqueTable.h"
 #include "DED.h"
 
-// arbitrary precision lib to count states
-#include "gmpxx.h"
-
-
 /******************************************************************************/
 /*                             class _GDDD                                     */
 /******************************************************************************/
@@ -219,17 +215,17 @@ class MyNbStates{
 private:
   int val; // val=0 donne nbState , val=1 donne noSharedSize
 //  static hash_map<GDDD,long double> s;
-  static hash_map<GDDD,mpf_class> s;
+  static hash_map<GDDD,long double> s;
 
-  mpf_class nbStates(const GDDD& g){
+  long double nbStates(const GDDD& g){
     if(g==GDDD::one)
       return 1;
     else if(g==GDDD::top || g==GDDD::null)
       return 0;
     else{
-      hash_map<GDDD,mpf_class>::const_iterator i=s.find(g);
+      hash_map<GDDD,long double>::const_iterator i=s.find(g);
       if(i==s.end()){
-	mpf_class res=0;
+	long double res=0;
 	for(GDDD::const_iterator gi=g.begin();gi!=g.end();gi++)
 	  res+=nbStates(gi->second)+val;
 	s[g]=res;
@@ -243,8 +239,8 @@ private:
 
 public:
   MyNbStates(int v):val(v){};
-  mpf_class operator()(const GDDD& g){
-    mpf_class res=nbStates(g);
+  long double operator()(const GDDD& g){
+    long double res=nbStates(g);
 //    s.clear();
     return res;
   }
@@ -254,15 +250,15 @@ public:
   }
 };
 
-hash_map<GDDD,mpf_class> MyNbStates::s = hash_map<GDDD,mpf_class> ();
+hash_map<GDDD,long double> MyNbStates::s = hash_map<GDDD,long double> ();
 
 
-mpf_class GDDD::nbStates() const{
+long double GDDD::nbStates() const{
   static MyNbStates myNbStates(0);
   return myNbStates(*this);
 }
 
-mpf_class GDDD::noSharedSize() const{
+long double GDDD::noSharedSize() const{
   static MyNbStates myNbStates(1);
   return myNbStates(*this);
 }
@@ -409,7 +405,7 @@ bool DDD::set_equal(const DataSet & b) const {
   return *this == (DDD &) b;
 }
   
-size_t DDD::set_size() const { return (size_t) nbStates().get_ui(); }
+long double DDD::set_size() const { return nbStates(); }
 
 size_t DDD::set_hash() const {
   return hash<GDDD>() (*this);
