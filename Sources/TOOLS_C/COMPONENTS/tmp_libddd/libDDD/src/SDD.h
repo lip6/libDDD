@@ -24,9 +24,10 @@ private:
   friend ostream& operator<<(ostream &os,const GSDD &g);
   friend class SDD;
   _GSDD *concret;
-  GSDD(_GSDD *_g);
+
   void print(ostream& os,string s) const;
 public:
+  GSDD(_GSDD *_g);
   /* Accessors */
   typedef vector<pair<DataSet *,GSDD> > Valuation;
   typedef Valuation::const_iterator const_iterator;
@@ -103,7 +104,16 @@ public:
   virtual long double set_size() const;
   virtual size_t set_hash() const ;
   void set_print (ostream &os) const { os << *this; }
+
 };
+
+// not very nice to access unicity table directly
+#include "UniqueTable.h"
+namespace SDDutil {
+  UniqueTable<_GSDD> * getTable ();
+  void foreachTable (void (*foo) (const GSDD & g)); 
+}
+
 
 /******************************************************************************/
 namespace __gnu_cxx {
