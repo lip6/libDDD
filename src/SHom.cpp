@@ -260,7 +260,10 @@ public:
       s.insert(left(cur));
       s.insert(right(cur));
     }
-    return SDED::add(s);
+    if (s.empty())
+      return left(d) + right(d);
+    else
+      return SDED::add(s);
 //    return left(d) + right(d);
   }
 
