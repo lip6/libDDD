@@ -126,34 +126,6 @@ void GDDD::pstats(bool reinit)
 
 
 
-void GDDD::garbage(){
-  // mark phase
-  if (canonical.size() > Max_DDD) 
-    Max_DDD=canonical.size();  
-
-
-  for(UniqueTable<_GDDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
-    if((*di)->refCounter!=0)
-      (*di)->mark();
-  }
-
-  // sweep phase
-  
-  for(UniqueTable<_GDDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
-    if(!((*di)->marking)){
-      UniqueTable<_GDDD>::Table::iterator ci=di;
-      di++;
-      _GDDD *g=(*ci);
-      canonical.table.erase(ci);
-      delete g;
-    }
-    else{
-      (*di)->marking=false;
-      di++;
-    }
-  }
-}
-
 /* Visualisation*/
 void GDDD::print(ostream& os,string s) const{
   if (*this == one)
@@ -242,7 +214,7 @@ unsigned long int GDDD::size() const{
 class MyNbStates{
 private:
   int val; // val=0 donne nbState , val=1 donne noSharedSize
-  hash_map<GDDD,long double> s;
+  static hash_map<GDDD,long double> s;
 
   long double nbStates(const GDDD& g){
     if(g==GDDD::one)
@@ -268,10 +240,17 @@ public:
   MyNbStates(int v):val(v){};
   long double operator()(const GDDD& g){
     long double res=nbStates(g);
-    s.clear();
+//    s.clear();
     return res;
   }
+
+  static void clear () {
+    s.clear();
+  }
 };
+
+hash_map<GDDD,long double> MyNbStates::s = hash_map<GDDD,long double> ();
+
 
 long double GDDD::nbStates() const{
   static MyNbStates myNbStates(0);
@@ -282,6 +261,39 @@ long double GDDD::noSharedSize() const{
   static MyNbStates myNbStates(1);
   return myNbStates(*this);
 }
+
+
+void GDDD::garbage(){
+  // mark phase
+  if (canonical.size() > Max_DDD) 
+    Max_DDD=canonical.size();  
+
+  MyNbStates::clear();
+
+  for(UniqueTable<_GDDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
+    if((*di)->refCounter!=0)
+      (*di)->mark();
+  }
+
+  // sweep phase
+  
+  for(UniqueTable<_GDDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
+    if(!((*di)->marking)){
+      UniqueTable<_GDDD>::Table::iterator ci=di;
+      di++;
+      _GDDD *g=(*ci);
+      canonical.table.erase(ci);
+      delete g;
+    }
+    else{
+      (*di)->marking=false;
+      di++;
+    }
+  }
+}
+
+
+
 
 /* Constants */
 const GDDD GDDD::one(canonical(new _GDDD(1,1)));
