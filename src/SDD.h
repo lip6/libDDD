@@ -24,10 +24,11 @@ private:
   friend class SDD;
   friend class _GSDD;
   _GSDD *concret;
-
+  
   void print(ostream& os,string s) const;
 public:
   GSDD(_GSDD *_g);
+  virtual ~GSDD () ;
   /* Accessors */
   typedef vector<pair<DataSet *,GSDD> > Valuation;
   typedef Valuation::const_iterator const_iterator;
@@ -39,6 +40,8 @@ public:
   GSDD(int variable,Valuation value);
   GSDD():concret(null.concret){};
   GSDD(int var,const DataSet & val,const GSDD &d=one ); //var-val->d
+  GSDD(const GSDD &);
+  GSDD & operator=(const GSDD &);
 
   /* Constants */
   static const GSDD one;
@@ -71,6 +74,9 @@ public:
   // WARNING : this is not const at all in fact it deletes "concret" and is quite dangerous,
   // only for expert use not a basic library functionality
   void clearNode() const;
+  void markAsSon() const;
+
+
   static void pstats(bool reinit=true);
   static size_t peak();
 };
@@ -92,7 +98,7 @@ public:
   SDD(const GSDD &g=GSDD::null);
   SDD(int var,const DataSet& val,const GSDD &d=one ); //var-val->d
 
-  ~SDD(); 
+  virtual ~SDD(); 
 
   /* Set */
   SDD &operator=(const GSDD&);
@@ -115,6 +121,8 @@ public:
 // not very nice to access unicity table directly
 #include "UniqueTable.h"
 namespace SDDutil {
+  void recentGarbage();
+
   UniqueTable<_GSDD> * getTable ();
   void foreachTable (void (*foo) (const GSDD & g)); 
 }
