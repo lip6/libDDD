@@ -134,7 +134,7 @@ int main(){
   cout <<"****************"<<endl;
   cout <<"* Define DDD u *"<<endl;
   cout <<"****************"<<endl;
-
+  {
   DDD a=DDD(A,1,DDD(B,3))+DDD(A,4,DDD(B,4));
   DDD b=DDD(C,6,DDD(D,1))+DDD(C,2,DDD(D,2));
   DDD u=a^b;
@@ -146,10 +146,11 @@ int main(){
 
   Hom permuteA_C = permute(A,C);
   DDD v=permuteA_C(u);
+  
   cout <<"<A,C=C,A>(u)="<< endl<<v<<endl;
-
+  }
   MemoryManager::pstats();
-
+  MemoryManager::garbage();
   return 1;
 }
 
