@@ -29,11 +29,6 @@ public:
   static void garbage(); 
 };
 
-/* Binary operators */
-GDDD operator^(const GDDD&,const GDDD&); // concatenation
-GDDD operator+(const GDDD&,const GDDD&); // union
-GDDD operator*(const GDDD&,const GDDD&); // intersection
-GDDD operator-(const GDDD&,const GDDD&); // difference
 
 /******************************************************************************/
 namespace __gnu_cxx {
