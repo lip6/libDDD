@@ -13,6 +13,9 @@ using namespace __gnu_cxx;
 
 #include "DataSet.h"
 
+// arbitrary precision lib to count states
+#include <gmpxx.h>
+
 class _GDDD;
 
 /******************************************************************************/
@@ -55,8 +58,8 @@ public:
   unsigned int refCounter() const;
   unsigned long int size() const;
   size_t nbsons () const;
-  long double nbStates() const;
-  long double noSharedSize() const;
+  mpf_class nbStates() const;
+  mpf_class noSharedSize() const;
   static void varName(int,const string &);
   static const string getvarName(int var);
 
