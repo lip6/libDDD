@@ -394,7 +394,7 @@ private:
     }
   }
 
-  virtual void sddsize(const DataSet* g){
+  void sddsize(const DataSet* g){
     // Used to work for referenced DDD
     if (typeid(*g) == typeid(SDD) ) {
       sddsize( GSDD ((SDD &) *g) );
@@ -409,7 +409,7 @@ private:
     }
   }
 
-  virtual void sddsize(const GDDD& g){
+  void sddsize(const GDDD& g){
       if (sd3.find(g)==sd3.end()) {
 	sd3.insert(g);
 	d3res ++;
