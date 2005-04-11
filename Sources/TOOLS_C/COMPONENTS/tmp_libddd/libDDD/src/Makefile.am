@@ -11,7 +11,7 @@ AM_CPPFLAGS =  -WAll
 
 # default options => -o2 
 libDDD_a_SOURCES = $(SRCS)
-libDDD_a_CPPFLAGS = -O2  -WAll 
+libDDD_a_CPPFLAGS = -O2  -Wall 
 
 # STL instantiated version for hash profiling
 # libDDD_i_a_SOURCES = $(SRCS)
@@ -19,7 +19,7 @@ libDDD_a_CPPFLAGS = -O2  -WAll
 
 # change options to debug 
 libDDD_d_a_SOURCES = $(SRCS)
-libDDD_d_a_CPPFLAGS = -g  -WAll 
+libDDD_d_a_CPPFLAGS = -g  -Wall 
 
 # profiling version : -pg
 # libDDD_p_a_SOURCES = $(SRCS)
@@ -27,4 +27,4 @@ libDDD_d_a_CPPFLAGS = -g  -WAll
 
 # change options to activate OTF garbage collection (reference counting on GSDD) 
 libDDD_otfg_a_SOURCES = $(SRCS)
-libDDD_otfg_a_CPPFLAGS = -g -O2 -WAll -D OTF_GARBAGE
+libDDD_otfg_a_CPPFLAGS = -g -O2 -Wall -D OTF_GARBAGE
