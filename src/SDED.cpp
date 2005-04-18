@@ -508,8 +508,7 @@ GSDD _SDED_Concat::eval() const{
 
   map<GSDD,DataSet *> res;
   GSDD next;
-  map<GSDD,DataSet *>::iterator kt;
-
+  
   for(GSDD::const_iterator v1=parameter1.begin();v1!=parameter1.end();v1++){
     next = (v1->second)^parameter2 ;
     square_union(res,next,v1->first);
