@@ -60,4 +60,5 @@ EXTRA_DIST = \
   mainpage.dox \
   $(srcdir)/stamp \
   $(srcdir)/libddd.html \
-  $(srcdir)/libdddref.pdf
+  $(srcdir)/libdddref.pdf \
+  manuel.ps
