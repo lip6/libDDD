@@ -7,7 +7,7 @@ SRCS = DED.cpp DDD.cpp Hom.cpp SDED.cpp SDD.cpp SHom.cpp \
    DataSet.h  DED.h  MemoryManager.h  SDED.h  UniqueTable.h \
    DDD.h	   Hom.h  SDD.h		   SHom.h
 
-AM_CPPFLAGS =  -WAll 
+AM_CPPFLAGS =  -Wall 
 
 # default options => -o2 
 libDDD_a_SOURCES = $(SRCS)
