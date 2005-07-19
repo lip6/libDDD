@@ -348,7 +348,7 @@ private:
 public: 
   static _DED *create(const GHom &h,const GDDD &d);
 
-  virtual bool shouldCache() { return /*parameter.refCounter()>1 ||*/ parameter.nbsons() > 1 ; }
+//  virtual bool shouldCache() { return /*parameter.refCounter()>1 ||*/ parameter.nbsons() > 1 ; }
 
   /* Compare */
   size_t hash() const;
@@ -444,15 +444,15 @@ GDDD DED::eval(){
     delete concret;
     return res;
   }
-  else 
-    if (! concret->shouldCache() ){
-      // we don't need to store it
-      GDDD res=concret->eval(); // compute the result
+//  else 
+//     if (! concret->shouldCache() ){
+//       // we don't need to store it
+//       GDDD res=concret->eval(); // compute the result
       
-      delete concret;
-      Misses++;
-      return res;
-    }
+//       delete concret;
+//       Misses++;
+//       return res;
+//     }
 #ifdef INST_STL
     NBAccess++;
     NBJumps++;
