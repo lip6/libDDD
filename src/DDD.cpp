@@ -307,7 +307,7 @@ const GDDD GDDD::top(canonical(new _GDDD(-1,1)));
 /*                   class DDD:public GDDD                                    */
 /******************************************************************************/
 
-DDD::DDD(const DDD &g):GDDD(g.concret){
+DDD::DDD(const DDD &g):GDDD(g.concret),DataSet(){
   (concret->refCounter)++;
 }
 
