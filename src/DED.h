@@ -57,7 +57,7 @@ public:
   /* Destructor */
   virtual ~_DED(){};
 
-  virtual bool shouldCache() { return true;}
+//  virtual bool shouldCache() { return true;}
 
   /* Compare */
   virtual size_t hash() const =0;
