@@ -12,6 +12,7 @@ using namespace std;
 using namespace __gnu_cxx;
 
 #include "DataSet.h"
+#include "hashfunc.hh"
 
 /// pre-declaration of concrete (private) class implemented in .cpp file
 class _GDDD;
@@ -286,7 +287,8 @@ namespace __gnu_cxx {
   template<>
 	struct hash<GDDD> {
 		size_t operator()(const GDDD &g) const{
-			return (size_t) g.concret;
+		  //return (size_t) g.concret;
+		  return ddd::knuth32_hash(reinterpret_cast<const size_t>(g.concret));
 		}
 	};
 }
