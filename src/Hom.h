@@ -4,6 +4,7 @@
 
 #include "DDD.h"
 #include "DataSet.h"
+#include "hashfunc.hh"
 
 #include <string>
 #include <map>
@@ -210,7 +211,8 @@ namespace __gnu_cxx {
   template<>
   struct hash<GHom> {
     size_t operator()(const GHom &g) const{
-      return (size_t) g.concret;
+      //return (size_t) g.concret;
+      return ddd::knuth32_hash(reinterpret_cast<const size_t>(g.concret));
     }
   };
 }
