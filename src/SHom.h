@@ -4,6 +4,7 @@
 
 #include "DataSet.h"
 #include "SDD.h"
+#include "hashfunc.hh"
 
 #include <string>
 #include <map>
@@ -229,7 +230,8 @@ namespace __gnu_cxx {
   /// Value returned is based on unicity of concret in unicity table.
   template<>  struct hash<GShom> {
     size_t operator()(const GShom &g) const{
-      return (size_t) g.concret;
+      //return (size_t) g.concret;
+      return ddd::knuth32_hash(reinterpret_cast<const size_t>(g.concret));
     }
   };
 }

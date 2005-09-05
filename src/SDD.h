@@ -13,6 +13,7 @@ using namespace __gnu_cxx;
 
 #include "DDD.h"
 #include "DataSet.h"
+#include "hashfunc.hh"
 
 class _GSDD;
 
@@ -138,7 +139,8 @@ namespace SDDutil {
 namespace __gnu_cxx {
   template<>	struct hash<GSDD> {
 		size_t operator()(const GSDD &g) const{
-			return (size_t) g.concret;
+		  //return (size_t) g.concret;
+		  return ddd::knuth32_hash(reinterpret_cast<const size_t>(g.concret));
 		}
 	};
 }
