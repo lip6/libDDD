@@ -9,6 +9,9 @@
 using namespace std;
 using namespace __gnu_cxx;
 
+
+/// This class implements a unicity table mechanism, based on an STL hash_set.
+/// Requirements on the contained type are thus those of hash_set
 template<typename T>
 class UniqueTable{
 
