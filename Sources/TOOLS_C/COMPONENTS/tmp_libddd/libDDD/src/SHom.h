@@ -228,6 +228,7 @@ public:
 namespace __gnu_cxx {
   /// Computes a hash key for an Shom. 
   /// Value returned is based on unicity of concret in unicity table.
+  /// Uses D. Knuth's hash function for pointers.
   template<>  struct hash<GShom> {
     size_t operator()(const GShom &g) const{
       //return (size_t) g.concret;
