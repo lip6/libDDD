@@ -79,7 +79,7 @@ public:
   /// \name Public Constructors 
   //@{
   /// Default public constructor.
-  /// Builds Identity homomorphism : \forall d \in DDD, id(d) = d
+  /// Builds Identity homomorphism : forall d in DDD, id(d) = d
   GHom():concret(id.concret){};
   /// Create a (general) homomorphism from a user defined StrongHom.
   /// Common usage is : GHom h = GHom ( new myUserDefinedStrongHom(parameters) )
@@ -150,8 +150,8 @@ public:
   /// A constructor for a union of several homomorphisms.
   /// Note that for canonisation and optimization reasons, union is an n-ary and commutative composition operator.
   /// Use of this constructor may be slightly more efficient than using operator+ multiple times.
-  /// H({h1,h2, ..hn}) (d) = \sum_i h_i (d).
-  /// \param the set of homomorphisms to put in the union.
+  /// H({h1,h2, ..hn}) (d) = sum_i h_i (d).
+  /// \param anonymous the set of homomorphisms to put in the union.
   /// \todo std::set not very efficient for storage, replace by a sorted vector ?
   static GHom add(const set<GHom>&);
 
@@ -179,35 +179,100 @@ public:
 
 
 /* Operations */
+/// \name Composition operators between DDD homomorphisms.
+//@{
+/// Apply a homomorphism until fixpoint is reached. 
+/// This new unary operator is introduced to implement local saturation in transition
+///  relation evaluation. Proper use of fixpoint allows to effectively tackle the 
+/// intermediate size problem of decision diagram based representations. 
+/// Note that evaluation simply iterates until a fixpoint is reached, thus to cumulate
+/// new states with previously reached it should be combined with GShom::id as in
+///
+/// fixpoint ( h + GShom::id )
+///
 GHom fixpoint(const GHom &);
+/// Composition by union of two homomorphisms. 
+/// See also GShom::add(). This commutative operation computes a homomorphism 
+/// that evaluates as the sum of two homomorphism.
+///
+/// Semantics : (h1 + h2) (d) = h1(d) + h2(d).
 GHom operator+(const GHom &,const GHom &); 
+/// Composition by circ (rond) of homomorphisms.
+/// 
+/// Semantics :  (h1 & h2) (d) = h1( h2(d) ).
 GHom operator&(const GHom &,const GHom &); // composition
+/// Intersection with a constant DDD.
+/// Semantics : (h * d1) (d) = h(d) * d1
 GHom operator*(const GDDD &,const GHom &); 
+/// Intersection with a constant SDD.
+/// Semantics : (d1 * h) (d) = d1 * h(d)
 GHom operator*(const GHom &,const GDDD &); 
+/// Left Concatenation of a constant SDD.
+/// Note that this is inherently inefficient, the nodes of d1 are constructed, 
+/// but the result a priori will not contain them, unless h(d) == GSDD::one.
+///
+/// Semantics : (d1 ^ h) (d) = d1 ^ h(d)
 GHom operator^(const GDDD &,const GHom &); 
+/// Right Concatenation of a constant SDD.
+/// This is used to construct new nodes, and has the same efficiency issue as 
+/// left concatenation.
+///
+/// Semantics : (h ^ d1) (d) =  h(d) ^ d1
 GHom operator^(const GHom &,const GDDD &); 
+/// Set difference.
+/// Note that this operation is not commutative, nor is it \e linear.
+/// This means the difference of two linear homomorphisms is not necessarily linear;
+/// (h1 - h2) (d) is not necessarily equal to h1(d) - h2(d). Therefore this operator is 
+/// not defined for composition of two homomorphisms, only for a constant and a homomorphism.
+///
+/// Semantics : (h - d1) (d) =  h(d) - d1
 GHom operator-(const GHom &,const GDDD &); 
+//@}
 
 
+
+/// This is the user interface class to manipulate homomorphisms.
+/// The only difference with Hom is that it implements reference counting
+/// so that instances of Hom are not collected upon MemoryManager::garbage().
 class Hom:public GHom /*, public DataSet*/ {
  public:
   /* Constructor */
+  /// \name Public Constructors.
+  /// Default constructor builds identity homomorphism.
+  //@{
+  /// Build an Hom from a GHom.
   Hom(const GHom &h=GHom::id);
+  /// Copy constructor. Maintains reference count.
   Hom(const Hom &h);
+  /// Constructs a constant homomorphism. 
   Hom(const GDDD& d);   // constant
+  /// Left concatenation of a single arc DDD. This is provided as a convenience
+  /// and to avoid the inefficiency if we build a node pointing to GSDD::one
+  /// and then concatenate something to it. Applied to a SDD d, this homomorphism
+  /// will return var--val->h(d).
+  /// \param var the variable labeling the node to left concat
+  /// \param val the set of values labeling the arc
+  /// \param h the homomorphism to apply on the argument d. This defaults to GSHom::id.
   Hom(int var, int val, const GHom &h=GHom::id);  // var -- val -> Id
+  /// Destructor maintains reference counting. 
+  /// Note that the destructor does not truly reclaim memory, MemoryManager::garbage() does that.
   ~Hom();
-  
-  /* Set */
+  //@}
+
+  /// \name Assignment operators.
+  //@{
+  /// Overloaded behavior for assignment operator, maintains reference counting.
   Hom &operator=(const GHom &);
+  /// Overloaded behavior for assignment operator, maintains reference counting.
   Hom &operator=(const Hom &);
-
-  
-
+  //@}
 };
 
 /******************************************************************************/
 namespace __gnu_cxx {
+  /// Computes a hash key for an GHom. 
+  /// Value returned is based on unicity of concret in unicity table.
+  /// Uses D. Knuth's hash function for pointers.
   template<>
   struct hash<GHom> {
     size_t operator()(const GHom &g) const{
@@ -218,6 +283,8 @@ namespace __gnu_cxx {
 }
 
 namespace std {
+  /// Compares two GHom in hash tables. 
+  /// Value returned is based on unicity of concret in unicity table.
   template<>
   struct equal_to<GHom> {
     bool operator()(const GHom &g1,const GHom &g2) const{
@@ -227,6 +294,8 @@ namespace std {
 }
 
 namespace std {
+  /// Compares two GHom in hash tables. 
+  /// Value returned is based on unicity of concret in unicity table.
   template<>
   struct less<GHom> {
     bool operator()(const GHom &g1,const GHom &g2) const{
@@ -236,32 +305,61 @@ namespace std {
 }
 
 /**********************************************************************/
+/// The concrete data class for Homomorphisms.
+/// Users should not use this (private) class directly, but may use it indirectly 
+/// by deriving user homomorphisms from the StrongHom class.
 class _GHom{
 private:
+  /// open access to container class GHom.
   friend class GHom;
+  /// open access to container class Hom.
   friend class Hom;
+  /// For garbage collection. 
+  /// Counts the number of times a _GShom is referenced from the context of an Shom.
   mutable int refCounter;
+  /// For garbage collection. Used in the two phase garbage collection process.
+  /// A Hom that is not marked after the first pass over the unicity table, will
+  /// be sweeped in the second phase. Outside of garbage collection routine, marking
+  /// should always bear the value false.
   mutable bool marking;
+  /// For operation cache management. 
+  /// If immediat==true,  eval is called without attempting a cache hit. 
+  /// Currently only the constant homomorphism has this attribute set to true.  
   mutable bool immediat;
 public:
 #ifdef INST_STL
+  /// For hash table optimization.
   static MapJumps HomJumps;
 #endif
-  
-  /* Destructor*/
+  /// Constructor. Note this class is abstract, so this is only used in initialization
+  /// list of derived classes constructors (hard coded operations and StrongShom).
   _GHom(int ref=0,bool im=false):refCounter(ref),marking(false),immediat(im){};
+  /// Destructor. Default behavior. 
+  /// \todo Remove this declaration ? compiler generated version sufficient.
   virtual ~_GHom(){};
 
-  /* Compare */
+
+  /// Comparator. Used in case of hash collision. 
+  /// Should be appropriately defined in derived classes, in particular in user defined
+  /// homomorphisms.
   virtual bool operator==(const _GHom &h) const=0;
+  /// Hash key computation. It is essential for good hash table operation that the spread
+  /// of the keys be as good as possible. Also, fast hash key computation is a good design goal.
+  /// Note that bad hash functions will yield more collisions, thus equality comparisons which
+  /// may be quite costly. Use INST_STL version of the library to check your hash functions
+  /// for good behavior.
   virtual size_t hash() const=0;
 
-  /* Eval */
+  /// The computation function responsible for evaluation over a node.
+  /// Users should not directly use this. Normal behavior is to use GShom::operator()
+  /// that encapsulates this call with operation caching.
   virtual GDDD eval(const GDDD &)const=0;
 
-  /* Memory Manager */
+  /// For garbage collection. Used in first phase of garbage collection.
   virtual void mark() const{};
+
 #ifdef INST_STL
+  /// For hash table optimization.
   virtual void InstrumentNbJumps(int nbjumps)
   {
     const char *name=typeid(*this).name();
@@ -277,16 +375,46 @@ public:
 #endif
 };
 
+/// The abstract base class for user defined operations. 
+/// This is the class users should derive their operations from.
+/// It defines the interface of a Strong Homomorphism :
+/// * evaluation over terminal GDDD::one, which should return a constant DDD
+/// * evaluation over an arbitrary var--val--> pair, that returns a 
+///   \e homomorphism to apply to the successor node
+/// Users also have to provide a comparison function, and a hash function (from _GHom).
+/// See the demo folder for examples of user defined homomorphisms.
 class StrongHom:public _GHom{
 public:
+  /// Default constructor. Empty behavior.
+  /// \todo Is this declaration useful ?
   StrongHom(){};
+  /// Default destructor. Empty behavior.
+  /// \todo Is this declaration useful ?
   virtual ~StrongHom(){};
+  /// Evaluation over terminal GDDD::one. Returns a constant DDD.
+  /// A homomorphism that does not overload phiOne does not expect to meet
+  /// the terminal during it's evaluation, therefore default behavior returns GDDD::top
   virtual GDDD phiOne() const{return GDDD::top;}; 
+  /// Evaluation over an arbitrary arc of a SDD. 
+  /// \param var the index of the variable labeling the node.
+  /// \param val the value labeling the arc.
+  /// \return a homomorphism to apply on the successor node  
   virtual GHom phi(int var,int val) const=0; 
+  /// Comparator is pure virtual. Define a behavior in user homomorphisms.
   virtual bool operator==(const StrongHom &h) const=0;
+  
+  /// Comparator for unicity table. Users should not use this. The behavior is 
+  /// to check for type mismatch (and return false if that is the case) or call 
+  /// specialized comparators of derived subclasses otherwise.
   bool operator==(const _GHom &h) const;
 
-  //Eval
+
+  /// The evaluation mechanism of strong homomorphisms. 
+  /// Evaluation is defined as : 
+  /// 
+  /// Let an SDD d= (var, Union_i (val_i, d_i) )
+  ///
+  /// h (d) = Sum_i ( phi(var, val_i) (d_i) ) 
   GDDD eval(const GDDD &)const;  
 };
  
