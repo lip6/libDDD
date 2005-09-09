@@ -1,15 +1,11 @@
 /* -*- C++ -*- */
 #ifndef DDD_H
 #define DDD_H
+
+#include <iosfwd>
 #include <string>
-#include <iostream>
 #include <vector>
-#include <set>
-
-#include <ext/hash_map>
-
-using namespace std;
-using namespace __gnu_cxx;
+#include <ext/hash_set>
 
 #include "DataSet.h"
 #include "hashfunc.hh"
@@ -29,10 +25,10 @@ class GDDD
 {
 private:
   /// Open access to hash function computation procedure.
-  friend struct hash<GDDD>;
+  friend struct __gnu_cxx::hash<class GDDD>;
   /// A textual output. 
   /// Don't use it with large number of paths as each element is printed on a different line
-  friend ostream& operator<<(ostream &os,const GDDD &g);
+  friend std::ostream& operator<<(std::ostream &os,const GDDD &g);
   /// Open access to concret for reference counting in DDD.
   friend class DDD;
   /// The real implementation class. All true operations are delagated on this pointer.
@@ -42,16 +38,16 @@ private:
   /// \param _g The pointer provided should point into the unicity table
   GDDD(_GDDD *_g);
   /// Internal function used in recursion for textual printing of GDDD.
-  void print(ostream& os,string s) const;
+  void print(std::ostream& os,std::string s) const;
   /// A function for DDD serialization (beta).
-  void saveNode(ostream&, vector<_GDDD*>& )const;
+  void saveNode(std::ostream&, std::vector<_GDDD*>& )const;
   /// Another function used in serialization.
-  unsigned long int nodeIndex(vector<_GDDD*>)const;
+  unsigned long int nodeIndex(std::vector<_GDDD*>)const;
 public:
   /// \name Public Accessors 
   //@{
   /// To hide how arcs are actually stored. Use GDDD::Valuation to refer to arcs type
-  typedef vector<pair<int,GDDD> > Valuation;
+  typedef std::vector<std::pair<int,GDDD> > Valuation;
   /// To hide how arcs are stored. Also for more compact expressions : 
   /// use GDDD::const_iterator to iterate over the arcs of a DDD
   typedef Valuation::const_iterator const_iterator;
@@ -152,12 +148,12 @@ public:
   /// \todo This function should be implemented in a name manager somewhere so that it is common to DDD and SDD variables.
   /// \param var the index of the variable to be named
   /// \param name the name to attach to this variable index
-  static void varName( int var, const string& name );
+  static void varName( int var, const std::string& name );
   /// Gets a variable's name. 
   /// \todo This function should be implemented in a name manager somewhere so that it is common to DDD and SDD variables.
   /// \param var the index of the variable to be named
   /// \return the name attached to this variable index
-  static const string getvarName( int var );
+  static const std::string getvarName( int var );
   //@}
 
   /// \name Memory Management 
@@ -167,10 +163,11 @@ public:
   /// For garbage collection internals. Marks a GDDD as in use in garbage collection phase. 
   /// 
   void mark() const;
-  /// For garbage collection.
+  /// For garbage collection, do not call this directly, use MemoryManager::garbage() instead.
   /// \todo describe garbage collection algorithm(s) + mark usage homogeneously in one place.
   static void garbage(); 
   /// Prints some statistics to std::cout. Mostly used in debug and development phase.
+  /// See also MemoryManager::pstats().
   /// \todo allow output in other place than cout. Clean up output.
   static void pstats(bool reinit=true);
   /// Returns the peak size of the DDD unicity table. This value is maintained up to date upon GarbageCollection.
@@ -179,15 +176,15 @@ public:
   /// \name Serialization functions.
   //@{
   /// Function for serialization. Save a set of DDD to a stream.
-  friend void saveDDD(ostream&, vector<DDD>);
+  friend void saveDDD(std::ostream&, std::vector<DDD>);
   /// Function for deserialization. Load a set of DDD from a stream.
-  friend void loadDDD(istream&, vector<DDD>&);
+  friend void loadDDD(std::istream&, std::vector<DDD>&);
   //@}
 };
 
 
 /// Textual output of DDD into a stream in (relatively) human readable format.
-ostream& operator<<(ostream &,const GDDD &);
+std::ostream& operator<<(std::ostream &,const GDDD &);
 /* Binary operators */
 /// Operator for concatenation of DDD. See DDD operations documentation section for details.
 /// \todo Write the DDD operations documentation !!
@@ -278,37 +275,44 @@ public:
   /// Returns a hash key for the DDD.
   virtual size_t set_hash() const;
   /// Textual (human readable) output of a DDD.
-  virtual void set_print (ostream &os) const { os << *this; }
+  virtual void set_print (std::ostream &os) const { os << *this; }
   //@}
 };
 
 /******************************************************************************/
 namespace __gnu_cxx {
+  /// Computes a hash key for a DDD. 
+  /// Value returned is based on unicity of concret in unicity table.
+  /// Uses D. Knuth's hash function for pointers.  
   template<>
-	struct hash<GDDD> {
-		size_t operator()(const GDDD &g) const{
-		  //return (size_t) g.concret;
-		  return ddd::knuth32_hash(reinterpret_cast<const size_t>(g.concret));
-		}
-	};
+  struct hash<GDDD> {
+    size_t operator()(const GDDD &g) const{
+      //return (size_t) g.concret;
+      return ddd::knuth32_hash(reinterpret_cast<const size_t>(g.concret));
+    }
+  };
 }
 
 namespace std {
+  /// Compares two DDD in hash tables. 
+  /// Value returned is based on unicity of concret in unicity table.
   template<>
-	struct equal_to<GDDD> {
-		bool operator()(const GDDD &g1,const GDDD &g2) const{
-			return g1==g2;
-		}
-	};
+  struct equal_to<GDDD> {
+    bool operator()(const GDDD &g1,const GDDD &g2) const{
+      return g1==g2;
+    }
+  };
 }
 
 namespace std {
+  /// Compares two DDD in hash tables. 
+  /// Value returned is based on unicity of concret in unicity table.
   template<>
-	struct less<GDDD> {
-		bool operator()(const GDDD &g1,const GDDD &g2) const{
-			return g1<g2;
-		}
-	};
+  struct less<GDDD> {
+    bool operator()(const GDDD &g1,const GDDD &g2) const{
+      return g1<g2;
+    }
+  };
 }
 
 #endif
