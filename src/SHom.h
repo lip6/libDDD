@@ -8,6 +8,7 @@
 
 #include <string>
 #include <map>
+#include <set>
 /**********************************************************************/
 
 #ifdef INST_STL
@@ -40,7 +41,7 @@ private:
   /// Open access to concret for Shom class
   friend class Shom;
   /// Open access to concret for hash key computation
-  friend struct hash<GShom>;
+  friend struct __gnu_cxx::hash<GShom>;
 
   /// \name Friendly hard coded composition operators.
   /// Open full access for library implemented hard coded operations.    
@@ -114,7 +115,7 @@ public:
   /// Compute an n-ary sum between homomorphisms. This should be slightly more efficient 
   /// in evaluation than a composition of binary sums constructed using the friend operator+.
   /// \todo : move this to friend status not static member for more homogeneity with other operators.
-  static GShom add(const set<GShom>&);
+  static GShom add(const std::set<GShom>&);
 
   /// \name  Memory Management routines. 
   //@{
