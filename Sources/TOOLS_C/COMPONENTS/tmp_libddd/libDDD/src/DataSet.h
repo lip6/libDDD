@@ -1,13 +1,7 @@
 #ifndef __DATASET_H__
 #define __DATASET_H__
 
-#include <string>
-#include <iostream>
-#include <vector>
-#include <set>
-#include <cassert>
-using namespace std;
-
+#include <iosfwd>
 
 /// This class is an abstraction of a set of data.
 /// Set Decision Diagrams SDD arcs are labeled by a DataSet *, canonization of SDD requires
@@ -48,7 +42,7 @@ class DataSet
   /// returns a hash function, used in the SDD hash function computation
   virtual size_t set_hash() const =0;
   /// returns a formatted string description of the set
-  virtual void set_print (ostream &os) const =0;
+  virtual void set_print (std::ostream &os) const =0;
 };
 
 
