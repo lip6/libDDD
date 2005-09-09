@@ -13,15 +13,15 @@ class GShom;
 /******************************************************************************/
 class SDED{
 private:
-  friend struct hash<SDED>;
-  friend struct equal_to<SDED>;
+  friend struct __gnu_cxx::hash<SDED>;
+  friend struct std::equal_to<SDED>;
   _SDED *concret;
 public:
   GSDD eval();
   SDED(_SDED *c):concret(c){};
   bool operator==(const SDED&) const; 
   
-  static GSDD add(const set<GSDD> &);
+  static GSDD add(const std::set<GSDD> &);
   static GSDD Shom(const GShom &,const GSDD&);
 
   /* Memory Manager */
