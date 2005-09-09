@@ -17,6 +17,7 @@ using namespace __gnu_cxx;
 #include "SDED.h"
 #include "SDD.h"
 #include "UniqueTable.h"
+#include "DDD.h"
 
 /******************************************************************************/
 /*                             class _GSDD                                     */
