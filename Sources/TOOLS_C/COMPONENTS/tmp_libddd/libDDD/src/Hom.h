@@ -7,6 +7,7 @@
 #include "hashfunc.hh"
 
 #include <string>
+#include <set>
 #include <map>
 /**********************************************************************/
 #ifdef INST_STL
@@ -36,7 +37,7 @@ private:
   /// Open access to Hom derived class
   friend class Hom;
   /// Open access to hash function computation procedure.
-  friend struct hash<GHom>;
+  friend struct __gnu_cxx::hash<GHom>;
   /// This operator applies its argument to a node until a fixpoint is reached.
   /// Application consists in : while ( h(d) != d ) d = h(d);
   /// Where d is a DDD and h a homomorphism.
@@ -153,7 +154,7 @@ public:
   /// H({h1,h2, ..hn}) (d) = sum_i h_i (d).
   /// \param anonymous the set of homomorphisms to put in the union.
   /// \todo std::set not very efficient for storage, replace by a sorted vector ?
-  static GHom add(const set<GHom>&);
+  static GHom add(const std::set<GHom>&);
 
 
   /// \name Memory Management 
