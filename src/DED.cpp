@@ -1,6 +1,7 @@
 
 /* -*- C++ -*- */
 #include <set>
+#include <iostream>
 #include <map>
 // modif
 #include <assert.h>
