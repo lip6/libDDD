@@ -1,11 +1,14 @@
 #include <typeinfo>
+#include <iostream>
 #include "Hom.h"
 #include "DDD.h"
 #include "DED.h"
 #include "UniqueTable.h"
 
-#include <assert.h>
+#include <cassert>
 
+using namespace std;
+using namespace __gnu_cxx ;
 
 #ifdef INST_STL
 MapJumps  _GHom::HomJumps;
@@ -189,7 +192,7 @@ public:
     return value==((Constant*)&h )->value;
   }
   size_t hash() const{
-    return ::hash<GDDD>()(value);
+    return __gnu_cxx::hash<GDDD>()(value);
   }
 
   /* Eval */
