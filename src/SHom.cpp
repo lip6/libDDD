@@ -1,6 +1,7 @@
 #include <typeinfo>
 #include <cassert>
-using namespace std;
+#include <iostream>
+
 #include "Hom.h"
 #include "DDD.h"
 #include "DED.h"
@@ -14,6 +15,8 @@ using namespace std;
 MapJumps  _GShom::HomJumps;
 #endif
 
+using namespace __gnu_cxx;
+using namespace std;
 
 namespace namespace_SHom {
 #ifdef INST_STL
