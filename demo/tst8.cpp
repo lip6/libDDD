@@ -34,7 +34,7 @@ public:
   }
 
   size_t hash() const {
-    return (size_t) var+::hash<GHom>()(f);
+    return (size_t) var+__gnu_cxx::hash<GHom>()(f);
   }
 
   bool operator==(const StrongHom &s) const {
