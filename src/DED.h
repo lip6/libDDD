@@ -13,14 +13,14 @@ class GHom;
 /******************************************************************************/
 class DED{
 private:
-  friend struct hash<DED>;
-  friend struct equal_to<DED>;
+  friend struct __gnu_cxx::hash<DED>;
+  friend struct std::equal_to<DED>;
   _DED *concret;
 public:
   GDDD eval();
   DED(_DED *c):concret(c){};
   bool operator==(const DED&) const; 
-  static GDDD add(const set<GDDD> &);
+  static GDDD add(const std::set<GDDD> &);
   static GDDD hom(const GHom &,const GDDD&);
 
   /* Memory Manager */
