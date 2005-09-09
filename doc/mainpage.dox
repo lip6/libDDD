@@ -14,19 +14,7 @@
 /// This document describes all the public data structures and functions
 /// of libDDD.  This aims to be a reference manual, not a tutorial.
 ///
-/// If you are new to this manual, start with <a href="modules.html">the
-/// module page</a>.  This is what looks the closest to a table of contents.
 ///
 /// \section pointers Handy starting points
 ///
-///  TODO
-/// \li spot::ltl::formula  Base class for an LTL formulae.
-/// \li spot::ltl::parse    Parsing a text string into a
-///                         spot::ltl::formula.
-/// \li spot::tgba          Base class for Transition-based
-///                         Generalized Büchi Automaton.
-/// \li spot::ltl_to_tgba_fm  Convert a spot::ltl::formula into a
-///                           spot::tgba.
-/// \li spot::tgba_product    On-the-fly product of two spot::tgba.
-/// \li spot::emptiness_check Base class for all emptiness-check algorithms
                           
