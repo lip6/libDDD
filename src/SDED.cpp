@@ -6,6 +6,7 @@
 #include <typeinfo>
 // ajout
 #include <cassert>
+#include <iostream>
 using namespace std;
 using namespace __gnu_cxx;
 
