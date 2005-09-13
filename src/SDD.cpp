@@ -243,6 +243,7 @@ size_t GSDD::peak() {
 
 void GSDD::pstats(bool reinit)
 {
+  cout << "Peak number of SDD nodes in unicity table :" << peak() << endl; 
 #ifdef INST_STL
   cout << "*\nGSDD : size unicity table =" << canonical.size() << endl;
   cout << "  Average nb jump in hash table : " << _GSDD::StatJumps() << endl;

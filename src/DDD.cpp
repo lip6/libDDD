@@ -115,7 +115,7 @@ size_t GDDD::peak() {
 
 void GDDD::pstats(bool reinit)
 {
-  cout << "Peak number of DDD nodes in unicity table :" << Max_DDD << endl; 
+  cout << "Peak number of DDD nodes in unicity table :" << peak() << endl; 
 #ifdef INST_STL
   cout << "*\nGDDS : size unicity table =" << canonical.size() << endl;
   cout << "  Average nb jump in hash table : " << _GDDD::StatJumps() << endl;
