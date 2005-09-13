@@ -3,7 +3,7 @@ noinst_PROGRAMS = tst1 tst2 tst3 tst4 tst5 tst6 tst7 tst8 tst9 tst10 tst11
 DDD_SRCDIR = $(top_srcdir)/src
 DDD_BUILDDIR = $(top_builddir)/src
 
-AM_CPPFLAGS =  -I $(DDD_SRCDIR) -g
+AM_CPPFLAGS =  -I $(DDD_SRCDIR) -g -Wall
 LDADD = $(DDD_BUILDDIR)/libDDD_d.a
 
 # AM_CPPFLAGS = -D INST_STL -I $(DDD_SRCDIR)
