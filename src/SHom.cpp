@@ -672,6 +672,14 @@ GShom operator-(const GShom &h,const GSDD &d){
 }
 
 
+GShom::GShom(const MyGShom* h) :
+  concret(h)
+{}
+
+GShom::GShom(MyGShom* h) :
+  concret(h)
+{}
+
 void GShom::pstats(bool reinit)
 {
   cout << "*\nGSHom Stats : size unicity table = " <<  canonical.size() << endl;

@@ -22,6 +22,7 @@ typedef std::map<std::string, PairLL > MapJumps;
 class _GShom;
 /// pre-declare StrongShom for constructor(s) of GShom
 class StrongShom;
+class MyGShom;
 
 /// This class is the base class for Homomorphisms over SDD.
 /// Composition operators between homomorphisms are defined at this level,
@@ -73,6 +74,10 @@ public:
   /// Construct a homomorphism from a (user defined) Strong homomorphism. 
   /// No constraints on the pointer which will be canonized for unicity.
   GShom(StrongShom *);
+
+  GShom(const MyGShom*);
+  GShom(MyGShom*);
+
   /// Construct a constant homomorphism. Applied to any SDD this homomorphism
   /// will return the value it was initialized with.
   GShom(const GSDD& d);   
@@ -370,5 +375,7 @@ public:
   /// h (d) = Sum_i ( phi(var, val_i) (d_i) ) 
   GSDD eval(const GSDD &)const;  
 };
+
+class MyGShom : public _GShom{};
  
 #endif /* SHOM_H_ */
