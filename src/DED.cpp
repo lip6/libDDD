@@ -8,8 +8,6 @@
 #include <ext/hash_map>
 #include <typeinfo>
 // ajout
-using namespace std;
-using namespace __gnu_cxx;
 
 #include "DDD.h"
 #include "DED.h"
@@ -23,7 +21,7 @@ long long NBJumps=0;
 long long NBAccess=0;
 #endif
 
-typedef hash_map<DED,GDDD> Cache;
+typedef __gnu_cxx::hash_map<DED,GDDD> Cache;
 static Cache cache;
 
 static int Hits=0;
@@ -35,7 +33,7 @@ private:
   GDDD parameter;
 public:
   _DED_GDDD(const GDDD& g):parameter(g){};
-  size_t hash()const {return 1433*::hash<GDDD>()(parameter);};
+  size_t hash()const {return 1433*__gnu_cxx::hash<GDDD>()(parameter);};
   bool  operator==(const _DED &e)const{
     return (parameter==((_DED_GDDD*)&e)->parameter);
   };
@@ -47,10 +45,10 @@ public:
 /******************************************************************************/
 class _DED_Add:public _DED{
 private:
-  set<GDDD> parameters;
-  _DED_Add(const set<GDDD> &d):parameters(d){};
+  std::set<GDDD> parameters;
+  _DED_Add(const std::set<GDDD> &d):parameters(d){};
 public:
-  static  _DED *create(const set<GDDD> &d);
+  static  _DED *create(const std::set<GDDD> &d);
   /* Compare */
   size_t hash() const;
   bool operator==(const _DED &e)const;
@@ -66,8 +64,8 @@ public:
 /* Compare */
 size_t _DED_Add::hash() const{
   size_t res=0;
-  for(set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
-    res+=::hash<GDDD>()(*si);
+  for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
+    res+=__gnu_cxx::hash<GDDD>()(*si);
   }
   return res;
 }
@@ -81,16 +79,16 @@ GDDD _DED_Add::eval() const{
   assert(parameters.size()>1);
   int variable=parameters.begin()->variable();
   GDDD::Valuation value;
-  map<int,set<GDDD> > map_set;
+  std::map<int,std::set<GDDD> > map_set;
   
-  for(set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
+  for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
     for(GDDD::const_iterator vi=si->begin();vi!=si->end();vi++){
       map_set[vi->first].insert(vi->second);
     }
   }
-  for(map<int,set<GDDD> >::const_iterator map_set_i=map_set.begin();map_set_i!=map_set.end();map_set_i++){
+  for(std::map<int,std::set<GDDD> >::const_iterator map_set_i=map_set.begin();map_set_i!=map_set.end();map_set_i++){
     assert(map_set_i->second.size()!=0);
-    pair<int,GDDD> x;
+    std::pair<int,GDDD> x;
     x.first=map_set_i->first;
     if(map_set_i->second.size()==1)
       x.second=*(map_set_i->second.begin());
@@ -102,9 +100,9 @@ GDDD _DED_Add::eval() const{
 };
 
 /* constructor*/
-_DED *_DED_Add::create(const set<GDDD> &s){
+_DED *_DED_Add::create(const std::set<GDDD> &s){
   assert(s.size()!=0); // s is not empty
-  set<GDDD> parameters=s;
+  std::set<GDDD> parameters=s;
   parameters.erase(GDDD::null);
   if(parameters.size()==1)
     return new _DED_GDDD(*parameters.begin());  
@@ -115,7 +113,7 @@ _DED *_DED_Add::create(const set<GDDD> &s){
       return new _DED_GDDD(GDDD::top);
     }
     else{ 
-      set<GDDD>::const_iterator si=parameters.begin();
+      std::set<GDDD>::const_iterator si=parameters.begin();
       int variable = si->variable();
       for(;(si!=parameters.end())?(variable == si->variable()):false;si++);
       if(si!=parameters.end())// s contains at least 2 GDDDs with different variables
@@ -149,7 +147,7 @@ public:
 /*********/
 /* Compare */
 size_t _DED_Mult::hash() const{
-  return ::hash<GDDD>()(parameter1)+13*::hash<GDDD>()(parameter2);
+  return __gnu_cxx::hash<GDDD>()(parameter1)+13*__gnu_cxx::hash<GDDD>()(parameter2);
 };
 
 bool _DED_Mult::operator==(const _DED &e)const{
@@ -162,7 +160,7 @@ GDDD _DED_Mult::eval() const{
   int variable=parameter1.variable();
   GDDD::Valuation value;
 
-  map<int,set<GDDD> > map_set;
+  std::map<int,std::set<GDDD> > map_set;
   GDDD::const_iterator v1=parameter1.begin();
   GDDD::const_iterator v2=parameter2.begin();
   while(v1!=parameter1.end()&&v2!=parameter2.end()){
@@ -173,7 +171,7 @@ GDDD _DED_Mult::eval() const{
     else{
       GDDD g=(v1->second)*(v2->second);
       if(g!=GDDD::null){
-	pair<int,GDDD> x;
+        std::pair<int,GDDD> x;
 	x.first=v1->first;
 	x.second=g;
 	value.push_back(x);
@@ -195,7 +193,7 @@ _DED *_DED_Mult::create(const GDDD &g1,const GDDD &g2){
     return new _DED_GDDD(GDDD::top);
   else if(g1.variable()!=g2.variable())
     return new _DED_GDDD(GDDD::null);
-  else if(::hash<GDDD>()(g1) < ::hash<GDDD>()(g2))
+  else if(__gnu_cxx::hash<GDDD>()(g1) < __gnu_cxx::hash<GDDD>()(g2))
     return new _DED_Mult(g1,g2);
   else
     return new _DED_Mult(g2,g1);
@@ -226,7 +224,7 @@ public:
 /*********/
 /* Compare */
 size_t _DED_Minus::hash() const{
-  return 617*::hash<GDDD>()(parameter1)+307*::hash<GDDD>()(parameter2);
+  return 617*__gnu_cxx::hash<GDDD>()(parameter1)+307*__gnu_cxx::hash<GDDD>()(parameter2);
 };
 
 bool _DED_Minus::operator==(const _DED &e)const{
@@ -239,12 +237,12 @@ GDDD _DED_Minus::eval() const{
   int variable=parameter1.variable();
   GDDD::Valuation value;
 
-  //  map<int,set<GDDD> > map_set;
+  //  std::map<int,std::set<GDDD> > std::map_std::set;
   GDDD::const_iterator v1=parameter1.begin();
   GDDD::const_iterator v2=parameter2.begin();
   while(v1!=parameter1.end()&&v2!=parameter2.end()){
     if(v1->first<v2->first){
-      pair<int,GDDD> x(v1->first,v1->second);
+      std::pair<int,GDDD> x(v1->first,v1->second);
       value.push_back(x);
       v1++;
     }
@@ -253,7 +251,7 @@ GDDD _DED_Minus::eval() const{
     else{
       GDDD g=(v1->second)-(v2->second);
       if(g!=GDDD::null){
-	pair<int,GDDD> x(v1->first,g);
+        std::pair<int,GDDD> x(v1->first,g);
 	value.push_back(x);
       }
       v1++;
@@ -262,7 +260,7 @@ GDDD _DED_Minus::eval() const{
   }
 
   for(;v1!=parameter1.end();v1++){
-      pair<int,GDDD> x(v1->first,v1->second);
+    std::pair<int,GDDD> x(v1->first,v1->second);
       value.push_back(x);
   }
 
@@ -271,6 +269,8 @@ GDDD _DED_Minus::eval() const{
 
 /* constructor*/
 _DED *_DED_Minus::create(const GDDD &g1,const GDDD &g2){
+  if(g1 == GDDD::top && g2 == GDDD::top)
+    return new _DED_GDDD(GDDD::top);
   if(g1==g2||g1==GDDD::null)
     return new _DED_GDDD(GDDD::null);
   else if(g2==GDDD::null)
@@ -307,7 +307,7 @@ public:
 /*********/
 /* Compare */
 size_t _DED_Concat::hash() const{
-  return 827*::hash<GDDD>()(parameter1)+1153*::hash<GDDD>()(parameter2);
+  return 827*__gnu_cxx::hash<GDDD>()(parameter1)+1153*__gnu_cxx::hash<GDDD>()(parameter2);
 };
 
 bool _DED_Concat::operator==(const _DED &e)const{
@@ -318,9 +318,9 @@ bool _DED_Concat::operator==(const _DED &e)const{
 GDDD _DED_Concat::eval() const{
   int variable=parameter1.variable();
   GDDD::Valuation value;
-  map<int,set<GDDD> > map_set;
+  std::map<int,std::set<GDDD> > map_set;
   for(GDDD::const_iterator v1=parameter1.begin();v1!=parameter1.end();v1++){
-    pair<int,GDDD> x(v1->first,(v1->second)^parameter2);
+    std::pair<int,GDDD> x(v1->first,(v1->second)^parameter2);
     value.push_back(x);
   }
   return GDDD(variable,value);
@@ -365,7 +365,7 @@ public:
 /*********/
 /* Compare */
 size_t _DED_Hom::hash() const{
-  return 1451*::hash<GHom>()(hom)+1399*::hash<GDDD>()(parameter);
+  return 1451*__gnu_cxx::hash<GHom>()(hom)+1399*__gnu_cxx::hash<GDDD>()(parameter);
 }
 
 bool _DED_Hom::operator==(const _DED &e)const{
@@ -397,17 +397,17 @@ unsigned int DED::statistics() {
 
 void DED::pstats(bool reinit)
 {
-  cout << "*\nCache Stats : size=" << cache.size() << endl;
+  std::cout << "*\nCache Stats : size=" << cache.size() << std::endl;
 #ifdef INST_STL
-  cout << "nb jump in hash table : " << NBJumps << "/" << "nbsearch " ;
-  cout << NBAccess << "=" << double (NBJumps)/double(NBAccess)<< endl;
+  std::cout << "nb jump in __gnu_cxx::hash table : " << NBJumps << "/" << "nbsearch " ;
+  std::cout << NBAccess << "=" << double (NBJumps)/double(NBAccess)<< std::endl;
   if (reinit){
     NBAccess=0;
     NBJumps=0;
   }
 #endif
   
-  cout << "\nCache hit ratio : " << double (Hits*100) / double(Misses+1+Hits) << "%" << endl;
+  std::cout << "\nCache hit ratio : " << double (Hits*100) / double(Misses+1+Hits) << "%" << std::endl;
   // long hitr=(Hits*100) / (Misses+1+Hits) ;
   if (reinit){
     Hits =0;
@@ -438,7 +438,7 @@ bool DED::operator==(const DED& e) const{
   return (*concret==*(e.concret));
 };
 
-// eval and set to NULL the DED
+// eval and std::set to NULL the DED
 GDDD DED::eval(){
   if(typeid(*concret)==typeid(_DED_GDDD)){
     GDDD res=concret->eval();
@@ -486,13 +486,13 @@ GDDD DED::hom(const GHom &h,const GDDD&g){
   return e.eval();
 };
 
-GDDD DED::add(const set<GDDD> &s){
+GDDD DED::add(const std::set<GDDD> &s){
   DED e(_DED_Add::create(s));
   return e.eval();
 };
 
 GDDD operator+(const GDDD &g1,const GDDD &g2){
-  set<GDDD> s;
+  std::set<GDDD> s;
   s.insert(g1);
   s.insert(g2);
   return DED::add(s);
@@ -515,10 +515,10 @@ GDDD operator-(const GDDD &g1,const GDDD &g2){
 
 /******************************************************************************/
 
-size_t hash<DED>::operator()(const DED &e) const{
+size_t __gnu_cxx::hash<DED>::operator()(const DED &e) const{
   return e.concret->hash();
 };
 
-bool equal_to<DED>::operator()(const DED &e1,const DED &e2) const{
+bool std::equal_to<DED>::operator()(const DED &e1,const DED &e2) const{
   return e1==e2;
 };
