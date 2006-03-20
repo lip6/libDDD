@@ -7,8 +7,6 @@
 // ajout
 #include <cassert>
 #include <iostream>
-using namespace std;
-using namespace __gnu_cxx;
 
 #include "DataSet.h"
 #include "DED.h"
@@ -23,7 +21,7 @@ namespace namespace_SDED {
   long long NBAccess=0;
 #endif
 
-  typedef hash_map<SDED,GSDD> Cache;
+  typedef __gnu_cxx::hash_map<SDED,GSDD> Cache;
   static Cache cache;
   static Cache recentCache;
   
@@ -39,7 +37,6 @@ namespace namespace_SDED {
   static size_t Max_Recent_SDED=0;
 #endif
 } //namespace namespace_SDED 
-using namespace namespace_SDED ;
 
 /******************************************************************************/
 class _SDED_GSDD:public _SDED{
@@ -47,7 +44,7 @@ private:
   GSDD parameter;
 public:
   _SDED_GSDD(const GSDD& g):parameter(g){};
-  size_t hash()const {return 1433*::hash<GSDD>()(parameter);};
+  size_t hash()const {return 1433*__gnu_cxx::hash<GSDD>()(parameter);};
   bool  operator==(const _SDED &e)const{
     return (parameter==((_SDED_GSDD*)&e)->parameter);
   };
@@ -59,8 +56,8 @@ public:
 
 
 /******************** BASIS FOR CANONIZATION OPERATIONS **********************/
-inline void square_union (map<GSDD,DataSet *> &res,const GSDD & s, DataSet * d) {
-  map<GSDD,DataSet *>::iterator kt = res.find(s);
+inline void square_union (std::map<GSDD,DataSet *> &res,const GSDD & s, DataSet * d) {
+  std::map<GSDD,DataSet *>::iterator kt = res.find(s);
   if (kt != res.end()) {
     /* found it in res compute union */
     DataSet * tofree = kt->second;
@@ -68,7 +65,7 @@ inline void square_union (map<GSDD,DataSet *> &res,const GSDD & s, DataSet * d) 
     delete tofree;
   } else {
     /* not yet in res, add it */
-    res.insert(make_pair(s,d->newcopy()));
+    res.insert(std::make_pair(s,d->newcopy()));
   }
 }
 
@@ -79,18 +76,18 @@ inline void square_union (map<GSDD,DataSet *> &res,const GSDD & s, DataSet * d) 
 /******************************************************************************/
 class _SDED_Add:public _SDED{
 private:
-  set<GSDD> parameters;
-  _SDED_Add(const set<GSDD> &d):parameters(d){};
+  std::set<GSDD> parameters;
+  _SDED_Add(const std::set<GSDD> &d):parameters(d){};
 public:
   static  _SDED *create(const GSDD &g1,const GSDD &g2);
-  static  _SDED *create(const set<GSDD> &d);
+  static  _SDED *create(const std::set<GSDD> &d);
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
 
 #ifdef OTF_GARBAGE
   bool shouldCache () {
-    for(set<GSDD>::const_iterator si=parameters.begin();si!=parameters.end();si++)
+    for(std::set<GSDD>::const_iterator si=parameters.begin();si!=parameters.end();si++)
       if (! si->isSon()) 
 	return false;
     return true;
@@ -108,8 +105,8 @@ public:
 /* Compare */
 size_t _SDED_Add::hash() const{
   size_t res=0;
-  for(set<GSDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
-    res+=::hash<GSDD>()(*si);
+  for(std::set<GSDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
+    res+=__gnu_cxx::hash<GSDD>()(*si);
   }
   return res;
 }
@@ -125,13 +122,13 @@ GSDD _SDED_Add::eval() const{
   assert(parameters.size() > 1);
   int variable=parameters.begin()->variable();
   // To compute the result 
-  map<GSDD,DataSet *> res;
+  std::map<GSDD,DataSet *> res;
 
   // for memory collection
   DataSet * tofree;
 
   // The current operand
-  set<GSDD>::const_iterator opit =  parameters.begin();
+  std::set<GSDD>::const_iterator opit =  parameters.begin();
 
   // Initialize with copy of first operand
   for (GSDD::Valuation::const_iterator it = opit->begin();it != opit->end() ; it++) 
@@ -141,15 +138,15 @@ GSDD _SDED_Add::eval() const{
   // Foreach  opit in (operands)
   for (opit++ ; opit != parameters.end() ; opit++) {
     // To store non empty intersection results;
-    vector< pair <GSDD,DataSet *> > sums;
+    std::vector< std::pair <GSDD,DataSet *> > sums;
     // To store the remainders (empty intersection with all previous elements)
-    vector< pair <GSDD,DataSet *> > rems;
+    std::vector< std::pair <GSDD,DataSet *> > rems;
     
     // Foreach arc in current operand  : e-a->A
     for (GSDD::Valuation::const_iterator arc = opit->begin() ; arc != opit->end() ; arc++ ) {
       DataSet * a = arc->first->newcopy();
       // foreach value already in result : e-b->B
-      for (map<GSDD,DataSet *>::iterator resit = res.begin() ; resit != res.end() ;  ) {
+      for (std::map<GSDD,DataSet *>::iterator resit = res.begin() ; resit != res.end() ;  ) {
 	// compute a*b
 	DataSet *ainterb = arc->first->set_intersect(*resit->second);
 	// if a*b = 0, skip
@@ -163,7 +160,7 @@ GSDD _SDED_Add::eval() const{
 	resit->second = resit->second->set_minus(*ainterb);
 	delete tofree;
 	// add intersection to sums : e- b * a -> A+B
-	sums.push_back( make_pair(resit->first + arc->second , ainterb) );
+	sums.push_back( std::make_pair(resit->first + arc->second , ainterb) );
 	// update current iteration value
 	tofree = a ;
 	a = a->set_minus(*ainterb);
@@ -173,7 +170,7 @@ GSDD _SDED_Add::eval() const{
 	  break;
 	}
 	if (resit->second->empty()) {
-	  map<GSDD,DataSet *>::iterator jt = resit;
+	  std::map<GSDD,DataSet *>::iterator jt = resit;
 	  resit++;
 	  delete jt->second;
 	  res.erase(jt);
@@ -185,17 +182,17 @@ GSDD _SDED_Add::eval() const{
       
       // if there is a remainder, store it
       if (! a->empty()) {
-	rems.push_back(make_pair(arc->second,a));
+	rems.push_back(std::make_pair(arc->second,a));
       } else 
 	delete a;
     } // end foreach arc in operand
     
     // Now process remainders and sums
-    for (vector< pair <GSDD,DataSet *> >::iterator it=sums.begin(); it != sums.end(); it++ ) {
+    for (std::vector< std::pair <GSDD,DataSet *> >::iterator it=sums.begin(); it != sums.end(); it++ ) {
       square_union(res,it->first,it->second);
       delete it->second;
     }
-    for (vector< pair <GSDD,DataSet *> >::iterator it=rems.begin(); it != rems.end(); it++ ) {
+    for (std::vector< std::pair <GSDD,DataSet *> >::iterator it=rems.begin(); it != rems.end(); it++ ) {
       square_union(res,it->first,it->second);
       delete it->second;
     }
@@ -205,15 +202,15 @@ GSDD _SDED_Add::eval() const{
   } // end foreach operand
 
   GSDD::Valuation value;
-  map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
+  std::map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
   if (nullmap != res.end()) {
     delete nullmap->second;
     res.erase(nullmap);
   }
   value.reserve(res.size());  
-  for (map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
+  for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
     if (! it->second->empty())
-      value.push_back(make_pair(it->second,it->first));
+      value.push_back(std::make_pair(it->second,it->first));
     else
       delete  it->second;
 
@@ -233,16 +230,16 @@ _SDED *_SDED_Add::create(const GSDD &g1,const GSDD &g2){
   if (g1 == GSDD::one || g2 == GSDD::one || g1 == GSDD::top || g2 == GSDD::top || g1.variable() != g2.variable() ) 
     return new _SDED_GSDD(GSDD::top);
 
-  set<GSDD> parameters;
+  std::set<GSDD> parameters;
   parameters.insert(g1);
   parameters.insert(g2);
 
   return new _SDED_Add(parameters);
 }
 /* constructor*/
-_SDED *_SDED_Add::create(const set<GSDD> &s){
+_SDED *_SDED_Add::create(const std::set<GSDD> &s){
   assert(s.size()!=0); // s is not empty
-  set<GSDD> parameters=s;
+  std::set<GSDD> parameters=s;
   parameters.erase(GSDD::null);
   if(parameters.size()==1)
     return new _SDED_GSDD(*parameters.begin());  
@@ -253,7 +250,7 @@ _SDED *_SDED_Add::create(const set<GSDD> &s){
       return new _SDED_GSDD(GSDD::top);
     }
     else{ 
-      set<GSDD>::const_iterator si=parameters.begin();
+      std::set<GSDD>::const_iterator si=parameters.begin();
       int variable = si->variable();
       for(;(si!=parameters.end())?(variable == si->variable()):false;si++);
       if(si!=parameters.end())// s contains at least 2 GDDDs with different variables
@@ -296,7 +293,7 @@ public:
 /*********/
 /* Compare */
 size_t _SDED_Mult::hash() const{
-  return ::hash<GSDD>()(parameter1)+13*::hash<GSDD>()(parameter2);
+  return __gnu_cxx::hash<GSDD>()(parameter1)+13*__gnu_cxx::hash<GSDD>()(parameter2);
 };
 
 bool _SDED_Mult::operator==(const _SDED &e)const{
@@ -307,7 +304,7 @@ bool _SDED_Mult::operator==(const _SDED &e)const{
 GSDD _SDED_Mult::eval() const{
   assert(parameter1.variable()==parameter2.variable());
   int variable=parameter1.variable();
-  map<GSDD,DataSet *> res;
+  std::map<GSDD,DataSet *> res;
 
 
 
@@ -330,14 +327,14 @@ GSDD _SDED_Mult::eval() const{
   }
 
   GSDD::Valuation value;
-  map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
+  std::map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
   if (nullmap != res.end()){
     delete nullmap->second;
     res.erase(nullmap);
   }
   value.reserve(res.size());  
-  for (map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
-    value.push_back(make_pair(it->second,it->first));
+  for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
+    value.push_back(std::make_pair(it->second,it->first));
   
   return GSDD(variable,value);
 };
@@ -352,7 +349,7 @@ _SDED *_SDED_Mult::create(const GSDD &g1,const GSDD &g2){
     return new _SDED_GSDD(GSDD::top);
   else if(g1.variable()!=g2.variable())
     return new _SDED_GSDD(GSDD::null);
-  else if(::hash<GSDD>()(g1) < ::hash<GSDD>()(g2))
+  else if(__gnu_cxx::hash<GSDD>()(g1) < __gnu_cxx::hash<GSDD>()(g2))
     return new _SDED_Mult(g1,g2);
   else
     return new _SDED_Mult(g2,g1);
@@ -387,7 +384,7 @@ public:
 /*********/
 /* Compare */
 size_t _SDED_Minus::hash() const{
-  return 617*::hash<GSDD>()(parameter1)+307*::hash<GSDD>()(parameter2);
+  return 617*__gnu_cxx::hash<GSDD>()(parameter1)+307*__gnu_cxx::hash<GSDD>()(parameter2);
 };
 
 bool _SDED_Minus::operator==(const _SDED &e)const{
@@ -399,9 +396,9 @@ GSDD _SDED_Minus::eval() const{
   assert(parameter1.variable()==parameter2.variable());
   int variable=parameter1.variable();
 
-  map<GSDD,DataSet *> res;
+  std::map<GSDD,DataSet *> res;
   // remainder for p1 
-  map<GSDD,DataSet *> rem_p1;
+  std::map<GSDD,DataSet *> rem_p1;
 
   // for each son of p1 initialize remainder
   for (GSDD::Valuation::const_iterator it = parameter1.begin();it != parameter1.end() ; it++) 
@@ -432,7 +429,7 @@ GSDD _SDED_Minus::eval() const{
   }
   // add remainders
   // for each son of p1 
-  for (map<GSDD,DataSet *>::const_iterator it = rem_p1.begin();it != rem_p1.end() ; it++) {
+  for (std::map<GSDD,DataSet *>::const_iterator it = rem_p1.begin();it != rem_p1.end() ; it++) {
     if (! it->second->empty() )      
       {
 	square_union(res,it->first,it->second);
@@ -441,14 +438,14 @@ GSDD _SDED_Minus::eval() const{
   }
 
   GSDD::Valuation value;
-  map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
+  std::map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
   if (nullmap != res.end()) {
     delete nullmap->second;
     res.erase(nullmap);
   }
   value.reserve(res.size());  
-  for (map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
-    value.push_back(make_pair(it->second,it->first));
+  for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
+    value.push_back(std::make_pair(it->second,it->first));
  
   return GSDD(variable,value);
 };
@@ -496,7 +493,7 @@ public:
 /*********/
 /* Compare */
 size_t _SDED_Concat::hash() const{
-  return 827*::hash<GSDD>()(parameter1)+1153*::hash<GSDD>()(parameter2);
+  return 827*__gnu_cxx::hash<GSDD>()(parameter1)+1153*__gnu_cxx::hash<GSDD>()(parameter2);
 };
 
 bool _SDED_Concat::operator==(const _SDED &e)const{
@@ -507,7 +504,7 @@ bool _SDED_Concat::operator==(const _SDED &e)const{
 GSDD _SDED_Concat::eval() const{
   int variable=parameter1.variable();
 
-  map<GSDD,DataSet *> res;
+  std::map<GSDD,DataSet *> res;
   GSDD next;
   
   for(GSDD::const_iterator v1=parameter1.begin();v1!=parameter1.end();v1++){
@@ -516,14 +513,14 @@ GSDD _SDED_Concat::eval() const{
   }
 
   GSDD::Valuation value;
-  map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
+  std::map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
   if (nullmap != res.end()) {
     delete nullmap->second;
     res.erase(nullmap);
   }
   value.reserve(res.size());  
-  for (map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
-    value.push_back(make_pair(it->second,it->first));
+  for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
+    value.push_back(std::make_pair(it->second,it->first));
  
   return GSDD(variable,value);
 };
@@ -568,7 +565,7 @@ public:
 /*********/
 /* Compare */
 size_t _SDED_Shom::hash() const{
-  return 1451*::hash<GShom>()(shom)+1399*::hash<GSDD>()(parameter);
+  return 1451*__gnu_cxx::hash<GShom>()(shom)+1399*__gnu_cxx::hash<GSDD>()(parameter);
 }
 
 bool _SDED_Shom::operator==(const _SDED &e)const{
@@ -595,17 +592,17 @@ _SDED * _SDED_Shom::create(const GShom &g,const GSDD &d){
 
   /* Memory Manager */
 unsigned int SDED::statistics() {
-  return cache.size();
+  return namespace_SDED::cache.size();
 }
 
 
 void SDED::pstats(bool reinit)
 {
-  cout << "*\nCache Stats : size=" << cache.size() << "   --- Peak size=" <<  Max_SDED << endl;
+  std::cout << "*\nCache Stats : size=" << namespace_SDED::cache.size() << "   --- Peak size=" <<  namespace_SDED::Max_SDED << std::endl;
   
 #ifdef INST_STL
-  cout << "nb jump in hash table : " << NBJumps << "/" << "nbsearch " ;
-  cout << NBAccess << "=" << double (NBJumps)/double(NBAccess)<< endl;
+  std::cout << "nb jump in hash table : " << NBJumps << "/" << "nbsearch " ;
+  std::cout << NBAccess << "=" << double (NBJumps)/double(NBAccess)<< std::endl;
   if (reinit){
     NBAccess=0;
     NBJumps=0;
@@ -613,16 +610,16 @@ void SDED::pstats(bool reinit)
 #endif
 
 #ifdef OTF_GARBAGE
-  cout << "\nRecent cache hit ratio : " << double (recentHits*100) / double(recentMisses+1+recentHits) << "%" << endl;  
+  std::cout << "\nRecent cache hit ratio : " << double (namespace_SDED::recentHits*100) / double(namespace_SDED::recentMisses+1+namespace_SDED::recentHits) << "%" << std::endl;  
 #endif
-  cout << "\nCache hit ratio : " << double (Hits*100) / double(Misses+1+Hits) << "%" << endl;
+  std::cout << "\nCache hit ratio : " << double (namespace_SDED::Hits*100) / double(namespace_SDED::Misses+1+namespace_SDED::Hits) << "%" << std::endl;
   // long hitr=(Hits*100) / (Misses+1+Hits) ;
   if (reinit){
-    Hits =0;
-    Misses =0;  
+    namespace_SDED::Hits =0;
+    namespace_SDED::Misses =0;  
 #ifdef OTF_GARBAGE
-    recentMisses =0;
-    recentHits =0;  
+    namespace_SDED::recentMisses =0;
+    namespace_SDED::recentHits =0;  
 #endif
   }  
 
@@ -631,33 +628,33 @@ void SDED::pstats(bool reinit)
 #ifdef OTF_GARBAGE
 static unsigned int  recentLimit = 1024 ;
 void SDED::recentGarbage(bool force){
-  size_t rcSize=recentCache.size();
+  size_t rcSize=namespace_SDED::recentCache.size();
   int longTerm = 0;
   int flSize ;
-  if ( (rcSize > recentLimit && rcSize > 2*cache.size()) || force ) {
-    flSize = cache.size();
-    if (recentCache.size() > Max_Recent_SDED) 
-      Max_Recent_SDED=recentCache.size();  
-    for(Cache::iterator di=recentCache.begin();di!=recentCache.end();){
-      Cache::iterator ci=di;
+  if ( (rcSize > recentLimit && rcSize > 2*namespace_SDED::cache.size()) || force ) {
+    flSize = namespace_SDED::cache.size();
+    if (namespace_SDED::recentCache.size() > namespace_SDED::Max_Recent_SDED) 
+      namespace_SDED::Max_Recent_SDED=namespace_SDED::recentCache.size();  
+    for(namespace_SDED::Cache::iterator di=namespace_SDED::recentCache.begin();di!=namespace_SDED::recentCache.end();){
+      namespace_SDED::Cache::iterator ci=di;
       di++;
       _SDED *d=ci->first.concret;
       if (d->shouldCache() && ci->second.isSon()) {
-	cache.insert(*ci);
-	recentCache.erase(ci);
+	namespace_SDED::cache.insert(*ci);
+	namespace_SDED::recentCache.erase(ci);
 	longTerm++;
       }      else {
-	recentCache.erase(ci);
+	namespace_SDED::recentCache.erase(ci);
 	delete d;
       }
     }
     if ( longTerm < (flSize / 20) )
       recentLimit*=2;
-    cerr << " Recent SDED cache size was " << rcSize << "/"<< recentLimit<<" Full : "<< cache.size() << "  comitted " << longTerm << " results to storage "<<endl;
-    cerr << "Recent cache hit ratio : " << double (recentHits*100) / double(recentMisses+1+recentHits) << "%" << endl;  
-    cerr << "Cache hit ratio : " << double (Hits*100) / double(Misses+1+Hits) << "%" << endl;
-    cerr << "Any Cache hit ratio : " << double ( (recentHits+ Hits)*100) / double(recentMisses+1+(recentHits+ Hits)) << "%" << endl;
-    recentHits =recentMisses = 0;
+    std::cerr << " Recent SDED cache size was " << rcSize << "/"<< recentLimit<<" Full : "<< namespace_SDED::cache.size() << "  comitted " << longTerm << " results to storage "<<std::endl;
+    std::cerr << "Recent cache hit ratio : " << double (namespace_SDED::recentHits*100) / double(namespace_SDED::recentMisses+1+namespace_SDED::recentHits) << "%" << std::endl;  
+    std::cerr << "Cache hit ratio : " << double (namespace_SDED::Hits*100) / double(namespace_SDED::Misses+1+namespace_SDED::Hits) << "%" << std::endl;
+    std::cerr << "Any Cache hit ratio : " << double ( (namespace_SDED::recentHits+ namespace_SDED::Hits)*100) / double(namespace_SDED::recentMisses+1+(namespace_SDED::recentHits+ namespace_SDED::Hits)) << "%" << std::endl;
+    namespace_SDED::recentHits =namespace_SDED::recentMisses = 0;
     SDDutil::recentGarbage();
   }
 };
@@ -668,21 +665,21 @@ void SDED::garbage(){
 #ifdef OTF_GARBAGE
   recentGarbage();
 #endif
-  if (cache.size() > Max_SDED) 
-    Max_SDED=cache.size();  
-  for(Cache::iterator di=cache.begin();di!=cache.end();){
-      Cache::iterator ci=di;
+  if (namespace_SDED::cache.size() > namespace_SDED::Max_SDED) 
+    namespace_SDED::Max_SDED=namespace_SDED::cache.size();  
+  for(namespace_SDED::Cache::iterator di=namespace_SDED::cache.begin();di!=namespace_SDED::cache.end();){
+      namespace_SDED::Cache::iterator ci=di;
       di++;
       _SDED *d=ci->first.concret;
-      cache.erase(ci);
+      namespace_SDED::cache.erase(ci);
       delete d;
   } 
 #ifdef OTF_GARBAGE
-  for(Cache::iterator di=recentCache.begin();di!=recentCache.end();){
-      Cache::iterator ci=di;
+  for(namespace_SDED::Cache::iterator di=namespace_SDED::recentCache.begin();di!=namespace_SDED::recentCache.end();){
+      namespace_SDED::Cache::iterator ci=di;
       di++;
       _SDED *d=ci->first.concret;
-      recentCache.erase(ci);
+      namespace_SDED::recentCache.erase(ci);
       delete d;
   } 
 #endif
@@ -697,7 +694,7 @@ bool SDED::operator==(const SDED& e) const{
   return (*concret==*(e.concret));
 };
 
-// eval and set to NULL the DED
+// eval and std::set to NULL the DED
 GSDD SDED::eval(){
 
 #ifndef OTF_GARBAGE
@@ -717,10 +714,10 @@ GSDD SDED::eval(){
     Cache::const_iterator ci=recentCache.find(*this, temp); // search e in the recent storage cache
     NBJumps+=temp;
 #else
-    Cache::const_iterator ci=recentCache.find(*this); // search e in the recent storage cache
+    namespace_SDED::Cache::const_iterator ci=namespace_SDED::recentCache.find(*this); // search e in the recent storage cache
 #endif
-    if (ci==recentCache.end()){ // *this is not in the recent storage cache
-      ++recentMisses;
+    if (ci==namespace_SDED::recentCache.end()){ // *this is not in the recent storage cache
+      ++namespace_SDED::recentMisses;
       // test if parameters potentially allow long term storage
       if ( concret->shouldCache() ){
 #endif // OTF_GARBAGE
@@ -737,22 +734,22 @@ GSDD SDED::eval(){
 	NBJumps+=temp;
 #else
 #ifndef OTF_GARBAGE
-	Cache::const_iterator 
+	namespace_SDED::Cache::const_iterator 
 #endif
-	ci=cache.find(*this); // search e in the long term storage cache
+	ci=namespace_SDED::cache.find(*this); // search e in the long term storage cache
 #endif
-	if (ci==cache.end()){ // *this is not in the long term storage cache
-	  Misses++;  // this constitutes a cache miss (double truly) !!
+	if (ci==namespace_SDED::cache.end()){ // *this is not in the long term storage cache
+	  namespace_SDED::Misses++;  // this constitutes a cache miss (double truly) !!
 	  GSDD res=concret->eval(); // compute the result
 #ifdef OTF_GARBAGE
 	  // test if result is eligible for long term storage status
  	  if ( ! res.isSon() ) {
 	    // Not eligible
-	    recentCache[*this]=res;
+	    namespace_SDED::recentCache[*this]=res;
  	  } else {
 #endif
  	    // eligible
- 	    cache[*this]=res;
+ 	    namespace_SDED::cache[*this]=res;
 #ifdef OTF_GARBAGE
 	    // Should we quick Garbage HERE ???
 	    recentGarbage();
@@ -762,7 +759,7 @@ GSDD SDED::eval(){
 	  return res;
 	} else {
 	  // found in long term cache
-	  Hits++;
+	  namespace_SDED::Hits++;
 	  delete concret;
 #ifdef OTF_GARBAGE
 	  recentGarbage();
@@ -774,12 +771,12 @@ GSDD SDED::eval(){
 	
 	// this constitutes a cache miss (simple) !!
 	GSDD res=concret->eval(); // compute the result
-	recentCache[*this]=res;	
+	namespace_SDED::recentCache[*this]=res;	
 	concret=NULL;
 	return res;
      }
   } else {// *this is in the cache
-    recentHits++;
+    namespace_SDED::recentHits++;
     delete concret;
     return ci->second;
   }
@@ -798,7 +795,7 @@ GSDD SDED::Shom(const GShom &h,const GSDD&g){
 };
 
 
-GSDD SDED::add(const set<GSDD> &s){
+GSDD SDED::add(const std::set<GSDD> &s){
    SDED e(_SDED_Add::create(s));
    return e.eval();
 };
@@ -825,10 +822,10 @@ GSDD operator-(const GSDD &g1,const GSDD &g2){
 
 /******************************************************************************/
 
-size_t hash<SDED>::operator()(const SDED &e) const{
+size_t __gnu_cxx::hash<SDED>::operator()(const SDED &e) const{
   return e.concret->hash();
 };
 
-bool equal_to<SDED>::operator()(const SDED &e1,const SDED &e2) const{
+bool __gnu_cxx::equal_to<SDED>::operator()(const SDED &e1,const SDED &e2) const{
   return e1==e2;
 };

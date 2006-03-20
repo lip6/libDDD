@@ -15,9 +15,6 @@
 MapJumps  _GShom::HomJumps;
 #endif
 
-using namespace __gnu_cxx;
-using namespace std;
-
 namespace namespace_SHom {
 #ifdef INST_STL
 static string TryDemangle(string in)
@@ -141,7 +138,6 @@ void PrintMapJumps(double ratemin=0){
 }
 
 } //end namespace namespace_SHom 
-using namespace namespace_SHom ;
 
 /* Unique Table */
 namespace __gnu_cxx {
@@ -193,7 +189,7 @@ public:
     return value==((Constant*)&h )->value;
   }
   size_t hash() const{
-    return ::hash<GSDD>()(value);
+    return __gnu_cxx::hash<GSDD>()(value);
   }
 
   /* Eval */
@@ -220,7 +216,7 @@ public:
     return left==((Mult*)&h )->left && right==((Mult*)&h )->right;
   }
   size_t hash() const{
-    return 83*::hash<GShom>()(left)+53*::hash<GSDD>()(right);
+    return 83*__gnu_cxx::hash<GShom>()(left)+53*__gnu_cxx::hash<GSDD>()(right);
   }
 
   /* Eval */
@@ -250,13 +246,13 @@ public:
     return left==((Add*)&h )->left && right==((Add*)&h )->right;
   }
   size_t hash() const{
-    return 1039*::hash<GShom>()(left)+1049*::hash<GShom>()(right);
+    return 1039*__gnu_cxx::hash<GShom>()(left)+1049*__gnu_cxx::hash<GShom>()(right);
   }
 
   /* Eval */
   GSDD eval(const GSDD &d)const{
     int variable=d.variable();
-    set<GSDD> s;
+    std::set<GSDD> s;
     GSDD cur;
     for(GSDD::const_iterator vi=d.begin();vi!=d.end();vi++){
       cur= GSDD(variable,*vi->first,vi->second);
@@ -321,7 +317,7 @@ public:
     return left==((Compose*)&h )->left && right==((Compose*)&h )->right;
   }
   size_t hash() const{
-    return 13*::hash<GShom>()(left)+7*::hash<GShom>()(right);
+    return 13*__gnu_cxx::hash<GShom>()(left)+7*__gnu_cxx::hash<GShom>()(right);
   }
 
   /* Eval */
@@ -350,7 +346,7 @@ public:
     return left==((LeftConcat*)&h )->left && right==((LeftConcat*)&h )->right;
   }
   size_t hash() const{
-    return 23*::hash<GSDD>()(left)+47*::hash<GShom>()(right);
+    return 23*__gnu_cxx::hash<GSDD>()(left)+47*__gnu_cxx::hash<GShom>()(right);
   }
 
   /* Eval */
@@ -379,7 +375,7 @@ public:
     return left==((RightConcat*)&h )->left && right==((RightConcat*)&h )->right;
   }
   size_t hash() const{
-    return 47*::hash<GShom>()(left)+19*::hash<GSDD>()(right);
+    return 47*__gnu_cxx::hash<GShom>()(left)+19*__gnu_cxx::hash<GSDD>()(right);
   }
 
   /* Eval */
@@ -407,7 +403,7 @@ public:
     return left==((Minus*)&h )->left && right==((Minus*)&h )->right;
   }
   size_t hash() const{
-    return 5*::hash<GShom>()(left)+61*::hash<GSDD>()(right);
+    return 5*__gnu_cxx::hash<GShom>()(left)+61*__gnu_cxx::hash<GSDD>()(right);
   }
 
   /* Eval */
@@ -434,7 +430,7 @@ public:
     return arg==((Fixpoint*)&h )->arg ;
   }
   size_t hash() const{
-    return 17*::hash<GShom>()(arg);
+    return 17*__gnu_cxx::hash<GShom>()(arg);
   }
 
   /* Eval */
@@ -450,7 +446,7 @@ public:
     } else {
       
       int variable=d.variable();
-      set<GSDD> s;
+      std::set<GSDD> s;
       GSDD cur,cur2;
       for(GSDD::const_iterator vi=d.begin();vi!=d.end();vi++){
 	cur= GSDD(variable,*vi->first,vi->second);
@@ -477,8 +473,6 @@ public:
 
 } // end namespace H_Homomorphism
 
-using namespace S_Homomorphism;
-
 /*************************************************************************/
 /*                         Class StrongShom                               */
 /*************************************************************************/
@@ -499,7 +493,7 @@ GSDD StrongShom::eval(const GSDD &d)const{
     return GSDD::top;
   else{
     int variable=d.variable();
-    set<GSDD> s;
+    std::set<GSDD> s;
 
     for(GSDD::const_iterator vi=d.begin();vi!=d.end();vi++){
       s.insert(phi(variable,*vi->first)(vi->second));
@@ -517,13 +511,13 @@ GShom::GShom(const StrongShom *h):concret(h){}
 
 GShom::GShom(StrongShom *h):concret(canonical(h)){}
 
-GShom::GShom(const GSDD& d):concret(canonical(new Constant(d))){}
+GShom::GShom(const GSDD& d):concret(canonical(new S_Homomorphism::Constant(d))){}
 
 GShom::GShom(int var,const DataSet & val, const GShom &h) {
   if ( ! val.empty() ) {
-    concret=  canonical(new LeftConcat(GSDD(var,val),h));
+    concret=  canonical(new S_Homomorphism::LeftConcat(GSDD(var,val),h));
   } else {
-    concret = canonical(new Constant(GSDD::null));
+    concret = canonical(new S_Homomorphism::Constant(GSDD::null));
   }
 }
 
@@ -539,7 +533,7 @@ GSDD GShom::eval(const GSDD &d) const{
   return concret->eval(d);
 }
 
-const GShom GShom::id(canonical(new Identity(1)));
+const GShom GShom::id(canonical(new S_Homomorphism::Identity(1)));
 
 int GShom::refCounter() const{return concret->refCounter;}
 
@@ -632,18 +626,18 @@ Shom &Shom::operator=(const GShom &h){
 
 /* Operations */
 GShom fixpoint (const GShom &h) {
-  return GShom(canonical(new Fixpoint(h)));
+  return GShom(canonical(new S_Homomorphism::Fixpoint(h)));
 }
 
 GShom operator&(const GShom &h1,const GShom &h2){
-  return GShom(canonical(new Compose(h1,h2)));
+  return GShom(canonical(new S_Homomorphism::Compose(h1,h2)));
 }
 
 GShom operator+(const GShom &h1,const GShom &h2){
   if (h1 < h2) 
-    return GShom(canonical(new Add(h1,h2)));
+    return GShom(canonical(new S_Homomorphism::Add(h1,h2)));
   else
-    return GShom(canonical(new Add(h2,h1)));
+    return GShom(canonical(new S_Homomorphism::Add(h2,h1)));
 //   set<GShom> s;
 //   s.insert(h1);
 //   s.insert(h2);
@@ -652,23 +646,23 @@ GShom operator+(const GShom &h1,const GShom &h2){
 }
 
 GShom operator*(const GSDD &d,const GShom &h){
-  return GShom(canonical(new Mult(h,d)));
+  return GShom(canonical(new S_Homomorphism::Mult(h,d)));
 }
 
 GShom operator*(const GShom &h,const GSDD &d){
-  return GShom(canonical(new Mult(h,d)));
+  return GShom(canonical(new S_Homomorphism::Mult(h,d)));
 }
 
 GShom operator^(const GSDD &d,const GShom &h){
-  return GShom(canonical(new LeftConcat(d,h)));
+  return GShom(canonical(new S_Homomorphism::LeftConcat(d,h)));
 }
 
 GShom operator^(const GShom &h,const GSDD &d){
-  return GShom(canonical(new RightConcat(h,d)));
+  return GShom(canonical(new S_Homomorphism::RightConcat(h,d)));
 }
 
 GShom operator-(const GShom &h,const GSDD &d){
-  return GShom(canonical(new Minus(h,d)));
+  return GShom(canonical(new S_Homomorphism::Minus(h,d)));
 }
 
 
@@ -682,19 +676,19 @@ GShom::GShom(MyGShom* h) :
 
 void GShom::pstats(bool reinit)
 {
-  cout << "*\nGSHom Stats : size unicity table = " <<  canonical.size() << endl;
+  std::cout << "*\nGSHom Stats : size unicity table = " <<  canonical.size() << std::endl;
 #ifdef INST_STL
   canonical.pstat(reinit);
   
-  cout << "\n ----------------  MAPPING Jumps on GHOM --------------" << endl;
+  std::cout << "\n ----------------  MAPPING Jumps on GHOM --------------" << std::endl;
   PrintMapJumps();
   if (reinit){
-    cout << "\n -----  END MAPPING Jumps on GHOM, reseting table -----" << endl;
+    std::cout << "\n -----  END MAPPING Jumps on GHOM, reseting table -----" << std::endl;
     _GShom::HomJumps.clear();
   }
   else
     {
-      cout << "\n -----  END MAPPING Jumps on GHOM   --------" << endl; 
+      std::cout << "\n -----  END MAPPING Jumps on GHOM   --------" << std::endl; 
     }
 #endif
 }
