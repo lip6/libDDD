@@ -7,9 +7,6 @@
 
 #include <cassert>
 
-using namespace std;
-using namespace __gnu_cxx ;
-
 #ifdef INST_STL
 MapJumps  _GHom::HomJumps;
 #endif
@@ -219,7 +216,7 @@ public:
     return left==((Mult*)&h )->left && right==((Mult*)&h )->right;
   }
   size_t hash() const{
-    return 83*::hash<GHom>()(left)+53*::hash<GDDD>()(right);
+    return 83*__gnu_cxx::hash<GHom>()(left)+53*__gnu_cxx::hash<GDDD>()(right);
   }
 
   /* Eval */
@@ -237,32 +234,32 @@ public:
 /************************** Add */
 class Add:public _GHom{
 private:
-  set<GHom> parameters;
+  std::set<GHom> parameters;
 public:
   /* Constructor */
-  Add(const set<GHom> &param,int ref=0):_GHom(ref,true),parameters(param){}
+  Add(const std::set<GHom> &param,int ref=0):_GHom(ref,true),parameters(param){}
   /* Compare */
   bool operator==(const _GHom &h) const{
     return parameters==((Add*)&h )->parameters;
   }
   size_t hash() const{
     size_t res=0;
-    for(set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
-      res^=::hash<GHom>()(*gi);
+    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
+      res^=__gnu_cxx::hash<GHom>()(*gi);
     return res;
   }
 
   /* Eval */
   GDDD eval(const GDDD &d)const{
-    set<GDDD> s;
-    for(set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
+    std::set<GDDD> s;
+    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
       s.insert((*gi)(d));
     return DED::add(s);
   }
 
   /* Memory Manager */
   void mark() const{
-    for(set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
+    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
       gi->mark();
   }
 };
@@ -279,7 +276,7 @@ public:
     return left==((Compose*)&h )->left && right==((Compose*)&h )->right;
   }
   size_t hash() const{
-    return 13*::hash<GHom>()(left)+7*::hash<GHom>()(right);
+    return 13*__gnu_cxx::hash<GHom>()(left)+7*__gnu_cxx::hash<GHom>()(right);
   }
 
   /* Eval */
@@ -308,7 +305,7 @@ public:
     return left==((LeftConcat*)&h )->left && right==((LeftConcat*)&h )->right;
   }
   size_t hash() const{
-    return 23*::hash<GDDD>()(left)+47*::hash<GHom>()(right);
+    return 23*__gnu_cxx::hash<GDDD>()(left)+47*__gnu_cxx::hash<GHom>()(right);
   }
 
   /* Eval */
@@ -337,7 +334,7 @@ public:
     return left==((RightConcat*)&h )->left && right==((RightConcat*)&h )->right;
   }
   size_t hash() const{
-    return 47*::hash<GHom>()(left)+19*::hash<GDDD>()(right);
+    return 47*__gnu_cxx::hash<GHom>()(left)+19*__gnu_cxx::hash<GDDD>()(right);
   }
 
   /* Eval */
@@ -365,7 +362,7 @@ public:
     return left==((Minus*)&h )->left && right==((Minus*)&h )->right;
   }
   size_t hash() const{
-    return 5*::hash<GHom>()(left)+61*::hash<GDDD>()(right);
+    return 5*__gnu_cxx::hash<GHom>()(left)+61*__gnu_cxx::hash<GDDD>()(right);
   }
 
   /* Eval */
@@ -392,7 +389,7 @@ public:
     return arg==((Fixpoint*)&h )->arg ;
   }
   size_t hash() const{
-    return 17*::hash<GHom>()(arg);
+    return 17*__gnu_cxx::hash<GHom>()(arg);
   }
 
   /* Eval */
@@ -432,7 +429,7 @@ GDDD StrongHom::eval(const GDDD &d)const{
     return GDDD::top;
   else{
     int variable=d.variable();
-    set<GDDD> s;
+    std::set<GDDD> s;
     for(GDDD::const_iterator vi=d.begin();vi!=d.end();vi++){
       s.insert(phi(variable,vi->first)(vi->second));
     }
@@ -471,7 +468,7 @@ int GHom::refCounter() const{return concret->refCounter;}
 
 /* Sum */
 
-GHom GHom::add(const set<GHom>& s){
+GHom GHom::add(const std::set<GHom>& s){
   return(new Add(s));
 }
 
@@ -569,7 +566,7 @@ GHom operator&(const GHom &h1,const GHom &h2){
 }
 
 GHom operator+(const GHom &h1,const GHom &h2){
-  set<GHom> s;
+  std::set<GHom> s;
   s.insert(h1);
   s.insert(h2);
 //  return(new Add(s));
@@ -609,14 +606,14 @@ GHom::GHom(MyGHom *h):concret(canonical(h)){}
 
 void GHom::pstats(bool reinit)
 {
-  cout << "*\nGHom Stats : size unicity table = " <<  canonical.size() << endl;
+  std::cout << "*\nGHom Stats : size unicity table = " <<  canonical.size() << std::endl;
 #ifdef INST_STL
   canonical.pstat(reinit);
   
-  cout << "\n ----------------  MAPPING Jumps on GHOM --------------" << endl;
+  std::cout << "\n ----------------  MAPPING Jumps on GHOM --------------" << std::endl;
   PrintMapJumps();
   if (reinit){
-    cout << "\n -----  END MAPPING Jumps on GHOM, reseting table -----" << endl;
+    std::cout << "\n -----  END MAPPING Jumps on GHOM, reseting table -----" << std::endl;
     _GHom::HomJumps.clear();
   }
   else

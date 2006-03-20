@@ -1,11 +1,32 @@
-lib_LIBRARIES = libDDD.a  libDDD_d.a libDDD_otfg.a
+lib_LIBRARIES 	= libDDD.a  libDDD_d.a libDDD_otfg.a
+include_HEADERS = DataSet.h			\
+	  	  DDD.h 			\
+		  DED.h 			\
+		  Hom.h 			\
+		  MemoryManager.h 		\
+		  SDD.h 			\
+		  SDED.h 			\
+		  SHom.h 			\
+		  UniqueTable.h
 
 # libDDD_p.a  DEACTIVATED BUILD
 # libDDD_i.a  BROKEN WITH GCC 3.4
 
-SRCS = DED.cpp DDD.cpp Hom.cpp SDED.cpp SDD.cpp SHom.cpp \
-   DataSet.h  DED.h  MemoryManager.h  SDED.h  UniqueTable.h \
-   DDD.h	   Hom.h  SDD.h		   SHom.h
+SRCS 		= DED.cpp			\
+		  DDD.cpp 			\
+		  Hom.cpp 			\
+		  SDED.cpp 			\
+		  SDD.cpp 			\
+		  SHom.cpp 			\
+   		  DataSet.h  			\
+		  DED.h  			\
+		  MemoryManager.h  		\
+		  SDED.h  			\
+		  UniqueTable.h 		\
+		  DDD.h				\
+		  Hom.h				\
+		  SDD.h		   		\
+		  SHom.h
 
 AM_CPPFLAGS =  -Wall 
 

@@ -9,9 +9,6 @@
 #include <map>
 // modif
 #include <sstream>
-// ajout
-using namespace std;
-using namespace __gnu_cxx;
 
 #include "DDD.h"
 #include "UniqueTable.h"
@@ -77,7 +74,7 @@ namespace std {
   };
 }
 
-map<int,string> mapVarName;
+std::map<int,std::string> mapVarName;
 
 static size_t Max_DDD=0;
 static UniqueTable<_GDDD> canonical;
@@ -115,10 +112,10 @@ size_t GDDD::peak() {
 
 void GDDD::pstats(bool reinit)
 {
-  cout << "Peak number of DDD nodes in unicity table :" << peak() << endl; 
+  std::cout << "Peak number of DDD nodes in unicity table :" << peak() << std::endl; 
 #ifdef INST_STL
-  cout << "*\nGDDS : size unicity table =" << canonical.size() << endl;
-  cout << "  Average nb jump in hash table : " << _GDDD::StatJumps() << endl;
+  std::cout << "*\nGDDS : size unicity table =" << canonical.size() << std::endl;
+  std::cout << "  Average nb jump in hash table : " << _GDDD::StatJumps() << std::endl;
   if (reinit){
     _GDDD::ResetNbJumps();
   }
@@ -129,19 +126,19 @@ void GDDD::pstats(bool reinit)
 
 
 /* Visualisation*/
-void GDDD::print(ostream& os,string s) const{
+void GDDD::print(std::ostream& os,std::string s) const{
   if (*this == one)
-    os << "[ " << s << "]"<<endl;
+    os << "[ " << s << "]"<<std::endl;
   else if(*this == top)
-      os << "[ " << s << "T ]"<<endl;
+      os << "[ " << s << "T ]"<<std::endl;
   else if(*this == null)
-      os << "[ " << s << "0 ]"<<endl;
+      os << "[ " << s << "0 ]"<<std::endl;
   else{
-    string val;
+    std::string val;
     for(GDDD::const_iterator vi=begin();vi!=end();vi++){
-      // modif strstream -> stringstream
-      stringstream tmp;
-      map<int,string>::iterator i=mapVarName.find(variable());
+      // modif strstream -> std::stringstream
+      std::stringstream tmp;
+      std::map<int,std::string>::iterator i=mapVarName.find(variable());
       if (i==mapVarName.end())
 	tmp<<"var"<<variable()<<'('<<vi->first<<")";
       else
@@ -152,8 +149,8 @@ void GDDD::print(ostream& os,string s) const{
   }
 }
 
-ostream& operator<<(ostream &os,const GDDD &g){
-  string s;
+std::ostream& operator<<(std::ostream &os,const GDDD &g){
+  std::string s;
   g.print(os,s);
   return(os);
 }
@@ -189,7 +186,7 @@ unsigned int GDDD::refCounter() const{
 class MySize{
 private:
   unsigned long int res;
-  set<GDDD> s;
+  std::set<GDDD> s;
   void mysize(const GDDD& g){
     if(s.find(g)==s.end()){
       s.insert(g);
@@ -217,7 +214,7 @@ class MyNbStates{
 private:
   int val; // val=0 donne nbState , val=1 donne noSharedSize
 //  static hash_map<GDDD,long double> s;
-  static hash_map<GDDD,long double> s;
+  static __gnu_cxx::hash_map<GDDD,long double> s;
 
   long double nbStates(const GDDD& g){
     if(g==GDDD::one)
@@ -225,7 +222,7 @@ private:
     else if(g==GDDD::top || g==GDDD::null)
       return 0;
     else{
-      hash_map<GDDD,long double>::const_iterator i=s.find(g);
+      __gnu_cxx::hash_map<GDDD,long double>::const_iterator i=s.find(g);
       if(i==s.end()){
 	long double res=0;
 	for(GDDD::const_iterator gi=g.begin();gi!=g.end();gi++)
@@ -252,7 +249,7 @@ public:
   }
 };
 
-hash_map<GDDD,long double> MyNbStates::s = hash_map<GDDD,long double> ();
+__gnu_cxx::hash_map<GDDD,long double> MyNbStates::s = __gnu_cxx::hash_map<GDDD,long double> ();
 
 
 long double GDDD::nbStates() const{
@@ -318,7 +315,7 @@ DDD::DDD(const GDDD &g):GDDD(g.concret){
 GDDD::GDDD(int var,int val,const GDDD &d):concret(null.concret){ //var-val->d
   if(d!=null){
     _GDDD *_g = new _GDDD(var,0);
-    pair<int,GDDD> x(val,d);
+    std::pair<int,GDDD> x(val,d);
     _g->valuation.push_back(x);
     concret=canonical(_g);
   }
@@ -329,7 +326,7 @@ GDDD::GDDD(int var,int val1,int val2,const GDDD &d):concret(null.concret){ //var
   if(val1<=val2 && null!=d){
     _GDDD *_g = new _GDDD(var,0);
     for(int val=val1;val<=val2;val++){
-      pair<int,GDDD> x(val,d);
+      std::pair<int,GDDD> x(val,d);
       _g->valuation.push_back(x);
     }
     concret=canonical(_g);
@@ -365,14 +362,14 @@ DDD &DDD::operator=(const DDD &g){
 }
 
 /* Visualisation */
-void GDDD::varName(int var,const string &name){
-  ::mapVarName[var]=name;
+void GDDD::varName(int var,const std::string &name){
+  mapVarName[var]=name;
 }
 
-const string GDDD::getvarName(int var)
+const std::string GDDD::getvarName(int var)
 {
-  stringstream tmp;
-  map<int,string>::iterator i=mapVarName.find(var);
+  std::stringstream tmp;
+  std::map<int,std::string>::iterator i=mapVarName.find(var);
   if (i==mapVarName.end())
     tmp<<"var"<< var ;
   else
@@ -410,7 +407,7 @@ bool DDD::set_equal(const DataSet & b) const {
 long double DDD::set_size() const { return nbStates(); }
 
 size_t DDD::set_hash() const {
-  return hash<GDDD>() (*this);
+  return __gnu_cxx::hash<GDDD>() (*this);
 }
 
 
@@ -418,7 +415,7 @@ size_t DDD::set_hash() const {
 
 //My funs
 
-unsigned long int GDDD::nodeIndex(vector<_GDDD*> list) const{
+unsigned long int GDDD::nodeIndex(std::vector<_GDDD*> list) const{
     assert(this);
     assert(concret);
     unsigned long int i=0;
@@ -429,7 +426,7 @@ unsigned long int GDDD::nodeIndex(vector<_GDDD*> list) const{
 }
 
 
-void GDDD::saveNode(ostream& os, vector<_GDDD*>& list)const {
+void GDDD::saveNode(std::ostream& os, std::vector<_GDDD*>& list)const {
     assert(this);
     //assert(concret);
     unsigned long int index = nodeIndex(list);
@@ -451,55 +448,55 @@ void GDDD::saveNode(ostream& os, vector<_GDDD*>& list)const {
 
 
 
-void saveDDD(ostream& os, vector<DDD> list) {
-    vector<_GDDD*> SavedDDD;
+void saveDDD(std::ostream& os, std::vector<DDD> list) {
+  std::vector<_GDDD*> SavedDDD;
     for (unsigned int i= 0; i<list.size(); i++) {
         list[i].saveNode(os, SavedDDD);
     }
-    os<<SavedDDD.size()<<endl;
+    os<<SavedDDD.size()<<std::endl;
     for (unsigned long int i=0; i<SavedDDD.size();i++) {
-        if (GDDD(SavedDDD[i])==GDDD::one) os<<i<<" one"<<endl;
+        if (GDDD(SavedDDD[i])==GDDD::one) os<<i<<" one"<<std::endl;
         else
-        if (GDDD(SavedDDD[i])==GDDD::null) os<<i<<" null"<<endl;
+        if (GDDD(SavedDDD[i])==GDDD::null) os<<i<<" null"<<std::endl;
         else
-        if (GDDD(SavedDDD[i])==GDDD::top) os<<i<<" top"<<endl;
+        if (GDDD(SavedDDD[i])==GDDD::top) os<<i<<" top"<<std::endl;
         else {
             os<<i<<"[ "<<SavedDDD[i]->variable;
             for (GDDD::const_iterator vi=GDDD(SavedDDD[i]).begin();vi!=GDDD(SavedDDD[i]).end();vi++)
                 os<<" "<<vi->first<<" "<<vi->second.nodeIndex(SavedDDD);
-            os<<" ]"<<endl;
+            os<<" ]"<<std::endl;
         }
     }
         
-    os<<endl<<"Saved:";
+    os<<std::endl<<"Saved:";
     for (unsigned int i= 0; i<list.size(); i++) os<<" "<<list[i].nodeIndex(SavedDDD);
-    os<<endl;
+    os<<std::endl;
     
 }
 
-void loadDDD(istream& is, vector<DDD>& list) {
+void loadDDD(std::istream& is, std::vector<DDD>& list) {
     unsigned long int size;
     unsigned long int index;
     int var;
     int val;
-    vector<pair<int,GDDD> > valuation;
-    string temp;
+    std::vector<std::pair<int,GDDD> > valuation;
+    std::string temp;
     is>>size;
-    vector<GDDD> nodes(size);
+    std::vector<GDDD> nodes(size);
     for (unsigned long int i=0;i<size;i++) {
         is>>index;
         is>>temp;
-        if (temp==string("one")) {nodes[index]=GDDD::one; /*cout<<"one"<<endl;cout.flush();*/}
-        else if (string(temp)==string("null")) nodes[index]=GDDD::null;
-        else if (string(temp)==string("top")) nodes[index]=GDDD::top;
+        if (temp==std::string("one")) {nodes[index]=GDDD::one; /*std::cout<<"one"<<std::endl;std::cout.flush();*/}
+        else if (std::string(temp)==std::string("null")) nodes[index]=GDDD::null;
+        else if (std::string(temp)==std::string("top")) nodes[index]=GDDD::top;
         else {
-            assert (temp==string("["));
+            assert (temp==std::string("["));
             is>>var;
             is>>temp;
-            while(temp!=string("]")) {
+            while(temp!=std::string("]")) {
                 val=atoi(temp.c_str());
                 is>>temp;
-                valuation.push_back(pair<int,GDDD>(val,nodes[strtoul(temp.c_str(),NULL,10)]));
+                valuation.push_back(std::pair<int,GDDD>(val,nodes[strtoul(temp.c_str(),NULL,10)]));
                 is>>temp;
             }
             nodes[index]=GDDD(var,valuation);
@@ -507,7 +504,7 @@ void loadDDD(istream& is, vector<DDD>& list) {
         }
     }
     is>>temp;
-    assert (temp==string("Saved:"));
+    assert (temp==std::string("Saved:"));
     for(unsigned long int i=0;i<list.size();i++) {
         is>>index; list[i]=nodes[index];
     }

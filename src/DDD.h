@@ -13,6 +13,9 @@
 /// pre-declaration of concrete (private) class implemented in .cpp file
 class _GDDD;
 
+/// pre-declaration of DDD for use in std::vector<DDD> before DDD declaration (g++ 4)
+class DDD;
+
 /// This class is the base class representing a Data Decision Diagram.
 /// It is composed of a set of arcs labeled by integers that point to successor GDDD nodes.
 /// This class does not implement reference counting : 

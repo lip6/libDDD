@@ -11,9 +11,6 @@
 // ajout
 #include <cassert>
 
-using namespace std;
-using namespace __gnu_cxx;
-
 #include "SDED.h"
 #include "SDD.h"
 #include "UniqueTable.h"
@@ -126,12 +123,12 @@ namespace std {
 static size_t Max_SDD=0;
 
 #ifdef OTF_GARBAGE
-static hash_set<_GSDD*> recent;
+static  __gnu_cxx::hash_set<_GSDD*> recent;
 
 template<>
 _GSDD* UniqueTable<_GSDD>::operator()(_GSDD *_g){
-  pair<hash_set<_GSDD*>::iterator, bool> ref=table.insert(_g); 
-  hash_set<_GSDD*>::iterator ti=ref.first;
+  std::pair<__gnu_cxx::hash_set<_GSDD*>::iterator, bool> ref=table.insert(_g); 
+  __gnu_cxx::hash_set<_GSDD*>::iterator ti=ref.first;
   if (!ref.second){
     delete _g;
   } else {
@@ -150,12 +147,12 @@ namespace SDDutil {
     size_t rcSize = recent.size();
     size_t flSize = canonical.table.size();
     int cleared=0,inuse=0,isson=0,toSon=0,totalRefs=0,min=255,max=0;
-    for (hash_set<_GSDD*>::iterator it =  recent.begin(); it != recent.end() ; ) {
+    for (__gnu_cxx::hash_set<_GSDD*>::iterator it =  recent.begin(); it != recent.end() ; ) {
       if ( ! (*it)->isSon  ) {
 	// not eligible for long term
 	if ( ! (*it)->tempCounter ) {
 	  // AND not in use
-	  hash_set<_GSDD*>::iterator jt= it;
+          __gnu_cxx::hash_set<_GSDD*>::iterator jt= it;
 	  it++;
 	  
 	  _GSDD *g=*jt;
@@ -172,7 +169,7 @@ namespace SDDutil {
 	  min =  cc < min ? cc : min ;
 	  max =  cc > max ? cc : max ;
 	  if (cc > (2*(lastAvg+1)) ) {
-	    hash_set<_GSDD*>::iterator jt= it;
+            __gnu_cxx::hash_set<_GSDD*>::iterator jt= it;
 	    it++;
 	    (*jt)->isSon=true;
 	    recent.erase(jt);
@@ -186,16 +183,16 @@ namespace SDDutil {
       } else {
 	// eligible (newly) for long term
 	// kill from recent entries
-	hash_set<_GSDD*>::iterator jt= it;
+        __gnu_cxx::hash_set<_GSDD*>::iterator jt= it;
 	it++;
 	recent.erase(jt);
 	++isson;
       }
     } // end foreach entry in recent nodes table
     lastAvg = inuse ? totalRefs / inuse : 1;
-    cerr << "Reduced recent from :" << rcSize << " to " << recent.size() << endl;
-    cerr << "Reduced canonical from :" << flSize << " to " << canonical.table.size() << endl;
-    cerr << "Destroyed : " << cleared << "  inuse : " << inuse << " average use(min/max) :" << lastAvg <<"("<<min<<","<<max<<")"<< " elevated to long term " << toSon << " natural new long term " << isson << endl <<endl; 
+    std::cerr << "Reduced recent from :" << rcSize << " to " << recent.size() << std::endl;
+    std::cerr << "Reduced canonical from :" << flSize << " to " << canonical.table.size() << std::endl;
+    std::cerr << "Destroyed : " << cleared << "  inuse : " << inuse << " average use(min/max) :" << lastAvg <<"("<<min<<","<<max<<")"<< " elevated to long term " << toSon << " natural new long term " << isson << std::endl <<std::endl; 
 
   }
 #endif // OTF_GARBAGE
@@ -243,10 +240,10 @@ size_t GSDD::peak() {
 
 void GSDD::pstats(bool reinit)
 {
-  cout << "Peak number of SDD nodes in unicity table :" << peak() << endl; 
+  std::cout << "Peak number of SDD nodes in unicity table :" << peak() << std::endl; 
 #ifdef INST_STL
-  cout << "*\nGSDD : size unicity table =" << canonical.size() << endl;
-  cout << "  Average nb jump in hash table : " << _GSDD::StatJumps() << endl;
+  std::cout << "*\nGSDD : size unicity table =" << canonical.size() << std::endl;
+  std::cout << "  Average nb jump in hash table : " << _GSDD::StatJumps() << std::endl;
   if (reinit){
     _GSDD::ResetNbJumps();
   }
@@ -257,19 +254,19 @@ void GSDD::pstats(bool reinit)
 
 
 /* Visualisation*/
-void GSDD::print(ostream& os,string s) const{
+void GSDD::print(std::ostream& os,std::string s) const{
   if (*this == one)
-    os << "[ " << s << "]"<<endl;
+    os << "[ " << s << "]"<<std::endl;
   else if(*this == top)
-      os << "[ " << s << "T ]"<<endl;
+      os << "[ " << s << "T ]"<<std::endl;
   else if(*this == null)
-      os << "[ " << s << "0 ]"<<endl;
+      os << "[ " << s << "0 ]"<<std::endl;
   else{
     // should not happen
     assert ( begin() != end());
 
     for(GSDD::const_iterator vi=begin();vi!=end();vi++){
-      stringstream tmp;
+      std::stringstream tmp;
       // Fixme  for pretty print variable names
 //      string varname = GDDD::getvarName(variable());
       tmp<<"var" << variable() <<  " " ;
@@ -280,8 +277,8 @@ void GSDD::print(ostream& os,string s) const{
 }
  
 
-ostream& operator<<(ostream &os,const GSDD &g){
-  string s;
+std::ostream& operator<<(std::ostream &os,const GSDD &g){
+  std::string s;
   g.print(os,s);
   return(os);
 }
@@ -328,7 +325,7 @@ GSDD::GSDD(int var,const DataSet &val,const GSDD &d):concret(null.concret){ //va
   if(d!=null && ! val.empty() ){
     _GSDD *_g = new _GSDD(var,0);
     // cast to (DataSet*) to lose "const" type
-    pair<DataSet *, GSDD> x( val.newcopy(),d);
+    std::pair<DataSet *, GSDD> x( val.newcopy(),d);
     _g->valuation.push_back(x);
     concret=canonical(_g);    
 #ifdef OTF_GARBAGE
@@ -373,13 +370,13 @@ unsigned int GSDD::refCounter() const{
 
 class SddSize{
 private:
-  set<GSDD> s;
+  std::set<GSDD> s;
   // Was used to compute number of nodes in referenced datasets as well
   // but dataset doesn't define what we need as it is not necessarily 
   // a decision diagram implementation => number of nodes = ??
 //   set<DataSet &> sd3;
   // trying to repair it : consider we reference only SDD or DDD for now, corresponds to current usage patterns
-  set<GDDD> sd3;
+  std::set<GDDD> sd3;
 
   bool firstError;
 
@@ -404,8 +401,8 @@ private:
       sddsize( GDDD ((DDD &) *g) );
     } else {
       if (firstError) {
-	cerr << "Warning : unkown referenced dataset type on arc, node count is inacurate"<<endl;
-	cerr << "Read type :" << typeid(*g).name() <<endl ;
+        std::cerr << "Warning : unkown referenced dataset type on arc, node count is inacurate"<<std::endl;
+        std::cerr << "Read type :" << typeid(*g).name() <<std::endl ;
 	firstError = false;
       }
     }
@@ -439,10 +436,10 @@ public:
 };
 
 
-pair<unsigned long int,unsigned long int> GSDD::node_size() const{
+std::pair<unsigned long int,unsigned long int> GSDD::node_size() const{
   static SddSize sddsize;
   sddsize(*this);
-  return make_pair(sddsize.res,sddsize.d3res);
+  return std::make_pair(sddsize.res,sddsize.d3res);
 }
 
 // old prototype
@@ -455,7 +452,7 @@ unsigned long int GSDD::size() const{
 class MySDDNbStates{
 private:
   int val; // val=0 donne nbState , val=1 donne noSharedSize
-  static hash_map<GSDD,long double> s;
+  static __gnu_cxx::hash_map<GSDD,long double> s;
 
   long double nbStates(const GSDD& g){
     if(g==GSDD::one)
@@ -463,7 +460,7 @@ private:
     else if(g==GSDD::top || g==GSDD::null)
       return 0;
     else{
-      hash_map<GSDD,long double>::const_iterator i=s.find(g);
+      __gnu_cxx::hash_map<GSDD,long double>::const_iterator i=s.find(g);
       if(i==s.end()){
 	long double res=0;
 	for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++)
@@ -489,7 +486,7 @@ public:
   }
 };
 
-hash_map<GSDD,long double> MySDDNbStates::s = hash_map<GSDD,long double> ();
+__gnu_cxx::hash_map<GSDD,long double> MySDDNbStates::s = __gnu_cxx::hash_map<GSDD,long double> ();
 
 long double GSDD::nbStates() const{
   static MySDDNbStates myNbStates(0);
@@ -515,8 +512,8 @@ void GSDD::garbage(){
 
   MySDDNbStates::clear();
 #ifdef OTF_GARBAGE
-  for (hash_set<_GSDD*>::iterator it =  recent.begin(); it != recent.end() ; ) {
-    hash_set<_GSDD*>::iterator jt= it;
+  for (__gnu_cxx::hash_set<_GSDD*>::iterator it =  recent.begin(); it != recent.end() ; ) {
+    __gnu_cxx::hash_set<_GSDD*>::iterator jt= it;
     it++;
     recent.erase(jt);
   }

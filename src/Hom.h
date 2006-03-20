@@ -365,8 +365,8 @@ public:
   {
     const char *name=typeid(*this).name();
     MapJumps::iterator ii;
-    if ((ii=HomJumps.find(string(name)))==HomJumps.end()){
-      HomJumps[string(name)]=PairLL(1L, (long long int) (1+nbjumps));
+    if ((ii=HomJumps.find(std::string(name)))==HomJumps.end()){
+      HomJumps[std::string(name)]=PairLL(1L, (long long int) (1+nbjumps));
     }
     else {
       ii->second.first++;
