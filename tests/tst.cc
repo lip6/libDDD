@@ -143,8 +143,8 @@ int main(int argc, char **argv){
   if (!ddd1 || !ddd2)
     return 1;
 //  export of tests into dot format
-//  xxx::dot::dot_export(std::string(argv[1]) + ".dot", xxx::data_set(new xxx::ddd_data(*ddd1)), std::string("ddd1"));
-//  xxx::dot::dot_export(std::string(argv[2]) + ".dot", xxx::data_set(new xxx::ddd_data(*ddd2)), std::string("ddd2"));
+  xxx::dot::dot_export(std::string(argv[1]) + ".dot", xxx::data_set(new xxx::ddd_data(*ddd1)), std::string("ddd1"));
+  xxx::dot::dot_export(std::string(argv[2]) + ".dot", xxx::data_set(new xxx::ddd_data(*ddd2)), std::string("ddd2"));
 //  commented lines are to show only wether ddd-making is ok or not
 //  cout << *ddd1 << endl;
 //  cout << *ddd2 << endl;
@@ -157,6 +157,6 @@ int main(int argc, char **argv){
   if (argv[3][0] == '-')
     cout << (ddd_res = (*ddd1 - *ddd2));
 //  export of tests into dot format
-//  xxx::dot::dot_export(std::string(argv[1]) + argv[3] + remove_slash(argv[2]) + ".dot", xxx::data_set(new xxx::ddd_data(ddd_res)) , std::string("ddd resultat"));
+  xxx::dot::dot_export(std::string(argv[1]) + argv[3] + remove_slash(argv[2]) + ".dot", xxx::data_set(new xxx::ddd_data(ddd_res)) , std::string("ddd_res"));
   return 0;
 }
