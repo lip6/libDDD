@@ -1,0 +1,76 @@
+CONTENU
+	alire : ce fichier
+	src : contient la bibiotheque DDD
+	demo: contient des exemples de programmes
+	doc : contient un manuel de reference
+
+INSTALLATION
+1. Aller dans le repertoire src
+2. Compiler la bibiotheque DDD : make
+3. Deplacer les fichiers *.h et libDDD.a a votre gout
+
+EXEMPLE
+Dans le repertoire demo 6 exemples de programme vous sont propose. Le Makefile vous permet directement de compiler un ou tous ces exemples :
+- la commande make produit 6 executables tsti.exe pour i=1..6
+- la commande make tsti.exe produit l'executable tsti.exe pour i=1..6
+
+PROBLEME
+Envoyez moi un mail : couvreur@labri.fr
+
+
+COMPILATION AVEC STL MODIFIE (INSTRUMENTE)
+
+   1- compile the sources of the application with options:
+      -D INST_STL (or #define INST_STL before including any DDD library include file)
+      -isystem <dir> where dir is  libddd/STLProf
+
+   2- link with libDDD_i.a
+
+Examples in demo:
+
+For instance in tst6.cpp, 
+    - #include "MemoryManager.h" has been added
+
+    - A call to 'MemoryManager::pstats();' has been added at the end
+      of the main()
+
+The obtained trace is (// are added comments):
+
+Each entry of the hash table is found using the hash function. Entries are
+the beginning of the chained list of elements. The performance of a hash function
+is good if the ratio  <total nb jump in hash table>/ <nb search in table> is
+kept low. The table of statistics by homomorphism can help determine the 'bad'
+hash functions.
+
+The statistics on the hash table describes the average number of jumps in the
+hash table when searching for an element.
+
+///////////////////////////////// begin trace /////////////////////////////////
+
+*
+Cache Stats : size=35              // size of the cache
+nb jump in hash table : 43/nbsearch 41=1.04878  // <total nb jump in hash table>/ <nb search in table>
+ 
+Cache hit ratio : 13.6364%         // Hit/Misses stats on the cache 
+*
+GHom Stats : size unicity table = 25    // number of stored homomorphisms
+NbInsertion(25)*100/NbAccess(32)  = 78	// hit misses ie percent of insertion in hom table
+ 
+ ----------------  MAPPING Jumps on GHOM --------------
+Hom LeftConcat  -->             26/20= 1.3        //  <total nb jump in hash table>/ <nb search in table>
+Hom PermuteFin  -->             3/2= 1.5
+Hom PermuteDown -->             2/2= 1
+Hom Compose     -->             5/4= 1.25
+Hom Permute     -->             1/1= 1
+Hom Identity    -->             1/1= 1
+Hom PermuteUp   -->             2/2= 1
+ 
+ -----  END MAPPING Jumps on GHOM, reseting table -----
+*
+GDDS : size unicity table =43              // nb DDD nodes in the unicity table
+  Average nb jump in hash table : 1.33898  // average jump in hash table
+NbInsertion(43)*100/NbAccess(59)  = 72    // hit misses ie percent of insertion in DDD table
+
+
+/////////////////////////////////  end trace  /////////////////////////////////
+
