@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cassert>
 using namespace std;
 #include "DataSet.h"
 #include "DDD.h"
