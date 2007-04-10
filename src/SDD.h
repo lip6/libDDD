@@ -149,7 +149,7 @@ public:
   /// Returns the number of successors of a given node. This is the size of the arc array of the node.
   size_t nbsons () const;
   /// Returns the number of states or paths represented by a given node.
-  long double GSDD::nbStates() const;
+  long double nbStates() const;
 
   ///  Broken right now, dont use me or fixme first
   /// Returns the number of nodes that would be used to represent a SDD if no unicity table was used.
