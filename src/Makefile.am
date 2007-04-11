@@ -1,4 +1,4 @@
-lib_LIBRARIES 	= libDDD.a  libDDD_d.a libDDD_otfg.a
+lib_LIBRARIES 	= libDDD.a  libDDD_d.a libDDD_otfg.a libDDD_ev.a
 include_HEADERS = DataSet.h			\
 	  	  DDD.h 			\
 		  DED.h 			\
@@ -18,7 +18,7 @@ SRCS 		= DED.cpp			\
 		  SDED.cpp 			\
 		  SDD.cpp 			\
 		  SHom.cpp 			\
-   		  DataSet.h  			\
+		  DataSet.h  			\
 		  DED.h  			\
 		  MemoryManager.h  		\
 		  SDED.h  			\
@@ -49,3 +49,8 @@ libDDD_d_a_CPPFLAGS = -g  -Wall
 # change options to activate OTF garbage collection (reference counting on GSDD) 
 libDDD_otfg_a_SOURCES = $(SRCS)
 libDDD_otfg_a_CPPFLAGS = -g -O2 -Wall -D OTF_GARBAGE
+
+# change options to activate EVDDD for distance functions
+libDDD_ev_a_SOURCES = $(SRCS)
+libDDD_ev_a_CPPFLAGS = -g -O2 -Wall -D EVDDD
+

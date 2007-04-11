@@ -368,6 +368,10 @@ void GDDD::varName(int var,const std::string &name){
 
 const std::string GDDD::getvarName(int var)
 {
+#ifdef EVDDD
+  if (var==DISTANCE) 
+    return "dist";
+#endif
   std::stringstream tmp;
   std::map<int,std::string>::iterator i=mapVarName.find(var);
   if (i==mapVarName.end())
