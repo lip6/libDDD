@@ -158,7 +158,17 @@ std::ostream& operator<<(std::ostream &os,const GDDD &g){
 GDDD::GDDD(_GDDD *_g):concret(_g){}
 
 GDDD::GDDD(int variable,Valuation value){
-  concret=(value.size()!=0)? canonical(new _GDDD(variable,value)): null.concret;
+#ifdef EVDDD
+  if (variable != DISTANCE) {
+#endif
+    concret=(value.size()!=0)? canonical(new _GDDD(variable,value)): null.concret;
+#ifdef EVDDD
+  } else {
+    assert(value.size() == 1);
+    Valuation::iterator it = value.begin();
+    new(this) GDDD(variable,it->first,it->second);
+  }
+#endif
 }
 
 /* Accessors */
@@ -315,7 +325,27 @@ DDD::DDD(const GDDD &g):GDDD(g.concret){
 GDDD::GDDD(int var,int val,const GDDD &d):concret(null.concret){ //var-val->d
   if(d!=null){
     _GDDD *_g = new _GDDD(var,0);
+#ifdef EVDDD
+    GDDD succ = d;
+    if (var == DISTANCE) {
+      if (succ != GDDD::one) {
+	int minsucc=-1;
+	for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; it++) {
+	  assert (it->second.nbsons() == 1);
+	  GDDD::const_iterator succd = it->second.begin();
+	  if (minsucc==-1 || succd->first < minsucc)
+	    minsucc = succd->first;
+	}
+	if (minsucc != 0) {
+	  val += minsucc;
+	  succ = push (-minsucc) (succ);
+	}
+      }
+    }
+    std::pair<int,GDDD> x(val,succ);
+#else
     std::pair<int,GDDD> x(val,d);
+#endif
     _g->valuation.push_back(x);
     concret=canonical(_g);
   }
