@@ -74,18 +74,91 @@ bool _DED_Add::operator==(const _DED &e)const{
   return (parameters==((_DED_Add*)&e)->parameters);
 }
 
+#ifdef EVDDD
+/// increment the value of the next variable
+class _push:public StrongHom {
+  int dist;
+public:
+  _push(int dist_) :dist(dist_){}
+
+  GDDD phiOne() const {
+    return GDDD::one;
+  }                   
+
+  GHom phi(int vr, int vl) const {
+    if (vr == DISTANCE)
+      return GHom(vr,vl+dist);
+    else 
+      return GHom(vr,vl,this);
+  }
+
+  size_t hash() const {
+    return 11213*dist;
+  }
+
+  bool operator==(const StrongHom &s) const {
+    return dist == ((const _push &)s).dist;
+  }
+};
+/// User function : Construct a Hom for a Strong Hom _plusplus
+GHom push(int v){return new _push(v);};
+#endif
+
+
 /* Transform */
 GDDD _DED_Add::eval() const{
   assert(parameters.size()>1);
   int variable=parameters.begin()->variable();
+
   GDDD::Valuation value;
   std::map<int,std::set<GDDD> > map_set;
-  
+
+#ifdef EVDDD
+  if (variable == DISTANCE) {
+    /// Special distance node canonization
+    int min = -1;
+    std::set<GDDD> succSet;
+    // gather min
+    for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
+      for(GDDD::const_iterator vi=si->begin();vi!=si->end();vi++){
+	if (min == -1 || min > vi->first)
+	  min = vi->first;
+      }
+    }
+    for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
+      for(GDDD::const_iterator vi=si->begin();vi!=si->end();vi++){
+	if (vi->first == min)
+	  succSet.insert(vi->second);
+	else
+	  succSet.insert(push(vi->first - min)(vi->second));
+      }
+    }
+    GDDD succ = DED::add(succSet);
+    if (succ != GDDD::one) {
+      int minsucc=-1;
+      for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; it++) {
+	assert (it->second.nbsons() == 1);
+	GDDD::const_iterator succd = it->second.begin();
+	if (minsucc==-1 || succd->first < minsucc)
+	  minsucc = succd->first;
+      }
+      if (minsucc != 0) {
+	min += minsucc;
+	succ = push (-minsucc) (succ);
+      }
+    }
+    return GDDD (variable,min,succ);
+  } else {
+    /// normal node canonization
+#endif  
   for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
     for(GDDD::const_iterator vi=si->begin();vi!=si->end();vi++){
       map_set[vi->first].insert(vi->second);
     }
   }
+#ifdef EVDDD
+  }
+#endif
   for(std::map<int,std::set<GDDD> >::const_iterator map_set_i=map_set.begin();map_set_i!=map_set.end();map_set_i++){
     assert(map_set_i->second.size()!=0);
     std::pair<int,GDDD> x;
@@ -158,8 +231,44 @@ bool _DED_Mult::operator==(const _DED &e)const{
 GDDD _DED_Mult::eval() const{
   assert(parameter1.variable()==parameter2.variable());
   int variable=parameter1.variable();
-  GDDD::Valuation value;
+#ifdef EVDDD
+  if (variable == DISTANCE) {
+    assert(parameter1.nbsons()==1);
+    assert(parameter2.nbsons()==1);
+    GDDD::const_iterator vv1=parameter1.begin();
+    GDDD::const_iterator vv2=parameter2.begin();
+    int succval;
+    GDDD succ;        
+    if (vv1->first < vv2->first) {
+      succval = vv2->first;
+      succ = push(vv1->first - vv2->first) (vv1->second)  * vv2->second;
+    } else if (vv1->first > vv2->first) {
+      succval = vv1->first;
+      succ = vv1->second * push(vv2->first - vv1->first)(vv2->second);
+    } else {
+      succval = vv1->first;
+      succ = vv1->second * vv2->second;
+    }
+    
+    if (succ != GDDD::one) {
+      int minsucc=-1;
+      for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; it++) {
+	assert (it->second.nbsons() == 1);
+	GDDD::const_iterator succd = it->second.begin();
+	if (minsucc==-1 || succd->first < minsucc)
+	  minsucc = succd->first;
+      }
+      if (minsucc != 0) {
+	succval += minsucc;
+	succ = push (-minsucc) (succ);
+      }
+    }
+    
+    return GDDD(variable,succval,succ);
+  }
+#endif
 
+  GDDD::Valuation value;
   std::map<int,std::set<GDDD> > map_set;
   GDDD::const_iterator v1=parameter1.begin();
   GDDD::const_iterator v2=parameter2.begin();

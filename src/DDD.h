@@ -318,6 +318,13 @@ namespace std {
   };
 }
 
+
+#ifdef EVDDD
+// the variable id of distance nodes
+#define DISTANCE -3
+#endif
+
+
 #endif
 
 
