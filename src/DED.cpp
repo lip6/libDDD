@@ -134,19 +134,19 @@ GDDD _DED_Add::eval() const{
       }
     }
     GDDD succ = DED::add(succSet);
-    if (succ != GDDD::one) {
-      int minsucc=-1;
-      for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; it++) {
-	assert (it->second.nbsons() == 1);
-	GDDD::const_iterator succd = it->second.begin();
-	if (minsucc==-1 || succd->first < minsucc)
-	  minsucc = succd->first;
-      }
-      if (minsucc != 0) {
-	min += minsucc;
-	succ = push (-minsucc) (succ);
-      }
-    }
+//     if (succ != GDDD::one) {
+//       int minsucc=-1;
+//       for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; it++) {
+// 	assert (it->second.nbsons() == 1);
+// 	GDDD::const_iterator succd = it->second.begin();
+// 	if (minsucc==-1 || succd->first < minsucc)
+// 	  minsucc = succd->first;
+//       }
+//       if (minsucc != 0) {
+// 	min += minsucc;
+// 	succ = push (-minsucc) (succ);
+//       }
+//     }
     return GDDD (variable,min,succ);
   } else {
     /// normal node canonization
@@ -250,19 +250,19 @@ GDDD _DED_Mult::eval() const{
       succ = vv1->second * vv2->second;
     }
     
-    if (succ != GDDD::one) {
-      int minsucc=-1;
-      for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; it++) {
-	assert (it->second.nbsons() == 1);
-	GDDD::const_iterator succd = it->second.begin();
-	if (minsucc==-1 || succd->first < minsucc)
-	  minsucc = succd->first;
-      }
-      if (minsucc != 0) {
-	succval += minsucc;
-	succ = push (-minsucc) (succ);
-      }
-    }
+//     if (succ != GDDD::one) {
+//       int minsucc=-1;
+//       for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; it++) {
+// 	assert (it->second.nbsons() == 1);
+// 	GDDD::const_iterator succd = it->second.begin();
+// 	if (minsucc==-1 || succd->first < minsucc)
+// 	  minsucc = succd->first;
+//       }
+//       if (minsucc != 0) {
+// 	succval += minsucc;
+// 	succ = push (-minsucc) (succ);
+//       }
+//     }
     
     return GDDD(variable,succval,succ);
   }
