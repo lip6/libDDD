@@ -74,6 +74,10 @@ public:
 
 };
 
+#ifdef EVDDD
+GHom push(int v);
+#endif
+
 #endif
 
 
