@@ -138,12 +138,8 @@ void GDDD::print(std::ostream& os,std::string s) const{
     for(GDDD::const_iterator vi=begin();vi!=end();vi++){
       // modif strstream -> std::stringstream
       std::stringstream tmp;
-      std::map<int,std::string>::iterator i=mapVarName.find(variable());
-      if (i==mapVarName.end())
-	tmp<<"var"<<variable()<<'('<<vi->first<<")";
-      else
-	tmp<<i->second<<'('<<vi->first<<")";
-      tmp>>val;
+      tmp << getvarName(variable())<<'('<<vi->first<<")";
+      tmp >> val;
       vi->second.print(os,s+val+" ");
     }
   }
@@ -328,19 +324,11 @@ GDDD::GDDD(int var,int val,const GDDD &d):concret(null.concret){ //var-val->d
 #ifdef EVDDD
     GDDD succ = d;
     if (var == DISTANCE) {
-      if (succ != GDDD::one) {
-	int minsucc=-1;
-	for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; it++) {
-	  assert (it->second.nbsons() == 1);
-	  GDDD::const_iterator succd = it->second.begin();
-	  if (minsucc==-1 || succd->first < minsucc)
-	    minsucc = succd->first;
-	}
+	int minsucc=succ.getMinDistance();
 	if (minsucc != 0) {
 	  val += minsucc;
 	  succ = push (-minsucc) (succ);
 	}
-      }
     }
     std::pair<int,GDDD> x(val,succ);
 #else
@@ -413,6 +401,24 @@ const std::string GDDD::getvarName(int var)
 }
 
 
+#ifdef EVDDD
+/// returns the minimum value of the function encoded by a node
+int GDDD::getMinDistance () const {
+  if (variable() == DISTANCE) {
+    assert (nbsons() == 1);
+    return begin()->first;
+  } else {
+    int minsucc=-1;
+    for (GDDD::const_iterator it = begin() ; it != end() ; it++) {
+      assert (it->second.nbsons() == 1);
+      GDDD::const_iterator succd = it->second.begin();
+      if (minsucc==-1 || succd->first < minsucc)
+	minsucc = succd->first;
+    }
+    return minsucc==-1?0:minsucc;
+  }
+}
+#endif
 
 // DataSet interface
 

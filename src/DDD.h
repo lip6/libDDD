@@ -144,6 +144,11 @@ public:
   long double nbStates() const;
   /// Returns the number of nodes that would be used to represent a DDD if no unicity table was used.
   long double noSharedSize() const;
+#ifdef EVDDD
+  /// returns the minimum value of the function encoded by a node
+  int getMinDistance () const;
+#endif
+
 
   /// \name Variable naming.
   //@{
