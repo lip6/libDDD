@@ -76,10 +76,10 @@ bool _DED_Add::operator==(const _DED &e)const{
 
 #ifdef EVDDD
 /// increment the value of the next variable
-class _push:public StrongHom {
+class _pushEVDDD:public StrongHom {
   int dist;
 public:
-  _push(int dist_) :dist(dist_){}
+  _pushEVDDD(int dist_) :dist(dist_){}
 
   GDDD phiOne() const {
     return GDDD::one;
@@ -97,11 +97,11 @@ public:
   }
 
   bool operator==(const StrongHom &s) const {
-    return dist == ((const _push &)s).dist;
+    return dist == ((const _pushEVDDD &)s).dist;
   }
 };
 /// User function : Construct a Hom for a Strong Hom _plusplus
-GHom push(int v){return new _push(v);};
+GHom pushEVDDD(int v){return new _pushEVDDD(v);};
 #endif
 
 
@@ -130,7 +130,7 @@ GDDD _DED_Add::eval() const{
 	if (vi->first == min)
 	  succSet.insert(vi->second);
 	else
-	  succSet.insert(push(vi->first - min)(vi->second));
+	  succSet.insert(pushEVDDD(vi->first - min)(vi->second));
       }
     }
     GDDD succ = DED::add(succSet);
@@ -239,12 +239,12 @@ GDDD _DED_Mult::eval() const{
     GDDD::const_iterator vv2=parameter2.begin();
     int succval;
     GDDD succ;        
-    if (vv1->first < vv2->first) {
+    if (vv1->first > vv2->first) {
       succval = vv2->first;
-      succ = push(vv1->first - vv2->first) (vv1->second)  * vv2->second;
-    } else if (vv1->first > vv2->first) {
+      succ = pushEVDDD(vv1->first - vv2->first) (vv1->second)  * vv2->second;
+    } else if (vv1->first < vv2->first) {
       succval = vv1->first;
-      succ = vv1->second * push(vv2->first - vv1->first)(vv2->second);
+      succ = vv1->second * pushEVDDD(vv2->first - vv1->first)(vv2->second);
     } else {
       succval = vv1->first;
       succ = vv1->second * vv2->second;
@@ -349,6 +349,13 @@ GDDD _DED_Minus::eval() const{
   //  std::map<int,std::set<GDDD> > std::map_std::set;
   GDDD::const_iterator v1=parameter1.begin();
   GDDD::const_iterator v2=parameter2.begin();
+#ifdef EVDDD
+  if (variable == DISTANCE) {
+    assert(parameter1.nbsons() == 1);
+    assert(parameter2.nbsons() == 1);
+    return GDDD(variable,v1->first,v1->second - v2->second);
+  }
+#endif
   while(v1!=parameter1.end()&&v2!=parameter2.end()){
     if(v1->first<v2->first){
       std::pair<int,GDDD> x(v1->first,v1->second);
