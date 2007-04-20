@@ -15,7 +15,7 @@
 #include "SDD.h"
 #include "UniqueTable.h"
 #include "DDD.h"
-
+#include "SHom.h"
 /******************************************************************************/
 /*                             class _GSDD                                     */
 /******************************************************************************/
@@ -630,6 +630,24 @@ SDD &SDD::operator=(const SDD &g){
   concret->refCounter++;
   return *this;
 }
+
+#ifdef EVDDD
+/// returns the minimum value of the function encoded by a node
+int GSDD::getMinDistance () const {
+  int minsucc=-1;
+  for (GSDD::const_iterator it = begin() ; it != end() ; it++) {
+    int lmin = it->first->getMinDistance();
+    if (minsucc==-1 || lmin < minsucc)
+      minsucc = lmin;
+  }
+  return minsucc==-1?0:minsucc;
+}
+
+
+GSDD GSDD::normalizeDistance(int n) const {
+  return pushEVSDD (n) (*this);
+}
+#endif
 
 
 // DataSet interface
