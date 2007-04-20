@@ -327,7 +327,7 @@ GDDD::GDDD(int var,int val,const GDDD &d):concret(null.concret){ //var-val->d
 	int minsucc=succ.getMinDistance();
 	if (minsucc != 0) {
 	  val += minsucc;
-	  succ = push (-minsucc) (succ);
+	  succ = succ.normalizeDistance(-minsucc);
 	}
     }
     std::pair<int,GDDD> x(val,succ);
@@ -417,6 +417,10 @@ int GDDD::getMinDistance () const {
     }
     return minsucc==-1?0:minsucc;
   }
+}
+
+GDDD GDDD::normalizeDistance(int n) const {
+  return pushEVDDD (n) (*this);
 }
 #endif
 
