@@ -75,7 +75,7 @@ public:
 };
 
 #ifdef EVDDD
-GHom push(int v);
+GHom pushEVDDD(int v);
 #endif
 
 #endif
