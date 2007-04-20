@@ -70,6 +70,34 @@ inline void square_union (std::map<GSDD,DataSet *> &res,const GSDD & s, DataSet 
 }
 
 
+#ifdef EVDDD
+/// increment the value of the next variable
+class _pushEVSDD:public StrongShom {
+  int dist;
+public:
+  _pushEVSDD(int dist_) :dist(dist_){}
+
+  GSDD phiOne() const {
+    return GSDD::one;
+  }                   
+
+  GShom phi(int vr, const DataSet & vl) const {    
+    return GShom(vr,*vl.normalizeDistance(dist));
+  }
+
+  size_t hash() const {
+    return 16759*dist;
+  }
+
+  bool operator==(const StrongShom &s) const {
+    return dist == ((const _pushEVSDD &)s).dist;
+  }
+};
+/// User function : Construct a Hom for a Strong Hom _plusplus
+GShom pushEVSDD(int v){return new _pushEVSDD(v);};
+#endif
+
+
 
 /******************************************************************************/
 /*                    class _SDED_Add:public _SDED                              */
@@ -207,12 +235,57 @@ GSDD _SDED_Add::eval() const{
     delete nullmap->second;
     res.erase(nullmap);
   }
+
+  for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end(); )
+    if (it->second->empty()) {
+      std::map<GSDD,DataSet *>::iterator tmp = it;
+      it ++;
+      delete tmp->second;
+      res.erase(tmp);
+    } else
+      it++;
+
+#ifdef EVDDD
+  // foreach value already in result : e-b->B
+  for (std::map<GSDD,DataSet *>::iterator resit = res.begin() ; resit != res.end() ;  ) {
+    int mindist = resit->first.getMinDistance();
+    if (mindist>0) {
+      std::map<GSDD,DataSet *>::iterator jt = resit;
+      resit++;
+//      square_union(res, jt->first.normalizeDistance(-mindist), jt->second->normalizeDistance(mindist));
+//       std::cerr << "got positive mindist = " << mindist <<std::endl;
+//       std::cerr << "apply -mindist to = " <<jt->first << "gives \n" << jt->first.normalizeDistance(-mindist) <<std::endl;
+//       std::cerr << "apply +mindist to = " ;
+//       jt->second->set_print(std::cerr);
+//       std::cerr << "gives \n" ; 
+//       jt->second->normalizeDistance(mindist)->set_print(std::cerr);
+//       std::cerr  <<std::endl;
+      res[jt->first.normalizeDistance(-mindist)] = jt->second->normalizeDistance(mindist);
+      delete jt->second;
+      res.erase(jt);
+    } else {
+      resit++;
+    }
+  }
+#endif
+
   value.reserve(res.size());  
   for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
     if (! it->second->empty())
       value.push_back(std::make_pair(it->second,it->first));
     else
       delete  it->second;
+
+
+//   int id=0;
+//   std::cerr << "operating over parameters : " <<std::endl ;
+//   for (std::set<GSDD>::const_iterator it = parameters.begin() ; it != parameters.end() ; it++ ) {
+//     std::cerr << "PARAM "<< id++ << "  "<< *it << std::endl ;
+//   }
+  GSDD ret(variable,value);
+//   std::cerr << "produced node : " << ret << std::endl ;
+  return ret;
+
 
   return GSDD(variable,value);
 };
@@ -518,6 +591,7 @@ GSDD _SDED_Concat::eval() const{
     delete nullmap->second;
     res.erase(nullmap);
   }
+
   value.reserve(res.size());  
   for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();it++)
     value.push_back(std::make_pair(it->second,it->first));
