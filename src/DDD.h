@@ -147,6 +147,7 @@ public:
 #ifdef EVDDD
   /// returns the minimum value of the function encoded by a node
   int getMinDistance () const;
+  GDDD normalizeDistance (int n) const;
 #endif
 
 
@@ -284,6 +285,11 @@ public:
   virtual size_t set_hash() const;
   /// Textual (human readable) output of a DDD.
   virtual void set_print (std::ostream &os) const { os << *this; }
+#ifdef EVDDD
+  virtual DataSet *normalizeDistance(int n) const { return new DDD(GDDD::normalizeDistance(n)); }
+  virtual int getMinDistance() const { return GDDD::getMinDistance();}
+#endif
+
   //@}
 };
 

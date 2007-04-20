@@ -62,6 +62,7 @@ public:
   ///
   /// returns a past the end iterator
   const_iterator end() const;
+
   //@}
 
 
@@ -150,6 +151,11 @@ public:
   size_t nbsons () const;
   /// Returns the number of states or paths represented by a given node.
   long double nbStates() const;
+#ifdef EVDDD
+  /// returns the minimum value of the function encoded by a node
+  int getMinDistance () const;
+  GSDD normalizeDistance (int n) const;
+#endif
 
   ///  Broken right now, dont use me or fixme first
   /// Returns the number of nodes that would be used to represent a SDD if no unicity table was used.
@@ -274,6 +280,11 @@ public:
   virtual size_t set_hash() const;
   /// Textual (human readable) output of a SDD.
   virtual void set_print (std::ostream &os) const { os << *this; }
+#ifdef EVDDD
+  virtual DataSet *normalizeDistance(int n) const { return new SDD(GSDD::normalizeDistance(n)); }
+  virtual int getMinDistance() const { return GSDD::getMinDistance();}
+#endif
+
   //@}
 
 };
