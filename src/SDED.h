@@ -80,5 +80,9 @@ public:
 
 };
 
+#ifdef EVDDD
+GShom pushEVSDD(int v);
+#endif
+
 #endif
 
