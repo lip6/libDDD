@@ -51,13 +51,13 @@ public :
   // reject any path with ANY ring that is on pole i or pole j
   GShom phi(int vr, const DataSet & vl) const {
     // we know there is only one level of depth, therefore DataSet concrete type is IntDataSet
-    DataSet * res =  vl.set_minus(set);
+    DataSet * tofree =  vl.set_minus(set);
+    IntDataSet res ( *( (IntDataSet *) tofree ) );
+    delete tofree;
 
-    /////////// Memory leak BUUGGGGG : res is not freed
-
-    if (! res->empty()) {
+    if (! res.empty()) {
       // propagate this test AND (re)saturate resulting nodes
-      return GShom(vr,*res, saturate() &GShom(this));
+      return GShom(vr,res, saturate() &GShom(this));
     } else {
       // cut this branch and exploration
       return GSDD::null;
@@ -150,13 +150,13 @@ int main(int argc, char **argv){
     // would be written : for ( i--) M0 = M0 ^ DDD(i,0);
   }
 
-  cout << M0 << endl ;
+//  cout << M0 << endl ;
 
   // Consider one single saturate event that recursively fires all events 
   // Saturate topmost node <=> reach fixpoint over transition relation
   SDD ss =  saturate() (M0) ;
 
-  cout << ss << endl ;
+//  cout << ss << endl ;
   // stats
   cout << "Number of states : " << ss.nbStates() << endl ;
   cout << "DDD Final/Peak nodes : " << ss.node_size().second << "/" << DDD::peak() << endl;
