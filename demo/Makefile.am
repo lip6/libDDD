@@ -1,5 +1,5 @@
 noinst_PROGRAMS = tst1 tst2 tst3 tst4 tst5 tst6 tst7 tst8 tst9 tst10 tst11 tst12 tst13 \
-	hanoi_v1 hanoi_v2 hanoi_v3 hanoi_v4 hanoi_v5 hanoi_v6 hanoi_v7 
+	hanoi_v1 hanoi_v2 hanoi_v3 hanoi_v4 hanoi_v5 hanoi_v6 hanoi_v7 hanoi_v8
 
 
 
@@ -19,6 +19,7 @@ hanoi_v4_SOURCES = hanoi_v4.cpp
 hanoi_v5_SOURCES = hanoi_v5.cpp
 hanoi_v6_SOURCES = hanoi_v6.cpp
 hanoi_v7_SOURCES = hanoi_v7.cpp
+hanoi_v8_SOURCES = hanoi_v8.cpp
 
 tst1_SOURCES = tst1.cpp
 tst2_SOURCES = tst2.cpp
