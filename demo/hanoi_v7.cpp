@@ -190,5 +190,5 @@ int main(int argc, char **argv){
   cout << "Number of states : " << ss.nbStates() << endl ;
   cout << "DDD Final/Peak nodes : " << ss.node_size().second << "/" << DDD::peak() << endl;
   cout << "SDD Final/Peak nodes : " << ss.node_size().first << "/" << SDD::peak() << endl;
-  cout << "Cache entries DDD/SDD : " << MemoryManager::nbDED() <<  "/" <<  MemoryManager::nbSDED << endl ;
+  cout << "Cache entries DDD/SDD : " << MemoryManager::nbDED() <<  "/" <<  MemoryManager::nbSDED() << endl ;
 }
