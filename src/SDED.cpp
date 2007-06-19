@@ -672,7 +672,7 @@ unsigned int SDED::statistics() {
 
 void SDED::pstats(bool reinit)
 {
-  std::cout << "*\nCache Stats : size=" << namespace_SDED::cache.size() << "   --- Peak size=" <<  namespace_SDED::Max_SDED << std::endl;
+  std::cout << "*\nCache Stats : size=" << statistics() << "   --- Peak size=" <<  namespace_SDED::Max_SDED << std::endl;
   
 #ifdef INST_STL
   std::cout << "nb jump in hash table : " << NBJumps << "/" << "nbsearch " ;
