@@ -1,7 +1,6 @@
 /** An example resolution of the famous towers of Hanoi puzzle. *
- *  v5 : This variant uses only DDD and  saturation,  *
- *  it exploits the fact that the same transition relation is applied to each ring to remove all args from move_ring
- *  v6 : saturation improved : the test no_ring_above resaturates before returning
+ *  v7 : This variant introduces the use of SDD  *
+ *  A single SDD variable is used, the program builds upon v6. *
 */
 
 
@@ -28,10 +27,41 @@ void initName() {
   }
 }
 
-
 // predeclaration
 GHom saturate ();
+// SDD application
+GShom saturateSDD ();
 
+/// SDD homomorphism of the transition relation
+class transition_relation : public StrongShom {
+ public :
+  transition_relation() {};
+
+  GSDD phiOne () const {
+    return GSDD::one;
+  }
+
+  GShom phi(int vr, const DataSet & vl) const {
+    // very basic, simply saturate arc value with move_ring
+    // we know there is only one level of depth, therefore DataSet concrete type is DDD
+    DDD sat =  saturate() ( (const DDD &) vl);
+    return  GShom ( vr, sat) ;
+  }
+
+  size_t hash() const {
+    return  61907 ;
+  }
+
+  bool operator==(const StrongShom &s) const {
+     return  true;
+  }  
+}; 
+
+// SDD application
+GShom saturateSDD () { 
+  return new transition_relation() ;
+}
+  
 // Removes any path such that one of the variables takes value i or value j
 // Not test on variable number means this operation should be used from "mid-height"
 class _no_ring_above : public StrongHom {
@@ -149,12 +179,16 @@ int main(int argc, char **argv){
     // would be written : for ( i--) M0 = M0 ^ DDD(i,0);
   }
 
+  // Add an SDD external var, bearing number 0
+  SDD M1 = SDD ( 0 , M0 ) ;
+
   // Consider one single saturate event that recursively fires all events 
   // Saturate topmost node <=> reach fixpoint over transition relation
-  DDD ss = saturate() (M0);
+  SDD ss =  saturateSDD() (M1) ;
 
   // stats
   cout << "Number of states : " << ss.nbStates() << endl ;
-  cout << "Final/Peak nodes : " << ss.size() << "/" << DDD::peak() << endl;
-  cout << "Cache entries : " << MemoryManager::nbDED() <<endl ;
+  cout << "DDD Final/Peak nodes : " << ss.node_size().second << "/" << DDD::peak() << endl;
+  cout << "SDD Final/Peak nodes : " << ss.node_size().first << "/" << SDD::peak() << endl;
+  cout << "Cache entries DDD/SDD : " << MemoryManager::nbDED() <<  "/" <<  MemoryManager::nbSDED << endl ;
 }
