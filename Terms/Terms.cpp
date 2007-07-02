@@ -17,7 +17,7 @@ void initName() {
 
 // SDD application
 GShom saturateSDD () {
-  return GShom::id ;
+  return  GShom (new _zero_plus_X()) & new _zero_plus_test() ; //& GShom::id ;
 }
 
 int main(int argc, char **argv){
@@ -25,20 +25,15 @@ int main(int argc, char **argv){
   // Define a name for each variable
   initName();
 
-  // a dataset for "+"
-  IntDataSet plus (vector<int> (1,PLUS) );
-  // a dataset for constant 0
-  IntDataSet natZero (vector<int> (1, 0) );
-  // a dataset for constant 1
-  IntDataSet natOne (vector<int> (1, 1) );
 
 
-  SDD ZeroPlusOne = SDD (NAT, plus) 
-    ^ SDD ( NAT , natZero )
-    ^ SDD ( NAT , natOne  );
-  SDD OnePlusOne = SDD (NAT, plus) 
-    ^ SDD ( NAT , natOne )
-    ^ SDD ( NAT , natOne  );
+  SDD ZeroPlusOne = SDD (NAT, natPlus) 
+    ^ SDD ( LEFT, SDDnatZero )
+    ^ SDD ( RIGHT, SDDnatOne)  ;
+  SDD OnePlusOne = SDD (NAT, natPlus) 
+    ^ SDD ( LEFT, SDDnatOne )
+    ^ SDD ( RIGHT, SDDnatOne)  ;
+
   
   // The initial state
   SDD M0 = OnePlusOne + ZeroPlusOne;

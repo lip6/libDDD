@@ -1,102 +1,95 @@
 #ifndef NAT_PLUS_ZERO__HH
 #define NAT_PLUS_ZERO__HH
 
+#include "Nat_Const.hpp"
 
-// class _no_ring_above : public StrongShom {
-//   // the 2 poles that have to be clear
-//   IntDataSet set;
-// public :
-//   _no_ring_above (int i, int j) { 
-//     // construct from vector
-//     vector<int> v (2);
-//     v[0] = i ;
-//     v[1] = j;
-//     set = IntDataSet(v);
-//   }
+class _zero_plus_test : public StrongShom {
 
-//   GSDD phiOne() const {
-//     return GSDD::one;
-//   }     
+public :
+
+  GSDD phiOne() const {
+    return GSDD::one;
+  }     
   
-//   // reject any path with ANY ring that is on pole i or pole j
-//   GShom phi(int vr, const DataSet & vl) const {
-//     // we know there is only one level of depth, therefore DataSet concrete type is IntDataSet
-//     DataSet * tofree =  vl.set_minus(set);
-//     IntDataSet res ( *( (IntDataSet *) tofree ) );
-//     delete tofree;
+  // accept any NAT path with    0 +  X  \forall X
+  GShom phi(int vr, const DataSet & vl) const {
+    cout << " running zeroplus on vr=" << vr << " vl= " ; vl.set_print(cout) ; cout << endl ;
 
-//     if (! res.empty()) {
-//       // propagate this test AND (re)saturate resulting nodes
-//       return GShom(vr,res, saturate() &GShom(this));
-//     } else {
-//       // cut this branch and exploration
-//       return GSDD::null;
-//     }
-//   }
 
-//   size_t hash() const {
-//     return set.set_hash();
-//   }
+    if (vr == NAT) {
+      // we know there is only one level of depth, therefore DataSet concrete type is IntDataSet
 
-//   bool operator==(const StrongShom &s) const {
-//     _no_ring_above* ps = (_no_ring_above*)&s;
-//     return set.set_equal(ps->set );
-//   }
-  
-// };
+      // looks good : looking for  "+" paths
+      // paths with anything except "PLUS" should be left alone
+      DataSet * tofree =  vl.set_minus(natPlus);
+      if ( tofree->empty() ) {
+	delete tofree;
+	return GShom (vr, natPlus , this) ;
+      } else {
+	// kill path
+	delete tofree;
+	return GSDD::null ;
+      }
+    } else if (vr == LEFT) {
+      // we know argument should be a NAT, therefore DataSet concrete type is SDD
+      
+      // look for paths with a zero
+      DataSet * tofree =  vl.set_intersect(SDDnatZero);
+      if (! tofree->empty() ) {
+	// a win ; detected 0 + X
+	delete tofree;
+	return GShom (vr, SDDnatZero ) ;
+      } else {
+	// kill path
+	delete tofree;
+	return GSDD::null ;
+      }
+    } else {
+      // should not reach this point ??
+      assert ( false );
+    }
+  }
 
-// // generic version no ring specified, just apply to current ring
-// class _move_ring : public StrongShom {
-  
-// public :
-  
-//   GSDD phiOne() const {
-//     return GSDD::one;
-//   }                   
-  
-//   GShom phi(int vr, const DataSet& vl) const {
-//     // ring reached 
-//     // try to move to all new positions
-//     // Initialize res with Id
-//     GShom res = GShom(vr,vl) ;
-//     for (IntDataSet::const_iterator vlit = ((const IntDataSet&)vl).begin() ; vlit != ((const IntDataSet&)vl).end() ; ++vlit ) {
-//       for (int i=0 ; i <NB_POLES ; i++) {
-// 	// test all possible moves from current position = vl
-// 	if (i != *vlit) {
-// 	  // first of all saturate successor node then
-// 	  // update ring position and test no ring above
-// 	  // no_ring_above propagates on the bottom of the SDD ; it returns 0 if preconditions are not met 
-// 	  // or an SDD with only paths where the move was legal
-// 	  // Additionnally we resaturate the results of this test before using them
-// 	  res = (res + ( GShom (vr , IntDataSet(vector<int> (1,i)) ) & saturate() & new _no_ring_above(i , *vlit) )) & saturate()  ;
-// 	}
-//       }
-//     }
-//     return res ;
-//   }
-  
-//   size_t hash() const {
-//     return 6961;
-//   }
-  
-//   bool operator==(const StrongShom &s) const {
-//     return true;
-//   }
-  
-// };
+  size_t hash() const {
+    return 12101;
+  }
 
-// // to be more pleasant for users  
-// GShom move_ring ( ) {
-//   return new _move_ring ();
-// }
+  bool operator==(const StrongShom &s) const {
+    return true;
+  }
+  
+};
 
-// // "saturate" fires all events that can be fired from a given node to
-// //  the leaves and returns a saturated node (à la Ciardo's RecFireAndSat).
-// GShom saturate () {
-//   return fixpoint(move_ring());
-// //  return move_ring();
-// }
 
- 
+class _zero_plus_X : public StrongShom {
+
+public :
+
+  GSDD phiOne() const {
+    return GSDD::one;
+  }     
+  
+  // accept any NAT path with    0 +  X  \forall X
+  GShom phi(int vr, const DataSet & vl) const {
+    cout << " running zeroplusX on vr=" << vr << " vl= " ; vl.set_print(cout) ; cout << endl ;
+
+    if (vr != RIGHT) {
+      // Don't test anything, propagate until right is reached ...
+      return this ;
+    } else {
+      return (SDD &) vl ;
+    }
+  }
+
+  size_t hash() const {
+    return 13913;
+  }
+
+  bool operator==(const StrongShom &s) const {
+    return true;
+  }
+  
+};
+
 
 #endif // NAT_PLUS_ZERO__HH
