@@ -25,6 +25,7 @@ AC_CONFIG_FILES([
   demo/Makefile
   tests/Makefile
   src/Makefile
+  Terms/Makefile
   doc/Doxyfile
   doc/Makefile
 ])
