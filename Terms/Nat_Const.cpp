@@ -42,7 +42,7 @@ void printExpression(std::ostream& os,const GSDD *d, std::string s, bool withend
     if (vr == NAT) {
       for (GSDD::const_iterator it = d->begin() ; it != d->end() ; ++it ) {	
 	std::stringstream tmp;
-	tmp << " Nat(" ;
+	tmp << " Nat[" ;
 	IntDataSet * ds = (IntDataSet*) it->first;
 	for (IntDataSet::const_iterator jt = ds->begin() ; jt != ds->end() ; ++jt) {
 	  switch (*jt) {
@@ -57,7 +57,7 @@ void printExpression(std::ostream& os,const GSDD *d, std::string s, bool withend
 	    break;
 	  }
 	}
-        tmp << " )" ;
+        tmp << "]" ;
 	printExpression(os, & it->second , s + tmp.str() + " ", withendl);
       }      
     } else if (vr == LEFT || vr == RIGHT || vr == SUCCARG ) {
