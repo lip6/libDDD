@@ -32,13 +32,11 @@ public:
   }     
   
   GShom phi(int vr, const DataSet & vl) const {
-    cout << " running zeroplus on vr=" << vr << " vl= " ; vl.set_print(cout) ; cout << endl ;
+//    cout << " running select on vr=" << vr << " vl= " ; vl.set_print(cout) ; cout << endl ;
     if (vr == type_condition_) {
       // we know there is only one level of depth, therefore DataSet concrete type is IntDataSet
 
-      // looks good : looking for  "+" paths
-      // paths with anything except "PLUS" should be left alone
-      // dirty "delete" code due to use of DataSet interface instead of direct IntDataSet manipulation
+      // dirty "delete" code due to use of DataSet interface instead of direct concrete IntDataSet/SDD manipulation
       DataSet * tofree =  vl.set_intersect(*condition_);
       GShom result = GShom( vr, *tofree, next_);
       delete tofree;
@@ -101,7 +99,7 @@ public:
   }     
   
   GShom phi(int vr, const DataSet & vl) const {
-    cout << " running _select_deephom on vr=" << vr << " vl= " ; vl.set_print(cout) ; cout << endl ;
+//    cout << " running _select_deephom on vr=" << vr << " vl= " ; vl.set_print(cout) ; cout << endl ;
     if (vr == type_condition_) {
       SDD subresult = condition_((const SDD&) vl);
       return GShom(vr, subresult, next_);
@@ -157,7 +155,7 @@ public :
   
   // accept any NAT path with    0 +  X  \forall X
   GShom phi(int vr, const DataSet & vl) const {
-    cout << " running extractor on vr=" << vr << " vl= " ; vl.set_print(cout) ; cout << endl ;
+//    cout << " running extractor on vr=" << vr << " vl= " ; vl.set_print(cout) ; cout << endl ;
 
     if (vr != trigger_) {
       // Don't test anything, propagate until right trigger is reached ...
