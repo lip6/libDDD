@@ -33,9 +33,8 @@ public:
       delete tofree;
       return result;
     } else {
-      // should not reach this point ??
-      assert(false);
-      return SDD::null;
+      // propagate
+      return GShom(vr,vl,this);
     }
   }
 
