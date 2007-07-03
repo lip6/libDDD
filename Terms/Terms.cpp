@@ -14,6 +14,8 @@ using namespace std;
 
 void initName() {
   DDD::varName (NAT,"NAT");
+  DDD::varName (LEFT,"LEFT");
+  DDD::varName (RIGHT,"RIGHT");
 }
 
 
