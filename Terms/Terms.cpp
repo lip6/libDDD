@@ -47,7 +47,7 @@ int main(int argc, char **argv){
     ^ SDD ( RIGHT, SDD(SDDnatSucc ^ SDD ( SUCCARG, SDDnatOne)) )  ;
   
   // The initial state
-  SDD M0 = /*OnePlusOne + ZeroPlusOne +*/ OnePlusTwo;
+  SDD M0 = OnePlusOne + ZeroPlusOne + OnePlusTwo;
   
   cout << "Input : " << M0 << endl ;
   // Consider one single saturate event that recursively fires all events 
