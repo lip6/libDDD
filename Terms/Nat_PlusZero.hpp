@@ -21,6 +21,7 @@ public :
 
       // looks good : looking for  "+" paths
       // paths with anything except "PLUS" should be left alone
+      // dirty "delete" code due to use of DataSet interface instead of direct IntDataSet manipulation
       DataSet * tofree =  vl.set_minus(natPlus);
       if ( tofree->empty() ) {
 	delete tofree;
@@ -32,18 +33,9 @@ public :
       }
     } else if (vr == LEFT) {
       // we know argument should be a NAT, therefore DataSet concrete type is SDD
-      
       // look for paths with a zero
-      DataSet * tofree =  vl.set_intersect(SDDnatZero);
-      if (! tofree->empty() ) {
-	// a win ; detected 0 + X
-	delete tofree;
-	return GShom( vr , SDDnatZero );
-      } else {
-	// kill path
-	delete tofree;
-	return GSDD::null ;
-      }
+      return GShom( vr , SDD (((const SDD &) vl) * SDDnatZero));
+
     } else {
       // should not reach this point ??
       assert ( false );
