@@ -7,6 +7,53 @@
 // rewriting rule : X + succ(Y) -> succ( X+Y)
 
 
+class select_deephom : public StrongShom {
+  int type_condition_;
+  GShom condition_;
+  GShom next_;
+
+public:
+  select_deephom(int type_condition,
+		 const GShom& condition,
+		 const GShom& next)
+    : type_condition_(type_condition),
+      condition_(condition),
+      next_(next)
+  {}
+
+  GSDD phiOne() const {
+    return GSDD::top;
+  }     
+  
+  GShom phi(int vr, const DataSet & vl) const {
+    cout << " running select_deephom on vr=" << vr << " vl= " ; vl.set_print(cout) ; cout << endl ;
+    if (vr == type_condition_) {
+      SDD subresult = condition_((const SDD&) vl);
+      return GShom(vr, subresult, next_);
+    } else {
+      return GShom(vr, vl, this);
+    }
+  }
+
+  void mark() const {
+    next_.mark();
+  }  
+  
+  size_t hash() const {
+    return ::__gnu_cxx::hash<int>()(type_condition_) ^ ::__gnu_cxx::hash<GShom>()(condition_) ^ ::__gnu_cxx::hash<GShom>()(next_) ^ 12269; 
+  }
+
+  bool operator==(const StrongShom &s) const {
+    const select_deephom * ps = (const select_deephom *)&s;
+    return next_ ==  ps->next_
+      && condition_ == ps ->condition_
+      && type_condition_ == ps->type_condition_;
+  }  
+  
+};
+
+
+
 class _select_succ : public StrongShom {
 public :
   GSDD phiOne() const {
@@ -168,7 +215,10 @@ public :
 };
 
 SDD applySuccPlusXY (const SDD & d) {
-  GSDD d1 = GShom(new _succ_plus_test()) (d);
+  GShom select_succ = new select_hom(NAT, &natSucc, GShom::id);
+  GShom select_plus_x_succ_y = new select_hom(NAT, &natPlus, new select_deephom(RIGHT, select_succ, GShom::id));
+  //  GSDD d1 = GShom(new _succ_plus_test()) (d);
+  GSDD d1 = select_plus_x_succ_y(d);
   return GShom(new _succ_plus_XY()) (d1) 
     + (d-d1);
 }
