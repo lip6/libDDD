@@ -131,7 +131,7 @@ public :
 		 std::ostream_iterator<int>(os, ",") );
       os << *(--data->end());
     }
-    os << "]\n" ;
+    os << "]" ;
   }
 #ifdef EVDDD
   DataSet *normalizeDistance(int n) const {
