@@ -3,9 +3,64 @@
 
 #include "Nat_Const.hpp"
 
-class _zero_plus_test : public StrongShom {
+class select_hom : public StrongShom {
+  int type_condition_;
+  const DataSet* condition_;
+  GShom next_;
 
+public:
+  select_hom(int type_condition,
+	     const DataSet* condition,
+	     const GShom& next)
+    : type_condition_(type_condition),
+      condition_(condition),
+      next_(next)
+  {}
+
+  GSDD phiOne() const {
+    return GSDD::one;
+  }     
+  
+  GShom phi(int vr, const DataSet & vl) const {
+    cout << " running zeroplus on vr=" << vr << " vl= " ; vl.set_print(cout) ; cout << endl ;
+    if (vr == type_condition_) {
+      // we know there is only one level of depth, therefore DataSet concrete type is IntDataSet
+
+      // looks good : looking for  "+" paths
+      // paths with anything except "PLUS" should be left alone
+      // dirty "delete" code due to use of DataSet interface instead of direct IntDataSet manipulation
+      DataSet * tofree =  vl.set_intersect(*condition_);
+      Shom result = GShom( vr, *tofree, next_);
+      delete tofree;
+      return result;
+    } else {
+      // should not reach this point ??
+      assert(false);
+      return SDD::null;
+    }
+  }
+
+  void mark() const {
+    next_.mark();
+  }  
+  
+  size_t hash() const {
+    return ::__gnu_cxx::hash<int>()(type_condition_) ^  condition_->set_hash() ^ ::__gnu_cxx::hash<GShom>()(next_) ^ 12269; 
+  }
+
+  bool operator==(const StrongShom &s) const {
+    const select_hom * ps = (const select_hom *)&s;
+    return next_ ==  ps->next_
+      && condition_ == ps ->condition_
+      && type_condition_ == ps->type_condition_;
+  }  
+  
+};
+
+class _zero_plus_test : public StrongShom {
+  GShom h ;
 public :
+  _zero_plus_test (const GShom hh) : h(hh) {};
 
   GSDD phiOne() const {
     return GSDD::one;
@@ -25,7 +80,7 @@ public :
       DataSet * tofree =  vl.set_minus(natPlus);
       if ( tofree->empty() ) {
 	delete tofree;
-	return SDDnatPlus ^ this ;
+	return SDDnatPlus ^ h ;
       } else {
 	// kill path
 	delete tofree;
@@ -42,13 +97,18 @@ public :
     }
   }
 
+  void mark() const {
+    h.mark();
+  }  
+  
   size_t hash() const {
-    return 12101;
+    return  ::__gnu_cxx::hash<GShom>()(h) ^ 12269; 
   }
 
   bool operator==(const StrongShom &s) const {
-    return true;
-  }
+    _zero_plus_test * ps = (_zero_plus_test *)&s;
+    return h ==  ps->h;
+  }  
   
 };
 
@@ -85,7 +145,9 @@ public :
 };
 
 SDD applyZeroPlusX (const SDD & d) {
-  GSDD d1 = GShom(new _zero_plus_test()) (d);
+  GShom select_zero_plus_test = new select_hom(NAT, &natPlus, new select_hom(LEFT, &SDDnatZero, GShom::id));
+  //  GSDD d1 = GShom(new _zero_plus_test()) (d);
+  GSDD d1 = select_zero_plus_test(d);
   return GShom(new _zero_plus_X()) (d1) 
     + (d-d1);
 }

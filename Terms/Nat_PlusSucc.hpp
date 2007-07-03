@@ -4,6 +4,8 @@
 #include "Nat_Const.hpp"
 
 
+// rewriting rule : X + succ(Y) -> succ( X+Y)
+
 
 class _select_succ : public StrongShom {
 public :
