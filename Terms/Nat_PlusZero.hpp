@@ -11,4 +11,13 @@ SDD applyZeroPlusX (const SDD & d) {
     + (d-d1);
 }
 
+SDD applyXPlusZero (const SDD & d) {
+  GShom select_plus_zero_test = select_hom(NAT, &natPlus, select_hom(RIGHT, &SDDnatZero, GShom::id));
+  GSDD d1 = select_plus_zero_test(d);
+  return extract_value (LEFT) (d1) 
+    + (d-d1);
+}
+
+
+
 #endif // NAT_PLUS_ZERO__HH
