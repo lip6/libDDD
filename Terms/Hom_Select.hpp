@@ -117,5 +117,44 @@ GShom  select_deephom(int type_condition,
 
 
 
+class _extract_value : public StrongShom {
+  int trigger_ ;
+  GShom extractor_;
+public :
+  _extract_value (int trigger, const GShom & extractor) : trigger_(trigger),
+								      extractor_(extractor) {}
+
+  GSDD phiOne() const {
+    return GSDD::top;
+  }     
+  
+  // accept any NAT path with    0 +  X  \forall X
+  GShom phi(int vr, const DataSet & vl) const {
+    cout << " running extractor on vr=" << vr << " vl= " ; vl.set_print(cout) ; cout << endl ;
+
+    if (vr != trigger_) {
+      // Don't test anything, propagate until right is reached ...
+      return this ;
+    } else {
+      // drop a level
+      return SDD ( extractor_ ((SDD &) vl) );
+    }
+  }
+
+  size_t hash() const {
+    return 13913 ^ ::__gnu_cxx::hash<GShom> () (extractor_) ^ ::__gnu_cxx::hash<int> () (trigger_);
+  }
+
+  bool operator==(const StrongShom &s) const {
+    const _extract_value * ps = (const _extract_value *)&s;
+    return trigger_ == ps ->trigger_
+      && extractor_ ==  ps->extractor_ ;
+  }
+  
+};
+
+GShom extract_value (int trigger, const GShom & extractor = GShom::id) {
+  return new _extract_value (trigger,extractor);
+}
 
 #endif // __HOM_SELECT_H_
