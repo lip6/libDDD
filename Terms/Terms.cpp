@@ -26,6 +26,7 @@ SDD saturateSDD (SDD d) {
   do {
     d1 = d ;
     d = applyZeroPlusX (d) ;
+    d = applyXPlusZero (d) ;
     d = applySuccPlusXY(d) ;
   } while (d != d1);
   return d1;
@@ -41,22 +42,38 @@ int main(int argc, char **argv){
   SDD ZeroPlusOne = SDDnatPlus 
     ^ SDD ( LEFT, SDDnatZero )
     ^ SDD ( RIGHT, SDDnatOne)  ;
+  cout << "0 + 1 : "  ;  printExpression(cout, & ZeroPlusOne); 
+  
+  SDD OnePlusZero = SDDnatPlus 
+    ^ SDD ( LEFT, SDDnatOne )
+    ^ SDD ( RIGHT, SDDnatZero)  ;
+  cout << "1 + 0 : "  ;  printExpression(cout, & OnePlusZero); 
+
   SDD OnePlusOne = SDDnatPlus
     ^ SDD ( LEFT, SDDnatOne )
     ^ SDD ( RIGHT, SDDnatOne)  ;
-  SDD OnePlusTwo = SDDnatPlus
+  cout << "1 + 1 : "  ;  printExpression(cout, & OnePlusOne); 
+
+
+  SDD OnePlusSuccOne = SDDnatPlus
     ^ SDD ( LEFT, SDDnatOne )
     ^ SDD ( RIGHT, SDD(SDDnatSucc ^ SDD ( SUCCARG, SDDnatOne)) )  ;
+  cout << "1 + 2 <=> 1 + succ(1) : "  ;  printExpression(cout, & OnePlusSuccOne); cout << endl ;
   
+
   // The initial state
-  SDD M0 = OnePlusOne + ZeroPlusOne + OnePlusTwo;
+  SDD M0 =  OnePlusOne + ZeroPlusOne + OnePlusSuccOne + OnePlusZero;
   
-  cout << "Input : " << M0 << endl ;
+  cout << "Input : "  << endl; // << M0 << endl ;
+  printExpression(cout, &M0);
+  cout << "Number of states : " << M0.nbStates() << endl ;
+
   // Consider one single saturate event that recursively fires all events 
   // Saturate topmost node <=> reach fixpoint over transition relation
   SDD ss = saturateSDD (M0);
 
-  cout << "Result : " << ss <<endl ;
+  cout << "Result : " <<endl; // << ss <<endl ;
+   printExpression(cout, &ss);
   // stats
   cout << "Number of states : " << ss.nbStates() << endl ;
 //  cout << "DDD Final/Peak nodes : " << ss.node_size().second << "/" << DDD::peak() << endl;
