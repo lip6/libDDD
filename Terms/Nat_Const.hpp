@@ -23,6 +23,8 @@ extern const IntDataSet natZero ;
 // a dataset for constant 1
 extern const IntDataSet natOne ;
 
+// a SDD dataset for constant +
+extern const SDD SDDnatPlus;
 // a SDD dataset for constant 0
 extern const SDD SDDnatZero;
 // a SDD dataset for constant 1

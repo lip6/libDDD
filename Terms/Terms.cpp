@@ -15,8 +15,10 @@ void initName() {
   DDD::varName (NAT,"NAT");
 }
 
+
+
 // SDD application
-GShom saturateSDD () {
+GShom saturateSDD () {  
   return  GShom (new _zero_plus_X()) & new _zero_plus_test() ; //& GShom::id ;
 }
 
@@ -27,10 +29,10 @@ int main(int argc, char **argv){
 
 
 
-  SDD ZeroPlusOne = SDD (NAT, natPlus) 
+  SDD ZeroPlusOne = SDDnatPlus 
     ^ SDD ( LEFT, SDDnatZero )
     ^ SDD ( RIGHT, SDDnatOne)  ;
-  SDD OnePlusOne = SDD (NAT, natPlus) 
+  SDD OnePlusOne = SDDnatPlus
     ^ SDD ( LEFT, SDDnatOne )
     ^ SDD ( RIGHT, SDDnatOne)  ;
 
@@ -40,7 +42,8 @@ int main(int argc, char **argv){
   
   // Consider one single saturate event that recursively fires all events 
   // Saturate topmost node <=> reach fixpoint over transition relation
-  SDD ss =  saturateSDD() (M0) ;
+//  SDD ss =  saturateSDD() (M0) ;
+  SDD ss = applyZeroPlusX (M0);
 
   cout << "Result : " << ss <<endl ;
   // stats

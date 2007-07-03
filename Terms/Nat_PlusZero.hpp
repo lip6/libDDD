@@ -91,5 +91,10 @@ public :
   
 };
 
+SDD applyZeroPlusX (const SDD & d) {
+  GSDD d1 = GShom(new _zero_plus_test()) (d);
+  return GShom(new _zero_plus_X()) (d1) 
+    + (d-d1);
+}
 
 #endif // NAT_PLUS_ZERO__HH
