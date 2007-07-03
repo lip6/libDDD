@@ -24,7 +24,7 @@ public :
       DataSet * tofree =  vl.set_minus(natPlus);
       if ( tofree->empty() ) {
 	delete tofree;
-	return GShom (vr, natPlus , this) ;
+	return SDDnatPlus ^ this ;
       } else {
 	// kill path
 	delete tofree;
@@ -38,7 +38,7 @@ public :
       if (! tofree->empty() ) {
 	// a win ; detected 0 + X
 	delete tofree;
-	return GShom (vr, SDDnatZero ) ;
+	return GShom( vr , SDDnatZero );
       } else {
 	// kill path
 	delete tofree;
@@ -77,6 +77,7 @@ public :
       // Don't test anything, propagate until right is reached ...
       return this ;
     } else {
+      // drop a level
       return (SDD &) vl ;
     }
   }
