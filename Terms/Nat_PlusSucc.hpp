@@ -12,18 +12,26 @@ public :
 
   
   GSDD phiOne() const {
-    return GSDD::one;
+    return GSDD::top;
   }     
  
   // rewriting  X + succ(Y) to succ (X + Y)
   GShom phi(int vr, const DataSet & vl) const {
-    if (vr == SUCCARG ) {
+    if (vr == RIGHT ) {
       // so vl is a SDD containing Y
       // produce output
-      return SDDnatSucc ^ GSDD (SUCCARG, SDD (SDDnatPlus ^ SDD(LEFT,SDD(X)) ^SDD (RIGHT, vl))) ;
+      return SDDnatSucc 
+	^ GSDD (SUCCARG, 
+		SDD (SDDnatPlus 
+		     ^ SDD (LEFT,SDD(X))  
+		     ^ SDD (RIGHT, 
+			    SDD( extract_value(SUCCARG) ((const SDD&)vl))
+			    )
+		     )
+		) ;
     } else {
-      // skip a bit
-      return this;
+      // should not happen
+	return GSDD::top;
     }
   }
 
@@ -53,7 +61,7 @@ public :
   
   // rewriting  X + succ(Y) to succ (X + Y)
   GShom phi(int vr, const DataSet & vl) const {
-    cout << " running succ XY on vr=" << vr << " vl= " ; vl.set_print(cout) ; cout << endl ;
+//    cout << " running succ XY on vr=" << vr << " vl= " ; vl.set_print(cout) ; cout << endl ;
     if (vr != LEFT) {
       // Don't test anything, propagate until left is reached ...
       return this ;
