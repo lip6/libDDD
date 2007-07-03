@@ -126,8 +126,11 @@ public :
   /// returns a formatted string description of the set
   virtual void set_print (std::ostream &os) const {
     os << "[" ;
-    std::copy( data->begin(), data->end(),
-	  std::ostream_iterator<int>(os, ",") );
+    if (! data->empty() ) {
+      std::copy( data->begin(), --data->end(),
+		 std::ostream_iterator<int>(os, ",") );
+      os << *(--data->end());
+    }
     os << "]\n" ;
   }
 #ifdef EVDDD
