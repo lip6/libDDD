@@ -1,10 +1,20 @@
 #ifndef __HOM_SELECT_H_
 #define __HOM_SELECT_H_
 
-
+/** A selector homomorphism.  
+ *  Bypass and restitute nodes until type_condition_ variable is met.
+ *  Then keep only condition_ \inter arc value and apply next_ to son node.
+ *  We expect : 
+ * 1. type_condition_ variable exists on this set of path (or you get TOP);
+ * 2. condition is a DataSet that should be compatible (to apply intersection) with the arc values of this variable
+ * 3. next_ should have the same type of non-modifying selection behavior ; overall the operation behavior is to select paths from an SDD.
+ * */
 class _select_hom : public StrongShom {
+  /// target variable
   int type_condition_;
+  /// condition to intersect with
   const DataSet* condition_;
+  /// hom to apply on successor
   GShom next_;
 
 public:
@@ -16,8 +26,9 @@ public:
       next_(next)
   {}
 
+  // should not reach terminal
   GSDD phiOne() const {
-    return GSDD::one;
+    return GSDD::top;
   }     
   
   GShom phi(int vr, const DataSet & vl) const {
@@ -29,7 +40,7 @@ public:
       // paths with anything except "PLUS" should be left alone
       // dirty "delete" code due to use of DataSet interface instead of direct IntDataSet manipulation
       DataSet * tofree =  vl.set_intersect(*condition_);
-      Shom result = GShom( vr, *tofree, next_);
+      GShom result = GShom( vr, *tofree, next_);
       delete tofree;
       return result;
     } else {
@@ -62,6 +73,15 @@ GShom select_hom(int type_condition,
   return new _select_hom (type_condition,condition,next);
 }
 
+
+/** A selector homomorphism, with support for more generic condition.  
+ *  Bypass and restitute nodes until type_condition_ variable is met.
+ *  Then keep only condition_ ( arc value ) and apply next_ to son node.
+ *  We expect : 
+ * 1. type_condition_ variable exists on this set of path (or you get TOP);
+ * 2. condition is SHom ; so that the variable target type_condition_ should have SDD referenced type.
+ * 3. BOTH condition_ AND next_ should have the same type of non-modifying selection behavior ; overall the operation behavior is to select paths from an SDD.
+ * */
 class _select_deephom : public StrongShom {
   int type_condition_;
   GShom condition_;
@@ -92,6 +112,7 @@ public:
 
   void mark() const {
     next_.mark();
+    condition_.mark();
   }  
   
   size_t hash() const {
@@ -115,7 +136,14 @@ GShom  select_deephom(int type_condition,
 }
 
 
-
+/** A helper homomorphism to change the depth of referenced values.
+  * Descends the SDD looking for trigger_ variable, destroying input as it goes.
+  * When trigger_ is reached return extractor(arc value).
+  * Default extractor is id, just return the arc value.
+  *  We expect : 
+  * 1. trigger_ variable exists on this set of path (or you get TOP);
+  * 2. trigger_ node has SDD as arc values type, since extractor is Shom. 
+*/
 class _extract_value : public StrongShom {
   int trigger_ ;
   GShom extractor_;
@@ -132,7 +160,7 @@ public :
     cout << " running extractor on vr=" << vr << " vl= " ; vl.set_print(cout) ; cout << endl ;
 
     if (vr != trigger_) {
-      // Don't test anything, propagate until right is reached ...
+      // Don't test anything, propagate until right trigger is reached ...
       return this ;
     } else {
       // drop a level
