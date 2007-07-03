@@ -39,5 +39,8 @@ extern const SDD SDDnatZero;
 // a SDD dataset for constant 1
 extern const SDD SDDnatOne;
 
+/* Pretty print for expression trees */
+void printExpression(std::ostream& os,const GSDD *d, std::string s="", bool withendl=true) ;
+
 
 #endif // __NAT_CONST_HH__
