@@ -66,7 +66,7 @@ public:
 
 GShom select_hom(int type_condition,
 	     const DataSet* condition,
-	     const GShom& next) 
+		 const GShom& next = GShom::id) 
 {
   return new _select_hom (type_condition,condition,next);
 }
