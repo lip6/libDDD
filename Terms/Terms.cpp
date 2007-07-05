@@ -26,13 +26,12 @@ void initName() {
 SDD saturateSDD (SDD d) {  
   SDD d1 = d;
   do {
-    d1 = d ;
-    d = applyZeroPlusX  (d) ;
-    d = applyXPlusZero  (d) ;
-    d = applySuccPlusXY (d) ;
-    d = applyOneToSucc0 (d);
-  } while (d != d1);
-  return d1;
+    d1 = d;
+    d = saturateHom() (d);
+    d = saturateNat (d);
+  } while ( d != d1);
+  return d;
+//  return saturateNat(d);
 }
 
 int main(int argc, char **argv){
