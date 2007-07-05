@@ -3,6 +3,7 @@
 
 #include "IntDataSet.h"
 #include "SDD.h"
+#include "SHom.h"
 
 // SDD Variables 
 // Natural 
@@ -42,5 +43,8 @@ extern const SDD SDDnatOne;
 /* Pretty print for expression trees */
 void printExpression(std::ostream& os,const GSDD *d, std::string s="", bool withendl=true) ;
 
+SDD saturateNat (SDD d) ;
+
+GShom saturateHom ();
 
 #endif // __NAT_CONST_HH__
