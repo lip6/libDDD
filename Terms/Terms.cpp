@@ -10,7 +10,9 @@ using namespace std;
 
 #include "Nat_PlusZero.hpp"
 #include "Nat_PlusSucc.hpp"
+#include "Nat_OneSuccZero.hpp"
 #include "Nat_Const.hpp"
+
 
 void initName() {
   DDD::varName (NAT,"NAT");
@@ -25,9 +27,10 @@ SDD saturateSDD (SDD d) {
   SDD d1 = d;
   do {
     d1 = d ;
-    d = applyZeroPlusX (d) ;
-    d = applyXPlusZero (d) ;
-    d = applySuccPlusXY(d) ;
+    d = applyZeroPlusX  (d) ;
+    d = applyXPlusZero  (d) ;
+    d = applySuccPlusXY (d) ;
+    d = applyOneToSucc0 (d);
   } while (d != d1);
   return d1;
 }
