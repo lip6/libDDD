@@ -14,6 +14,7 @@
 #include "SDED.h"
 #include "SDD.h"
 #include "UniqueTable.h"
+#include "IntDataSet.h"
 #include "DDD.h"
 #include "SHom.h"
 /******************************************************************************/
@@ -399,9 +400,11 @@ private:
       sddsize( GSDD ((SDD &) *g) );
     } else if (typeid(*g) == typeid(DDD)) {
       sddsize( GDDD ((DDD &) *g) );
+    } else if (typeid(*g) == typeid(IntDataSet)) {
+      // nothing, no nodes for this implem
     } else {
       if (firstError) {
-        std::cerr << "Warning : unkown referenced dataset type on arc, node count is inacurate"<<std::endl;
+        std::cerr << "Warning : unknown referenced dataset type on arc, node count is inacurate"<<std::endl;
         std::cerr << "Read type :" << typeid(*g).name() <<std::endl ;
 	firstError = false;
       }
