@@ -1,0 +1,40 @@
+% intro
+
+\section{Introduction}
+\label{sec:intro}
+% What we do : SDD + Terms
+
+Data Decision Diagrams (DDD) \cite{Couvreur02DDD}
+ are a directed acyclic graph structure that manipulates(\textit{a priori} unbounded)
+integer domain variables, and which offers a flexible and
+compositional definition of operations through inductive
+homomorphisms. 
+
+ The DDD definition has been extended in \cite{forte05} to
+introduce hierarchy in the data structure. We defined Set Decision
+Diagrams, in which a variable's domain is a \emph{set of
+values}. Concretely, it means the arcs of an SDD may be labeled with
+an SDD (or a DDD), introducing the possibility of arbitrary depth
+nesting in the data structure.  
+
+%%% Le probleme  de Didier
+
+\fixme{introduire le problème de réecriture, plus limites de l'approche traditionnelle Prolog}
+
+% What problems solved : cache, identical subproblems, arbitrary depth of expressions
+We show here how we can use this data structure and operation
+framework for a very different purpose than what is usually 
+the major use case for decision diagram technology, state-space exploration. 
+We use the structure and natural caching mechanism to reduce the complexity of applying rewriting rules to an algebraic specification \cite{je-sais-pas}.
+\fixme{YTM : heu je suis pas à l'aise là dessus, un peu de texte de Didier ?}
+
+% plan
+
+Section \ref{sec:def} recalls the essential definitions. 
+Section \ref{sec:cod} describes  the SDD encoding chosen and validates it's canonical form. 
+Section \ref{sec:hom} describes the encoding of the rewriting rules as homomorphisms operating over the SDD. 
+Section \ref{sec:perf} reports on some experimental results obtained with our prototype tool, \emph{Terms-SDD}. \fixme{trouver un nom}. 
+Finally we conclude in section \ref{sec:conclu}.
+
+
+
