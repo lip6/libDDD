@@ -11,7 +11,7 @@ LDADD = $(DDD_BUILDDIR)/libDDD_d.a
 # AM_CPPFLAGS = -D INST_STL -I $(DDD_SRCDIR)
 # LDADD = $(DDD_BUILDDIR)/libDDD_i.a
 
-terms_SOURCES = Terms.cpp Hom_Select.hpp Nat_PlusZero.hpp Nat_PlusSucc.hpp Nat_Const.hpp Nat_Const.cpp Nat_OneSuccZero.hpp \
-	Nat_PlusZero.cpp Nat_PlusSucc.cpp Nat_OneSuccZero.cpp Hom_Select.cpp 
+terms_SOURCES = Terms.cpp Hom_Select.hpp Hom_Apply.hpp Nat_PlusZero.hpp Nat_PlusSucc.hpp Nat_Const.hpp Nat_Const.cpp Nat_OneSuccZero.hpp \
+	Nat_PlusZero.cpp Nat_PlusSucc.cpp Nat_OneSuccZero.cpp Hom_Select.cpp Hom_Apply.cpp
 
 
