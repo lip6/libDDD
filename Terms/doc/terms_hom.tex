@@ -1,3 +1,59 @@
 \section{Encoding rewriting rules as homomorphisms}
 \label{sec:hom}
 
+
+We first define the selection homomorphism {\cal S} (see Select-Hom.cpp), parametered by a target variable $t$, a selection criterion $sel$ and an operation $next$ to apply when the variable is reached (to allow construction of complex behaviors by composition).
+
+$$
+\begin{array}{lcl}
+{\cal S}\tuple{t,sel,next} (e,x)= \\
+\left\{\begin{array}{ll}
+ e \fireseq{x} {\cal S}_{t,sel,next} =  e \fireseq{x} \mathit{this} & \mbox{ if } e \neq t \\
+ e \fireseq{sel \cap x} \mathit{next} & \mbox{ otherwise } \\
+\end{array}
+\right. \\
+ {\cal S}(1) = \top 
+\end{array}
+$$
+
+This selection homomorphism is used to construct many operations, and is adapted for operations that touch integer arrays when $sel$ is an integer array, or to match nested SDD when $sel$ is a SDD.
+
+However, it does not allow for parametric or wildcard style matching of expressions, as the SDD definition does not have the notion of $any$ arc value or $any$ terminal. We therefore introduce a refined version in which $sel$ is itself a homomorphism to be applied on the arc value. This version is only adapted to cases where the arc value has SDD type.
+
+
+$$
+\begin{array}{lcl}
+{\cal S}\tuple{t,sel,next} (e,x)= \\
+\left\{\begin{array}{ll}
+ e \fireseq{x} \mathit{this} & \mbox{ if } e \neq t \\
+ e \fireseq{sel (x) } \mathit{next} & \mbox{ otherwise } \\
+\end{array}
+\right. \\
+ {\cal S}(1) = \top 
+\end{array}
+$$
+
+\subsection{Rule : $1 \Rightarrow suc(0)$}
+
+We write the trivial homomorphism giving the actual rewriting pattern, that does not test any conditions :
+
+$$
+\begin{array}{lcl}
+{OneToSucZero} (e,x)= \\
+\left\{
+ \Nat \fireseq{suc} \mathit{Arg} \fireseq{ \Nat \fireseq{0} 1 }  \mathit{Id}
+\right. \\
+ {OneToSucZero}(1) = \top 
+\end{array}
+$$
+
+The full rule is defined by :
+
+$$
+rule_1 (d) =  \\
+\left\{\begin{array}{ll}
+d' = &  {\cal S}\tuple{\Nat,\left[1\right],Id} (d) \\
+\mathit{return} &  OneToSucZero (d') + (d-d')
+ \end{array}
+\right. \\
+$$
