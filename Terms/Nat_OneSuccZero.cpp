@@ -17,7 +17,7 @@ public :
     assert (vr == NAT) ;
     
     // we know vl == {1} rewrite to succ(0)
-    return  SDD(SDDnatSucc ^ SDD ( SUCCARG, SDDnatZero));
+    return  SDDnatSucc ^ GSDD ( SUCCARG, SDDnatZero);
 
   }
 

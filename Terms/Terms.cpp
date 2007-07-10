@@ -59,7 +59,7 @@ int main(int argc, char **argv){
 
   SDD OnePlusSuccOne = SDDnatPlus
     ^ SDD ( LEFT, SDDnatOne )
-    ^ SDD ( RIGHT, SDD(SDDnatSucc ^ SDD ( SUCCARG, SDDnatOne)) )  ;
+    ^ SDD ( RIGHT, SDDnatSucc ^ SDD ( SUCCARG, SDDnatOne))  ;
   cout << "1 + 2 <=> 1 + succ(1) : "  ;  printExpression(cout, & OnePlusSuccOne); cout << endl ;
   
 
