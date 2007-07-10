@@ -32,5 +32,27 @@ public:
   GShom   defineEnvironment(const SDD&) const;
 };
 
+class _hom_variable
+  : public StrongShom
+{
+private:
+  int variable_;
+public:
+  _hom_variable(int);
+  GSDD    phiOne()                      const;
+  GShom   phi(int, const DataSet&)      const;
+  size_t  hash()                        const;
+  bool    operator==(const StrongShom&) const;
+};
+
+typedef ::std::tr1::shared_ptr< const EnvShom >
+        EnvironmentShom;
+
+EnvironmentShom
+apply(const GShom&, EnvironmentShom);
+
+GShom
+variable(int);
+
 #endif //__HOM_APPLY_H_
 
