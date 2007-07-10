@@ -171,7 +171,7 @@ public :
       return this ;
     } else {
       // drop a level
-      return SDD ( extractor_ ((SDD &) vl) );
+      return  extractor_ ((const SDD &) vl) ;
     }
   }
 

@@ -20,13 +20,11 @@ public :
       // produce output
       return SDDnatSucc 
 	^ GSDD (SUCCARG, 
-		SDD (SDDnatPlus 
-		     ^ SDD (LEFT,SDD(X))  
-		     ^ SDD (RIGHT, 
-			    SDD( extract_value(SUCCARG) ((const SDD&)vl))
-			    )
-		     )
-		) ;
+		SDDnatPlus 
+		^ SDD (LEFT,X)  
+		^ SDD (RIGHT, 
+		       extract_value(SUCCARG) ((const SDD&)vl))
+		);
     } else {
       // should not happen
 	return GSDD::top;
