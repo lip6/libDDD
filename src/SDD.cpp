@@ -359,6 +359,24 @@ GSDD::GSDD(int var,const GSDD &va,const GSDD &d):concret(null.concret){ //var-va
   //  concret->refCounter++;
 }
 
+GSDD::GSDD(int var,const SDD &val,const GSDD &d):concret(null.concret){ //var-val->d
+  if(d!=null && ! val.empty() ){
+    _GSDD *_g = new _GSDD(var,0);
+    // cast to (DataSet*) to lose "const" type
+    std::pair<DataSet *, GSDD> x( val.newcopy(),d);
+    _g->valuation.push_back(x);
+    concret=canonical(_g);    
+#ifdef OTF_GARBAGE
+    if ( ! concret->isSon  ) {
+      if (!concret->tempCounter)
+	recent.insert(concret);
+      ++ concret->tempCounter;
+    }
+#endif
+  }
+  //  concret->refCounter++;
+}
+
 
 
 /* Accessors */
@@ -609,6 +627,13 @@ SDD::SDD(int var,const DataSet& val,const GSDD &d):GSDD(var,val,d){
 }
 
 SDD::SDD(int var,const GSDD& val,const GSDD &d):GSDD(var,val,d){
+  concret->refCounter++;
+#ifdef OTF_GARBAGE
+  concret->isSon = true;
+#endif
+}
+
+SDD::SDD(int var,const SDD& val,const GSDD &d):GSDD(var, val,d){
   concret->refCounter++;
 #ifdef OTF_GARBAGE
   concret->isSon = true;

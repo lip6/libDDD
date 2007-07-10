@@ -93,6 +93,7 @@ public:
   /// \param val the value labeling the arc
   /// \param d the successor node or defaults to terminal GSDD::one if none provided  
   GSDD(int var,const GSDD & val,const GSDD &d=one ); //var-val->d
+  GSDD(int var,const class SDD & val,const GSDD &d=one ); //var-val->d
   /// A should be \e private constructor used in internals, DO NOT USE THIS. 
   /// \param _g The pointer provided should point into the unicity table
   /// \todo make this private
@@ -246,6 +247,8 @@ public:
   /// \param d the successor node or defaults to terminal GDDD::one if none provided
   SDD(int var,const DataSet& val,const GSDD &d=one ); //var-val->d
   SDD(int var,const GSDD& val,const GSDD &d=one ); //var-val->d
+  // to disambiguate when using SDD as referenced type
+  SDD(int var,const SDD& val,const GSDD &d=one ); //var-val->d
   /// Destructor, maintains refCount. Note that destroying a DDD does not actually destroy
   /// any data, it decrements reference count, so that subsequent MemoryManager::garbage call
   /// may truly clear the data.
