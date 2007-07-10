@@ -77,7 +77,7 @@ public:
   GSDD(int variable,Valuation value);
   /// Default constructor creates the empty set SDD.
   GSDD():concret(null.concret){};
-  /// The most common way for the user of creating DDD.
+  /// The most common way for the user of creating SDD.
   /// This constructor builds a node with a single arc of the form var-val->d.
   /// Usually a user will create these single path SDD, possibly by imbrication as in
   /// GSDD(var1, val1, GSDD( var2, val2 )). Then compose them using +, -, *, ^ ...
@@ -85,6 +85,14 @@ public:
   /// \param val the value labeling the arc
   /// \param d the successor node or defaults to terminal GSDD::one if none provided  
   GSDD(int var,const DataSet & val,const GSDD &d=one ); //var-val->d
+  /// Another common way for the user to create SDD.
+  /// This constructor builds a node with a single arc of the form var-val->d.
+  /// This adapted version is useful when the arc value is itself the result of Hom applications
+  /// as the compiler needs the change from GSDD to SDD type to recognize a DataSet
+  /// \param var the variable labeling the node
+  /// \param val the value labeling the arc
+  /// \param d the successor node or defaults to terminal GSDD::one if none provided  
+  GSDD(int var,const GSDD & val,const GSDD &d=one ); //var-val->d
   /// A should be \e private constructor used in internals, DO NOT USE THIS. 
   /// \param _g The pointer provided should point into the unicity table
   /// \todo make this private
@@ -237,6 +245,7 @@ public:
   /// \param val the value labeling the arc
   /// \param d the successor node or defaults to terminal GDDD::one if none provided
   SDD(int var,const DataSet& val,const GSDD &d=one ); //var-val->d
+  SDD(int var,const GSDD& val,const GSDD &d=one ); //var-val->d
   /// Destructor, maintains refCount. Note that destroying a DDD does not actually destroy
   /// any data, it decrements reference count, so that subsequent MemoryManager::garbage call
   /// may truly clear the data.
