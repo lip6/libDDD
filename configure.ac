@@ -23,6 +23,7 @@ AC_PROG_CXX
 AC_CONFIG_FILES([
   Makefile
   demo/Makefile
+  demo/hanoi/Makefile
   tests/Makefile
   src/Makefile
   Terms/Makefile
