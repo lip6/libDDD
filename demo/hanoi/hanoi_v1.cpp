@@ -136,7 +136,7 @@ int main(int argc, char **argv){
 
   // The initial state
   // User program variables should be DDD not GDDD, to prevent their garbage collection
-  DDD M0 = GDDD::one ;
+  DDD M0 = DDD::one ;
   // construct an initial state for the problem, all rings are on pole 0
   for (int i=0; i<NB_RINGS ; i++ ) {
     // note the use of left-concat (adding at the top of the structure), 

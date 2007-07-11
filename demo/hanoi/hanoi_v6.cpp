@@ -18,7 +18,7 @@ using namespace std;
 // and is stored at the bottom of the DDD
 static int NB_RINGS= 5;
 // Each variable domain is {0,1,2} expressing the pole the variable is on
-static int NB_POLES= 3;
+static int NB_POLES= 10;
 
 void initName() {
   char buff [12];
