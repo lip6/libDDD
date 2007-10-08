@@ -7,8 +7,10 @@
 
 #include <cassert>
 
+#ifdef PARALLEL_DD
 #include <tbb/concurrent_vector.h>
 #include <tbb/parallel_reduce.h>
+#endif
 
 #ifdef INST_STL
 MapJumps  _GHom::HomJumps;
