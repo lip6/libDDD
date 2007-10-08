@@ -9,8 +9,6 @@
 #include "DED.h"
 #include "MemoryManager.h"
 
-#include "tbb/task_scheduler_init.h" 
-
 
 // we use one DDD variable per ring, ring 0 is the topmost, 
 // and is stored at the bottom of the DDD

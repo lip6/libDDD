@@ -24,9 +24,11 @@ class UniqueTable{
 
 private:
 	
+#ifdef PARALLEL_DD
 	// typedef tbb::queuing_mutex table_mutex_t;
 	typedef tbb::mutex table_mutex_t;
 	table_mutex_t table_mutex_;
+#endif
 
 public:
 	/// Constructor, builds a default table.

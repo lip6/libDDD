@@ -21,12 +21,14 @@ private:
 	typedef __gnu_cxx::hash_map<Key,Value> Internal_Cache;
 	Internal_Cache internal_cache_;
 	
+#ifdef PARALLEL_DD
 	typedef tbb::queuing_rw_mutex rw_mutex;
 	//typedef tbb::mutex mutex;
 	
 	rw_mutex cache_rw_mutex;
 	//mutex cache_mutex;
-	
+#endif
+
 public:
 	
 	typedef typename Internal_Cache::iterator iterator;
