@@ -5,7 +5,7 @@
 #include <map>
 // modif
 #include <assert.h>
-#include <ext/hash_map>
+//#include <ext/hash_map>
 #include <typeinfo>
 // ajout
 
@@ -13,6 +13,11 @@
 #include "DED.h"
 #include "Hom.h"
 
+#include "Cache.h"
+
+#ifdef PARALLEL_DD
+#include "tbb/atomic.h"
+#endif
 /******************************************************************************/
 
 
@@ -21,11 +26,32 @@ long long NBJumps=0;
 long long NBAccess=0;
 #endif
 
-typedef __gnu_cxx::hash_map<DED,GDDD> Cache;
+//typedef __gnu_cxx::hash_map<DED,GDDD> Cache;
+typedef __Cache<DED,GDDD> Cache;
 static Cache cache;
 
+#ifdef PARALLEL_DD
+
+static tbb::atomic<int> Hits;
+static tbb::atomic<int> Misses;
+class DED_parallel_init
+{
+public:
+	 
+	DED_parallel_init()
+	{
+		Hits = 0;
+		Misses = 0;
+	}
+		
+};
+static DED_parallel_init DED_init;
+
+#else
 static int Hits=0;
 static int Misses=0;
+
+#endif
 
 /******************************************************************************/
 class _DED_GDDD:public _DED{
@@ -526,8 +552,8 @@ void DED::pstats(bool reinit)
   std::cout << "\nCache hit ratio : " << double (Hits*100) / double(Misses+1+Hits) << "%" << std::endl;
   // long hitr=(Hits*100) / (Misses+1+Hits) ;
   if (reinit){
-    Hits =0;
-    Misses =0;  
+    Hits = 0;
+    Misses = 0;  
   }  
 
 }
@@ -556,11 +582,13 @@ bool DED::operator==(const DED& e) const{
 
 // eval and std::set to NULL the DED
 GDDD DED::eval(){
-  if(typeid(*concret)==typeid(_DED_GDDD)){
-    GDDD res=concret->eval();
-    delete concret;
-    return res;
-  }
+
+	if(typeid(*concret)==typeid(_DED_GDDD))
+	{
+		GDDD res=concret->eval();
+		delete concret;
+		return res;
+	}
 //  else 
 //     if (! concret->shouldCache() ){
 //       // we don't need to store it
@@ -570,6 +598,7 @@ GDDD DED::eval(){
 //       Misses++;
 //       return res;
 //     }
+
 #ifdef INST_STL
     NBAccess++;
     NBJumps++;
@@ -578,21 +607,28 @@ GDDD DED::eval(){
     Cache::const_iterator ci=cache.find(*this, temp); // search e in the cache
     NBJumps+=temp;
 #else
-  Cache::const_iterator ci=cache.find(*this); // search e in the cache
+
+
+ 	Cache::const_iterator ci=cache.find(*this); // search e in the cache
+
 #endif
 
-  if(ci==cache.end()){ // *this is not in the cache
-    Misses++;
-    GDDD res=concret->eval(); // compute the result
-    cache[*this]=res;
-    concret=NULL;
-    return res;
-  }
-  else {// *this is in the cache
-    Hits++;
-    delete concret;
-    return ci->second;
-  }
+	if(ci==cache.end())
+	{ // *this is not in the cache
+		Misses++;
+//		std::cout << "NOT IN CACHE" << std::endl;
+		GDDD res=concret->eval(); // compute the result
+    	cache[*this]=res;
+		concret=NULL;
+		return res;
+	}
+	else 
+	{// *this is in the cache
+//		std::cout << "IN CACHE" << std::endl;
+		Hits++;
+		delete concret;
+		return ci->second;
+	}
 };
 
 /* binary operators */

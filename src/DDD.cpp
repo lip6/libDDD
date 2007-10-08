@@ -5,7 +5,7 @@
 #include <set>
 // modif
 #include <cassert>
-#include <ext/hash_map>
+//#include <ext/hash_map>
 #include <map>
 // modif
 #include <sstream>
@@ -13,6 +13,12 @@
 #include "DDD.h"
 #include "UniqueTable.h"
 #include "DED.h"
+
+#ifdef PARALLEL_DD
+#include "tbb/atomic.h"
+#endif
+
+#include "Cache.h"
 
 /******************************************************************************/
 /*                             class _GDDD                                     */
@@ -74,10 +80,30 @@ namespace std {
   };
 }
 
+static UniqueTable<_GDDD> canonical;
 std::map<int,std::string> mapVarName;
 
-static size_t Max_DDD=0;
-static UniqueTable<_GDDD> canonical;
+#ifdef PARALLEL_DD
+
+static tbb::atomic<size_t> Max_DDD;
+
+class DDD_parallel_init
+{
+public:
+	 
+	DDD_parallel_init()
+	{
+		Max_DDD = 0;
+	}
+		
+};
+static DDD_parallel_init DDD_init;
+
+#else
+
+static size_t Max_DDD = 0;
+
+#endif
 
 /******************************************************************************/
 /*                             class GDDD                                     */
@@ -190,29 +216,45 @@ unsigned int GDDD::refCounter() const{
 }
 
 class MySize{
+
 private:
   unsigned long int res;
   std::set<GDDD> s;
-  void mysize(const GDDD& g){
-    if(s.find(g)==s.end()){
-      s.insert(g);
-      res++;
-      for(GDDD::const_iterator gi=g.begin();gi!=g.end();gi++)
-	mysize(gi->second);
+  void mysize(const GDDD& g)
+  {
+    if(s.find(g)==s.end())
+	{
+		s.insert(g);
+		res++;
+		for(GDDD::const_iterator gi=g.begin();gi!=g.end();gi++)
+			mysize(gi->second);
     }
   }
+
 public:
-  MySize(){};
+  MySize()
+#ifdef PARALLEL_DD
+	:
+	res(0),
+	s()
+#endif	
+	{};
   unsigned long int operator()(const GDDD& g){
+#ifndef PARALLEL_DD
     res=0;
     s.clear();
+#endif
     mysize(g);
     return res;
   }
 };
 
 unsigned long int GDDD::size() const{
-  static MySize mysize;
+#ifndef PARALLEL_DD
+ static	
+#endif
+  MySize mysize;
+
   return mysize(*this);
 }
 
@@ -220,27 +262,32 @@ class MyNbStates{
 private:
   int val; // val=0 donne nbState , val=1 donne noSharedSize
 //  static hash_map<GDDD,long double> s;
-  static __gnu_cxx::hash_map<GDDD,long double> s;
+  //static __gnu_cxx::hash_map<GDDD,long double> s;
+	typedef __Cache<GDDD, long double> s_t;
+	static s_t s;
 
-  long double nbStates(const GDDD& g){
-    if(g==GDDD::one)
-      return 1;
-    else if(g==GDDD::top || g==GDDD::null)
-      return 0;
-    else{
-      __gnu_cxx::hash_map<GDDD,long double>::const_iterator i=s.find(g);
-      if(i==s.end()){
-	long double res=0;
-	for(GDDD::const_iterator gi=g.begin();gi!=g.end();gi++)
-	  res+=nbStates(gi->second)+val;
-	s[g]=res;
-	return res;
-      }
-      else{
-	return i->second;
-      }
-    }
-  }
+long double nbStates(const GDDD& g){
+
+	if(g==GDDD::one)
+		return 1;
+	else if(g==GDDD::top || g==GDDD::null)
+		return 0;
+	else{
+//		__gnu_cxx::hash_map<GDDD,long double>::const_iterator i=s.find(g);
+		s_t::const_iterator i = s.find(g);
+		if(i==s.end()){
+			long double res=0;
+			for(GDDD::const_iterator gi=g.begin();gi!=g.end();gi++)
+				res+=nbStates(gi->second)+val;
+			s[g]=res;
+			return res;
+		}
+		else{
+			return i->second;
+		}
+// end of lock
+	}
+}
 
 public:
   MyNbStates(int v):val(v){};
@@ -255,8 +302,8 @@ public:
   }
 };
 
-__gnu_cxx::hash_map<GDDD,long double> MyNbStates::s = __gnu_cxx::hash_map<GDDD,long double> ();
-
+//__gnu_cxx::hash_map<GDDD,long double> MyNbStates::s = __gnu_cxx::hash_map<GDDD,long double> ();
+__Cache<GDDD,long double> MyNbStates::s = __Cache<GDDD,long double> ();
 
 long double GDDD::nbStates() const{
   static MyNbStates myNbStates(0);

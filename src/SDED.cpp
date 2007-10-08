@@ -14,6 +14,12 @@
 #include "SDED.h"
 #include "SHom.h"
 
+#include "Cache.h"
+
+#ifdef PARALLEL_DD
+#include "tbb/atomic.h"
+#endif
+
 /******************************************************************************/
 namespace namespace_SDED {
 #ifdef INST_STL
@@ -21,21 +27,45 @@ namespace namespace_SDED {
   long long NBAccess=0;
 #endif
 
-  typedef __gnu_cxx::hash_map<SDED,GSDD> Cache;
-  static Cache cache;
-  static Cache recentCache;
+//typedef __gnu_cxx::hash_map<SDED,GSDD> Cache;
+typedef __Cache<SDED,GSDD> Cache;
+static Cache cache;
+static Cache recentCache;
+
+#ifdef PARALLEL_DD
+
+static tbb::atomic<int> Hits;
+static tbb::atomic<int> Misses;
+static tbb::atomic<size_t> Max_SDED;
+
+class SDED_parallel_init
+{
+public:
+	 
+	SDED_parallel_init()
+	{
+		Hits = 0;
+		Misses = 0;
+		Max_SDED = 0;
+	}
+		
+};
+static SDED_parallel_init SDED_init;
+
+#else
   
-  static int Hits=0;
-  static int Misses=0;
+static int Hits=0;
+static int Misses=0;
+static size_t Max_SDED=0;
+
 #ifdef OTF_GARBAGE
-  static int recentHits=0;
-  static int recentMisses=0;
+static int recentHits=0;
+static int recentMisses=0;
+static size_t Max_Recent_SDED=0;
 #endif
 
-  static size_t Max_SDED=0;
-#ifdef OTF_GARBAGE
-  static size_t Max_Recent_SDED=0;
 #endif
+
 } //namespace namespace_SDED 
 
 /******************************************************************************/

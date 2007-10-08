@@ -17,6 +17,11 @@
 #include "IntDataSet.h"
 #include "DDD.h"
 #include "SHom.h"
+
+#ifdef PARALLEL_DD
+#include "tbb/atomic.h"
+#include "tbb/queuing_rw_mutex.h"
+#endif
 /******************************************************************************/
 /*                             class _GSDD                                     */
 /******************************************************************************/
@@ -121,7 +126,27 @@ namespace std {
 }
 
 // map<int,string> mapVarName;
+#ifdef PARALLEL_DD
+//typedef tbb::queuing_rw_mutex mutex_t;
+typedef tbb::mutex mutex_t;
+mutex_t mutex;
+
+static tbb::atomic<size_t> Max_SDD;
+class SDD_parallel_init
+{
+public:
+	 
+	SDD_parallel_init()
+	{
+		Max_SDD = 0;
+	}
+		
+};
+static SDD_parallel_init SDD_init;
+
+#else
 static size_t Max_SDD=0;
+#endif
 
 #ifdef OTF_GARBAGE
 static  __gnu_cxx::hash_set<_GSDD*> recent;
@@ -418,7 +443,8 @@ private:
 
   bool firstError;
 
-  void sddsize(const GSDD& g){
+  void sddsize(const GSDD& g)
+{
     if(s.find(g)==s.end()){
       s.insert(g);
       res++;
@@ -431,7 +457,8 @@ private:
     }
   }
 
-  void sddsize(const DataSet* g){
+  void sddsize(const DataSet* g)
+{
     // Used to work for referenced DDD
     if (typeid(*g) == typeid(SDD) ) {
       sddsize( GSDD ((SDD &) *g) );
@@ -448,7 +475,8 @@ private:
     }
   }
 
-  void sddsize(const GDDD& g){
+  void sddsize(const GDDD& g)
+	{
       if (sd3.find(g)==sd3.end()) {
 	sd3.insert(g);
 	d3res ++;
@@ -461,13 +489,26 @@ public:
   unsigned long int res;
   unsigned long int d3res;
 
-  SddSize():firstError(true){};
+	SddSize()
+		:
+		firstError(true)
+#ifdef PARALLEL_DD
+			,
+			res(0),
+			d3res(0),
+			sd3(),
+			s()
+#endif	
+	{
+	};
 //  pair<unsigned long int,unsigned long int> operator()(const GSDD& g){
-  unsigned long int operator()(const GSDD& g){
+	unsigned long int operator()(const GSDD& g){
+#ifndef PARALLEL_DD
     res=0;
     d3res=0;
     sd3.clear();
     s.clear();
+#endif
     sddsize(g);
     // we used to return a pair : number of nodes in SDD, number of nodes in referenced data structures
 //    return make_pair(res,d3res);
@@ -477,9 +518,12 @@ public:
 
 
 std::pair<unsigned long int,unsigned long int> GSDD::node_size() const{
-  static SddSize sddsize;
-  sddsize(*this);
-  return std::make_pair(sddsize.res,sddsize.d3res);
+#ifndef PARALLEL_DD
+	static 
+#endif
+	SddSize sddsize;
+	sddsize(*this);
+	return std::make_pair(sddsize.res,sddsize.d3res);
 }
 
 // old prototype
@@ -493,25 +537,30 @@ class MySDDNbStates{
 private:
   int val; // val=0 donne nbState , val=1 donne noSharedSize
   static __gnu_cxx::hash_map<GSDD,long double> s;
-
-  long double nbStates(const GSDD& g){
-    if(g==GSDD::one)
-      return 1;
-    else if(g==GSDD::top || g==GSDD::null)
-      return 0;
-    else{
-      __gnu_cxx::hash_map<GSDD,long double>::const_iterator i=s.find(g);
-      if(i==s.end()){
-	long double res=0;
-	for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++)
-	  res+=(gi->first->set_size())*nbStates(gi->second)+val;
-	s[g]=res;
-	return res;
-      } else {
-	return i->second;
-      }
-    }
-  }
+	
+long double nbStates(const GSDD& g)
+{
+	if(g==GSDD::one)
+		return 1;
+	else if(g==GSDD::top || g==GSDD::null)
+		return 0;
+	else
+	{
+		__gnu_cxx::hash_map<GSDD,long double>::const_iterator i=s.find(g);
+		if(i==s.end())
+		{
+			long double res=0;
+			for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++)
+				res+=(gi->first->set_size())*nbStates(gi->second)+val;
+			s[g]=res;
+			return res;
+		} 
+		else 
+		{
+			return i->second;
+		}
+	}
+}
 
 public:
   MySDDNbStates(int v):val(v){};
