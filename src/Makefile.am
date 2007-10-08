@@ -1,4 +1,4 @@
-lib_LIBRARIES 	= libDDD.a  libDDD_d.a libDDD_otfg.a libDDD_ev.a
+lib_LIBRARIES 	= libDDD.a  libDDD_d.a #libDDD_otfg.a libDDD_ev.a
 include_HEADERS = DataSet.h			\
 	  	  DDD.h 			\
 		  DED.h 			\
@@ -35,7 +35,7 @@ AM_CPPFLAGS =  -Wall
 
 # default options => -o2 
 libDDD_a_SOURCES = $(SRCS)
-libDDD_a_CPPFLAGS = -O5  -Wall 
+libDDD_a_CPPFLAGS = -O3  -Wall 
 
 # STL instantiated version for hash profiling
 # libDDD_i_a_SOURCES = $(SRCS)
@@ -51,9 +51,9 @@ libDDD_d_a_CPPFLAGS = -g  -Wall
 
 # change options to activate OTF garbage collection (reference counting on GSDD) 
 libDDD_otfg_a_SOURCES = $(SRCS)
-libDDD_otfg_a_CPPFLAGS = -g -O5 -Wall -D OTF_GARBAGE
+libDDD_otfg_a_CPPFLAGS = -g -O3 -Wall -D OTF_GARBAGE
 
 # change options to activate EVDDD for distance functions
 libDDD_ev_a_SOURCES = $(SRCS)
-libDDD_ev_a_CPPFLAGS = -g -O5 -Wall -D EVDDD
+libDDD_ev_a_CPPFLAGS = -g -O3 -Wall -D EVDDD
 

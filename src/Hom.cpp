@@ -7,6 +7,9 @@
 
 #include <cassert>
 
+#include <tbb/concurrent_vector.h>
+#include <tbb/parallel_reduce.h>
+
 #ifdef INST_STL
 MapJumps  _GHom::HomJumps;
 #endif
@@ -418,6 +421,44 @@ bool StrongHom::operator==(const _GHom &h) const{
   return typeid(*this)==typeid(h)?*this==*(StrongHom*)&h:false;
 }
 
+// typedef tbb::concurrent_vector< std::pair<int, GDDD> > GDDD_vec;
+// 
+// struct reducer
+// {
+// 	std::set<GDDD> result_;
+// 	const StrongHom& hom_;
+// 	int variable_;
+// 	
+// 	reducer( const StrongHom& hom,
+// 			 int variable)
+// 		:
+// 		result_(),
+// 		hom_(hom),
+// 		variable_(variable)
+// 	{}
+// 	
+// 	reducer( reducer& r, tbb::split)
+// 		:
+// 		result_(r.result_),
+// 		hom_(r.hom_),
+// 		variable_(r.variable_)
+// 	{}
+// 	
+// 	void
+// 	operator()( const GDDD_vec::range_type& vec)
+// 	{
+// 		assert( std::distance(vec.begin(),vec.end()) == 1 );
+// 		std::pair< int, GDDD > element = *vec.begin();
+// 		result_.insert( hom_.phi( variable_, element.first)(element.second) );
+// 	}
+// 	
+// 	void
+// 	join(const reducer& r)
+// 	{
+// 		this->result_.insert(r.result_.begin(), r.result_.end());
+// 	}
+// };
+
 
 /* Eval */
 GDDD StrongHom::eval(const GDDD &d)const{
@@ -427,6 +468,7 @@ GDDD StrongHom::eval(const GDDD &d)const{
     return phiOne();
   else if(d==GDDD::top)
     return GDDD::top;
+
   else{
     int variable=d.variable();
     std::set<GDDD> s;
@@ -435,6 +477,28 @@ GDDD StrongHom::eval(const GDDD &d)const{
     }
     return DED::add(s);
   }
+
+	// else  
+	// {
+	// 	
+	// 	int variable = d.variable();
+	// 
+	// 	GDDD_vec successors;
+	// 	for( GDDD::Valuation::const_iterator it = d.begin();
+	// 		 it != d.end();
+	// 		 ++it)
+	// 	{
+	// 		successors.push_back(*it);
+	// 	}
+	// 	
+	// 	
+	// 	reducer red_is_dead(*this,variable);
+	// 	tbb::parallel_reduce(successors.range(1), red_is_dead);
+	// 	
+	// 	return DED::add(red_is_dead.result_);
+	// 	
+	// }
+
 }
 
 /*************************************************************************/

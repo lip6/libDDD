@@ -5,6 +5,11 @@
 
 #include <ext/hash_set>
 
+#ifdef PARALLEL_DD
+#include "tbb/queuing_mutex.h"
+#include "tbb/mutex.h"
+#endif
+
 /// This class implements a unicity table mechanism, based on an STL hash_set.
 /// Requirements on the contained type are thus those of hash_set.
 template<typename T>
@@ -17,13 +22,26 @@ class UniqueTable{
   long NbInsertion;
 #endif
 
+private:
+	
+	// typedef tbb::queuing_mutex table_mutex_t;
+	typedef tbb::mutex table_mutex_t;
+	table_mutex_t table_mutex_;
+
 public:
-  /// Constructor, builds a default table.
-  UniqueTable(){
-#ifdef INST_STL
-    NbAcces=0;NbInsertion=0;
+	/// Constructor, builds a default table.
+	UniqueTable()
+#ifdef PARALLEL_DD
+		:
+		table_mutex_()
 #endif
-  }
+#ifdef INST_STL
+		:
+		NbAcces(0),
+		NbInsertion(0)
+#endif
+	{
+	}
 
   /// Typedef helps hide implementation type (currently gnu gcc's hash_set).
   typedef __gnu_cxx::hash_set<T*> Table;
@@ -42,39 +60,45 @@ public:
     std::pair<typename Table::iterator, bool> ref=table.insert(_g, nbjumps); 
     _g->InstrumentNbJumps(nbjumps);
 #else
+
+
+
+#ifdef PARALLEL_DD
+	table_mutex_t::scoped_lock lock(table_mutex_);
+#endif
+
     std::pair<typename Table::iterator, bool> ref=table.insert(_g); 
-    
 #endif
-  
     
-    typename Table::iterator ti=ref.first;
-    if (!ref.second){
-      delete _g;
-    }
+	typename Table::iterator ti=ref.first;
+	if (!ref.second){
+		delete _g;
+	}
 #ifdef INST_STL
-    else {
-      NbInsertion++;
-    }
+	else {
+		NbInsertion++;
+	}
 #endif
 
-    return *ti;
-  }
+	return *ti;
+// scoped lock released
+	}
 
-  /// Returns the current number of filled entries in the table.
-  size_t size() const{
-    return table.size();
-  }
+	/// Returns the current number of filled entries in the table.
+	size_t size() const{
+		return table.size();
+	}
 
 #ifdef INST_STL
-  /// Prints some statistics relating to UniqueTable effectiveness (only INST_STL version).
-  void pstat(bool reinit=true){
-    cout << "NbInsertion(" <<NbInsertion << ")*100/NbAccess(" << NbAcces<< ")  = " ;
-    cout << ((long)(((long)NbInsertion) * 100)) / ((long)NbAcces) << endl;
-    if (reinit ){
-      NbAcces=0;
-      NbInsertion=0;
-    }
-  }
+	/// Prints some statistics relating to UniqueTable effectiveness (only INST_STL version).
+	void pstat(bool reinit=true){
+		cout << "NbInsertion(" <<NbInsertion << ")*100/NbAccess(" << NbAcces<< ")  = " ;
+		cout << ((long)(((long)NbInsertion) * 100)) / ((long)NbAcces) << endl;
+		if (reinit ){
+			NbAcces=0;
+			NbInsertion=0;
+		}
+	}
 #endif
 };
 
