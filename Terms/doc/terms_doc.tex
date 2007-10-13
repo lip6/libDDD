@@ -1,0 +1,74 @@
+\documentclass{llncs}
+
+\usepackage[latin1]{inputenc} % accents 8 bits dans le fichier
+%\usepackage[T1]{fontenc}      % accents codés dans la fonte
+%\usepackage{pslatex}
+\usepackage{latexsym,graphicx,url,algorithm,algorithmic,floatflt,stmaryrd}
+\usepackage{PNota}
+\usepackage[usenames]{color}
+
+\usepackage{amsfonts,amsmath,txfonts} % amsthm
+
+% personal macros
+\newcommand{\DDD}{\varmathbb{D}}
+\newcommand{\SDD}{\varmathbb{S}}
+% \newcommand{\DDD}{\mbox{${\rm I\!D}$}}
+\newcommand{\Dom}{\mathrm{Dom}}
+\newcommand{\SL}{\mathrm{[\hspace{-0.1em}[}}
+\newcommand{\SR}{\mathrm{]\hspace{-0.1em}]}}
+\newcommand\fixme[1]{\color{Red}{FIXME: #1}\color{Black}}
+%\newcommand{\mathbb}{\mathrm{D}}
+
+\pagestyle{plain}
+
+\begin{document}
+
+% ==============================================================================
+% ==============================================================================
+\title{Set Decision Diagram based \\ Symbolic encoding of Algebraic Terms rewriting}
+
+
+\author{Didier Buchs, Alban Linard, Emmanuel Paviot-Adet and Yann Thierry-Mieg\inst{2} } 
+% the list of authors
+
+\tocauthor{Yann Thierry-Mieg (LIP6) } % the name of the author to appear in the toc
+
+\institute{Laboratoire d'Informatique de Paris 6, France \\ 
+       \email{Yann.Thierry-Mieg@lip6.fr} }
+
+\maketitle
+
+
+\noindent {\small\sc Keywords:} { Decision Diagrams, Rewriting rules, Algebraic Terms}
+
+
+\input{abstract.tex}
+
+% ==============================================================================
+% ==============================================================================
+
+
+\input{intro.tex}
+
+\input{definition.tex}
+
+\input{encoding.tex}
+
+\input{terms_hom.tex}
+
+\input{tool.tex}
+
+\input{conclu.tex}
+
+% ------------------------------------------
+% ==============================================================================
+\bibliography{bibliography}
+\bibliographystyle{plain}
+
+%\input{annex.tex}
+
+\end{document}
+	
+
+
+

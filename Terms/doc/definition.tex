@@ -1,0 +1,209 @@
+\section{Definitions}
+\label{sec:def}
+
+\subsection{SDD definition}
+
+BDD are a powerful data structure, but their expressive power is
+limited, and they are not very good at representing dynamic behavior.
+In Set Decision Diagrams \cite{forte05}, an arc of the structure is
+labeled by a
+\emph{set} of values, instead of a single valuation. The set may itself
+represented by an SDD, thus in effect we label the arcs of our
+structure with references to SDD, introducing hierarchy in the data
+structure. At the final depth level we use plain arrays of integers to
+label the edges.
+
+
+%definition des SDD
+
+Set Decision Diagrams (SDD) are data structures for representing
+sequences of assignments of the form $e_1 \in a_1 ;e_2 \in a_2;
+\cdots e_n \in a_n$ where $e_i$ are variables and $a_i$ are sets of values.
+We assume no variable ordering, and the same variable can occur
+several times in an assignment sequence.  We also make no assumptions
+on the domain of the variables. We encode SDD as shared decision
+trees.  We define the usual terminals $0$ and $1$ to represent
+non-accepting and accepting sequences respectively.  In the following,
+$E$ denotes a set of variables, and for any $e$ in $E$, $\Dom(e)$
+represents the domain of $e$,
+
+\begin{definition}[Set Decision Diagram]\label{SDD_Def}
+The set $\SDD$ of SDD is defined by $d\in \SDD$ if:
+\begin{itemize}
+\item $d \in \{0,1\}$ or
+\item $d=(e,\alpha)$ with:
+ \begin{itemize} \item $e \in E$ \item $\alpha$: is a finite set of
+ pairs $(a_i,d_i)$ where $a_i \subseteq \Dom(e)$ and $d_i \in \SDD$
+\end{itemize}
+\end{itemize}
+We denote $e \fireseq{a_i} d_i$, the SDD $(e,\alpha)$ with
+$\alpha(a_i)=d$ and for all $a_j \neq a_i$, $\alpha(a_j)=0$. We call
+SDD sequence an SDD of the form $e_1 \fireseq{a_1} e_2 \fireseq{a_2}
+\ldots 1$ where $\forall i, |a_i|=1$.
+\end{definition}
+
+We further introduce a canonical representation for SDD, essential to
+allow use of a unicity table and cache.  The SDD we manipulate are
+canonized by construction, through the union operation given in
+proposition \ref{prop:SDD_mapping} below.
+
+\begin{definition}[Canonical Set Decision Diagram]\label{SDD_Can_Def}
+An SDD $d$ is said to be canonical if and only if :
+\begin{itemize} 
+	\item $d = 0$ or $d=1$ \item $d = (e,\alpha)$ and $\forall
+	(a_i,d_i),(a_j,d_j) \in \alpha, i \neq j$, $\left\{
+\begin{tabular}{rl}
+ $ 1.$ & $ a_i \cap a_j = \emptyset$ \\ $ 2.$ & $d_i \neq d_j$ \\ $
+ 3.$ & $a_i \neq \emptyset$ and $d_i \neq 0$
+\end{tabular}
+\right.$
+\end{itemize}
+\end{definition}
+
+Intuitively this definition sets the constraints that:
+\begin{enumerate}
+\item The number of sets of values that are mapped to a non-zero SDD
+be finite. This is required so that the number of arcs leading from a
+node be finite, since \emph{only the arcs labeled with sets that map
+to a non-zero SDD are stored in the data structure};
+\item For a value $x$ of $\Dom(e)$, at most one non zero SDD is
+associated. In other words the sets referenced on the arcs outgoing
+from a node are disjoint. This is required to allow existence of a
+unique canonical representation of sets, hence unicity and comparison
+of SDD nodes.
+\item No two arcs from a node may lead to the same SDD. This is the
+crucial point, any time we are about to construct $e
+\fireseq{a} d+ e \fireseq{a'} d$, we will construct
+$e \fireseq{a \cup a'} d$ instead. This corresponds to fusing arcs
+that would have led to the same node.
+\item By definition, the empty set maps to 0 and is not represented.
+\end{enumerate}
+
+Some immediate effects of this definition should be highlighted :
+\begin{itemize}
+\item This definition assumes that sets of values can be (efficiently)
+represented, as an arc of the shared decision tree representing the
+SDD is labeled with a set of values. As an SDD itself represents a
+set, we can use variables of domain $\SDD$ itself, introducing
+hierarchy in the data structure.
+\item In practice, the requirements on the data sets that label the
+arcs of an SDD are that they offer the usual set theoretic operations
+(union, intersection and set difference) and the ability to compute a
+hash key for the set stored. These requirements are captured by an
+abstract interface class, thus labeling an SDD with any type of set
+implementation is easy.  We use a shared array implementation, with
+copy on write semantics, backed by a unicity table.
+\end{itemize}     
+
+To handle paths of variable lengths, SDD are required to represent a
+set of compatible assignment sequences. An operation over SDD is said
+partially defined if it may produce incompatible sequences in the
+result.
+
+\begin{definition}[Compatible SDD sequences]
+\label{SDD:def-well-defined} 
+\begin{itemize}
+\item Any SDD sequence is compatible with itself.
+\item $1$ and $e \fireseq{a} d$ are incompatible
+\item $e\fireseq{a}d$ and $e'\fireseq{a'}d'$ are compatible if 
+$\left\{\begin{array}{l} e=e' \\
+\land a $ and $a'$ are compatible$ \\
+\land (a=a' \Rightarrow d $ and $ d' $are compatible$) \\ 
+\end{array}
+\right.$\\
+\end{itemize}
+The compatibility of $a$ and $a'$ is defined as SDD compatibility if
+$a,a' \in \SDD$. If $a,a' \subset \Nat$ they are compatible, and a
+subset of $\Nat$ is incompatible with a SDD. In essence compatibility of
+$a$ and $a'$ means $a \setminus a', a \cup a'$, and $a \cap a'$ are
+well-defined.
+\end{definition}
+
+
+\subsection{Operations on SDD}
+
+\subsubsection{Set theoretic operations}
+
+First, we generalize the usual set-theoretic operations -- sum
+(union), product (intersection) and difference -- to sets of set
+assignment sequences expressed in terms of SDD.
+
+\begin{definition}[Compatible SDD set theoretic operations]
+By definition, set theoretic operations are only offered over
+compatible SDD.
+\begin{itemize}
+\item $0 + d = d + 0 = d$,$0 * d = d * 0 = 0$, $0 \setminus d = 0$ and $d \setminus 0 = d, \forall d \in \SDD$;
+\item $1 + 1 = 1 * 1 = 1$, $1 \setminus 1 = 0$
+\item $\tuple{e,\alpha} \diamond \tuple{e,\alpha'} = \tuple{e,\alpha \diamond \alpha'}, \forall \diamond \in \{+,*,\setminus\}$ 
+\end{itemize}
+\end{definition}
+
+\subsubsection{SDD homomorphisms}
+
+By analogy with DDD, SDD allow the definition of user defined
+operations through a recursive and compositional definition :
+inductive homomorphisms. The essential constraint over homomorphisms
+is linearity over the set of sequences contained in an
+SDD. Homomorphisms can then be combined by sum and composition.
+
+ \begin{definition}[Homomorphism] A mapping $\Phi$ on SDD is a fully
+ defined \emph{homomorphism} if $\Phi(0)=0$ and $\forall d_1,d_2 \in
+ \SDD: \Phi(d_1)+\Phi(d_2) = \Phi(d_1+d_2) $
+\end{definition}
+
+
+\begin{proposition}[Sum and composition]
+\label{SDD:prop-hom-operator} Let $\Phi_1$, $\Phi_2$ be two
+homomorphisms. Then $\Phi_1 + \Phi_2$, $\Phi_1 \circ \Phi_2$ are
+homomorphisms.
+\end{proposition}
+
+The \textbf{transitive closure} $^*$ is also introduced, and allows to
+perform a local fixpoint computation. It is defined thus~: for a
+homomorphism $h$, $h^*(d)$ is computed by repeating $ d \leftarrow
+h(d)$ until a fixpoint is reached. We often use $(h+ \mathit{Id})^*$
+in our fixpoint computations. From here we can allow the definition of
+user-defined inductive homomorphisms:
+
+\begin{proposition}[Inductive homomorphism]
+\label{SDD:prop-hom-equation} 
+The following recursive definition of mappings $(\Phi_k)_{k}$ defines
+a family of homomorphisms called inductive homomorphisms.:
+\[\begin{array}{lcl}
+\forall d\in \SDD, \Phi_k(d)&=& \left\{\begin{array}{ll}
+ 0 & \mbox{ if } d = 0 \\ d' \in \SDD & \mbox{ if } d = 1 \\
+% \top & \mbox{ if } d = \top \\ 
+\alpha' = \sum_{i=1}^k  \Phi_{k}(e,a_i) (d_i)
+& \mbox{ if } d = (e,\alpha = \bigcup_{i=1}^k \{ a_i\rightarrow d_i\})
+\\
+\end{array}
+\right. \\
+\end{array}
+\]
+$\Phi_{k} (e,a)$ is inductively defined as a sum $ \Phi_{k} (e,a) =
+\sum_{l} \pi_{l}(e,a) \circ \Phi_{l} + \pi_{0}(e,a) $ where all
+$\pi_{l}(e,a)$ are SDD homomorphisms, linear over the elements of $a$
+($\forall a,a' \subseteq \Dom(e):\pi_l(e,a \cup a') = \pi_l(e,a) +
+\pi_l(e,a')$).
+\end{proposition}
+
+
+To define a family of inductive homomorphisms $\Phi$, one has just to
+set the homomorphisms for the symbolic expression $\Phi (e,a_i)$ for
+any variable $e$ and set $a_i$ and the SDD $\Phi(1)$. It should be
+noted that this definition differs from the DDD inductive homomorphism
+in that $\Phi(e,a_i)$ is defined over the
+\emph{sets} ($a_i \subseteq \Dom(e)$) of values of the variable $e$'s domain
+$\Dom(e)$. This is a fundamental difference as it requires $\Phi$ to
+be defined in an ensemblist way: we cannot by this definition define
+the evaluation of $\Phi$ over a single value of $e$. However $\Phi$
+must be defined for the \emph{set} containing any single value.
+
+In addition $\pi(e,a)$ must be an SDD homorphism linear over the
+element of $a$.
+
+We use most commonly homomorphisms of the form $e \fireseq{\phi(a)}
+Id$ which allows a linear operation on the values labeling the arc,
+and by composition with another inductive homomorphism, to realize an
+operation on the rest of the paths of the SDD.
+

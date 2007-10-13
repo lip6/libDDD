@@ -1,0 +1,191 @@
+\section{Encoding the transition relation}
+\label{sec:hom}
+
+
+\subsection{Naïve approach (v1)}
+
+A first analysis of the problem can suggest an encoding of the
+transition relation in a generic way by using a homomorphism taking
+three parameters : the disk or ring to be moved $r$, the origin pole $ori$ and
+the destination pole $dest$. This allows to encode all possible moves
+ quite easily, although the number of moves is $d \cdot p \cdot (p-1)$
+ ($d$ disks, $p \cdot (p-1)$ potential moves per disk). This setting remains
+ reasonable provided $p$ does not grow too much ; in the classical problem
+ with $p=3$ we have $6$ moves per disk.
+
+We obtain the following form for this homomorphism :
+
+$$
+\begin{array}{lcl}
+swap\_pole\tuple{r,ori,dest} (e,x)= \\
+\left\{\begin{array}{ll}
+ e \fireseq{x} \mathit{this} & \mbox{ if } e \neq r \\
+ e \fireseq{dest} \mathit{noring}\tuple{ori,dest} & \mbox{ if } e = r \land x = ori \\
+ 0  & \mbox{ otherwise } \\
+\end{array}
+\right. \\
+swap\_pole\tuple{r,ori,dest} (1) = 1 
+\end{array}
+$$
+
+The tester homomorphism $noring$ is used to ensure that that the movement is legal, 
+ i.e. that all rings below (smaller) than the target ring are neither on $ori$ nor on $dest$.
+It is written thus :
+
+$$
+\begin{array}{lcl}
+ \mathit{noring}\tuple{ori,dest} (e,x)= \\
+\left\{\begin{array}{ll}
+ e \fireseq{x} \mathit{this} & \mbox{ if } x \neq ori \land x \neq dest \\
+ 0  & \mbox{ otherwise } \\
+\end{array}
+\right. \\
+ \mathit{noring}\tuple{ori,dest} (1) = 1 
+\end{array}
+$$
+
+Since the behavior is symmetric, we can additionally request that $ori < dest$, and enforce this constraint in the homomorphisms constructor.
+This reduces the number of instances of this homomorphism that nees to be created
+ to $\Sigma_{i=1}^p p-i=\Sigma_{i=0}^{p-1} i= \frac {p \cdot (p-1)}{2}$.
+
+We construct and store the parametered $swap\_pole\tuple{r,ori,dest}$ homomorphisms in a vector called $events$. 
+
+Finally we perform a BFS style fixpoint, with state accumulation.
+\begin{lstlisting}
+  // Fixpoint over events + Id
+  DDD ss, tmp = M0;
+  do {
+    ss = tmp;
+    vector<Hom>::iterator it = events.begin();
+    for ( ; it != events.end(); ++it) {
+      tmp = tmp + (*it) (tmp);
+    }
+  } while (ss != tmp);
+\end{lstlisting}
+
+The results obtained (see performances in section \ref{sec:perfs})
+show an exponential blowup of the number of intermediate nodes and of
+the cache usage. Increasing the number of poles makes things much
+worse, due to the $p \cdot (p-1)$ quadratic blowup in the number of
+homomorphism instances, that is further reflected on the number of cache entries.
+
+
+\subsection{Reducing the number of events (v2)}
+
+A first improvement we can think of, is to try to reduce the number of
+events.  In the previous algorithm, each event instance has to
+traverse all the nodes from root to appropriate application level, and
+then it might happen that the event is not enabled (e.g. the target
+ring is not on the $ori$ pole).
+
+This is very wasteful, time-wise (lots of useless traversals), and
+memory-wise because homomorphism applications are cached, so the cache
+will get very large.  We can write a better version of the
+$move\_ring$ homomorphism, which decides which $dest$ we will work
+with, only once the ring is reached (and $ori$ is read from the
+current state).
+
+It is written thus, where $noring$ is left unchanged from the previous version :
+$$
+\begin{array}{lcl}
+move\_ring\tuple{r} (e,x)= \\
+\left\{\begin{array}{ll}
+ e \fireseq{x} \mathit{this} & \mbox{ if } e \neq r \\
+\Sigma_{dest=1,dest\neq x}^{p} e \fireseq{dest} \mathit{noring}\tuple{x,dest} &  \mbox{ otherwise } \\
+\end{array}
+\right. \\
+move\_ring\tuple{r} (1) = 1 
+\end{array}
+$$
+
+The sum above is written in c++ as :
+\begin{lstlisting}
+GHom phi(int vr, int vl) const {
+	/// example shortened    
+      // ring reached 
+      // try to move to all new positions
+      GHom res = GDDD::null;
+      for (int i=0 ; i <NB_POLES ; i++) {
+	// test all possible moves from current position = vl
+	if (i != vl) {
+	  // update ring position and test no ring above
+	  // no_ring_above propagates on the bottom of the DDD ;
+	  // it returns 0 if preconditions are not met 
+	  // or a DDD with only paths where the move is legal
+	  res = res + ( GHom (ring_ , i) & new _no_ring_above(i , vl) );
+	}
+      }      
+      return res ;
+}
+\end{lstlisting}
+
+The impact is immediate, with much less intermediate nodes and cache
+entries.  We measure a reduction factor with respect to $v1$ that
+increases with $d$ the number of disks, with a factor of roughly $2$
+when $d=5$, and a factor of $5$ for $d=10$.  However peak size still
+progresses exponentially with the number of rings.
+
+\subsection{Moving the union down  (v3)}
+
+We can further improve our algorithm if we take into account that what
+we are interested in the full reachable state-space. 
+The issue is that in the BFS loop, we first fire an event, then union
+the result with the previously reached states. 
+This treatment is done externally, from the main loop, thus the union
+has to travel from the root back to where the update has taken place.
+This also creates useless intermediate nodes (just before union) that
+we can be pretty sure will not appear in the result.
+
+We can slightly rewrite the $move\_ring$ homomorphism to keep
+previously existing paths and only add to them. Note however that
+applying our event now will NOT produce only the successor states,
+ which does not make it fit for more complex problems than
+ reachability such as CTL or counter-example search.
+
+$$
+\begin{array}{lcl}
+move\_ring\tuple{r} (e,x)= \\
+\left\{\begin{array}{ll}
+ e \fireseq{x} \mathit{this} & \mbox{ if } e \neq r \\
+ e \fireseq{x} \mathit{Id} + \Sigma_{dest=1,dest\neq x}^{p} e \fireseq{dest} \mathit{noring}\tuple{x,dest} &  \mbox{ otherwise } \\
+\end{array}
+\right. \\
+move\_ring\tuple{r} (1) = 1 
+\end{array}
+$$
+
+We can rewrite the BFS loop to remove the union with previous ($tmp = tmp + (*it) tmp \leadsto tmp = (*it) tmp$ states.
+
+This optimization reduces roughly by a factor of $2$ the cache and peak size, with respect to $v2$.
+However, we still grow exponentiallly with the number of disks. 
+
+
+\subsection{Introducing saturation (v4)}
+
+In this version, we will introduce the recursive firing algorithm due
+to Ciardo et al. \cite{CiardoTacas03,ciardo01saturation}. The
+principle is to fire events bottom up, by executing nested fixpoint
+iterations.
+
+$$
+\begin{array}{lcl}
+move\_ring\tuple{r} (e,x)= \\
+\left\{\begin{array}{ll}
+ e \fireseq{x} \mathit{this} & \mbox{ if } e \neq r \\
+( e \fireseq{x} \mathit{Id} + \Sigma_{dest=1,dest\neq x}^{p} e \fireseq{dest} \mathit{noring}\tuple{x,dest}) \circ \\
+ move\_ring\tuple{r-1}^* &  \mbox{ otherwise } \\
+\end{array}
+\right. \\
+move\_ring\tuple{r} (1) = 1 
+\end{array}
+$$
+
+
+The addition of the fixpoint application $move\_ring\tuple{r-1}^*$
+allows to ensure that the successor node has already explored all its
+possible states before continuing the evaluation.
+
+The gain is awesome, resulting memory and time complexity becomes
+linear to the number of disks, with $22$ new nodes and $39$ new cache
+entries when $d$ is increased by $1$.
+

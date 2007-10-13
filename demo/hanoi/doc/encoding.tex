@@ -1,0 +1,41 @@
+\section{Encoding the states using SDD}
+\label{sec:cod}
+
+Let $p$ designate the number of poles or towers, and $d$ designate the
+number of disks.
+
+We essentially have two possible encodings of the state :
+\begin{itemize}
+\item We use $p$ variables $v_1 .. v_p$ representing the poles, the domain of each
+variable will be states a pole can reach, which is bounded by $2^d$
+(each disk is on the pole or not). It is immediately obvious that this
+high upper bound may lead to a huge number of arcs. Furthermore, we
+have a strong dependency between our variables in this schema, since a
+given disk can only be on one pole at a given time. These are bad
+characteristics of an encoding.
+\item We use $d$ variables $v_1..v_d$ representing the disks, each one has a domain
+$1..p$ which tells which pole the disk is on in this state. This
+encoding puts reasonable bounds on the number of arcs per node, and
+promotes the relative independence of the different disk states. This
+is the encoding we will use.
+\end{itemize}
+
+The second problem is variable order, which we know is often critical
+when using decision diagrams. There does not seem to be reason to
+shuffle the variables, as the problem is very symmetric. If we chose a
+natural order for disks, we still have the choice of putting the
+smallest disk at the top or at the bottom of the DD. 
+Although it may seem there is little difference between the two, much
+depends on the algorithm we will use to generate the state-space.
+
+For BFS style iterations it does not really matter which disk is at
+the top of structure, however, saturation can profit from having the
+smaller disk at the bottom of the structure. Indeed, a movement of a
+given disk is only constrained by the state of the smaller disks. Thus
+the smallest disk has no constraints on its movement in any
+state. Putting smaller disks near the leaves of the structure will
+help discover states faster as we will see.
+
+The initial state is thus encoded by the DDD : \\
+$v_d \fireseq{0} \ldots v_2 \fireseq{0} v_1 \fireseq{0} 1$ \\
+where $v_d$ represents the state of the largest disk. 
