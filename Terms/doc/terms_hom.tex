@@ -1,0 +1,182 @@
+\section{Encoding rewriting rules as homomorphisms}
+\label{sec:hom}
+
+
+\subsection{Generic helper homomorphisms}
+
+
+
+\subsubsection{The selector : {\cal S}}
+
+We first define the selection homomorphism {\cal S} (see Select-Hom.cpp), parametered by a target variable $t$, a selection criterion $sel$ and an operation $next$ (most often $Id$) to apply when the variable is reached (to allow construction of complex behaviors by composition).
+
+$$
+\begin{array}{lcl}
+{\cal S}\tuple{t,sel,next} (e,x)= \\
+\left\{\begin{array}{ll}
+ e \fireseq{x} {\cal S}_{t,sel,next} =  e \fireseq{x} \mathit{this} & \mbox{ if } e \neq t \\
+ e \fireseq{sel \cap x} \mathit{next} & \mbox{ otherwise } \\
+\end{array}
+\right. \\
+ {\cal S}(1) = \top 
+\end{array}
+$$
+
+This selection homomorphism is used to construct many operations, and is adapted for operations that touch integer arrays when $sel$ is an integer array, or to match nested SDD when $sel$ is a SDD.
+
+However, it does not allow for parametric or wildcard style matching of expressions, as the SDD definition does not have the notion of $any$ arc value or $any$ terminal. We therefore introduce a refined version in which $sel$ is itself a homomorphism to be applied on the arc value. This version is only adapted to cases where the arc value has SDD type.
+
+
+$$
+\begin{array}{lcl}
+{\cal S}\tuple{t,sel,next} (e,x)= \\
+\left\{\begin{array}{ll}
+ e \fireseq{x} \mathit{this} & \mbox{ if } e \neq t \\
+ e \fireseq{sel (x) } \mathit{next} & \mbox{ otherwise } \\
+\end{array}
+\right. \\
+ {\cal S}(1) = \top 
+\end{array}
+$$
+
+
+\subsubsection{The extractor : {\cal E}}
+
+The extractor homomorphisms is used to change the depth of a substructure in the SDD. It is defined by a trigger variable $t$, and an extraction primitive $ext$  (most often $ext = \mathit{Id}$):
+
+$$
+\begin{array}{lcl}
+{\cal E}\tuple{t,ext} (e,x)= \\
+\left\{\begin{array}{ll}
+\mathit{this} & \mbox{ if } e \neq t \\
+ext (x) & \mbox{ otherwise } \\
+\end{array}
+\right. \\
+ {\cal E}(1) = \top 
+\end{array}
+$$
+
+Note that the extractor ``destroys'' its input as it goes.
+
+
+\subsection{Rule 1 : $1 \leadsto_1 suc(0)$}
+
+We write the trivial homomorphism giving the actual rewriting pattern, that does not test any conditions :
+
+$$
+\begin{array}{lcl}
+{OneToSucZero} (e,x)= \\
+\left\{
+ \Nat \fireseq{suc} \mathit{Arg_0} \fireseq{ \Nat \fireseq{0} 1 }  \mathit{Id}
+\right. \\
+ {OneToSucZero}(1) = \top 
+\end{array}
+$$
+
+The full rule application is defined by :
+
+$$
+rule_1 (d) =  \\
+\left\{\begin{array}{ll}
+d' = &  {\cal S}\tuple{\Nat,\left[1\right],Id} (d) \\
+\mathit{return} &  OneToSucZero (d') + (d-d')
+ \end{array}
+\right. \\
+$$
+
+
+\subsection{Rule 2 (and symmetric): $0 + a \leadsto_2 a$  and $a + 0 \leadsto_2' a$}
+
+No additional homomorphisms need to be defined, we use the extractor and selector homomorphisms.
+
+
+$$
+rule_2 (d) =  \\
+\left\{\begin{array}{ll}
+d' = &  {\cal S}\tuple{\Nat,\left[+\right],{\cal S}\tuple{Arg_0,\left[0\right],Id}} (d) \\
+\mathit{return} &  {\cal E}\tuple{Arg_1,Id} (d') + (d-d')
+ \end{array}
+\right. \\
+$$
+
+Similarly we define the rule for  $a + 0 \leadsto_2' a$ thus :
+
+$$
+rule_2' (d) =  \\
+\left\{\begin{array}{ll}
+d' = &  {\cal S}\tuple{\Nat,\left[+\right],{\cal S}\tuple{Arg_1,\left[0\right],Id}} (d) \\
+\mathit{return} &  {\cal E}\tuple{Arg_0,Id} (d') + (d-d')
+ \end{array}
+\right. \\
+$$
+
+
+\subsection{Rule 3 : $a + suc(b) \leadsto_3 suc (a + b)$}
+
+Because we currently lack an ``environment'' aware homomorphism, we
+need to define two small homomorphisms for this treatment.
+
+The first one picks up $a$ and passes it to a homomorphism that
+reconstructs the full pattern once $b$ is obtained.  No controls are
+performed, the selector does that for us.
+
+
+$$
+\begin{array}{lcl}
+{succAplusB} (e,x)= \\
+\left\{\begin{array}{ll}
+ \mathit{this} & \mbox{ if } e \neq Arg_0 \\
+ succAplusB'\tuple{x}  & \mbox{ otherwise } \\
+\end{array}
+\right. \\
+ succAplusB (1) = \top 
+\end{array}
+$$
+
+The second part reconstructs everything :
+
+$$
+\begin{array}{lcl}
+{succAplusB'}\tuple{a} (e,x)= \\
+\left\{\begin{array}{ll}
+\Nat \fireseq{suc} {Arg_0} \fireseq{\Nat \fireseq{+} {Arg_0} \fireseq{a} {Arg_1} \fireseq{ {\cal E}\tuple{Arg_0,Id}(x) } 1  } 1 & \mbox{ if } e = Arg_1 \\
+\top  & \mbox{ otherwise } \\
+\end{array}
+\right. \\
+ succAplusB'\tuple{a} (1) = \top 
+\end{array}
+$$
+
+The full rule application is given by :
+
+$$
+rule_3 (d) =  \\
+\left\{\begin{array}{ll}
+d' = &  {\cal S}\tuple{\Nat,\left[+\right],{\cal S}\tuple{Arg_1,{\cal S}\tuple{\Nat,\left[suc\right],Id},Id}} (d) \\
+\mathit{return} &  succAplusB (d') + (d-d')
+ \end{array}
+\right. \\
+$$
+
+
+
+\subsection{Fixpoint application}
+
+The goal is to compute $\leadsto^*$.
+
+We first define $rule_{all}$ as the fixpoint application of the rewriting rules over a node of variable $\Nat$.
+
+Then to allow application of the rewriting rules on nested expressions, we use a ``broadcast'' homomorphism : 
+
+$$
+\begin{array}{lcl}
+{broadcast} (e,x)= \\
+\left\{\begin{array}{ll}
+e \fireseq{(rule_{all} \circ \mathit{this} )^* ( x )}   \mathit{this} & \mbox{ if } e \neq \Nat \\
+e \fireseq{x} \mathit{this} & \mbox{ otherwise } \\
+\end{array}
+\right. \\
+{broadcast}  (1) = 1 
+\end{array}
+$$
+

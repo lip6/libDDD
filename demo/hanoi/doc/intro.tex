@@ -1,0 +1,51 @@
+% intro
+
+\section{Introduction}
+\label{sec:intro}
+
+\subsubsection{Origins}
+
+From the Wikipedia \cite{wikipedia}:
+
+``The puzzle was invented by the French mathematician Édouard Lucas in
+1883. There is a legend about an Indian temple which contains a large
+room with three time-worn posts in it surrounded by 64 golden
+disks. The priests of Brahma, acting out the command of an ancient
+prophecy, have been moving these disks, in accordance with the rules
+of the puzzle. According to the legend, when the last move of the
+puzzle is completed, the world will end. The puzzle is therefore also
+known as the Tower of Brahma puzzle. It is not clear whether Lucas
+invented this legend or was inspired by it.
+
+If the legend were true and if the priests were able to move disks at
+a rate of 1 per second, using the smallest number of moves, it would
+take them $2^64-1$ seconds or roughly $585.442$ billion years. The
+universe is currently about $13.7$ billion years old.''
+
+
+The problem is explored and solutions explained in depth on the Wikipedia page.
+
+In 2007 while visiting in Paris, Gianfranco Ciardo suggested using
+this puzzle as a tutorial example, to present the various encoding
+tricks we use when model-checking on a simple example everyone
+understands. By the way, he has an MDD version of the same example.
+
+\subsubsection{The problem}
+
+The Tower of Hanoi or Towers of Hanoi is a mathematical game or puzzle. It consists of three pegs, and a number of disks of different sizes which can slide onto any peg. The puzzle starts with the disks neatly stacked in order of size on one peg, smallest at the top, thus making a conical shape.
+
+The objective of the game is to move the entire stack to another peg, obeying the following rules:
+\begin{enumerate}
+\item Only one disk may be moved at a time.
+\item Each move consists of taking the upper disk from one of the pegs and sliding it onto another peg, on top of the other disks that may already be present on that peg.
+\item No disk may be placed on top of a smaller disk.
+\end{enumerate}
+
+% plan
+Section \ref{sec:cod} describes the DDD and SDD encodings of the state we can chose from. 
+Section \ref{sec:hom} describes the encoding of the rewriting rules as homomorphisms operating over the SDD. 
+Section \ref{sec:perf} groups the performance results of the different versions.
+Finally we conclude in section \ref{sec:conclu}.
+
+
+

@@ -1,0 +1,20 @@
+/// \mainpage
+///
+/// \section overview The Data Decision Diagram Library
+///
+/// libDDD is a data decision diagram library.  It provides algorithms and data
+/// structures to implement symbolic manipulation of data, in particular in the 
+/// context of model-checking
+///
+/// See <a href="http://ddd.lip6.fr/">ddd.lip6.fr</a> for more
+/// information about this project.
+///
+/// \section thisdoc This Document
+///
+/// This document describes all the public data structures and functions
+/// of libDDD.  This aims to be a reference manual, not a tutorial.
+///
+///
+/// \section pointers Handy starting points
+///
+                          
