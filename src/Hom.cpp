@@ -1,5 +1,7 @@
 #include <typeinfo>
 #include <iostream>
+#include <vector>
+#include <utility>
 #include "Hom.h"
 #include "DDD.h"
 #include "DED.h"
@@ -525,6 +527,11 @@ bool StrongHom::operator==(const _GHom &h) const{
 // };
 
 
+static bool valOrder (const std::pair<int,GDDD > & a,const std::pair<int,GDDD > & b) {
+  return a.first < b.first ;
+}
+
+static int count_larc = 0;
 /* Eval */
 GDDD StrongHom::eval(const GDDD &d)const{
   if(d==GDDD::null)
@@ -533,27 +540,84 @@ GDDD StrongHom::eval(const GDDD &d)const{
     return phiOne();
   else if(d==GDDD::top)
     return GDDD::top;
-
+  
   else{
     int variable=d.variable();
-     std::set<GDDD> s;
-     for(GDDD::const_iterator vi=d.begin();vi!=d.end();vi++){
-       s.insert(phi(variable,vi->first)(vi->second));
-     }
-     return DED::add(s);
-//     std::map<int , std::set<const GHom &,const GDDD &> toCanonize;
-//     std::set<GDDD> others;
-//     for(GDDD::const_iterator vi=d.begin();vi!=d.end();vi++){
-//       const GHom & phi =  phi(variable,vi->first);
-//       if ( typeid(phi) == typeid(LeftConcat) ) {
-// 	const LeftConcat & lc = (const LeftConcat &) phi;
-	
+    //      std::set<GDDD> s;
+    //      for(GDDD::const_iterator vi=d.begin();vi!=d.end();vi++){
+    //        s.insert(phi(variable,vi->first)(vi->second));
+    //      }
+    //      return DED::add(s);
+    typedef std::set< std::pair<const GHom ,const GDDD > > listType;
+    typedef std::map<int , listType > canoMap;
+    // for pathological cases LeftArcConcat
+    canoMap toCanonize;
+    // for general case
+    std::set<GDDD> others;
+    
+    // for every arc of d
+    for(GDDD::const_iterator vi=d.begin();vi!=d.end();vi++){
+      // store phi to see if we can optimize
+      const GHom & phiTmp =  phi(variable,vi->first);
+      
+      // pathological case, a LeftArcConcat. Add to toCanonize list 
+      if ( typeid(* get_concret(phiTmp)) == typeid(LeftArcConcat) ) {
+	// downcast
+	const LeftArcConcat * lc = (const LeftArcConcat *) get_concret(phiTmp);
+	// consistency check : we expect the Hom to return the same variable with a new value.
+	if (lc->var ==  variable) {
+	  
+	  // Canonic insertion in toCanonize
+	  canoMap::iterator it = toCanonize.find(lc->val);
+	  if (it != toCanonize.end() ) {
+	    // value already represented, augment list used to produce son node 
+	    it->second.insert(std::make_pair(lc->right,vi->second));
+	    continue ;
+	  } else {
+	    // a new arc value, add new entry to toCanonize
+	    listType arcs ;
+	    arcs.insert(std::make_pair(lc->right,vi->second));
+	    toCanonize.insert(std::make_pair(lc->val, arcs));
+	    continue ;
+	  }
+       	}
+      }
+      // if this is not LeftArcConcat or consistency check var'=var failed.
+      // fallback into general case.
+      others.insert(phiTmp (vi->second));
+    }
+    // finished exploring arcs of d
+    // if we have captured an optimized temporary node
+    if (! toCanonize.empty()) {
+      GDDD::Valuation canoRes ;
+      // note that canoMap is sorted by key, so this iteration produces
+      // elements in the Valuation canoRes appropriately sorted by arc value
+      // this constraint is necessary, see comments in DDD.h on GDDD::GDDD(int var, Valuation v).
+      for (canoMap::const_iterator it = toCanonize.begin() ; it != toCanonize.end() ; ++it ) {
+	// compute toAdd = \sum_i ( h_i (d_i) )  for i in the list to produce son node
+	std::set<GDDD> toAdd;
+	for (listType::const_iterator lit = it->second.begin() ; lit != it->second.end() ; ++lit ) {
+	  toAdd.insert(lit->first (lit->second) );
+	}
+	// add the arc to node under construction valuation
+	canoRes.push_back(std::make_pair(it->first, DED::add(toAdd)));
+      }
+      //           sort(canoRes.begin(),canoRes.end(),valOrder);
+//       int i=-12;
+//       for (GDDD::const_iterator it = canoRes.begin() ; it != canoRes.end() ; ++it ) {
+// 	//	assert(i <= it->first);
+// 	std::cout << i << "  " << it->first << std::endl;
+// 	i = it->first;
 //       }
-//       s.insert(phi(variable,vi->first)(vi->second));
-//    }
+      // construct the node and add it to general case.
+      others.insert(GDDD(variable,canoRes));
+      ++count_larc;
+    }
+    return DED::add(others);
   }
+}
 
-	// else  
+    // else  
 	// {
 	// 	
 	// 	int variable = d.variable();
@@ -574,7 +638,7 @@ GDDD StrongHom::eval(const GDDD &d)const{
 	// 	
 	// }
 
-}
+
 
 /*************************************************************************/
 /*                         Class GHom                                    */
@@ -752,7 +816,7 @@ GHom::GHom(MyGHom *h):concret(canonical(h)){}
 void GHom::pstats(bool reinit)
 {
   std::cout << "*\nGHom Stats : size unicity table = " <<  canonical.size() << std::endl;
-  
+  std::cout << "LeftArcConcats caught : " << count_larc <<std::endl;
 #ifdef INST_STL
   canonical.pstat(reinit);
   
