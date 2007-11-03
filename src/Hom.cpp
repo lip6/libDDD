@@ -597,10 +597,13 @@ GDDD StrongHom::eval(const GDDD &d)const{
 	// compute toAdd = \sum_i ( h_i (d_i) )  for i in the list to produce son node
 	std::set<GDDD> toAdd;
 	for (listType::const_iterator lit = it->second.begin() ; lit != it->second.end() ; ++lit ) {
-	  toAdd.insert(lit->first (lit->second) );
+	  const GDDD & g = lit->first (lit->second);
+	  if (g != GDDD::null)
+	    toAdd.insert(lit->first (lit->second) );
 	}
-	// add the arc to node under construction valuation
-	canoRes.push_back(std::make_pair(it->first, DED::add(toAdd)));
+	if (! toAdd.empty() )
+	  // add the arc to node under construction valuation
+	  canoRes.push_back(std::make_pair(it->first, DED::add(toAdd)));
       }
       //           sort(canoRes.begin(),canoRes.end(),valOrder);
 //       int i=-12;
