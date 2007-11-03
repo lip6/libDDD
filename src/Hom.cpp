@@ -331,6 +331,8 @@ class LeftConcat:public _GHom{
 private:
   GDDD left;
   GHom right;
+
+  friend class StrongHom ;
 public:
   /* Constructor */
   LeftConcat(const GDDD &l,const GHom &r,int ref=0):_GHom(ref,true),left(l),right(r){}
@@ -350,6 +352,38 @@ public:
   /* Memory Manager */
   void mark() const{
     left.mark();
+    right.mark();
+  }
+
+};
+
+/************************** LeftConcat */
+
+class LeftArcConcat:public _GHom{
+private:
+  int var;
+  int val;
+  GHom right;
+
+  friend class StrongHom ;
+public:
+  /* Constructor */
+  LeftArcConcat(int vr,int vl,const GHom &r,int ref=0):_GHom(ref,true),var(vr),val(vl),right(r){}
+  /* Compare */
+  bool operator==(const _GHom &h) const{
+    return var==((LeftArcConcat*)&h )->var && val==((LeftArcConcat*)&h )->val && right==((LeftArcConcat*)&h )->right;
+  }
+  size_t hash() const{
+    return 23*var + val*1789 +47*__gnu_cxx::hash<GHom>()(right);
+  }
+
+  /* Eval */
+  GDDD eval(const GDDD &d)const{
+    return GDDD(var,val,right(d));
+  }
+
+  /* Memory Manager */
+  void mark() const{
     right.mark();
   }
 
@@ -502,11 +536,21 @@ GDDD StrongHom::eval(const GDDD &d)const{
 
   else{
     int variable=d.variable();
-    std::set<GDDD> s;
-    for(GDDD::const_iterator vi=d.begin();vi!=d.end();vi++){
-      s.insert(phi(variable,vi->first)(vi->second));
-    }
-    return DED::add(s);
+     std::set<GDDD> s;
+     for(GDDD::const_iterator vi=d.begin();vi!=d.end();vi++){
+       s.insert(phi(variable,vi->first)(vi->second));
+     }
+     return DED::add(s);
+//     std::map<int , std::set<const GHom &,const GDDD &> toCanonize;
+//     std::set<GDDD> others;
+//     for(GDDD::const_iterator vi=d.begin();vi!=d.end();vi++){
+//       const GHom & phi =  phi(variable,vi->first);
+//       if ( typeid(phi) == typeid(LeftConcat) ) {
+// 	const LeftConcat & lc = (const LeftConcat &) phi;
+	
+//       }
+//       s.insert(phi(variable,vi->first)(vi->second));
+//    }
   }
 
 	// else  
@@ -543,7 +587,7 @@ GHom::GHom(StrongHom *h):concret(canonical(h)){}
 
 GHom::GHom(const GDDD& d):concret(canonical(new Constant(d))){}
 
-GHom::GHom(int var, int val, const GHom &h):concret(canonical(new LeftConcat(GDDD(var,val),h))){}
+GHom::GHom(int var, int val, const GHom &h):concret(canonical(new LeftArcConcat(var,val,h))){}
 
 /* Eval */
 GDDD GHom::operator()(const GDDD &d) const{
@@ -677,6 +721,12 @@ GHom operator*(const GHom &h,const GDDD &d){
 }
 
 GHom operator^(const GDDD &d,const GHom &h){
+  // optimize pathologic case, just one arc left concatenated 
+  if (d.nbsons() == 1) {
+    GDDD::const_iterator it = d.begin();
+    if (it->second == GDDD::one)
+      return GHom(canonical(new LeftArcConcat(d.variable(),it->first,h)));
+  }
   return GHom(canonical(new LeftConcat(d,h)));
 }
 
