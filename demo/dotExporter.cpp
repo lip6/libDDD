@@ -62,6 +62,8 @@ protected:
   }
 
 public :
+  virtual ~dotExporter() {};
+
    /* make a census and name all nodes in the sdd */
   virtual void collect(const GSDD& g){    
     if(name.find(g)==name.end()){
@@ -247,6 +249,7 @@ class hDotExporter: public dotExporter {
 public :
   hDotExporter(const string &s="test"):dotExporter(s) {};
 
+  virtual ~hDotExporter() {};
   
    /* make a census and name all nodes in the sdd */
   void collect(const GSDD& g){    
