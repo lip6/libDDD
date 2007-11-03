@@ -237,17 +237,46 @@ public:
 };
 
 /************************** Add */
-class Add:public _GHom{
+class Add:public _GHom
+{
+
 private:
+
   std::set<GHom> parameters;
+  
 public:
+  
   /* Constructor */
-  Add(const std::set<GHom> &param,int ref=0):_GHom(ref,true),parameters(param){}
-  /* Compare */
-  bool operator==(const _GHom &h) const{
+  Add( const std::set<GHom> &param, int ref=0)
+  	:
+  	_GHom(ref,true),
+  	parameters()
+  {
+    // reprendre les paramètres des unions des fils dans mon set
+    for( std::set<GHom>::const_iterator it = param.begin(); it != param.end(); ++it)
+    {
+      if( typeid( *get_concret(*it) ) == typeid(Add) )
+      {
+        std::set<GHom>& local_param = ((Add*)get_concret(*it))->parameters;
+        parameters.insert( local_param.begin() , local_param.end());
+      }
+      else
+      {
+        parameters.insert(*it);
+      }
+    }
+  }
+  
+  
+
+/* Compare */
+  bool operator==(const _GHom &h) const
+  {
     return parameters==((Add*)&h )->parameters;
   }
-  size_t hash() const{
+  
+  size_t hash() const
+  {
     size_t res=0;
     for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
       res^=__gnu_cxx::hash<GHom>()(*gi);
@@ -673,6 +702,7 @@ GHom::GHom(MyGHom *h):concret(canonical(h)){}
 void GHom::pstats(bool reinit)
 {
   std::cout << "*\nGHom Stats : size unicity table = " <<  canonical.size() << std::endl;
+  
 #ifdef INST_STL
   canonical.pstat(reinit);
   

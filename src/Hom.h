@@ -36,6 +36,8 @@ class GHom {
 private:
   /// Open access to Hom derived class
   friend class Hom;
+  /// Open access to _GHom based homomophisms
+  friend class _GHom;
   /// Open access to hash function computation procedure.
   friend struct __gnu_cxx::hash<GHom>;
   /// This operator applies its argument to a node until a fixpoint is reached.
@@ -374,6 +376,16 @@ public:
     }
   }
 #endif
+protected:
+  
+  // Enable access to the concrete GHom for _GHom homorphisms
+  const _GHom*
+  get_concret(const GHom& ghom) const
+  {
+    return ghom.concret;
+  }
+  
+  
 };
 
 /// The abstract base class for user defined operations. 
