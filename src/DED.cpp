@@ -90,7 +90,7 @@ public:
 /* Compare */
 size_t _DED_Add::hash() const{
   size_t res=0;
-  for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
+  for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
     res+=__gnu_cxx::hash<GDDD>()(*si);
   }
   return res;
@@ -145,14 +145,14 @@ GDDD _DED_Add::eval() const{
     int min = -1;
     std::set<GDDD> succSet;
     // gather min
-    for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
-      for(GDDD::const_iterator vi=si->begin();vi!=si->end();vi++){
+    for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
+      for(GDDD::const_iterator vi=si->begin();vi!=si->end();++vi){
 	if (min == -1 || min > vi->first)
 	  min = vi->first;
       }
     }
-    for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
-      for(GDDD::const_iterator vi=si->begin();vi!=si->end();vi++){
+    for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
+      for(GDDD::const_iterator vi=si->begin();vi!=si->end();++vi){
 	if (vi->first == min)
 	  succSet.insert(vi->second);
 	else
@@ -162,7 +162,7 @@ GDDD _DED_Add::eval() const{
     GDDD succ = DED::add(succSet);
 //     if (succ != GDDD::one) {
 //       int minsucc=-1;
-//       for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; it++) {
+//       for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; ++it) {
 // 	assert (it->second.nbsons() == 1);
 // 	GDDD::const_iterator succd = it->second.begin();
 // 	if (minsucc==-1 || succd->first < minsucc)
@@ -177,15 +177,15 @@ GDDD _DED_Add::eval() const{
   } else {
     /// normal node canonization
 #endif  
-  for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
-    for(GDDD::const_iterator vi=si->begin();vi!=si->end();vi++){
+  for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
+    for(GDDD::const_iterator vi=si->begin();vi!=si->end();++vi){
       map_set[vi->first].insert(vi->second);
     }
   }
 #ifdef EVDDD
   }
 #endif
-  for(std::map<int,std::set<GDDD> >::const_iterator map_set_i=map_set.begin();map_set_i!=map_set.end();map_set_i++){
+  for(std::map<int,std::set<GDDD> >::const_iterator map_set_i=map_set.begin();map_set_i!=map_set.end();++map_set_i){
     assert(map_set_i->second.size()!=0);
     std::pair<int,GDDD> x;
     x.first=map_set_i->first;
@@ -214,7 +214,7 @@ _DED *_DED_Add::create(const std::set<GDDD> &s){
     else{ 
       std::set<GDDD>::const_iterator si=parameters.begin();
       int variable = si->variable();
-      for(;(si!=parameters.end())?(variable == si->variable()):false;si++);
+      for(;(si!=parameters.end())?(variable == si->variable()):false;++si);
       if(si!=parameters.end())// s contains at least 2 GDDDs with different variables
 	return new _DED_GDDD(GDDD::top);
       return new _DED_Add(parameters);    
@@ -278,7 +278,7 @@ GDDD _DED_Mult::eval() const{
     
 //     if (succ != GDDD::one) {
 //       int minsucc=-1;
-//       for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; it++) {
+//       for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; ++it) {
 // 	assert (it->second.nbsons() == 1);
 // 	GDDD::const_iterator succd = it->second.begin();
 // 	if (minsucc==-1 || succd->first < minsucc)
@@ -401,9 +401,8 @@ GDDD _DED_Minus::eval() const{
     }
   }
 
-  for(;v1!=parameter1.end();v1++){
-    std::pair<int,GDDD> x(v1->first,v1->second);
-      value.push_back(x);
+  for(;v1!=parameter1.end();++v1){
+    value.push_back(make_pair(v1->first,v1->second));
   }
 
   return GDDD(variable,value);
@@ -461,7 +460,7 @@ GDDD _DED_Concat::eval() const{
   int variable=parameter1.variable();
   GDDD::Valuation value;
   std::map<int,std::set<GDDD> > map_set;
-  for(GDDD::const_iterator v1=parameter1.begin();v1!=parameter1.end();v1++){
+  for(GDDD::const_iterator v1=parameter1.begin();v1!=parameter1.end();++v1){
     std::pair<int,GDDD> x(v1->first,(v1->second)^parameter2);
     value.push_back(x);
   }
