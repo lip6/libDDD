@@ -111,7 +111,7 @@ namespace __gnu_cxx {
       size_t res=(size_t) g->variable;
       for(GSDD::const_iterator vi=g->valuation.begin();vi!=g->valuation.end();++vi)
         res ^=   vi->first->set_hash()  
-	      +  hash<GSDD>()(vi->second)  ;
+	  +  vi->second.hash()  ;
       return res;
     }
   };

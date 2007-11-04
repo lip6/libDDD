@@ -74,7 +74,7 @@ private:
   GSDD parameter;
 public:
   _SDED_GSDD(const GSDD& g):parameter(g){};
-  size_t hash()const {return 1433*__gnu_cxx::hash<GSDD>()(parameter);};
+  size_t hash()const {return 1433*parameter.hash();};
   bool  operator==(const _SDED &e)const{
     return (parameter==((_SDED_GSDD*)&e)->parameter);
   };
@@ -164,7 +164,7 @@ public:
 size_t _SDED_Add::hash() const{
   size_t res=0;
   for(std::set<GSDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
-    res+=__gnu_cxx::hash<GSDD>()(*si);
+    res+= si->hash();
   }
   return res;
 }
@@ -396,7 +396,7 @@ public:
 /*********/
 /* Compare */
 size_t _SDED_Mult::hash() const{
-  return __gnu_cxx::hash<GSDD>()(parameter1)+13*__gnu_cxx::hash<GSDD>()(parameter2);
+  return parameter1.hash()+13*parameter2.hash();
 };
 
 bool _SDED_Mult::operator==(const _SDED &e)const{
@@ -452,7 +452,7 @@ _SDED *_SDED_Mult::create(const GSDD &g1,const GSDD &g2){
     return new _SDED_GSDD(GSDD::top);
   else if(g1.variable()!=g2.variable())
     return new _SDED_GSDD(GSDD::null);
-  else if(__gnu_cxx::hash<GSDD>()(g1) < __gnu_cxx::hash<GSDD>()(g2))
+  else if(g1.hash() < g2.hash())
     return new _SDED_Mult(g1,g2);
   else
     return new _SDED_Mult(g2,g1);
@@ -487,7 +487,7 @@ public:
 /*********/
 /* Compare */
 size_t _SDED_Minus::hash() const{
-  return 617*__gnu_cxx::hash<GSDD>()(parameter1)+307*__gnu_cxx::hash<GSDD>()(parameter2);
+  return 617*parameter1.hash()+307*parameter2.hash();
 };
 
 bool _SDED_Minus::operator==(const _SDED &e)const{
@@ -596,7 +596,7 @@ public:
 /*********/
 /* Compare */
 size_t _SDED_Concat::hash() const{
-  return 827*__gnu_cxx::hash<GSDD>()(parameter1)+1153*__gnu_cxx::hash<GSDD>()(parameter2);
+  return 827*parameter1.hash()+1153*parameter2.hash();
 };
 
 bool _SDED_Concat::operator==(const _SDED &e)const{
@@ -669,7 +669,7 @@ public:
 /*********/
 /* Compare */
 size_t _SDED_Shom::hash() const{
-  return 1451*__gnu_cxx::hash<GShom>()(shom)+1399*__gnu_cxx::hash<GSDD>()(parameter);
+  return 1451*shom.hash()+1399*parameter.hash();
 }
 
 bool _SDED_Shom::operator==(const _SDED &e)const{
@@ -891,6 +891,11 @@ GSDD SDED::eval(){
 };
 
 
+size_t SDED::hash () const {
+  return concret->hash();
+}
+
+
 /* binary operators */
 
 GSDD SDED::Shom(const GShom &h,const GSDD&g){
@@ -926,10 +931,4 @@ GSDD operator-(const GSDD &g1,const GSDD &g2){
 
 /******************************************************************************/
 
-size_t __gnu_cxx::hash<SDED>::operator()(const SDED &e) const{
-  return e.concret->hash();
-};
 
-bool __gnu_cxx::equal_to<SDED>::operator()(const SDED &e1,const SDED &e2) const{
-  return e1==e2;
-};
