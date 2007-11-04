@@ -548,7 +548,7 @@ GDDD StrongHom::eval(const GDDD &d)const{
     //        s.insert(phi(variable,vi->first)(vi->second));
     //      }
     //      return DED::add(s);
-    typedef std::set< std::pair<const GHom ,const GDDD > > listType;
+    typedef std::set< GDDD > listType;
     typedef std::map<int , listType > canoMap;
     // for pathological cases LeftArcConcat
     canoMap toCanonize;
@@ -567,21 +567,28 @@ GDDD StrongHom::eval(const GDDD &d)const{
 	// consistency check : we expect the Hom to return the same variable with a new value.
 	if (lc->var ==  variable) {
 	  
-	  // Canonic insertion in toCanonize
-	  canoMap::iterator it = toCanonize.find(lc->val);
-	  if (it != toCanonize.end() ) {
-	    // value already represented, augment list used to produce son node 
-	    it->second.insert(std::make_pair(lc->right,vi->second));
-	    continue ;
+	  GDDD son = lc->right (vi->second);
+	  if (son != GDDD::null) {
+	    // Canonic insertion in toCanonize
+	    canoMap::iterator it = toCanonize.find(lc->val);
+	    if (it != toCanonize.end() ) {
+	      // value already represented, augment list used to produce son node 
+	      it->second.insert(son);
+	      continue ;
+	    } else {
+	      // a new arc value, add new entry to toCanonize
+	      listType arcs ;
+	      arcs.insert(son);
+	      toCanonize.insert(std::make_pair(lc->val, arcs));
+	      continue ;
+	    }
 	  } else {
-	    // a new arc value, add new entry to toCanonize
-	    listType arcs ;
-	    arcs.insert(std::make_pair(lc->right,vi->second));
-	    toCanonize.insert(std::make_pair(lc->val, arcs));
+	    // arcs to GDDD::null are not represented
 	    continue ;
 	  }
        	}
       }
+      // we get here if we did not hit any "continue" instruction
       // if this is not LeftArcConcat or consistency check var'=var failed.
       // fallback into general case.
       others.insert(phiTmp (vi->second));
@@ -594,29 +601,21 @@ GDDD StrongHom::eval(const GDDD &d)const{
       // elements in the Valuation canoRes appropriately sorted by arc value
       // this constraint is necessary, see comments in DDD.h on GDDD::GDDD(int var, Valuation v).
       for (canoMap::const_iterator it = toCanonize.begin() ; it != toCanonize.end() ; ++it ) {
-	// compute toAdd = \sum_i ( h_i (d_i) )  for i in the list to produce son node
-	std::set<GDDD> toAdd;
-	for (listType::const_iterator lit = it->second.begin() ; lit != it->second.end() ; ++lit ) {
-	  const GDDD & g = lit->first (lit->second);
-	  if (g != GDDD::null)
-	    toAdd.insert(lit->first (lit->second) );
-	}
-	if (! toAdd.empty() )
-	  // add the arc to node under construction valuation
-	  canoRes.push_back(std::make_pair(it->first, DED::add(toAdd)));
+	// compute resulting son by summing the list of son nodes
+	// then add the arc to node under construction valuation
+	canoRes.push_back(std::make_pair(it->first, DED::add(it->second)));
       }
+      // useless already done by the map
       //           sort(canoRes.begin(),canoRes.end(),valOrder);
-//       int i=-12;
-//       for (GDDD::const_iterator it = canoRes.begin() ; it != canoRes.end() ; ++it ) {
-// 	//	assert(i <= it->first);
-// 	std::cout << i << "  " << it->first << std::endl;
-// 	i = it->first;
-//       }
+
       // construct the node and add it to general case.
       others.insert(GDDD(variable,canoRes));
       ++count_larc;
     }
-    return DED::add(others);
+    if (others.empty())
+      return GDDD::null ;
+    else
+      return DED::add(others);
   }
 }
 
