@@ -281,7 +281,6 @@ namespace __gnu_cxx {
   template<>
   struct hash<GHom> {
     size_t operator()(const GHom &g) const{
-      //return (size_t) g.concret;
       return g.hash();
     }
   };
