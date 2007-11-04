@@ -300,9 +300,9 @@ GDDD _DED_Mult::eval() const{
   GDDD::const_iterator v2=parameter2.begin();
   while(v1!=parameter1.end()&&v2!=parameter2.end()){
     if(v1->first<v2->first)
-      v1++;
+      ++v1;
     else if(v1->first>v2->first)
-      v2++;
+      ++v2;
     else{
       GDDD g=(v1->second)*(v2->second);
       if(g!=GDDD::null){
@@ -311,8 +311,8 @@ GDDD _DED_Mult::eval() const{
 	x.second=g;
 	value.push_back(x);
       }
-      v1++;
-      v2++;
+      ++v1;
+      ++v2;
     }
   }
   return GDDD(variable,value);
