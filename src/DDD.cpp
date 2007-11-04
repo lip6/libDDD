@@ -64,7 +64,7 @@ namespace __gnu_cxx {
   struct hash<_GDDD*> {
     size_t operator()(_GDDD *g) const{
       size_t res=(size_t) g->variable;
-      for(GDDD::const_iterator vi=g->valuation.begin();vi!=g->valuation.end();vi++)
+      for(GDDD::const_iterator vi=g->valuation.begin();vi!=g->valuation.end();++vi)
         res+=(size_t)(vi->first+1011)* hash<GDDD>()(vi->second);
       return res;
     }
@@ -122,7 +122,7 @@ void GDDD::mark()const{
 void _GDDD::mark()const{
   if(!marking){
     marking=true;
-    for(GDDD::Valuation::const_iterator vi=valuation.begin();vi!=valuation.end();vi++){
+    for(GDDD::Valuation::const_iterator vi=valuation.begin();vi!=valuation.end();++vi){
       vi->second.mark();
     }
   }
@@ -161,7 +161,7 @@ void GDDD::print(std::ostream& os,std::string s) const{
       os << "[ " << s << "0 ]"<<std::endl;
   else{
     std::string val;
-    for(GDDD::const_iterator vi=begin();vi!=end();vi++){
+    for(GDDD::const_iterator vi=begin();vi!=end();++vi){
       // modif strstream -> std::stringstream
       std::stringstream tmp;
       tmp << getvarName(variable())<<'('<<vi->first<<")";
@@ -226,7 +226,7 @@ private:
 	{
 		s.insert(g);
 		res++;
-		for(GDDD::const_iterator gi=g.begin();gi!=g.end();gi++)
+		for(GDDD::const_iterator gi=g.begin();gi!=g.end();++gi)
 			mysize(gi->second);
     }
   }
@@ -277,7 +277,7 @@ long double nbStates(const GDDD& g){
 		s_t::const_iterator i = s.find(g);
 		if(i==s.end()){
 			long double res=0;
-			for(GDDD::const_iterator gi=g.begin();gi!=g.end();gi++)
+			for(GDDD::const_iterator gi=g.begin();gi!=g.end();++gi)
 				res+=nbStates(gi->second)+val;
 			s[g]=res;
 			return res;
@@ -323,7 +323,7 @@ void GDDD::garbage(){
 
   MyNbStates::clear();
 
-  for(UniqueTable<_GDDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
+  for(UniqueTable<_GDDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
     if((*di)->refCounter!=0)
       (*di)->mark();
   }
@@ -390,7 +390,7 @@ GDDD::GDDD(int var,int val,const GDDD &d):concret(null.concret){ //var-val->d
 GDDD::GDDD(int var,int val1,int val2,const GDDD &d):concret(null.concret){ //var-[val1,val2]->d
   if(val1<=val2 && null!=d){
     _GDDD *_g = new _GDDD(var,0);
-    for(int val=val1;val<=val2;val++){
+    for(int val=val1;val<=val2;++val){
       std::pair<int,GDDD> x(val,d);
       _g->valuation.push_back(x);
     }
@@ -456,7 +456,7 @@ int GDDD::getMinDistance () const {
     return begin()->first;
   } else {
     int minsucc=-1;
-    for (GDDD::const_iterator it = begin() ; it != end() ; it++) {
+    for (GDDD::const_iterator it = begin() ; it != end() ; ++it) {
       assert (it->second.nbsons() == 1);
       GDDD::const_iterator succd = it->second.begin();
       if (minsucc==-1 || succd->first < minsucc)
@@ -510,7 +510,7 @@ unsigned long int GDDD::nodeIndex(std::vector<_GDDD*> list) const{
     assert(this);
     assert(concret);
     unsigned long int i=0;
-    for (i=0; i<list.size();i++)
+    for (i=0; i<list.size();++i)
       if (concret==list[i]) return i;
     return ULONG_MAX;
     assert (false);
@@ -530,7 +530,7 @@ void GDDD::saveNode(std::ostream& os, std::vector<_GDDD*>& list)const {
         if (*this==top) list.push_back(concret);
         else {
             assert(concret);
-                for (GDDD::Valuation::const_iterator vi=begin();vi!=end();vi++) 
+                for (GDDD::Valuation::const_iterator vi=begin();vi!=end();++vi) 
                     vi->second.saveNode(os, list);
                 list.push_back(concret);
         }
@@ -541,11 +541,11 @@ void GDDD::saveNode(std::ostream& os, std::vector<_GDDD*>& list)const {
 
 void saveDDD(std::ostream& os, std::vector<DDD> list) {
   std::vector<_GDDD*> SavedDDD;
-    for (unsigned int i= 0; i<list.size(); i++) {
+    for (unsigned int i= 0; i<list.size(); ++i) {
         list[i].saveNode(os, SavedDDD);
     }
     os<<SavedDDD.size()<<std::endl;
-    for (unsigned long int i=0; i<SavedDDD.size();i++) {
+    for (unsigned long int i=0; i<SavedDDD.size();++i) {
         if (GDDD(SavedDDD[i])==GDDD::one) os<<i<<" one"<<std::endl;
         else
         if (GDDD(SavedDDD[i])==GDDD::null) os<<i<<" null"<<std::endl;
@@ -553,14 +553,14 @@ void saveDDD(std::ostream& os, std::vector<DDD> list) {
         if (GDDD(SavedDDD[i])==GDDD::top) os<<i<<" top"<<std::endl;
         else {
             os<<i<<"[ "<<SavedDDD[i]->variable;
-            for (GDDD::const_iterator vi=GDDD(SavedDDD[i]).begin();vi!=GDDD(SavedDDD[i]).end();vi++)
+            for (GDDD::const_iterator vi=GDDD(SavedDDD[i]).begin();vi!=GDDD(SavedDDD[i]).end();++vi)
                 os<<" "<<vi->first<<" "<<vi->second.nodeIndex(SavedDDD);
             os<<" ]"<<std::endl;
         }
     }
         
     os<<std::endl<<"Saved:";
-    for (unsigned int i= 0; i<list.size(); i++) os<<" "<<list[i].nodeIndex(SavedDDD);
+    for (unsigned int i= 0; i<list.size(); ++i) os<<" "<<list[i].nodeIndex(SavedDDD);
     os<<std::endl;
     
 }
@@ -574,7 +574,7 @@ void loadDDD(std::istream& is, std::vector<DDD>& list) {
     std::string temp;
     is>>size;
     std::vector<GDDD> nodes(size);
-    for (unsigned long int i=0;i<size;i++) {
+    for (unsigned long int i=0;i<size;++i) {
         is>>index;
         is>>temp;
         if (temp==std::string("one")) {nodes[index]=GDDD::one; /*std::cout<<"one"<<std::endl;std::cout.flush();*/}
@@ -596,7 +596,7 @@ void loadDDD(std::istream& is, std::vector<DDD>& list) {
     }
     is>>temp;
     assert (temp==std::string("Saved:"));
-    for(unsigned long int i=0;i<list.size();i++) {
+    for(unsigned long int i=0;i<list.size();++i) {
         is>>index; list[i]=nodes[index];
     }
     
