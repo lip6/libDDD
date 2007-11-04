@@ -130,7 +130,7 @@ static string TryDemangle(string in)
 void PrintMapJumps(double ratemin=0){
 #ifdef INST_STL
   MapJumps::iterator ii;
-  for (ii=_GHom::HomJumps.begin(); ii!=_GHom::HomJumps.end(); ii++){
+  for (ii=_GHom::HomJumps.begin(); ii!=_GHom::HomJumps.end(); ++ii){
     double rate= double(ii->second.second)/double (ii->second.first);
     if (rate>ratemin){
       cout << "Hom " << TryDemangle(ii->first) << "\t-->\t\t" << ii->second.second  <<"/" ;
@@ -280,7 +280,7 @@ public:
   size_t hash() const
   {
     size_t res=0;
-    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
+    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
       res^=__gnu_cxx::hash<GHom>()(*gi);
     return res;
   }
@@ -288,14 +288,14 @@ public:
   /* Eval */
   GDDD eval(const GDDD &d)const{
     std::set<GDDD> s;
-    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
+    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
       s.insert((*gi)(d));
     return DED::add(s);
   }
 
   /* Memory Manager */
   void mark() const{
-    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
+    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
       gi->mark();
   }
 };
@@ -544,7 +544,7 @@ GDDD StrongHom::eval(const GDDD &d)const{
   else{
     int variable=d.variable();
     //      std::set<GDDD> s;
-    //      for(GDDD::const_iterator vi=d.begin();vi!=d.end();vi++){
+    //      for(GDDD::const_iterator vi=d.begin();vi!=d.end();++vi){
     //        s.insert(phi(variable,vi->first)(vi->second));
     //      }
     //      return DED::add(s);
@@ -556,7 +556,7 @@ GDDD StrongHom::eval(const GDDD &d)const{
     std::set<GDDD> others;
     
     // for every arc of d
-    for(GDDD::const_iterator vi=d.begin();vi!=d.end();vi++){
+    for(GDDD::const_iterator vi=d.begin();vi!=d.end();++vi){
       // store phi to see if we can optimize
       const GHom & phiTmp =  phi(variable,vi->first);
       
@@ -693,7 +693,7 @@ void GHom::mark()const{
 
 void GHom::garbage(){
   // mark phase
-  for(UniqueTable<_GHom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
+  for(UniqueTable<_GHom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
     if((*di)->refCounter!=0){
       (*di)->marking=true;
       (*di)->mark();

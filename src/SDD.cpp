@@ -51,7 +51,7 @@ public:
   _GSDD(int var,GSDD::Valuation val,int cpt=0):variable(var),valuation(val),refCounter(cpt),tempCounter(0),marking(false),isSon(false){}; 
 
   void UpdateSons () const {
-    for (GSDD::Valuation::const_iterator it= valuation.begin(); it != valuation.end() ; it++) 
+    for (GSDD::Valuation::const_iterator it= valuation.begin(); it != valuation.end() ; ++it) 
       it->second.concret->isSon = true;
   }
 #else
@@ -60,7 +60,7 @@ public:
 #endif // OTF_GARBAGE
 
   virtual ~_GSDD () {
-    for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; it++) {
+    for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; ++it) {
       delete it->first;
     }
   }
@@ -71,7 +71,7 @@ public:
 #else
   _GSDD (const _GSDD &g):variable(g.variable),valuation(g.valuation),refCounter(g.refCounter),marking(g.marking) {
 #endif // OTF_GARBAGE
-    for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; it++) {
+    for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; ++it) {
       it->first = it->first->newcopy();
     }
   }
@@ -109,7 +109,7 @@ namespace __gnu_cxx {
   template<>  struct hash<_GSDD*> {
     size_t operator()(_GSDD *g) const{
       size_t res=(size_t) g->variable;
-      for(GSDD::const_iterator vi=g->valuation.begin();vi!=g->valuation.end();vi++)
+      for(GSDD::const_iterator vi=g->valuation.begin();vi!=g->valuation.end();++vi)
         res ^=   vi->first->set_hash()  
 	      +  hash<GSDD>()(vi->second)  ;
       return res;
@@ -228,7 +228,7 @@ namespace SDDutil {
 
 
   void foreachTable (void (*foo) (const GSDD & g)) {
-    for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
+    for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
       (*foo) (GSDD( (*di)));
     }
   }
@@ -251,7 +251,7 @@ void GSDD::mark()const{
 void _GSDD::mark()const{
   if(!marking){
     marking=true;
-    for(GSDD::Valuation::const_iterator vi=valuation.begin();vi!=valuation.end();vi++){
+    for(GSDD::Valuation::const_iterator vi=valuation.begin();vi!=valuation.end();++vi){
       vi->second.mark();
     }
   }
@@ -291,7 +291,7 @@ void GSDD::print(std::ostream& os,std::string s) const{
     // should not happen
     assert ( begin() != end());
 
-    for(GSDD::const_iterator vi=begin();vi!=end();vi++){
+    for(GSDD::const_iterator vi=begin();vi!=end();++vi){
       std::stringstream tmp;
       // Fixme  for pretty print variable names
 //      string varname = GDDD::getvarName(variable());
@@ -448,10 +448,10 @@ private:
     if(s.find(g)==s.end()){
       s.insert(g);
       res++;
-      for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++) 
+      for(GSDD::const_iterator gi=g.begin();gi!=g.end();++gi) 
 	sddsize(gi->first);
       
-      for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++)
+      for(GSDD::const_iterator gi=g.begin();gi!=g.end();++gi)
 	sddsize(gi->second);
       
     }
@@ -480,7 +480,7 @@ private:
       if (sd3.find(g)==sd3.end()) {
 	sd3.insert(g);
 	d3res ++;
-	for(GDDD::const_iterator gi=g.begin();gi!=g.end();gi++)
+	for(GDDD::const_iterator gi=g.begin();gi!=g.end();++gi)
 	  sddsize(gi->second);
       }
   }
@@ -550,7 +550,7 @@ long double nbStates(const GSDD& g)
 		if(i==s.end())
 		{
 			long double res=0;
-			for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++)
+			for(GSDD::const_iterator gi=g.begin();gi!=g.end();++gi)
 				res+=(gi->first->set_size())*nbStates(gi->second)+val;
 			s[g]=res;
 			return res;
@@ -608,7 +608,7 @@ void GSDD::garbage(){
   }
 #endif
   // mark phase
-  for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
+  for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
     if((*di)->refCounter!=0)
       (*di)->mark();
   }
@@ -740,7 +740,7 @@ SDD &SDD::operator=(const SDD &g){
 /// returns the minimum value of the function encoded by a node
 int GSDD::getMinDistance () const {
   int minsucc=-1;
-  for (GSDD::const_iterator it = begin() ; it != end() ; it++) {
+  for (GSDD::const_iterator it = begin() ; it != end() ; ++it) {
     int lmin = it->first->getMinDistance();
     if (minsucc==-1 || lmin < minsucc)
       minsucc = lmin;
