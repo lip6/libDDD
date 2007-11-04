@@ -196,7 +196,7 @@ public:
     return value==((Constant*)&h )->value;
   }
   size_t hash() const{
-    return __gnu_cxx::hash<GDDD>()(value);
+    return value.hash();
   }
 
   /* Eval */
@@ -223,7 +223,7 @@ public:
     return left==((Mult*)&h )->left && right==((Mult*)&h )->right;
   }
   size_t hash() const{
-    return 83*__gnu_cxx::hash<GHom>()(left)+53*__gnu_cxx::hash<GDDD>()(right);
+    return 83*left.hash()+53*right.hash();
   }
 
   /* Eval */
@@ -281,7 +281,7 @@ public:
   {
     size_t res=0;
     for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
-      res^=__gnu_cxx::hash<GHom>()(*gi);
+      res^= gi->hash();
     return res;
   }
 
@@ -312,7 +312,7 @@ public:
     return left==((Compose*)&h )->left && right==((Compose*)&h )->right;
   }
   size_t hash() const{
-    return 13*__gnu_cxx::hash<GHom>()(left)+7*__gnu_cxx::hash<GHom>()(right);
+    return 13*left.hash()+7*right.hash();
   }
 
   /* Eval */
@@ -343,7 +343,7 @@ public:
     return left==((LeftConcat*)&h )->left && right==((LeftConcat*)&h )->right;
   }
   size_t hash() const{
-    return 23*__gnu_cxx::hash<GDDD>()(left)+47*__gnu_cxx::hash<GHom>()(right);
+    return 23*left.hash()+47*right.hash();
   }
 
   /* Eval */
@@ -376,7 +376,7 @@ public:
     return var==((LeftArcConcat*)&h )->var && val==((LeftArcConcat*)&h )->val && right==((LeftArcConcat*)&h )->right;
   }
   size_t hash() const{
-    return 23*var + val*1789 +47*__gnu_cxx::hash<GHom>()(right);
+    return 23*var + val*1789 +47*right.hash();
   }
 
   /* Eval */
@@ -404,7 +404,7 @@ public:
     return left==((RightConcat*)&h )->left && right==((RightConcat*)&h )->right;
   }
   size_t hash() const{
-    return 47*__gnu_cxx::hash<GHom>()(left)+19*__gnu_cxx::hash<GDDD>()(right);
+    return 47*left.hash()+19*right.hash();
   }
 
   /* Eval */
@@ -432,7 +432,7 @@ public:
     return left==((Minus*)&h )->left && right==((Minus*)&h )->right;
   }
   size_t hash() const{
-    return 5*__gnu_cxx::hash<GHom>()(left)+61*__gnu_cxx::hash<GDDD>()(right);
+    return 5*left.hash()+61*right.hash();
   }
 
   /* Eval */
@@ -459,7 +459,7 @@ public:
     return arg==((Fixpoint*)&h )->arg ;
   }
   size_t hash() const{
-    return 17*__gnu_cxx::hash<GHom>()(arg);
+    return 17*arg.hash();
   }
 
   /* Eval */

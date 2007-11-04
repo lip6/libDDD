@@ -65,7 +65,7 @@ namespace __gnu_cxx {
     size_t operator()(_GDDD *g) const{
       size_t res=(size_t) g->variable;
       for(GDDD::const_iterator vi=g->valuation.begin();vi!=g->valuation.end();++vi)
-        res+=(size_t)(vi->first+1011)* hash<GDDD>()(vi->second);
+        res+=(size_t)(vi->first+1011)* vi->second.hash();
       return res;
     }
   };
@@ -498,7 +498,7 @@ bool DDD::set_equal(const DataSet & b) const {
 long double DDD::set_size() const { return nbStates(); }
 
 size_t DDD::set_hash() const {
-  return __gnu_cxx::hash<GDDD>() (*this);
+  return hash();
 }
 
 

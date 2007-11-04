@@ -59,7 +59,7 @@ private:
   GDDD parameter;
 public:
   _DED_GDDD(const GDDD& g):parameter(g){};
-  size_t hash()const {return 1433*__gnu_cxx::hash<GDDD>()(parameter);};
+  size_t hash()const {return 1433* parameter.hash();};
   bool  operator==(const _DED &e)const{
     return (parameter==((_DED_GDDD*)&e)->parameter);
   };
@@ -91,7 +91,7 @@ public:
 size_t _DED_Add::hash() const{
   size_t res=0;
   for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
-    res+=__gnu_cxx::hash<GDDD>()(*si);
+    res+= si->hash();
   }
   return res;
 }
@@ -246,7 +246,7 @@ public:
 /*********/
 /* Compare */
 size_t _DED_Mult::hash() const{
-  return __gnu_cxx::hash<GDDD>()(parameter1)+13*__gnu_cxx::hash<GDDD>()(parameter2);
+  return parameter1.hash()+13*parameter2.hash();
 };
 
 bool _DED_Mult::operator==(const _DED &e)const{
@@ -328,7 +328,7 @@ _DED *_DED_Mult::create(const GDDD &g1,const GDDD &g2){
     return new _DED_GDDD(GDDD::top);
   else if(g1.variable()!=g2.variable())
     return new _DED_GDDD(GDDD::null);
-  else if(__gnu_cxx::hash<GDDD>()(g1) < __gnu_cxx::hash<GDDD>()(g2))
+  else if(g1.hash() < g2.hash())
     return new _DED_Mult(g1,g2);
   else
     return new _DED_Mult(g2,g1);
@@ -359,7 +359,7 @@ public:
 /*********/
 /* Compare */
 size_t _DED_Minus::hash() const{
-  return 617*__gnu_cxx::hash<GDDD>()(parameter1)+307*__gnu_cxx::hash<GDDD>()(parameter2);
+  return 617*parameter1.hash() +307*parameter2.hash();
 };
 
 bool _DED_Minus::operator==(const _DED &e)const{
@@ -448,7 +448,7 @@ public:
 /*********/
 /* Compare */
 size_t _DED_Concat::hash() const{
-  return 827*__gnu_cxx::hash<GDDD>()(parameter1)+1153*__gnu_cxx::hash<GDDD>()(parameter2);
+  return 827*parameter1.hash()+1153*parameter2.hash();
 };
 
 bool _DED_Concat::operator==(const _DED &e)const{
@@ -506,7 +506,7 @@ public:
 /*********/
 /* Compare */
 size_t _DED_Hom::hash() const{
-  return 1451*__gnu_cxx::hash<GHom>()(hom)+1399*__gnu_cxx::hash<GDDD>()(parameter);
+  return 1451*hom.hash()+1399*parameter.hash();
 }
 
 bool _DED_Hom::operator==(const _DED &e)const{
@@ -630,6 +630,10 @@ GDDD DED::eval(){
 	}
 };
 
+size_t DED::hash () const {
+  return concret->hash();
+}
+
 /* binary operators */
 
 GDDD DED::hom(const GHom &h,const GDDD&g){
@@ -666,10 +670,4 @@ GDDD operator-(const GDDD &g1,const GDDD &g2){
 
 /******************************************************************************/
 
-size_t __gnu_cxx::hash<DED>::operator()(const DED &e) const{
-  return e.concret->hash();
-};
 
-bool std::equal_to<DED>::operator()(const DED &e1,const DED &e2) const{
-  return e1==e2;
-};
