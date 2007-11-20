@@ -27,8 +27,6 @@ class DDD;
 class GDDD 
 {
 private:
-  /// Open access to hash function computation procedure.
-  friend struct __gnu_cxx::hash<class GDDD>;
   /// A textual output. 
   /// Don't use it with large number of paths as each element is printed on a different line
   friend std::ostream& operator<<(std::ostream &os,const GDDD &g);
@@ -172,6 +170,10 @@ public:
   /// For garbage collection internals. Marks a GDDD as in use in garbage collection phase. 
   /// 
   void mark() const;
+  /// For storage in a hash table
+  size_t hash () const { 
+    return ddd::knuth32_hash(reinterpret_cast<const size_t>(concret)); 
+  }
   /// For garbage collection, do not call this directly, use MemoryManager::garbage() instead.
   /// \todo describe garbage collection algorithm(s) + mark usage homogeneously in one place.
   static void garbage(); 
@@ -302,7 +304,7 @@ namespace __gnu_cxx {
   struct hash<GDDD> {
     size_t operator()(const GDDD &g) const{
       //return (size_t) g.concret;
-      return ddd::knuth32_hash(reinterpret_cast<const size_t>(g.concret));
+      return g.hash(); 
     }
   };
 }

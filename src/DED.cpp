@@ -59,7 +59,7 @@ private:
   GDDD parameter;
 public:
   _DED_GDDD(const GDDD& g):parameter(g){};
-  size_t hash()const {return 1433*__gnu_cxx::hash<GDDD>()(parameter);};
+  size_t hash()const {return 1433* parameter.hash();};
   bool  operator==(const _DED &e)const{
     return (parameter==((_DED_GDDD*)&e)->parameter);
   };
@@ -90,8 +90,8 @@ public:
 /* Compare */
 size_t _DED_Add::hash() const{
   size_t res=0;
-  for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
-    res+=__gnu_cxx::hash<GDDD>()(*si);
+  for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
+    res+= si->hash();
   }
   return res;
 }
@@ -145,14 +145,14 @@ GDDD _DED_Add::eval() const{
     int min = -1;
     std::set<GDDD> succSet;
     // gather min
-    for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
-      for(GDDD::const_iterator vi=si->begin();vi!=si->end();vi++){
+    for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
+      for(GDDD::const_iterator vi=si->begin();vi!=si->end();++vi){
 	if (min == -1 || min > vi->first)
 	  min = vi->first;
       }
     }
-    for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
-      for(GDDD::const_iterator vi=si->begin();vi!=si->end();vi++){
+    for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
+      for(GDDD::const_iterator vi=si->begin();vi!=si->end();++vi){
 	if (vi->first == min)
 	  succSet.insert(vi->second);
 	else
@@ -162,7 +162,7 @@ GDDD _DED_Add::eval() const{
     GDDD succ = DED::add(succSet);
 //     if (succ != GDDD::one) {
 //       int minsucc=-1;
-//       for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; it++) {
+//       for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; ++it) {
 // 	assert (it->second.nbsons() == 1);
 // 	GDDD::const_iterator succd = it->second.begin();
 // 	if (minsucc==-1 || succd->first < minsucc)
@@ -177,15 +177,15 @@ GDDD _DED_Add::eval() const{
   } else {
     /// normal node canonization
 #endif  
-  for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();si++){
-    for(GDDD::const_iterator vi=si->begin();vi!=si->end();vi++){
+  for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
+    for(GDDD::const_iterator vi=si->begin();vi!=si->end();++vi){
       map_set[vi->first].insert(vi->second);
     }
   }
 #ifdef EVDDD
   }
 #endif
-  for(std::map<int,std::set<GDDD> >::const_iterator map_set_i=map_set.begin();map_set_i!=map_set.end();map_set_i++){
+  for(std::map<int,std::set<GDDD> >::const_iterator map_set_i=map_set.begin();map_set_i!=map_set.end();++map_set_i){
     assert(map_set_i->second.size()!=0);
     std::pair<int,GDDD> x;
     x.first=map_set_i->first;
@@ -214,7 +214,7 @@ _DED *_DED_Add::create(const std::set<GDDD> &s){
     else{ 
       std::set<GDDD>::const_iterator si=parameters.begin();
       int variable = si->variable();
-      for(;(si!=parameters.end())?(variable == si->variable()):false;si++);
+      for(;(si!=parameters.end())?(variable == si->variable()):false;++si);
       if(si!=parameters.end())// s contains at least 2 GDDDs with different variables
 	return new _DED_GDDD(GDDD::top);
       return new _DED_Add(parameters);    
@@ -246,7 +246,7 @@ public:
 /*********/
 /* Compare */
 size_t _DED_Mult::hash() const{
-  return __gnu_cxx::hash<GDDD>()(parameter1)+13*__gnu_cxx::hash<GDDD>()(parameter2);
+  return parameter1.hash()+13*parameter2.hash();
 };
 
 bool _DED_Mult::operator==(const _DED &e)const{
@@ -278,7 +278,7 @@ GDDD _DED_Mult::eval() const{
     
 //     if (succ != GDDD::one) {
 //       int minsucc=-1;
-//       for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; it++) {
+//       for (GDDD::const_iterator it = succ.begin() ; it != succ.end() ; ++it) {
 // 	assert (it->second.nbsons() == 1);
 // 	GDDD::const_iterator succd = it->second.begin();
 // 	if (minsucc==-1 || succd->first < minsucc)
@@ -300,9 +300,9 @@ GDDD _DED_Mult::eval() const{
   GDDD::const_iterator v2=parameter2.begin();
   while(v1!=parameter1.end()&&v2!=parameter2.end()){
     if(v1->first<v2->first)
-      v1++;
+      ++v1;
     else if(v1->first>v2->first)
-      v2++;
+      ++v2;
     else{
       GDDD g=(v1->second)*(v2->second);
       if(g!=GDDD::null){
@@ -311,8 +311,8 @@ GDDD _DED_Mult::eval() const{
 	x.second=g;
 	value.push_back(x);
       }
-      v1++;
-      v2++;
+      ++v1;
+      ++v2;
     }
   }
   return GDDD(variable,value);
@@ -328,7 +328,7 @@ _DED *_DED_Mult::create(const GDDD &g1,const GDDD &g2){
     return new _DED_GDDD(GDDD::top);
   else if(g1.variable()!=g2.variable())
     return new _DED_GDDD(GDDD::null);
-  else if(__gnu_cxx::hash<GDDD>()(g1) < __gnu_cxx::hash<GDDD>()(g2))
+  else if(g1.hash() < g2.hash())
     return new _DED_Mult(g1,g2);
   else
     return new _DED_Mult(g2,g1);
@@ -359,7 +359,7 @@ public:
 /*********/
 /* Compare */
 size_t _DED_Minus::hash() const{
-  return 617*__gnu_cxx::hash<GDDD>()(parameter1)+307*__gnu_cxx::hash<GDDD>()(parameter2);
+  return 617*parameter1.hash() +307*parameter2.hash();
 };
 
 bool _DED_Minus::operator==(const _DED &e)const{
@@ -401,9 +401,8 @@ GDDD _DED_Minus::eval() const{
     }
   }
 
-  for(;v1!=parameter1.end();v1++){
-    std::pair<int,GDDD> x(v1->first,v1->second);
-      value.push_back(x);
+  for(;v1!=parameter1.end();++v1){
+    value.push_back(std::make_pair(v1->first,v1->second));
   }
 
   return GDDD(variable,value);
@@ -449,7 +448,7 @@ public:
 /*********/
 /* Compare */
 size_t _DED_Concat::hash() const{
-  return 827*__gnu_cxx::hash<GDDD>()(parameter1)+1153*__gnu_cxx::hash<GDDD>()(parameter2);
+  return 827*parameter1.hash()+1153*parameter2.hash();
 };
 
 bool _DED_Concat::operator==(const _DED &e)const{
@@ -461,7 +460,7 @@ GDDD _DED_Concat::eval() const{
   int variable=parameter1.variable();
   GDDD::Valuation value;
   std::map<int,std::set<GDDD> > map_set;
-  for(GDDD::const_iterator v1=parameter1.begin();v1!=parameter1.end();v1++){
+  for(GDDD::const_iterator v1=parameter1.begin();v1!=parameter1.end();++v1){
     std::pair<int,GDDD> x(v1->first,(v1->second)^parameter2);
     value.push_back(x);
   }
@@ -507,7 +506,7 @@ public:
 /*********/
 /* Compare */
 size_t _DED_Hom::hash() const{
-  return 1451*__gnu_cxx::hash<GHom>()(hom)+1399*__gnu_cxx::hash<GDDD>()(parameter);
+  return 1451*hom.hash()+1399*parameter.hash();
 }
 
 bool _DED_Hom::operator==(const _DED &e)const{
@@ -631,6 +630,10 @@ GDDD DED::eval(){
 	}
 };
 
+size_t DED::hash () const {
+  return concret->hash();
+}
+
 /* binary operators */
 
 GDDD DED::hom(const GHom &h,const GDDD&g){
@@ -667,10 +670,4 @@ GDDD operator-(const GDDD &g1,const GDDD &g2){
 
 /******************************************************************************/
 
-size_t __gnu_cxx::hash<DED>::operator()(const DED &e) const{
-  return e.concret->hash();
-};
 
-bool std::equal_to<DED>::operator()(const DED &e1,const DED &e2) const{
-  return e1==e2;
-};
