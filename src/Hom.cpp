@@ -1,5 +1,7 @@
 #include <typeinfo>
 #include <iostream>
+#include <vector>
+#include <utility>
 #include "Hom.h"
 #include "DDD.h"
 #include "DED.h"
@@ -128,7 +130,7 @@ static string TryDemangle(string in)
 void PrintMapJumps(double ratemin=0){
 #ifdef INST_STL
   MapJumps::iterator ii;
-  for (ii=_GHom::HomJumps.begin(); ii!=_GHom::HomJumps.end(); ii++){
+  for (ii=_GHom::HomJumps.begin(); ii!=_GHom::HomJumps.end(); ++ii){
     double rate= double(ii->second.second)/double (ii->second.first);
     if (rate>ratemin){
       cout << "Hom " << TryDemangle(ii->first) << "\t-->\t\t" << ii->second.second  <<"/" ;
@@ -194,7 +196,7 @@ public:
     return value==((Constant*)&h )->value;
   }
   size_t hash() const{
-    return __gnu_cxx::hash<GDDD>()(value);
+    return value.hash();
   }
 
   /* Eval */
@@ -221,7 +223,7 @@ public:
     return left==((Mult*)&h )->left && right==((Mult*)&h )->right;
   }
   size_t hash() const{
-    return 83*__gnu_cxx::hash<GHom>()(left)+53*__gnu_cxx::hash<GDDD>()(right);
+    return 83*left.hash()+53*right.hash();
   }
 
   /* Eval */
@@ -278,22 +280,22 @@ public:
   size_t hash() const
   {
     size_t res=0;
-    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
-      res^=__gnu_cxx::hash<GHom>()(*gi);
+    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+      res^= gi->hash();
     return res;
   }
 
   /* Eval */
   GDDD eval(const GDDD &d)const{
     std::set<GDDD> s;
-    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
+    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
       s.insert((*gi)(d));
     return DED::add(s);
   }
 
   /* Memory Manager */
   void mark() const{
-    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
+    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
       gi->mark();
   }
 };
@@ -310,7 +312,7 @@ public:
     return left==((Compose*)&h )->left && right==((Compose*)&h )->right;
   }
   size_t hash() const{
-    return 13*__gnu_cxx::hash<GHom>()(left)+7*__gnu_cxx::hash<GHom>()(right);
+    return 13*left.hash()+7*right.hash();
   }
 
   /* Eval */
@@ -331,6 +333,8 @@ class LeftConcat:public _GHom{
 private:
   GDDD left;
   GHom right;
+
+  friend class StrongHom ;
 public:
   /* Constructor */
   LeftConcat(const GDDD &l,const GHom &r,int ref=0):_GHom(ref,true),left(l),right(r){}
@@ -339,7 +343,7 @@ public:
     return left==((LeftConcat*)&h )->left && right==((LeftConcat*)&h )->right;
   }
   size_t hash() const{
-    return 23*__gnu_cxx::hash<GDDD>()(left)+47*__gnu_cxx::hash<GHom>()(right);
+    return 23*left.hash()+47*right.hash();
   }
 
   /* Eval */
@@ -350,6 +354,38 @@ public:
   /* Memory Manager */
   void mark() const{
     left.mark();
+    right.mark();
+  }
+
+};
+
+/************************** LeftConcat */
+
+class LeftArcConcat:public _GHom{
+private:
+  int var;
+  int val;
+  GHom right;
+
+  friend class StrongHom ;
+public:
+  /* Constructor */
+  LeftArcConcat(int vr,int vl,const GHom &r,int ref=0):_GHom(ref,true),var(vr),val(vl),right(r){}
+  /* Compare */
+  bool operator==(const _GHom &h) const{
+    return var==((LeftArcConcat*)&h )->var && val==((LeftArcConcat*)&h )->val && right==((LeftArcConcat*)&h )->right;
+  }
+  size_t hash() const{
+    return 23*var + val*1789 +47*right.hash();
+  }
+
+  /* Eval */
+  GDDD eval(const GDDD &d)const{
+    return GDDD(var,val,right(d));
+  }
+
+  /* Memory Manager */
+  void mark() const{
     right.mark();
   }
 
@@ -368,7 +404,7 @@ public:
     return left==((RightConcat*)&h )->left && right==((RightConcat*)&h )->right;
   }
   size_t hash() const{
-    return 47*__gnu_cxx::hash<GHom>()(left)+19*__gnu_cxx::hash<GDDD>()(right);
+    return 47*left.hash()+19*right.hash();
   }
 
   /* Eval */
@@ -396,7 +432,7 @@ public:
     return left==((Minus*)&h )->left && right==((Minus*)&h )->right;
   }
   size_t hash() const{
-    return 5*__gnu_cxx::hash<GHom>()(left)+61*__gnu_cxx::hash<GDDD>()(right);
+    return 5*left.hash()+61*right.hash();
   }
 
   /* Eval */
@@ -423,7 +459,7 @@ public:
     return arg==((Fixpoint*)&h )->arg ;
   }
   size_t hash() const{
-    return 17*__gnu_cxx::hash<GHom>()(arg);
+    return 17*arg.hash();
   }
 
   /* Eval */
@@ -491,6 +527,11 @@ bool StrongHom::operator==(const _GHom &h) const{
 // };
 
 
+static bool valOrder (const std::pair<int,GDDD > & a,const std::pair<int,GDDD > & b) {
+  return a.first < b.first ;
+}
+
+static int count_larc = 0;
 /* Eval */
 GDDD StrongHom::eval(const GDDD &d)const{
   if(d==GDDD::null)
@@ -499,17 +540,86 @@ GDDD StrongHom::eval(const GDDD &d)const{
     return phiOne();
   else if(d==GDDD::top)
     return GDDD::top;
-
+  
   else{
     int variable=d.variable();
-    std::set<GDDD> s;
-    for(GDDD::const_iterator vi=d.begin();vi!=d.end();vi++){
-      s.insert(phi(variable,vi->first)(vi->second));
+    //      std::set<GDDD> s;
+    //      for(GDDD::const_iterator vi=d.begin();vi!=d.end();++vi){
+    //        s.insert(phi(variable,vi->first)(vi->second));
+    //      }
+    //      return DED::add(s);
+    typedef std::set< GDDD > listType;
+    typedef std::map<int , listType > canoMap;
+    // for pathological cases LeftArcConcat
+    canoMap toCanonize;
+    // for general case
+    std::set<GDDD> others;
+    
+    // for every arc of d
+    for(GDDD::const_iterator vi=d.begin();vi!=d.end();++vi){
+      // store phi to see if we can optimize
+      const GHom & phiTmp =  phi(variable,vi->first);
+      
+      // pathological case, a LeftArcConcat. Add to toCanonize list 
+      if ( typeid(* get_concret(phiTmp)) == typeid(LeftArcConcat) ) {
+	// downcast
+	const LeftArcConcat * lc = (const LeftArcConcat *) get_concret(phiTmp);
+	// consistency check : we expect the Hom to return the same variable with a new value.
+	if (lc->var ==  variable) {
+	  
+	  GDDD son = lc->right (vi->second);
+	  if (son != GDDD::null) {
+	    // Canonic insertion in toCanonize
+	    canoMap::iterator it = toCanonize.find(lc->val);
+	    if (it != toCanonize.end() ) {
+	      // value already represented, augment list used to produce son node 
+	      it->second.insert(son);
+	      continue ;
+	    } else {
+	      // a new arc value, add new entry to toCanonize
+	      listType arcs ;
+	      arcs.insert(son);
+	      toCanonize.insert(std::make_pair(lc->val, arcs));
+	      continue ;
+	    }
+	  } else {
+	    // arcs to GDDD::null are not represented
+	    continue ;
+	  }
+       	}
+      }
+      // we get here if we did not hit any "continue" instruction
+      // if this is not LeftArcConcat or consistency check var'=var failed.
+      // fallback into general case.
+      others.insert(phiTmp (vi->second));
     }
-    return DED::add(s);
-  }
+    // finished exploring arcs of d
+    // if we have captured an optimized temporary node
+    if (! toCanonize.empty()) {
+      GDDD::Valuation canoRes ;
+      // note that canoMap is sorted by key, so this iteration produces
+      // elements in the Valuation canoRes appropriately sorted by arc value
+      // this constraint is necessary, see comments in DDD.h on GDDD::GDDD(int var, Valuation v).
+      for (canoMap::const_iterator it = toCanonize.begin() ; it != toCanonize.end() ; ++it ) {
+	// compute resulting son by summing the list of son nodes
+	// then add the arc to node under construction valuation
+	canoRes.push_back(std::make_pair(it->first, DED::add(it->second)));
+      }
+      // useless already done by the map
+      //           sort(canoRes.begin(),canoRes.end(),valOrder);
 
-	// else  
+      // construct the node and add it to general case.
+      others.insert(GDDD(variable,canoRes));
+      ++count_larc;
+    }
+    if (others.empty())
+      return GDDD::null ;
+    else
+      return DED::add(others);
+  }
+}
+
+    // else  
 	// {
 	// 	
 	// 	int variable = d.variable();
@@ -530,7 +640,7 @@ GDDD StrongHom::eval(const GDDD &d)const{
 	// 	
 	// }
 
-}
+
 
 /*************************************************************************/
 /*                         Class GHom                                    */
@@ -543,7 +653,7 @@ GHom::GHom(StrongHom *h):concret(canonical(h)){}
 
 GHom::GHom(const GDDD& d):concret(canonical(new Constant(d))){}
 
-GHom::GHom(int var, int val, const GHom &h):concret(canonical(new LeftConcat(GDDD(var,val),h))){}
+GHom::GHom(int var, int val, const GHom &h):concret(canonical(new LeftArcConcat(var,val,h))){}
 
 /* Eval */
 GDDD GHom::operator()(const GDDD &d) const{
@@ -583,7 +693,7 @@ void GHom::mark()const{
 
 void GHom::garbage(){
   // mark phase
-  for(UniqueTable<_GHom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
+  for(UniqueTable<_GHom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
     if((*di)->refCounter!=0){
       (*di)->marking=true;
       (*di)->mark();
@@ -677,6 +787,12 @@ GHom operator*(const GHom &h,const GDDD &d){
 }
 
 GHom operator^(const GDDD &d,const GHom &h){
+  // optimize pathologic case, just one arc left concatenated 
+  if (d.nbsons() == 1) {
+    GDDD::const_iterator it = d.begin();
+    if (it->second == GDDD::one)
+      return GHom(canonical(new LeftArcConcat(d.variable(),it->first,h)));
+  }
   return GHom(canonical(new LeftConcat(d,h)));
 }
 
@@ -702,7 +818,7 @@ GHom::GHom(MyGHom *h):concret(canonical(h)){}
 void GHom::pstats(bool reinit)
 {
   std::cout << "*\nGHom Stats : size unicity table = " <<  canonical.size() << std::endl;
-  
+  std::cout << "LeftArcConcats caught : " << count_larc <<std::endl;
 #ifdef INST_STL
   canonical.pstat(reinit);
   
