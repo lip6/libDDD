@@ -127,7 +127,7 @@ static string TryDemangle(string in)
 void PrintMapJumps(double ratemin=0){
 #ifdef INST_STL
   MapJumps::iterator ii;
-  for (ii=_GHom::HomJumps.begin(); ii!=_GHom::HomJumps.end(); ii++){
+  for (ii=_GHom::HomJumps.begin(); ii!=_GHom::HomJumps.end(); ++ii){
     double rate= double(ii->second.second)/double (ii->second.first);
     if (rate>ratemin){
       cout << "SHom " << TryDemangle(ii->first) << "\t-->\t\t" << ii->second.second  <<"/" ;
@@ -189,7 +189,7 @@ public:
     return value==((Constant*)&h )->value;
   }
   size_t hash() const{
-    return __gnu_cxx::hash<GSDD>()(value);
+    return value.hash();
   }
 
   /* Eval */
@@ -216,7 +216,7 @@ public:
     return left==((Mult*)&h )->left && right==((Mult*)&h )->right;
   }
   size_t hash() const{
-    return 83*__gnu_cxx::hash<GShom>()(left)+53*__gnu_cxx::hash<GSDD>()(right);
+    return 83*left.hash()+53*right.hash();
   }
 
   /* Eval */
@@ -246,7 +246,7 @@ public:
     return left==((Add*)&h )->left && right==((Add*)&h )->right;
   }
   size_t hash() const{
-    return 1039*__gnu_cxx::hash<GShom>()(left)+1049*__gnu_cxx::hash<GShom>()(right);
+    return 1039*left.hash()+1049*right.hash();
   }
 
   /* Eval */
@@ -254,7 +254,7 @@ public:
     int variable=d.variable();
     std::set<GSDD> s;
     GSDD cur;
-    for(GSDD::const_iterator vi=d.begin();vi!=d.end();vi++){
+    for(GSDD::const_iterator vi=d.begin();vi!=d.end();++vi){
       cur= GSDD(variable,*vi->first,vi->second);
       s.insert(left(cur));
       s.insert(right(cur));
@@ -285,22 +285,22 @@ public:
 //   }
 //   size_t hash() const{
 //     size_t res=0;
-//     for(set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
-//       res^=::hash<GShom>()(*gi);
+//     for(set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+//       res^=gi->hash();
 //     return res;
 //   }
 
 //   /* Eval */
 //   GSDD eval(const GSDD &d)const{
 //      set<GSDD> s;
-//      for(set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
+//      for(set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
 //        s.insert((*gi)(d));
 //      return HDED::add(s);
 //   }
 
 //   /* Memory Manager */
 //   void mark() const{
-//     for(set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();gi++)
+//     for(set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
 //       gi->mark();
 //   }
 // };
@@ -317,7 +317,7 @@ public:
     return left==((Compose*)&h )->left && right==((Compose*)&h )->right;
   }
   size_t hash() const{
-    return 13*__gnu_cxx::hash<GShom>()(left)+7*__gnu_cxx::hash<GShom>()(right);
+    return 13*left.hash()+7*right.hash();
   }
 
   /* Eval */
@@ -346,7 +346,7 @@ public:
     return left==((LeftConcat*)&h )->left && right==((LeftConcat*)&h )->right;
   }
   size_t hash() const{
-    return 23*__gnu_cxx::hash<GSDD>()(left)+47*__gnu_cxx::hash<GShom>()(right);
+    return 23*left.hash()+47*right.hash();
   }
 
   /* Eval */
@@ -375,7 +375,7 @@ public:
     return left==((RightConcat*)&h )->left && right==((RightConcat*)&h )->right;
   }
   size_t hash() const{
-    return 47*__gnu_cxx::hash<GShom>()(left)+19*__gnu_cxx::hash<GSDD>()(right);
+    return 47*left.hash()+19*right.hash();
   }
 
   /* Eval */
@@ -403,7 +403,7 @@ public:
     return left==((Minus*)&h )->left && right==((Minus*)&h )->right;
   }
   size_t hash() const{
-    return 5*__gnu_cxx::hash<GShom>()(left)+61*__gnu_cxx::hash<GSDD>()(right);
+    return 5*left.hash()+61*right.hash();
   }
 
   /* Eval */
@@ -430,7 +430,7 @@ public:
     return arg==((Fixpoint*)&h )->arg ;
   }
   size_t hash() const{
-    return 17*__gnu_cxx::hash<GShom>()(arg);
+    return 17*arg.hash();
   }
 
   /* Eval */
@@ -477,7 +477,7 @@ GSDD StrongShom::eval(const GSDD &d)const{
     int variable=d.variable();
     std::set<GSDD> s;
 
-    for(GSDD::const_iterator vi=d.begin();vi!=d.end();vi++){
+    for(GSDD::const_iterator vi=d.begin();vi!=d.end();++vi){
       s.insert(phi(variable,*vi->first)(vi->second));
     }
     return SDED::add(s);
@@ -541,7 +541,7 @@ void GShom::mark()const{
 
 void GShom::garbage(){
   // mark phase
-  for(UniqueTable<_GShom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();di++){
+  for(UniqueTable<_GShom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
     if((*di)->refCounter!=0){
       (*di)->marking=true;
       (*di)->mark();

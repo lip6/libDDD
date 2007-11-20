@@ -24,8 +24,6 @@ class _GSDD;
 /// memory occurrence thanks to the unicity table.
 class GSDD {
 private:
-  /// Open access to hash function computation procedure.
-  friend struct __gnu_cxx::hash<GSDD>;
   /// A textual output. 
   /// Don't use it with large number of paths as each element is printed on a different line
   friend std::ostream& operator<<(std::ostream &os,const GSDD &g);
@@ -143,6 +141,7 @@ public:
   /// \param g the node to compare to
   /// \return true if argument g is greater than "this" node.
   bool operator<(const GSDD& g) const{return concret<g.concret;};
+  
   //@}
 
   /* Visualisation */ 
@@ -179,6 +178,10 @@ public:
   /// For garbage collection internals. Marks a GSDD as in use in garbage collection phase. 
   /// 
   void mark()const;
+  /// For storage in a hash table
+  size_t hash () const { 
+    return ddd::knuth32_hash(reinterpret_cast<const size_t>(concret)); 
+  }
   /// For garbage collection, do not call this directly, use MemoryManager::garbage() instead.
   /// \todo describe garbage collection algorithm(s) + mark usage homogeneously in one place.
   static void garbage();
@@ -328,7 +331,7 @@ namespace __gnu_cxx {
   struct hash<GSDD> {
     size_t operator()(const GSDD &g) const{
       //return (size_t) g.concret;
-      return ddd::knuth32_hash(reinterpret_cast<const size_t>(g.concret));
+      return g.hash();
     }
   };
 }
