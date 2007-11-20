@@ -38,6 +38,8 @@ private:
   friend class Hom;
   /// Open access to _GHom based homomophisms
   friend class _GHom;
+  /// Open access to hash function computation procedure.
+  friend struct __gnu_cxx::hash<GHom>;
   /// This operator applies its argument to a node until a fixpoint is reached.
   /// Application consists in : while ( h(d) != d ) d = h(d);
   /// Where d is a DDD and h a homomorphism.
@@ -166,10 +168,6 @@ public:
   static void pstats(bool reinit=true);
   /// For garbage collection internals. Marks a GHom as in use in garbage collection phase. 
   void mark()const;
-  /// For storage in a hash table
-  size_t hash () const { 
-    return ddd::knuth32_hash(reinterpret_cast<const size_t>(concret)); 
-  }
   /// For garbage collection. 
   /// \e WARNING Do not use this function directly !! Use MemoryManager::garbage() to ensure
   /// proper reference counting and cache cleanup.
@@ -281,7 +279,8 @@ namespace __gnu_cxx {
   template<>
   struct hash<GHom> {
     size_t operator()(const GHom &g) const{
-      return g.hash();
+      //return (size_t) g.concret;
+      return ddd::knuth32_hash(reinterpret_cast<const size_t>(g.concret));
     }
   };
 }
