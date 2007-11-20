@@ -13,6 +13,7 @@ class GHom;
 /******************************************************************************/
 class DED{
 private:
+  friend struct __gnu_cxx::hash<DED>;
   friend struct std::equal_to<DED>;
   _DED *concret;
 public:
@@ -26,8 +27,6 @@ public:
   static  unsigned int statistics();
   static void pstats(bool reinit=true);
   static void garbage(); 
-  /// For storage in a hash table
-  size_t hash () const ;
 };
 
 
@@ -35,14 +34,14 @@ public:
 namespace __gnu_cxx {
   template<>
   struct hash<DED> {
-    size_t operator()(const DED& d) const { return d.hash(); }
+    size_t operator()(const DED&) const;
   };
 }
 
 namespace std {
   template<>
   struct equal_to<DED> {
-    bool operator()(const DED& a,const DED& b ) const { return a == b ;}
+    bool operator()(const DED&,const DED&) const;
   };
 }
 

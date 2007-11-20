@@ -41,6 +41,8 @@ class GShom
 private:
   /// Open access to concret for Shom class
   friend class Shom;
+  /// Open access to concret for hash key computation
+  friend struct __gnu_cxx::hash<GShom>;
 
   /// \name Friendly hard coded composition operators.
   /// Open full access for library implemented hard coded operations.    
@@ -129,10 +131,6 @@ public:
   static void pstats(bool reinit=true);
   /// Mark a concrete data as in use (forbids garbage collection of the data).
   void mark() const;
-  /// For storage in a hash table
-  size_t hash () const { 
-    return ddd::knuth32_hash(reinterpret_cast<const size_t>(concret)); 
-  }
   /// Collects and destroys unused homomorphisms. Do not call this directly but through 
   /// MemoryManager::garbage() as order of calls (among GSDD::garbage(), GShom::garbage(), 
   /// SDED::garbage()) is important.
@@ -239,7 +237,8 @@ namespace __gnu_cxx {
   /// Uses D. Knuth's hash function for pointers.
   template<>  struct hash<GShom> {
     size_t operator()(const GShom &g) const{
-      return g.hash();
+      //return (size_t) g.concret;
+      return ddd::knuth32_hash(reinterpret_cast<const size_t>(g.concret));
     }
   };
 }
