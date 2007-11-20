@@ -1,7 +1,5 @@
 #include <typeinfo>
 #include <iostream>
-#include <vector>
-#include <utility>
 #include "Hom.h"
 #include "DDD.h"
 #include "DED.h"
@@ -333,8 +331,6 @@ class LeftConcat:public _GHom{
 private:
   GDDD left;
   GHom right;
-
-  friend class StrongHom ;
 public:
   /* Constructor */
   LeftConcat(const GDDD &l,const GHom &r,int ref=0):_GHom(ref,true),left(l),right(r){}
@@ -354,38 +350,6 @@ public:
   /* Memory Manager */
   void mark() const{
     left.mark();
-    right.mark();
-  }
-
-};
-
-/************************** LeftConcat */
-
-class LeftArcConcat:public _GHom{
-private:
-  int var;
-  int val;
-  GHom right;
-
-  friend class StrongHom ;
-public:
-  /* Constructor */
-  LeftArcConcat(int vr,int vl,const GHom &r,int ref=0):_GHom(ref,true),var(vr),val(vl),right(r){}
-  /* Compare */
-  bool operator==(const _GHom &h) const{
-    return var==((LeftArcConcat*)&h )->var && val==((LeftArcConcat*)&h )->val && right==((LeftArcConcat*)&h )->right;
-  }
-  size_t hash() const{
-    return 23*var + val*1789 +47*right.hash();
-  }
-
-  /* Eval */
-  GDDD eval(const GDDD &d)const{
-    return GDDD(var,val,right(d));
-  }
-
-  /* Memory Manager */
-  void mark() const{
     right.mark();
   }
 
@@ -527,11 +491,6 @@ bool StrongHom::operator==(const _GHom &h) const{
 // };
 
 
-static bool valOrder (const std::pair<int,GDDD > & a,const std::pair<int,GDDD > & b) {
-  return a.first < b.first ;
-}
-
-static int count_larc = 0;
 /* Eval */
 GDDD StrongHom::eval(const GDDD &d)const{
   if(d==GDDD::null)
@@ -540,86 +499,17 @@ GDDD StrongHom::eval(const GDDD &d)const{
     return phiOne();
   else if(d==GDDD::top)
     return GDDD::top;
-  
+
   else{
     int variable=d.variable();
-    //      std::set<GDDD> s;
-    //      for(GDDD::const_iterator vi=d.begin();vi!=d.end();++vi){
-    //        s.insert(phi(variable,vi->first)(vi->second));
-    //      }
-    //      return DED::add(s);
-    typedef std::set< GDDD > listType;
-    typedef std::map<int , listType > canoMap;
-    // for pathological cases LeftArcConcat
-    canoMap toCanonize;
-    // for general case
-    std::set<GDDD> others;
-    
-    // for every arc of d
+    std::set<GDDD> s;
     for(GDDD::const_iterator vi=d.begin();vi!=d.end();++vi){
-      // store phi to see if we can optimize
-      const GHom & phiTmp =  phi(variable,vi->first);
-      
-      // pathological case, a LeftArcConcat. Add to toCanonize list 
-      if ( typeid(* get_concret(phiTmp)) == typeid(LeftArcConcat) ) {
-	// downcast
-	const LeftArcConcat * lc = (const LeftArcConcat *) get_concret(phiTmp);
-	// consistency check : we expect the Hom to return the same variable with a new value.
-	if (lc->var ==  variable) {
-	  
-	  GDDD son = lc->right (vi->second);
-	  if (son != GDDD::null) {
-	    // Canonic insertion in toCanonize
-	    canoMap::iterator it = toCanonize.find(lc->val);
-	    if (it != toCanonize.end() ) {
-	      // value already represented, augment list used to produce son node 
-	      it->second.insert(son);
-	      continue ;
-	    } else {
-	      // a new arc value, add new entry to toCanonize
-	      listType arcs ;
-	      arcs.insert(son);
-	      toCanonize.insert(std::make_pair(lc->val, arcs));
-	      continue ;
-	    }
-	  } else {
-	    // arcs to GDDD::null are not represented
-	    continue ;
-	  }
-       	}
-      }
-      // we get here if we did not hit any "continue" instruction
-      // if this is not LeftArcConcat or consistency check var'=var failed.
-      // fallback into general case.
-      others.insert(phiTmp (vi->second));
+      s.insert(phi(variable,vi->first)(vi->second));
     }
-    // finished exploring arcs of d
-    // if we have captured an optimized temporary node
-    if (! toCanonize.empty()) {
-      GDDD::Valuation canoRes ;
-      // note that canoMap is sorted by key, so this iteration produces
-      // elements in the Valuation canoRes appropriately sorted by arc value
-      // this constraint is necessary, see comments in DDD.h on GDDD::GDDD(int var, Valuation v).
-      for (canoMap::const_iterator it = toCanonize.begin() ; it != toCanonize.end() ; ++it ) {
-	// compute resulting son by summing the list of son nodes
-	// then add the arc to node under construction valuation
-	canoRes.push_back(std::make_pair(it->first, DED::add(it->second)));
-      }
-      // useless already done by the map
-      //           sort(canoRes.begin(),canoRes.end(),valOrder);
-
-      // construct the node and add it to general case.
-      others.insert(GDDD(variable,canoRes));
-      ++count_larc;
-    }
-    if (others.empty())
-      return GDDD::null ;
-    else
-      return DED::add(others);
+    return DED::add(s);
   }
-}
 
-    // else  
+	// else  
 	// {
 	// 	
 	// 	int variable = d.variable();
@@ -640,7 +530,7 @@ GDDD StrongHom::eval(const GDDD &d)const{
 	// 	
 	// }
 
-
+}
 
 /*************************************************************************/
 /*                         Class GHom                                    */
@@ -653,7 +543,7 @@ GHom::GHom(StrongHom *h):concret(canonical(h)){}
 
 GHom::GHom(const GDDD& d):concret(canonical(new Constant(d))){}
 
-GHom::GHom(int var, int val, const GHom &h):concret(canonical(new LeftArcConcat(var,val,h))){}
+GHom::GHom(int var, int val, const GHom &h):concret(canonical(new LeftConcat(GDDD(var,val),h))){}
 
 /* Eval */
 GDDD GHom::operator()(const GDDD &d) const{
@@ -787,12 +677,6 @@ GHom operator*(const GHom &h,const GDDD &d){
 }
 
 GHom operator^(const GDDD &d,const GHom &h){
-  // optimize pathologic case, just one arc left concatenated 
-  if (d.nbsons() == 1) {
-    GDDD::const_iterator it = d.begin();
-    if (it->second == GDDD::one)
-      return GHom(canonical(new LeftArcConcat(d.variable(),it->first,h)));
-  }
   return GHom(canonical(new LeftConcat(d,h)));
 }
 
@@ -818,7 +702,7 @@ GHom::GHom(MyGHom *h):concret(canonical(h)){}
 void GHom::pstats(bool reinit)
 {
   std::cout << "*\nGHom Stats : size unicity table = " <<  canonical.size() << std::endl;
-  std::cout << "LeftArcConcats caught : " << count_larc <<std::endl;
+  
 #ifdef INST_STL
   canonical.pstat(reinit);
   
