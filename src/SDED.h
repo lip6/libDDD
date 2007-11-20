@@ -31,19 +31,21 @@ public:
   static void recentGarbage(bool force=false);
 #endif // OTF_GARBAGE
   static void garbage(); 
+  /// For storage in a hash table
+  size_t hash () const ;
 };
 
 
 /******************************************************************************/
 namespace __gnu_cxx {
   template<>  struct hash<SDED> {
-    size_t operator()(const SDED&) const;
+    size_t operator()(const SDED&d) const { return d.hash(); }
   };
 }
 
 namespace std {
   template<>  struct equal_to<SDED> {
-    bool operator()(const SDED&,const SDED&) const;
+    bool operator()(const SDED&a,const SDED&b) const { return a == b ;};
   };
 }
 
