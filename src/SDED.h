@@ -27,6 +27,7 @@ public:
   /* Memory Manager */
   static  unsigned int statistics();
   static void pstats(bool reinit=true);
+  static size_t peak();
 #ifdef OTF_GARBAGE
   static void recentGarbage(bool force=false);
 #endif // OTF_GARBAGE
