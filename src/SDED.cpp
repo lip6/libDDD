@@ -764,6 +764,11 @@ void SDED::recentGarbage(bool force){
 };
 #endif
 
+size_t SDED::peak() {
+  if (namespace_SDED::cache.size() > namespace_SDED::Max_SDED)
+    namespace_SDED::Max_SDED = namespace_SDED::cache.size();
+  return namespace_SDED::Max_SDED;
+}
 
 void SDED::garbage(){
 #ifdef OTF_GARBAGE

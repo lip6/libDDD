@@ -558,9 +558,17 @@ void DED::pstats(bool reinit)
 }
 
 
+static size_t DEDpeak = 0;
 
+size_t DED::peak() {
+  if (cache.size() > DEDpeak)
+    DEDpeak = cache.size();
+  return DEDpeak;
+}
 // Todo
 void DED::garbage(){
+  if (cache.size() > DEDpeak)
+    DEDpeak = cache.size();
   for(Cache::iterator di=cache.begin();di!=cache.end();){
       Cache::iterator ci=di;
       di++;

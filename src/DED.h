@@ -25,6 +25,7 @@ public:
   /* Memory Manager */
   static  unsigned int statistics();
   static void pstats(bool reinit=true);
+  static size_t peak();
   static void garbage(); 
   /// For storage in a hash table
   size_t hash () const ;
