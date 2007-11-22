@@ -475,7 +475,7 @@ StrongHom::eval(const GDDD &d) const
       GDDD::Valuation v;
       for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
       {
-          GDDD son = this->eval(it->second);
+          GDDD son = GHom(this)(it->second);
           if( son != GDDD::null )
           {
               v.push_back(std::make_pair(it->first, son));
