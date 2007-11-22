@@ -54,6 +54,6 @@ libDDD_otfg_a_SOURCES = $(SRCS)
 libDDD_otfg_a_CPPFLAGS = -g -O3 -Wall -D OTF_GARBAGE
 
 # change options to activate EVDDD for distance functions
-libDDD_ev_a_SOURCES = $(SRCS)
-libDDD_ev_a_CPPFLAGS = -g -O3 -Wall -D EVDDD
+# libDDD_ev_a_SOURCES = $(SRCS)
+# libDDD_ev_a_CPPFLAGS = -g -O3 -Wall -D EVDDD
 

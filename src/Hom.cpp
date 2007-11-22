@@ -452,83 +452,47 @@ bool StrongHom::operator==(const _GHom &h) const{
   return typeid(*this)==typeid(h)?*this==*(StrongHom*)&h:false;
 }
 
-// typedef tbb::concurrent_vector< std::pair<int, GDDD> > GDDD_vec;
-// 
-// struct reducer
-// {
-// 	std::set<GDDD> result_;
-// 	const StrongHom& hom_;
-// 	int variable_;
-// 	
-// 	reducer( const StrongHom& hom,
-// 			 int variable)
-// 		:
-// 		result_(),
-// 		hom_(hom),
-// 		variable_(variable)
-// 	{}
-// 	
-// 	reducer( reducer& r, tbb::split)
-// 		:
-// 		result_(r.result_),
-// 		hom_(r.hom_),
-// 		variable_(r.variable_)
-// 	{}
-// 	
-// 	void
-// 	operator()( const GDDD_vec::range_type& vec)
-// 	{
-// 		assert( std::distance(vec.begin(),vec.end()) == 1 );
-// 		std::pair< int, GDDD > element = *vec.begin();
-// 		result_.insert( hom_.phi( variable_, element.first)(element.second) );
-// 	}
-// 	
-// 	void
-// 	join(const reducer& r)
-// 	{
-// 		this->result_.insert(r.result_.begin(), r.result_.end());
-// 	}
-// };
-
 
 /* Eval */
-GDDD StrongHom::eval(const GDDD &d)const{
-  if(d==GDDD::null)
-    return GDDD::null;
-  else if(d==GDDD::one)
-    return phiOne();
-  else if(d==GDDD::top)
-    return GDDD::top;
-
-  else{
+GDDD 
+StrongHom::eval(const GDDD &d) const
+{
+  if( d == GDDD::null )
+  {
+      return GDDD::null;
+  }
+  else if( d == GDDD::one )
+  {
+      return phiOne();
+  }
+  else if( d == GDDD::top )
+  {
+      return GDDD::top;
+  }
+  else if( this->skip_variable(d.variable()) )
+  {
+      // The homorphism propagates itself without any modification on the GDDD
+      GDDD::Valuation v;
+      for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
+      {
+          GDDD son = this->eval(it->second);
+          if( son != GDDD::null )
+          {
+              v.push_back(std::make_pair(it->first, son));
+          }
+      }
+      return GDDD(d.variable(),v);
+  }
+  else
+  {
     int variable=d.variable();
     std::set<GDDD> s;
-    for(GDDD::const_iterator vi=d.begin();vi!=d.end();++vi){
-      s.insert(phi(variable,vi->first)(vi->second));
+    for(GDDD::const_iterator vi=d.begin();vi!=d.end();++vi)
+    {
+        s.insert(phi(variable,vi->first)(vi->second));
     }
     return DED::add(s);
   }
-
-	// else  
-	// {
-	// 	
-	// 	int variable = d.variable();
-	// 
-	// 	GDDD_vec successors;
-	// 	for( GDDD::Valuation::const_iterator it = d.begin();
-	// 		 it != d.end();
-	// 		 ++it)
-	// 	{
-	// 		successors.push_back(*it);
-	// 	}
-	// 	
-	// 	
-	// 	reducer red_is_dead(*this,variable);
-	// 	tbb::parallel_reduce(successors.range(1), red_is_dead);
-	// 	
-	// 	return DED::add(red_is_dead.result_);
-	// 	
-	// }
 
 }
 
@@ -546,7 +510,9 @@ GHom::GHom(const GDDD& d):concret(canonical(new Constant(d))){}
 GHom::GHom(int var, int val, const GHom &h):concret(canonical(new LeftConcat(GDDD(var,val),h))){}
 
 /* Eval */
-GDDD GHom::operator()(const GDDD &d) const{
+GDDD
+GHom::operator()(const GDDD &d) const
+{
   if(concret->immediat)
     return concret->eval(d);
   else

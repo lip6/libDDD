@@ -397,7 +397,10 @@ protected:
 ///   \e homomorphism to apply to the successor node
 /// Users also have to provide a comparison function, and a hash function (from _GHom).
 /// See the demo folder for examples of user defined homomorphisms.
-class StrongHom:public _GHom{
+class StrongHom
+	:
+    public _GHom
+{
 public:
   /// Default constructor. Empty behavior.
   /// \todo Is this declaration useful ?
@@ -429,7 +432,14 @@ public:
   /// Let an SDD d= (var, Union_i (val_i, d_i) )
   ///
   /// h (d) = Sum_i ( phi(var, val_i) (d_i) ) 
-  GDDD eval(const GDDD &)const;  
+  GDDD eval(const GDDD &)const; 
+  
+  virtual bool
+  skip_variable(int var) const
+  {
+      return false;
+  }
+  
 };
  
 
