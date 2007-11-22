@@ -80,32 +80,52 @@ class _move_ring : public StrongHom {
   int ring_;
   
 public :
-  _move_ring (int ring): ring_(ring) {};
+
+    _move_ring (int ring)
+    	: 
+    ring_(ring) 
+    {}
   
-  GDDD phiOne() const {
-    return GDDD::one;
-  }                   
-  
-  GHom phi(int vr, int vl) const {
-    if (vr != ring_ ) {
-      // target ring not reached yet : propagate
-      return GHom(vr,vl,this) ;
-    } else {
-      // ring reached 
-      // try to move to all new positions
-      GHom res = GDDD::null;
-      for (int i=0 ; i <NB_POLES ; i++) {
-	// test all possible moves from current position = vl
-	if (i != vl) {
-	  // update ring position and test no ring above
-	  // no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met 
-	  // or a DDD with only paths where the move is legal
-	  res = res + ( GHom (ring_ , i) & new _no_ring_above(i , vl) );
-	}
-      }
-      return res ;
+    bool
+    skip_variable(int v) const
+    {
+        if(  v != ring_ )
+        {
+            return true;
+        }
+        return false;
     }
-  }
+    
+      GDDD phiOne() const 
+    {
+        return GDDD::one;
+    }              
+  
+    GHom phi(int vr, int vl) const 
+    {
+        if (vr != ring_ ) 
+        {
+            // target ring not reached yet : propagate
+            return GHom(vr,vl,this) ;
+        }
+        else 
+        {
+            // ring reached 
+            // try to move to all new positions
+            GHom res = GDDD::null;
+            for (int i=0 ; i <NB_POLES ; i++)
+            {
+                // test all possible moves from current position = vl
+                if (i != vl) {
+                    // update ring position and test no ring above
+                    // no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met 
+                    // or a DDD with only paths where the move is legal
+                    res = res + ( GHom (ring_ , i) & new _no_ring_above(i , vl) );
+                }
+            }
+            return res ;
+        }
+    }
   
   size_t hash() const {
     // a hash function (avoid hash value 0)
@@ -167,4 +187,7 @@ int main(int argc, char **argv){
   cout << "Number of states : " << ss.nbStates() << endl ;
   cout << "Final/Peak nodes : " << ss.size() << "/" << DDD::peak() << endl;
   cout << "Cache entries : " << MemoryManager::nbDED() <<endl ;
+  
+  MemoryManager::pstats();
+  
 }

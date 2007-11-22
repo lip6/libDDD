@@ -5,11 +5,6 @@
 
 #include <ext/hash_set>
 
-#ifdef PARALLEL_DD
-#include "tbb/queuing_mutex.h"
-#include "tbb/mutex.h"
-#endif
-
 /// This class implements a unicity table mechanism, based on an STL hash_set.
 /// Requirements on the contained type are thus those of hash_set.
 template<typename T>
@@ -24,19 +19,9 @@ class UniqueTable{
 
 private:
 	
-#ifdef PARALLEL_DD
-	// typedef tbb::queuing_mutex table_mutex_t;
-	typedef tbb::mutex table_mutex_t;
-	table_mutex_t table_mutex_;
-#endif
-
 public:
 	/// Constructor, builds a default table.
 	UniqueTable()
-#ifdef PARALLEL_DD
-		:
-		table_mutex_()
-#endif
 #ifdef INST_STL
 		:
 		NbAcces(0),
@@ -63,11 +48,6 @@ public:
     _g->InstrumentNbJumps(nbjumps);
 #else
 
-
-
-#ifdef PARALLEL_DD
-	table_mutex_t::scoped_lock lock(table_mutex_);
-#endif
 
     std::pair<typename Table::iterator, bool> ref=table.insert(_g); 
 #endif

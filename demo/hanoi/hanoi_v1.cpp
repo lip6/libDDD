@@ -27,7 +27,10 @@ void initName() {
 
 // Removes any path such that one of the variables takes value i or value j
 // Not test on variable number means this operation should be used from "mid-height"
-class _no_ring_above : public StrongHom {
+class _no_ring_above 
+    : 
+    public StrongHom
+{
 // the 2 poles that have to be clear
 	int i_,j_;
 	public :
@@ -52,7 +55,8 @@ class _no_ring_above : public StrongHom {
 	}     
 
 // reject any path with ANY ring that is on pole i or pole j
-	GHom phi(int vr, int vl) const {
+	GHom 
+    phi(int vr, int vl) const {
 		if ( vl == i_ || vl == j_ )
 	// cut this branch and exploration
 			return GDDD::null;
@@ -107,6 +111,16 @@ class _swap_pole : public StrongHom {
 			}
 		}
 	}
+
+    bool
+    skip_variable(int v) const
+    {
+        if(  v != ring_ )
+        {
+            return true;
+        }
+        return false;
+    }
 
 	size_t hash() const {
 	// a hash function, probably too complex but will work well
@@ -176,4 +190,6 @@ int main(int argc, char **argv){
 	cout << "Number of states : " << ss.nbStates() << endl ;
 	cout << "Final/Peak nodes : " << ss.size() << "/" << DDD::peak() << endl;
 	cout << "Cache entries : " << MemoryManager::nbDED() <<endl ;
+    
+    MemoryManager::pstats();
 }
