@@ -186,7 +186,10 @@ main(int argc, char **argv)
 	}
     
     // To store the set of events
-	vector<Hom> events;
+	Hom events = GHom::id;
+
+    std::set<GHom> tmp2;
+
 	for (int i=0 ; i < NB_RINGS ; i++)
     {
         // No tricks used : consider all 6 = NB_POLES * (NB_POLES-1) events per ring 
@@ -197,20 +200,24 @@ main(int argc, char **argv)
             {
 				if (ori != dest)
                 {
-					events.push_back(swap_pole(i,ori,dest));
+//					events = events + swap_pole(i,ori,dest);
+                    tmp2.insert(swap_pole(i,ori,dest));
 				}
 			}
 		}
 	}
+
+    tmp2.insert(GHom::id);
+    events = GHom::add(tmp2);
     
     // Fixpoint over events + Id
 	DDD ss, tmp = M0;
 	do {
 		ss = tmp;
-		for ( vector<Hom>::reverse_iterator it = events.rbegin(); it != events.rend(); it++)
-        {
-			tmp = tmp + (*it) (tmp);
-		}
+//		for ( vector<Hom>::reverse_iterator it = events.rbegin(); it != events.rend(); it++)
+//        {
+			tmp = events(tmp);
+//		}
 	} while (ss != tmp);
     
     // stats
