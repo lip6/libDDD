@@ -160,13 +160,11 @@ void GDDD::print(std::ostream& os,std::string s) const{
   else if(*this == null)
       os << "[ " << s << "0 ]"<<std::endl;
   else{
-    std::string val;
     for(GDDD::const_iterator vi=begin();vi!=end();++vi){
       // modif strstream -> std::stringstream
       std::stringstream tmp;
       tmp << getvarName(variable())<<'('<<vi->first<<")";
-      tmp >> val;
-      vi->second.print(os,s+val+" ");
+      vi->second.print(os,s+tmp.str() +" ");
     }
   }
 }
