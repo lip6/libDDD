@@ -77,6 +77,7 @@ private:
   /// \param _h The pointer provided should point into the unicity table
   GHom(const _GHom *_h):concret(_h){};
 public:
+
   /// \name Public Constructors 
   //@{
   /// Default public constructor.
@@ -331,6 +332,14 @@ private:
   /// Currently only the constant homomorphism has this attribute set to true.  
   mutable bool immediat;
 public:
+
+    virtual bool
+    skip_variable(int var) const
+    {
+        return false;
+    }
+    
+
 #ifdef INST_STL
   /// For hash table optimization.
   static MapJumps HomJumps;
@@ -434,11 +443,6 @@ public:
   /// h (d) = Sum_i ( phi(var, val_i) (d_i) ) 
   GDDD eval(const GDDD &)const; 
   
-  virtual bool
-  skip_variable(int var) const
-  {
-      return false;
-  }
   
 };
  

@@ -177,6 +177,12 @@ public:
   bool operator==(const _GHom &h) const{return true;}
   size_t hash() const{return 17;}
 
+    bool
+    skip_variable(int var) const 
+    {
+        return true;
+    }
+
   /* Eval */
   GDDD eval(const GDDD &d)const{return d;}
 };
@@ -249,10 +255,9 @@ public:
   /* Constructor */
   Add( const std::set<GHom> &param, int ref=0)
   	:
-  	_GHom(ref,true),
+  	_GHom(ref,false),
   	parameters()
   {
-    // reprendre les paramètres des unions des fils dans mon set
     for( std::set<GHom>::const_iterator it = param.begin(); it != param.end(); ++it)
     {
       if( typeid( *get_concret(*it) ) == typeid(Add) )
@@ -284,13 +289,66 @@ public:
   }
 
   /* Eval */
-  GDDD eval(const GDDD &d)const{
-    std::set<GDDD> s;
-    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
-      s.insert((*gi)(d));
-    return DED::add(s);
+  GDDD
+  eval(const GDDD &d) const
+  {
+      if( d == GDDD::null )
+      {
+          return GDDD::null;
+      }
+      else if( d == GDDD::one || d == GDDD::top )
+      {
+          std::set<GDDD> s;
+          
+          for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+          {
+              s.insert((*gi)(d));
+          }
+          return DED::add(s);
+      }
+      else
+      {
+          std::set<GDDD> s;
+          std::set<GHom> constant_hom;
+          
+          int var = d.variable();
+          
+          for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+          {
+              if( get_concret(*gi)->skip_variable(var) )
+              {
+                  constant_hom.insert(*gi);
+              }
+              else
+              {
+                  s.insert((*gi)(d));
+              }
+          }
+          
+          GDDD::Valuation v ;
+          
+          if( not constant_hom.empty() )
+          {
+              
+              GHom all = GHom::add(constant_hom);
+              
+              for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
+              {
+                  GDDD son = all(it->second);
+                  if( son != GDDD::null )
+                  {
+                      v.push_back(std::make_pair(it->first, son));
+                  }
+              }
+              
+              if( not v.empty() )
+                  s.insert(GDDD(var,v));
+          }
+          
+          return DED::add(s);
+      }
   }
-
+    
   /* Memory Manager */
   void mark() const{
     for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
@@ -412,35 +470,57 @@ public:
 };
 
 /************************** Fixpoint */
-class Fixpoint:public _GHom{
+class Fixpoint
+    	:
+        public _GHom
+{
+
 private:
-  GHom arg;
+    GHom arg;
+
 public:
-  /* Constructor */
-  Fixpoint(const GHom &a,int ref=0):_GHom(ref),arg(a){}
-  /* Compare */
-  bool operator==(const _GHom &h) const{
-    return arg==((Fixpoint*)&h )->arg ;
-  }
-  size_t hash() const{
-    return 17*arg.hash();
-  }
 
-  /* Eval */
-  GDDD eval(const GDDD &d)const{
-    GDDD d1=d,d2=d;
-    do {
-      d1=d2;
-      d2=arg(d2);
-    } while (d1 != d2);
+    /* Constructor */
 
-    return d1;
-  }
+    Fixpoint(const GHom &a,int ref=0)
+    	:
+        _GHom(ref),
+        arg(a)
+    {
+    }
 
-  /* Memory Manager */
-  void mark() const{
-    arg.mark();
-  }
+    /* Compare */
+    bool operator==(const _GHom &h) const
+    {
+        return arg==((Fixpoint*)&h )->arg ;
+    }
+
+    size_t
+    hash() const {
+        return 17*arg.hash();
+    }
+    
+    /* Eval */
+    GDDD
+    eval(const GDDD &d) const
+    {
+        GDDD d1 = d;
+        GDDD d2 = d;
+    
+        do
+        {
+            d1 = d2;
+            d2 = arg(d2);
+        } 
+        while (d1 != d2);
+        
+        return d1;
+    }
+    
+    /* Memory Manager */
+    void mark() const{
+        arg.mark();
+    }
 };
 
 /*************************************************************************/
@@ -481,7 +561,11 @@ StrongHom::eval(const GDDD &d) const
               v.push_back(std::make_pair(it->first, son));
           }
       }
-      return GDDD(d.variable(),v);
+
+      if( v.empty() )
+          return GDDD::null;
+      else
+          return GDDD(d.variable(),v);
   }
   else
   {
@@ -530,7 +614,7 @@ int GHom::refCounter() const{return concret->refCounter;}
 /* Sum */
 
 GHom GHom::add(const std::set<GHom>& s){
-  return(new Add(s));
+  return(canonical(new Add(s)));
 }
 
 
