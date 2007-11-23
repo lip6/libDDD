@@ -89,6 +89,17 @@ public :
     return GDDD::one;
   }                   
   
+    bool
+    skip_variable(int v) const
+    {
+        if(  v != ring_ )
+        {
+            return true;
+        }
+        return false;
+    }
+    
+  
   GHom phi(int vr, int vl) const {
     if (vr != ring_ ) {
       // target ring not reached yet : propagate
@@ -172,4 +183,6 @@ int main(int argc, char **argv){
   cout << "Number of states : " << ss.nbStates() << endl ;
   cout << "Final/Peak nodes : " << ss.size() << "/" << DDD::peak() << endl;
   cout << "Cache entries : " << MemoryManager::nbDED() <<endl ;
+  
+      MemoryManager::pstats();
 }
