@@ -22,10 +22,6 @@
 
 /******************************************************************************/
 namespace namespace_SDED {
-#ifdef INST_STL
-  long long NBJumps=0;
-  long long NBAccess=0;
-#endif
 
 //typedef __gnu_cxx::hash_map<SDED,GSDD> Cache;
 typedef __Cache<SDED,GSDD> Cache;
@@ -704,14 +700,6 @@ void SDED::pstats(bool reinit)
 {
   std::cout << "*\nCache Stats : size=" << statistics() << "   --- Peak size=" <<  namespace_SDED::Max_SDED << std::endl;
   
-#ifdef INST_STL
-  std::cout << "nb jump in hash table : " << NBJumps << "/" << "nbsearch " ;
-  std::cout << NBAccess << "=" << double (NBJumps)/double(NBAccess)<< std::endl;
-  if (reinit){
-    NBAccess=0;
-    NBJumps=0;
-  }
-#endif
 
 #ifdef OTF_GARBAGE
   std::cout << "\nRecent cache hit ratio : " << double (namespace_SDED::recentHits*100) / double(namespace_SDED::recentMisses+1+namespace_SDED::recentHits) << "%" << std::endl;  
@@ -815,16 +803,8 @@ GSDD SDED::eval(){
 #endif
 
 #ifdef OTF_GARBAGE
-#ifdef INST_STL
-    NBAccess++;
-    NBJumps++;
-    int temp=0;
-    //    Cache::const_iterator 
-    Cache::const_iterator ci=recentCache.find(*this, temp); // search e in the recent storage cache
-    NBJumps+=temp;
-#else
     namespace_SDED::Cache::const_iterator ci=namespace_SDED::recentCache.find(*this); // search e in the recent storage cache
-#endif
+
     if (ci==namespace_SDED::recentCache.end()){ // *this is not in the recent storage cache
       ++namespace_SDED::recentMisses;
       // test if parameters potentially allow long term storage
@@ -832,21 +812,11 @@ GSDD SDED::eval(){
 #endif // OTF_GARBAGE
 
 	// search in long term cache
-#ifdef INST_STL
-	NBAccess++;
-	NBJumps++;
-	temp=0;
-#ifndef OTF_GARBAGE
-	Cache::const_iterator 
-#endif
-	ci=cache.find(*this, temp); // search e in the long term storage cache
-	NBJumps+=temp;
-#else
 #ifndef OTF_GARBAGE
 	namespace_SDED::Cache::const_iterator 
 #endif
 	ci=namespace_SDED::cache.find(*this); // search e in the long term storage cache
-#endif
+
 	if (ci==namespace_SDED::cache.end()){ // *this is not in the long term storage cache
 	  namespace_SDED::Misses++;  // this constitutes a cache miss (double truly) !!
 	  GSDD res=concret->eval(); // compute the result

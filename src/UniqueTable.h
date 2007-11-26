@@ -10,23 +10,11 @@
 template<typename T>
 class UniqueTable{
 
-#ifdef INST_STL
-  /// in the context of INST_STL version counts number of lookups in the table.
-  long NbAcces;
-  /// In the context of INST_STL version, counts number of misses.
-  long NbInsertion;
-#endif
-
 private:
 	
 public:
 	/// Constructor, builds a default table.
 	UniqueTable()
-#ifdef INST_STL
-		:
-		NbAcces(0),
-		NbInsertion(0)
-#endif
 	{
 	}
 
@@ -41,26 +29,13 @@ public:
   /// \param _g the pointer to the value we want to find in the table.
   /// \return the address of an object stored in the UniqueTable such that (*_g == *return_value)
   T *operator()(T *_g){
-#ifdef INST_STL
-    NbAcces++;
-    int nbjumps=0;
-    std::pair<typename Table::iterator, bool> ref=table.insert(_g, nbjumps); 
-    _g->InstrumentNbJumps(nbjumps);
-#else
-
-
     std::pair<typename Table::iterator, bool> ref=table.insert(_g); 
-#endif
+
     
 	typename Table::iterator ti=ref.first;
 	if (!ref.second){
 		delete _g;
 	}
-#ifdef INST_STL
-	else {
-		NbInsertion++;
-	}
-#endif
 
 	return *ti;
 // scoped lock released
@@ -71,17 +46,6 @@ public:
 		return table.size();
 	}
 
-#ifdef INST_STL
-	/// Prints some statistics relating to UniqueTable effectiveness (only INST_STL version).
-	void pstat(bool reinit=true){
-		cout << "NbInsertion(" <<NbInsertion << ")*100/NbAccess(" << NbAcces<< ")  = " ;
-		cout << ((long)(((long)NbInsertion) * 100)) / ((long)NbAcces) << endl;
-		if (reinit ){
-			NbAcces=0;
-			NbInsertion=0;
-		}
-	}
-#endif
 };
 
 #endif

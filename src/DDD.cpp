@@ -24,12 +24,8 @@
 /*                             class _GDDD                                     */
 /******************************************************************************/
 
-#ifdef INST_STL
-static long long NBJumps=0;
-static long long NBAccess=0;
-#endif
-
-class _GDDD{
+class _GDDD
+{
 public:
   /* Attributs*/
   int variable;
@@ -48,12 +44,6 @@ public:
   void mark()const;
 
 
-#ifdef INST_STL
-  //for use with instrumented hash tables in STL
-  static void InstrumentNbJumps(int nbjmp){NBJumps+=(1+nbjmp);NBAccess++;}
-  static void ResetNbJumps(){NBJumps=0; NBAccess=0;}
-  static double StatJumps() {if (NBAccess!=0)  return double(NBJumps) / double(NBAccess); return -1;}
-#endif
 };
 
 /******************************************************************************/
@@ -139,14 +129,6 @@ size_t GDDD::peak() {
 void GDDD::pstats(bool reinit)
 {
   std::cout << "Peak number of DDD nodes in unicity table :" << peak() << std::endl; 
-#ifdef INST_STL
-  std::cout << "*\nGDDS : size unicity table =" << canonical.size() << std::endl;
-  std::cout << "  Average nb jump in hash table : " << _GDDD::StatJumps() << std::endl;
-  if (reinit){
-    _GDDD::ResetNbJumps();
-  }
-  canonical.pstat(reinit);
-#endif
 }
 
 

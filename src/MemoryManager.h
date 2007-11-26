@@ -52,7 +52,6 @@ public:
   };
 
   /// Prints some statistics about use of unicity tables, also reinitializes peak sizes.
-  /// Side effect in INST_STL version is to reinitialize rebound counters.
   static void pstats(bool reinit=true){
     //cout << " Memory Usage " << MemUsage() << " %" << endl;
     
