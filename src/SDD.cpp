@@ -26,11 +26,6 @@
 /*                             class _GSDD                                     */
 /******************************************************************************/
 
-#ifdef INST_STL
-static long long NBJumps=0;
-static long long NBAccess=0;
-#endif
-
 class _GSDD{
 public:
   /* Attributs*/
@@ -92,13 +87,6 @@ public:
 
   /* Memory Manager */
   void mark()const;
-
-#ifdef INST_STL
-  //for use with instrumented hash tables in STL
-  static void InstrumentNbJumps(int nbjmp){NBJumps+=(1+nbjmp);NBAccess++;}
-  static void ResetNbJumps(){NBJumps=0; NBAccess=0;}
-  static double StatJumps() {if (NBAccess!=0)  return double(NBJumps) / double(NBAccess); return -1;}
-#endif
 
 };
 
@@ -267,14 +255,6 @@ size_t GSDD::peak() {
 void GSDD::pstats(bool reinit)
 {
   std::cout << "Peak number of SDD nodes in unicity table :" << peak() << std::endl; 
-#ifdef INST_STL
-  std::cout << "*\nGSDD : size unicity table =" << canonical.size() << std::endl;
-  std::cout << "  Average nb jump in hash table : " << _GSDD::StatJumps() << std::endl;
-  if (reinit){
-    _GSDD::ResetNbJumps();
-  }
-  canonical.pstat(reinit);
-#endif
 }
 
 

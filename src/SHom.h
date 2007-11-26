@@ -11,13 +11,6 @@
 #include <set>
 /**********************************************************************/
 
-#ifdef INST_STL
-/// To store hit/miss info in INST_STL context
-typedef  std::pair<long long int, long long int> PairLL;
-/// To store hit/miss info in INST_STL context
-typedef std::map<std::string, PairLL > MapJumps;
-#endif
-
 /// pre-declare the concrete storage class
 class _GShom;
 /// pre-declare StrongShom for constructor(s) of GShom
@@ -288,10 +281,7 @@ private:
   /// Currently only the constant homomorphism has this attribute set to true.
   mutable bool immediat;
 public:
-#ifdef INST_STL
-  /// For hash table optimization.
-  static MapJumps HomJumps;
-#endif
+
   /// Constructor. Note this class is abstract, so this is only used in initialization
   /// list of derived classes constructors (hard coded operations and StrongShom).
   _GShom(int ref=0,bool im=false):refCounter(ref),marking(false),immediat(im){};
@@ -306,8 +296,7 @@ public:
   /// Hash key computation. It is essential for good hash table operation that the spread
   /// of the keys be as good as possible. Also, fast hash key computation is a good design goal.
   /// Note that bad hash functions will yield more collisions, thus equality comparisons which
-  /// may be quite costly. Use INST_STL version of the library to check your hash functions
-  /// for good behavior.
+  /// may be quite costly.
   virtual size_t hash() const=0;
 
   /// The computation function responsible for evaluation over a node.
@@ -318,21 +307,6 @@ public:
   /// For garbage collection. Used in first phase of garbage collection.
   virtual void mark() const{};
 
-#ifdef INST_STL
-  /// For hash table optimization.
-  virtual void InstrumentNbJumps(int nbjumps)
-  {
-    const char *name=typeid(*this).name();
-    MapJumps::iterator ii;
-    if ((ii=HomJumps.find(string(name)))==HomJumps.end()){
-      HomJumps[string(name)]=PairLL(1L, (long long int) (1+nbjumps));
-    }
-    else {
-      ii->second.first++;
-      ii->second.second+=(1+nbjumps);
-    }
-  }
-#endif
 };
 
 /// The abstract base class for user defined operations. 

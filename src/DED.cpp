@@ -20,12 +20,6 @@
 #endif
 /******************************************************************************/
 
-
-#ifdef INST_STL
-long long NBJumps=0;
-long long NBAccess=0;
-#endif
-
 //typedef __gnu_cxx::hash_map<DED,GDDD> Cache;
 typedef __Cache<DED,GDDD> Cache;
 static Cache cache;
@@ -538,16 +532,7 @@ unsigned int DED::statistics() {
 
 void DED::pstats(bool reinit)
 {
-  std::cout << "*\nCache Stats : size=" << cache.size() << std::endl;
-#ifdef INST_STL
-  std::cout << "nb jump in __gnu_cxx::hash table : " << NBJumps << "/" << "nbsearch " ;
-  std::cout << NBAccess << "=" << double (NBJumps)/double(NBAccess)<< std::endl;
-  if (reinit){
-    NBAccess=0;
-    NBJumps=0;
-  }
-#endif
-  
+  std::cout << "*\nCache Stats : size=" << cache.size() << std::endl;  
   std::cout << "\nCache hit ratio : " << double (Hits*100) / double(Misses+1+Hits) << "%" << std::endl;
   // long hitr=(Hits*100) / (Misses+1+Hits) ;
   if (reinit){
@@ -606,19 +591,7 @@ GDDD DED::eval(){
 //       return res;
 //     }
 
-#ifdef INST_STL
-    NBAccess++;
-    NBJumps++;
-    int temp=0;
-    //    Cache::const_iterator 
-    Cache::const_iterator ci=cache.find(*this, temp); // search e in the cache
-    NBJumps+=temp;
-#else
-
-
  	Cache::const_iterator ci=cache.find(*this); // search e in the cache
-
-#endif
 
 	if(ci==cache.end())
 	{ // *this is not in the cache

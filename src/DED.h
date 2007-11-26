@@ -50,11 +50,6 @@ namespace std {
 /******************************************************************************/
 class _DED{
 
-#ifdef INST_STL
-static long long NBJumps;
-static long long NBAccess;
-#endif
-
 public:
   /* Destructor */
   virtual ~_DED(){};
@@ -67,12 +62,6 @@ public:
 
   /* Transform */
   virtual GDDD eval() const=0; 
-
-#ifdef INST_STL
-  static void InstrumentNbJumps(int nboops){NBJumps+=(1+nboops);NBAccess++;}
-  static void ResetNbJumps(){NBJumps=0; NBAccess=0;}
-  static double StatJumps() {if (NBAccess!=0)  return double(NBJumps) / double(NBAccess); return -1;}
-#endif
 
 };
 
