@@ -553,6 +553,8 @@ public:
             GDDD d1 = d;
             GDDD d2 = d;
             
+            // Rewrite ( Id + F + G )*
+            // into ( (G + Id) o (F + Id)* )* 
             if( not F.empty() and have_id )
             {
                 GHom F_part = fixpoint(GHom::add(F));
@@ -578,7 +580,6 @@ public:
                     				? GDDD::null 
                                     : G_part(GDDD(variable,v));
                     
-                    d2 = G_part(d2);
                     d2 = d2 + d_prime;
                     
                 }
