@@ -271,83 +271,95 @@ public:
     GDDD
     eval(const GDDD &d) const
     {
-        int variable = d.variable();
-    
-        bool left_skip_variable = get_concret(left)->skip_variable(variable);
-        bool right_skip_variable = get_concret(right)->skip_variable(variable);
-        
-        if( left_skip_variable and right_skip_variable )
+        if( d == GDDD::null )
         {
-            GDDD::Valuation v;
-            for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
-            {
-                GDDD son = left(right(it->second));
-                if( son != GDDD::null )
-                {
-                    v.push_back(std::make_pair(it->first, son));
-                }
-            }
-            
-            if( v.empty() )
-            {
-                return GDDD::null;
-            }
-            else
-            {
-                return GDDD(d.variable(),v);
-            }
-            
+            return GDDD::null;
         }
-        else if( not left_skip_variable and right_skip_variable )
+        else if( d == GDDD::one or d == GDDD::top )
         {
-            GDDD::Valuation v;
-            for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
-            {
-                GDDD son = right(it->second);
-                if( son != GDDD::null )
-                {
-                    v.push_back(std::make_pair(it->first, son));
-                }
-            }
-            
-            if( v.empty() )
-            {
-                return left(GDDD::null);
-            }
-            else
-            {
-                return left(GDDD(d.variable(),v));
-            }
-            
-        }
-        else if( left_skip_variable and not right_skip_variable )
-        {
-            GDDD d_prime = right(d);
-
-            GDDD::Valuation v;
-            for( GDDD::const_iterator it = d_prime.begin() ; it != d_prime.end() ; ++it )
-            {
-                GDDD son = left(it->second);
-                if( son != GDDD::null )
-                {
-                    v.push_back(std::make_pair(it->first, son));
-                }
-            }
-            
-            if( v.empty() )
-            {
-                return GDDD::null;
-            }
-            else
-            {
-                return GDDD(d.variable(),v);
-            }
-            
-            
+            return left(right(d));
         }
         else
         {
-            return left(right(d));
+            
+            int variable = d.variable();
+            
+            bool left_skip_variable = get_concret(left)->skip_variable(variable);
+            bool right_skip_variable = get_concret(right)->skip_variable(variable);
+            
+            if( left_skip_variable and right_skip_variable )
+            {
+                GDDD::Valuation v;
+                for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
+                {
+                    GDDD son = left(right(it->second));
+                    if( son != GDDD::null )
+                    {
+                        v.push_back(std::make_pair(it->first, son));
+                    }
+                }
+                
+                if( v.empty() )
+                {
+                    return GDDD::null;
+                }
+                else
+                {
+                    return GDDD(d.variable(),v);
+                }
+                
+            }
+            else if( not left_skip_variable and right_skip_variable )
+            {
+                GDDD::Valuation v;
+                for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
+                {
+                    GDDD son = right(it->second);
+                    if( son != GDDD::null )
+                    {
+                        v.push_back(std::make_pair(it->first, son));
+                    }
+                }
+                
+                if( v.empty() )
+                {
+                    return left(GDDD::null);
+                }
+                else
+                {
+                    return left(GDDD(d.variable(),v));
+                }
+                
+            }
+            else if( left_skip_variable and not right_skip_variable )
+            {
+                GDDD d_prime = right(d);
+                
+                GDDD::Valuation v;
+                for( GDDD::const_iterator it = d_prime.begin() ; it != d_prime.end() ; ++it )
+                {
+                    GDDD son = left(it->second);
+                    if( son != GDDD::null )
+                    {
+                        v.push_back(std::make_pair(it->first, son));
+                    }
+                }
+                
+                if( v.empty() )
+                {
+                    return GDDD::null;
+                }
+                else
+                {
+                    return GDDD(d.variable(),v);
+                }
+                
+                
+            }
+            else
+            {
+                return left(right(d));
+            }
         }
     }
     
