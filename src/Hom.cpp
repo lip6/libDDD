@@ -233,31 +233,130 @@ public:
   }
 };
 /************************** Compose */
-class Compose:public _GHom{
+class Compose
+	:
+    public _GHom
+{
+
 private:
-  GHom left;
-  GHom right;
+
+    GHom left;
+    GHom right;
+
 public:
+
   /* Constructor */
-  Compose(const GHom &l,const GHom &r,int ref=0):_GHom(ref,true),left(l),right(r){}
-  /* Compare */
-  bool operator==(const _GHom &h) const{
-    return left==((Compose*)&h )->left && right==((Compose*)&h )->right;
-  }
-  size_t hash() const{
-    return 13*left.hash()+7*right.hash();
-  }
+    Compose(const GHom &l,const GHom &r,int ref=0)
+		:
+	    _GHom(ref,true),
+    	left(l),
+	    right(r)
+    {
+    }
 
-  /* Eval */
-  GDDD eval(const GDDD &d)const{
-    return left(right(d));
-  }
+    /* Compare */
+    bool
+    operator==(const _GHom &h) const
+    {
+        return left==((Compose*)&h )->left && right==((Compose*)&h )->right;
+    }
+    
+    size_t
+    hash() const
+    {
+        return 13*left.hash() + 7*right.hash();
+    }
+    
+    /* Eval */
+    GDDD
+    eval(const GDDD &d) const
+    {
+        int variable = d.variable();
+    
+        bool left_skip_variable = get_concret(left)->skip_variable(variable);
+        bool right_skip_variable = get_concret(right)->skip_variable(variable);
+        
+        if( left_skip_variable and right_skip_variable )
+        {
+            GDDD::Valuation v;
+            for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
+            {
+                GDDD son = left(right(it->second));
+                if( son != GDDD::null )
+                {
+                    v.push_back(std::make_pair(it->first, son));
+                }
+            }
+            
+            if( v.empty() )
+            {
+                return GDDD::null;
+            }
+            else
+            {
+                return GDDD(d.variable(),v);
+            }
+            
+        }
+        else if( not left_skip_variable and right_skip_variable )
+        {
+            GDDD::Valuation v;
+            for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
+            {
+                GDDD son = right(it->second);
+                if( son != GDDD::null )
+                {
+                    v.push_back(std::make_pair(it->first, son));
+                }
+            }
+            
+            if( v.empty() )
+            {
+                return left(GDDD::null);
+            }
+            else
+            {
+                return left(GDDD(d.variable(),v));
+            }
+            
+        }
+        else if( left_skip_variable and not right_skip_variable )
+        {
+            GDDD d_prime = right(d);
 
-  /* Memory Manager */
-  void mark() const{
-    left.mark();
-    right.mark();
-  }
+            GDDD::Valuation v;
+            for( GDDD::const_iterator it = d_prime.begin() ; it != d_prime.end() ; ++it )
+            {
+                GDDD son = left(it->second);
+                if( son != GDDD::null )
+                {
+                    v.push_back(std::make_pair(it->first, son));
+                }
+            }
+            
+            if( v.empty() )
+            {
+                return GDDD::null;
+            }
+            else
+            {
+                return GDDD(d.variable(),v);
+            }
+            
+            
+        }
+        else
+        {
+            return left(right(d));
+        }
+    }
+    
+    /* Memory Manager */
+    void mark() const
+    {
+        left.mark();
+        right.mark();
+    }
 
 };
 
@@ -373,8 +472,9 @@ public:
     }
 
     size_t
-    hash() const {
-        return 17*arg.hash();
+    hash() const 
+    {
+        return 17 * arg.hash();
     }
     
     /* Eval */
