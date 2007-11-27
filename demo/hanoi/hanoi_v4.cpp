@@ -89,11 +89,7 @@ class _move_ring : public StrongHom {
     bool
     skip_variable(int v) const
     {
-        if(  v != ring_ )
-        {
-            return true;
-        }
-        return false;
+        return v != ring_;
     }
     
     
