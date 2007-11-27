@@ -55,7 +55,7 @@ public:
   size_t hash() const{return 17;}
 
     bool
-    skip_variable(int var) const 
+    skip_variable(int) const 
     {
         return true;
     }
@@ -120,7 +120,9 @@ public:
 };
 
 /************************** Add */
-class Add:public _GHom
+class Add
+	:
+    public _GHom
 {
 
 private:
@@ -129,42 +131,53 @@ private:
   
 public:
   
-  /* Constructor */
-  Add( const std::set<GHom> &param, int ref=0)
-  	:
-  	_GHom(ref,false),
-  	parameters()
-  {
-    for( std::set<GHom>::const_iterator it = param.begin(); it != param.end(); ++it)
+    /* Constructor */
+    Add( const std::set<GHom> &param, int ref=0)
+  		:
+  		_GHom(ref,false),
+  		parameters()
     {
-      if( typeid( *get_concret(*it) ) == typeid(Add) )
-      {
-        std::set<GHom>& local_param = ((Add*)get_concret(*it))->parameters;
-        parameters.insert( local_param.begin() , local_param.end());
-      }
-      else
-      {
-        parameters.insert(*it);
-      }
+        for( std::set<GHom>::const_iterator it = param.begin(); it != param.end(); ++it)
+        {
+            if( typeid( *get_concret(*it) ) == typeid(Add) )
+            {
+                std::set<GHom>& local_param = ((Add*)get_concret(*it))->parameters;
+                parameters.insert( local_param.begin() , local_param.end());
+            }
+            else
+            {
+                parameters.insert(*it);
+            }
+        }
     }
-  }
-  
-  
+   
+    std::set<GHom>&
+    get_parameters()
+    {
+        return this->parameters;
+    }
+    
 
-/* Compare */
-  bool operator==(const _GHom &h) const
-  {
-    return parameters==((Add*)&h )->parameters;
-  }
+    /* Compare */
+    bool
+    operator==(const _GHom &h) const
+    {
+        return parameters==((Add*)&h )->parameters;
+    }
   
-  size_t hash() const
-  {
-    size_t res=0;
-    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
-      res^= gi->hash();
-    return res;
-  }
+  
+    size_t
+    hash() const
+    {
+        size_t res=0;
+        for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+        {
+            res ^= gi->hash();
+        }
+        return res;
+    }
 
+  
   /* Eval */
   GDDD
   eval(const GDDD &d) const
@@ -493,17 +506,98 @@ public:
     GDDD
     eval(const GDDD &d) const
     {
-        GDDD d1 = d;
-        GDDD d2 = d;
-    
-        do
+        if( d == GDDD::null )
         {
-            d1 = d2;
-            d2 = arg(d2);
-        } 
-        while (d1 != d2);
-        
-        return d1;
+            return GDDD::null;
+        }
+        else if( d == GDDD::one or d == GDDD::top )
+        {
+            return arg(d);
+        }
+        else
+        {
+            std::set<GHom> F;
+            std::set<GHom> G;
+            
+            bool have_id = false;
+            int variable = d.variable();
+            
+            if( typeid( *get_concret(arg) ) == typeid(Add) )
+            {
+                // Check if we have ( Id + F + G )* where F can be forwarded to the next variable
+                const std::set<GHom>& parameters = ((Add*)get_concret(arg))->get_parameters();
+                for( std::set<GHom>::const_iterator it = parameters.begin();
+                    it != parameters.end();
+                    ++it)
+                {
+                    if( typeid(*get_concret(*it)) == typeid(Identity) )
+                    {
+                        have_id = true;
+                    }
+                    
+                    if( get_concret(*it)->skip_variable(variable) )
+                    {
+                        F.insert(*it);
+                    }
+                    else
+                    {
+                        G.insert(*it);
+                    }
+                }
+                
+            }
+            
+            if( not F.empty() and have_id )
+            {
+                GDDD d1 = d;
+                GDDD d2 = d;
+                
+                F.insert(GHom::id);
+                GHom F_part = fixpoint(GHom::add(F));
+                
+                GHom G_part = GHom::add(G);
+                
+                do
+                {
+                    d1 = d2;
+                    
+                    // Apply ( Id + F )* on all sons
+                    GDDD::Valuation v;
+                    for( GDDD::const_iterator it = d1.begin(); it != d1.end() ; ++it )
+                    {
+                        GDDD son = F_part(it->second);
+                        if( son != GDDD::null )
+                        {
+                            v.push_back(std::make_pair(it->first, son));
+                        }
+                    }
+                    
+                    GDDD d_prime =  v.empty() ? GDDD::null : GDDD(d.variable(),v);
+                    
+                    d2 = G_part(d2);
+                    
+                    d2 = d2 + d_prime;
+                    
+                }
+                while (d1 != d2);
+                
+                return d1;
+            }
+            else
+            {
+                GDDD d1 = d;
+                GDDD d2 = d;
+                
+                do
+                {
+                    d1 = d2;
+                    d2 = arg(d2);
+                } 
+                while (d1 != d2);
+                
+                return d1;
+            }
+        }
     }
     
     /* Memory Manager */
