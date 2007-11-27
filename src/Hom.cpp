@@ -516,12 +516,15 @@ public:
         }
         else
         {
+            // operations that can be forwarded to the next variable
             std::set<GHom> F;
+            // operations that have to be applied at this level
             std::set<GHom> G;
             
             bool have_id = false;
             int variable = d.variable();
             
+            // is it the fixpoint of an union ?
             if( typeid( *get_concret(arg) ) == typeid(Add) )
             {
                 // Check if we have ( Id + F + G )* where F can be forwarded to the next variable
@@ -552,9 +555,7 @@ public:
                 GDDD d1 = d;
                 GDDD d2 = d;
                 
-                F.insert(GHom::id);
                 GHom F_part = fixpoint(GHom::add(F));
-                
                 GHom G_part = GHom::add(G);
                 
                 do
@@ -572,7 +573,9 @@ public:
                         }
                     }
                     
-                    GDDD d_prime =  v.empty() ? GDDD::null : GDDD(d.variable(),v);
+                    GDDD d_prime =  v.empty() 
+                    				? GDDD::null 
+                                    : GDDD(variable,v);
                     
                     d2 = G_part(d2);
                     
