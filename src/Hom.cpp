@@ -556,6 +556,7 @@ public:
                 GDDD d2 = d;
                 
                 GHom F_part = fixpoint(GHom::add(F));
+                G.insert(GHom::id);
                 GHom G_part = GHom::add(G);
                 
                 do
@@ -575,10 +576,9 @@ public:
                     
                     GDDD d_prime =  v.empty() 
                     				? GDDD::null 
-                                    : GDDD(variable,v);
+                                    : G_part(GDDD(variable,v));
                     
                     d2 = G_part(d2);
-                    
                     d2 = d2 + d_prime;
                     
                 }
