@@ -549,12 +549,12 @@ public:
                 }
                 
             }
+
+            GDDD d1 = d;
+            GDDD d2 = d;
             
             if( not F.empty() and have_id )
             {
-                GDDD d1 = d;
-                GDDD d2 = d;
-                
                 GHom F_part = fixpoint(GHom::add(F));
                 G.insert(GHom::id);
                 GHom G_part = GHom::add(G);
@@ -583,23 +583,19 @@ public:
                     
                 }
                 while (d1 != d2);
-                
-                return d1;
+            
             }
             else
             {
-                GDDD d1 = d;
-                GDDD d2 = d;
-                
                 do
                 {
                     d1 = d2;
                     d2 = arg(d2);
                 } 
                 while (d1 != d2);
-                
-                return d1;
             }
+            
+            return d1;
         }
     }
     
