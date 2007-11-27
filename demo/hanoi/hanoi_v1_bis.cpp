@@ -188,7 +188,7 @@ main(int argc, char **argv)
     // To store the set of events
 	Hom events = GHom::id;
 
-    std::set<GHom> tmp2;
+    std::set<GHom> union_hom;
 
 	for (int i=0 ; i < NB_RINGS ; i++)
     {
@@ -200,24 +200,20 @@ main(int argc, char **argv)
             {
 				if (ori != dest)
                 {
-//					events = events + swap_pole(i,ori,dest);
-                    tmp2.insert(swap_pole(i,ori,dest));
+                    union_hom.insert(swap_pole(i,ori,dest));
 				}
 			}
 		}
 	}
 
-    tmp2.insert(GHom::id);
-    events = GHom::add(tmp2);
+    union_hom.insert(GHom::id);
+    events = GHom::add(union_hom);
     
     // Fixpoint over events + Id
 	DDD ss, tmp = M0;
 	do {
 		ss = tmp;
-//		for ( vector<Hom>::reverse_iterator it = events.rbegin(); it != events.rend(); it++)
-//        {
-			tmp = events(tmp);
-//		}
+        tmp = events(tmp);
 	} while (ss != tmp);
     
     // stats

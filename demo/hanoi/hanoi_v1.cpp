@@ -131,11 +131,7 @@ class _swap_pole : public StrongHom {
     bool
     skip_variable(int v) const
     {
-        if(  v != ring_ )
-        {
-            return true;
-        }
-        return false;
+        return  v != ring_;
     }
     
 	size_t
