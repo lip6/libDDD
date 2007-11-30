@@ -327,6 +327,9 @@ private:
   /// If immediat==true,  eval is called without attempting a cache hit. 
   /// Currently only the constant homomorphism has this attribute set to true.  
   mutable bool immediat;
+  
+    GDDD eval_skip(const GDDD &) const;
+  
 public:
 
     virtual bool
@@ -334,7 +337,6 @@ public:
     {
         return false;
     }
-    
 
   /// Constructor. Note this class is abstract, so this is only used in initialization
   /// list of derived classes constructors (hard coded operations and StrongShom).
@@ -428,10 +430,3 @@ public:
 class MyGHom:public _GHom{};
 
 #endif /* HOM_H_ */
-
-
-
-
-
-
-
