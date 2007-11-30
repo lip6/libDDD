@@ -1,23 +1,16 @@
 #include <typeinfo>
 #include <iostream>
+#include <cassert>
+
 #include "Hom.h"
 #include "DDD.h"
 #include "DED.h"
 #include "UniqueTable.h"
 
-#include <cassert>
-
 #ifdef PARALLEL_DD
 #include <tbb/concurrent_vector.h>
 #include <tbb/parallel_reduce.h>
 #endif
-
-void PrintMapJumps(double ratemin=0){
-}
-
-
-
-
 
 /* Unique Table */
 namespace __gnu_cxx {
@@ -178,6 +171,18 @@ public:
     }
 
   
+    bool
+    skip_variable(int var) const
+    {
+        bool skip = true;
+        for( std::set<GHom>::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
+        {
+            std::cout << get_concret(*it)->skip_variable(var) ;
+            skip &= get_concret(*it)->skip_variable(var);
+        }
+        return skip;
+    }
+  
   /* Eval */
   GDDD
   eval(const GDDD &d) const
@@ -199,7 +204,7 @@ public:
       else
       {
           std::set<GDDD> s;
-          std::set<GHom> constant_hom;
+          std::set<GHom> F;
           
           int var = d.variable();
           
@@ -207,7 +212,7 @@ public:
           {
               if( get_concret(*gi)->skip_variable(var) )
               {
-                  constant_hom.insert(*gi);
+                  F.insert(*gi);
               }
               else
               {
@@ -217,10 +222,10 @@ public:
           
           GDDD::Valuation v ;
           
-          if( not constant_hom.empty() )
+          if( not F.empty() )
           {
               
-              GHom all = GHom::add(constant_hom);
+              GHom all = GHom::add(F);
               
               for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
               {
@@ -232,7 +237,9 @@ public:
               }
               
               if( not v.empty() )
+              {
                   s.insert(GDDD(var,v));
+              }
           }
           
           return DED::add(s);
@@ -280,100 +287,106 @@ public:
         return 13*left.hash() + 7*right.hash();
     }
     
+    bool
+    skip_variable(int var) const
+    {
+        return get_concret(left)->skip_variable(var) and get_concret(right)->skip_variable(var);
+    }
+    
     /* Eval */
     GDDD
     eval(const GDDD &d) const
     {
-        if( d == GDDD::null )
-        {
-            return GDDD::null;
-        }
-        else if( d == GDDD::one or d == GDDD::top )
-        {
-            return left(right(d));
-        }
-        else
-        {
-            
-            int variable = d.variable();
-            
-            bool left_skip_variable = get_concret(left)->skip_variable(variable);
-            bool right_skip_variable = get_concret(right)->skip_variable(variable);
-            
-            if( left_skip_variable and right_skip_variable )
-            {
-                GDDD::Valuation v;
-                for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
-                {
-                    GDDD son = left(right(it->second));
-                    if( son != GDDD::null )
-                    {
-                        v.push_back(std::make_pair(it->first, son));
-                    }
-                }
-                
-                if( v.empty() )
-                {
-                    return GDDD::null;
-                }
-                else
-                {
-                    return GDDD(d.variable(),v);
-                }
-                
-            }
-            else if( not left_skip_variable and right_skip_variable )
-            {
-                GDDD::Valuation v;
-                for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
-                {
-                    GDDD son = right(it->second);
-                    if( son != GDDD::null )
-                    {
-                        v.push_back(std::make_pair(it->first, son));
-                    }
-                }
-                
-                if( v.empty() )
-                {
-                    return left(GDDD::null);
-                }
-                else
-                {
-                    return left(GDDD(d.variable(),v));
-                }
-                
-            }
-            else if( left_skip_variable and not right_skip_variable )
-            {
-                GDDD d_prime = right(d);
-                
-                GDDD::Valuation v;
-                for( GDDD::const_iterator it = d_prime.begin() ; it != d_prime.end() ; ++it )
-                {
-                    GDDD son = left(it->second);
-                    if( son != GDDD::null )
-                    {
-                        v.push_back(std::make_pair(it->first, son));
-                    }
-                }
-                
-                if( v.empty() )
-                {
-                    return GDDD::null;
-                }
-                else
-                {
-                    return GDDD(d.variable(),v);
-                }
-                
-                
-            }
-            else
-            {
+//        if( d == GDDD::null )
+//        {
+//            return GDDD::null;
+//        }
+//        else if( d == GDDD::one or d == GDDD::top )
+//        {
+//            return left(right(d));
+//        }
+//        else
+//        {
+//            
+//            int variable = d.variable();
+//            
+//            bool left_skip_variable = get_concret(left)->skip_variable(variable);
+//            bool right_skip_variable = get_concret(right)->skip_variable(variable);
+//            
+//            if( left_skip_variable and right_skip_variable )
+//            {
+//                GDDD::Valuation v;
+//                for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
+//                {
+//                    GDDD son = left(right(it->second));
+//                    if( son != GDDD::null )
+//                    {
+//                        v.push_back(std::make_pair(it->first, son));
+//                    }
+//                }
+//                
+//                if( v.empty() )
+//                {
+//                    return GDDD::null;
+//                }
+//                else
+//                {
+//                    return GDDD(d.variable(),v);
+//                }
+//                
+//            }
+//            else if( not left_skip_variable and right_skip_variable )
+//            {
+//                GDDD::Valuation v;
+//                for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
+//                {
+//                    GDDD son = right(it->second);
+//                    if( son != GDDD::null )
+//                    {
+//                        v.push_back(std::make_pair(it->first, son));
+//                    }
+//                }
+//                
+//                if( v.empty() )
+//                {
+//                    return left(GDDD::null);
+//                }
+//                else
+//                {
+//                    return left(GDDD(d.variable(),v));
+//                }
+//                
+//            }
+//            else if( left_skip_variable and not right_skip_variable )
+//            {
+//                GDDD d_prime = right(d);
+//                
+//                GDDD::Valuation v;
+//                for( GDDD::const_iterator it = d_prime.begin() ; it != d_prime.end() ; ++it )
+//                {
+//                    GDDD son = left(it->second);
+//                    if( son != GDDD::null )
+//                    {
+//                        v.push_back(std::make_pair(it->first, son));
+//                    }
+//                }
+//                
+//                if( v.empty() )
+//                {
+//                    return GDDD::null;
+//                }
+//                else
+//                {
+//                    return GDDD(d.variable(),v);
+//                }
+//                
+//                
+//            }
+//            else
+//            {
                 return left(right(d));
-            }
-        }
+//            }
+//        }
     }
     
     /* Memory Manager */
@@ -386,31 +399,90 @@ public:
 };
 
 /************************** LeftConcat */
-class LeftConcat:public _GHom{
+class LeftConcat
+	:
+    public _GHom
+{
+
 private:
-  GDDD left;
-  GHom right;
+
+    GDDD left;
+    GHom right;
+
 public:
-  /* Constructor */
-  LeftConcat(const GDDD &l,const GHom &r,int ref=0):_GHom(ref,true),left(l),right(r){}
-  /* Compare */
-  bool operator==(const _GHom &h) const{
-    return left==((LeftConcat*)&h )->left && right==((LeftConcat*)&h )->right;
-  }
-  size_t hash() const{
-    return 23*left.hash()+47*right.hash();
-  }
 
-  /* Eval */
-  GDDD eval(const GDDD &d)const{
-    return left^right(d);
-  }
+    /* Constructor */
+    LeftConcat(const GDDD &l,const GHom &r,int ref=0)
+    	:
+        _GHom(ref,true),
+        left(l),
+        right(r)
+    {
+    }
 
-  /* Memory Manager */
-  void mark() const{
-    left.mark();
-    right.mark();
-  }
+    /* Compare */
+    bool
+    operator==(const _GHom &h) const
+    {
+        return left==((LeftConcat*)&h )->left && right==((LeftConcat*)&h )->right;
+    }
+
+    size_t
+    hash() const
+    {
+        return 23*left.hash()+47*right.hash();
+    }
+
+    /* Eval */
+    GDDD
+    eval(const GDDD &d) const
+    {
+        if( d == GDDD::null )
+        {
+            return GDDD::null;
+        }
+        else if( d == GDDD::one or d == GDDD::top )
+        {
+            return left ^ right(d);
+        }
+    
+        GDDD tmp;
+        
+        if( get_concret(right)->skip_variable(d.variable()) )
+        {
+            GDDD::Valuation v;
+            for( GDDD::const_iterator it = d.begin(); it != d.end() ; ++it )
+            {
+                GDDD son = right(it->second);
+                if( son != GDDD::null )
+                {
+                    v.push_back(std::make_pair(it->first,son));
+                }
+            }
+            
+            if( v.empty() )
+            {
+                tmp = GDDD::null;
+            }
+            else
+            {
+                tmp = GDDD(d.variable(),v);
+            }
+        }
+        else
+        {
+            tmp = right(d);
+        }
+        return left ^ tmp;
+    }
+           
+    /* Memory Manager */
+    void
+    mark() const
+    {
+        left.mark();
+        right.mark();
+    }
 
 };
 
@@ -546,8 +618,7 @@ public:
                     {
                         G.insert(*it);
                     }
-                }
-                
+                }     
             }
 
             GDDD d1 = d;
@@ -576,12 +647,10 @@ public:
                         }
                     }
                     
-                    GDDD d_prime =  v.empty() 
-                    				? GDDD::null 
-                                    : G_part(GDDD(variable,v));
-                    
-                    d2 = d2 + d_prime;
-                    
+                    d2 = d2 + ( v.empty() 
+                               ? GDDD::null 
+                               : G_part(GDDD(variable,v)));
+
                 }
                 while (d1 != d2);
             
@@ -606,6 +675,43 @@ public:
     }
 };
 
+GDDD 
+_GHom::eval_skip(const GDDD& d) const
+{
+    if( d == GDDD::null )
+    {
+        return GDDD::null;
+    }
+    else if( d == GDDD::one )
+    {
+        // basic case, mustn't call d.variable()
+    }
+    else if( d == GDDD::top )
+    {
+        return GDDD::top;
+    }
+    else if( this->skip_variable(d.variable()) )
+    {
+        // The homorphism propagates itself without any modification on the GDDD
+        GDDD::Valuation v;
+        for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
+        {
+            GDDD son = GHom(this)(it->second);
+            if( son != GDDD::null )
+            {
+                v.push_back(std::make_pair(it->first, son));
+            }
+        }
+        
+        if( v.empty() )
+            return GDDD::null;
+        else
+            return GDDD(d.variable(),v);
+    }
+
+    return eval(d);
+}
+
 /*************************************************************************/
 /*                         Class StrongHom                               */
 /*************************************************************************/
@@ -620,38 +726,11 @@ bool StrongHom::operator==(const _GHom &h) const{
 GDDD 
 StrongHom::eval(const GDDD &d) const
 {
-  if( d == GDDD::null )
-  {
-      return GDDD::null;
-  }
-  else if( d == GDDD::one )
-  {
-      return phiOne();
-  }
-  else if( d == GDDD::top )
-  {
-      return GDDD::top;
-  }
-  else if( this->skip_variable(d.variable()) )
-  {
-      // The homorphism propagates itself without any modification on the GDDD
-      GDDD::Valuation v;
-      for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
-      {
-          GDDD son = GHom(this)(it->second);
-          if( son != GDDD::null )
-          {
-              v.push_back(std::make_pair(it->first, son));
-          }
-      }
-
-      if( v.empty() )
-          return GDDD::null;
-      else
-          return GDDD(d.variable(),v);
-  }
-  else
-  {
+    if( d == GDDD::one )
+    {
+        return phiOne();
+    }
+    
     int variable=d.variable();
     std::set<GDDD> s;
     for(GDDD::const_iterator vi=d.begin();vi!=d.end();++vi)
@@ -659,8 +738,6 @@ StrongHom::eval(const GDDD &d) const
         s.insert(phi(variable,vi->first)(vi->second));
     }
     return DED::add(s);
-  }
-
 }
 
 /*************************************************************************/
@@ -680,14 +757,18 @@ GHom::GHom(int var, int val, const GHom &h):concret(canonical(new LeftConcat(GDD
 GDDD
 GHom::operator()(const GDDD &d) const
 {
-  if(concret->immediat)
-    return concret->eval(d);
-  else
-    return DED::hom(*this,d);
+    if(concret->immediat)
+    {
+        return concret->eval(d);
+    }
+    else
+    {
+        return DED::hom(*this,d);
+    }
 }
 
 GDDD GHom::eval(const GDDD &d) const{
-  return concret->eval(d);
+  return concret->eval_skip(d);
 }
 
 const GHom GHom::id(canonical(new Identity(1)));
