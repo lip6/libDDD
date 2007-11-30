@@ -1,6 +1,7 @@
 #include <typeinfo>
 #include <iostream>
 #include <cassert>
+#include <map>
 
 #include "Hom.h"
 #include "DDD.h"
@@ -117,11 +118,18 @@ class Add
 	:
     public _GHom
 {
+public:
+
+    typedef std::pair< GHom , std::set<GHom> > partition;
+    typedef std::map<int,partition> partition_cache_type;
+
 
 private:
 
-  std::set<GHom> parameters;
-  
+    std::set<GHom> parameters;
+    mutable partition_cache_type partition_cache;
+    bool have_id;
+       
 public:
   
     /* Constructor */
@@ -139,9 +147,19 @@ public:
             }
             else
             {
+                if( typeid(*get_concret(*it)) == typeid(Identity) )
+                {
+                    have_id = true;
+                }
                 parameters.insert(*it);
             }
         }
+    }
+
+    bool
+    get_have_id() const
+    {
+        return have_id;
     }
    
     std::set<GHom>&
@@ -150,6 +168,12 @@ public:
         return this->parameters;
     }
     
+    partition
+    get_partition(int var)
+    {
+        this->skip_variable(var);
+        return partition_cache.find(var)->second;
+    }
 
     /* Compare */
     bool
@@ -174,13 +198,29 @@ public:
     bool
     skip_variable(int var) const
     {
-        bool skip = true;
-        for( std::set<GHom>::const_iterator it = parameters.begin(); it != parameters.end(); ++it)
+        partition_cache_type::iterator part_it = partition_cache.find(var);
+        if( part_it == partition_cache.end() )
         {
-            std::cout << get_concret(*it)->skip_variable(var) ;
-            skip &= get_concret(*it)->skip_variable(var);
+            partition& part = partition_cache.insert(std::make_pair(var,partition())).first->second;
+
+            std::set<GHom> F;
+            for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+            {
+                if( get_concret(*gi)->skip_variable(var) )
+                {
+                    // F part
+                    F.insert(*gi);
+                }
+                else
+                {
+                    // G part
+                    part.second.insert(*gi);
+                }
+            }
+            part.first = GHom::add(F);
+            return part.second.empty();
         }
-        return skip;
+        return part_it->second.second.empty();
     }
   
   /* Eval */
@@ -204,44 +244,32 @@ public:
       else
       {
           std::set<GDDD> s;
-          std::set<GHom> F;
-          
           int var = d.variable();
-          
-          for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+                    
+          partition_cache_type::iterator part_it = partition_cache.find(var);
+          if( part_it == partition_cache.end() )
           {
-              if( get_concret(*gi)->skip_variable(var) )
-              {
-                  F.insert(*gi);
-              }
-              else
-              {
-                  s.insert((*gi)(d));
-              }
-          }
+              this->skip_variable(var);
+              part_it = partition_cache.find(var);
+          }              
           
-          GDDD::Valuation v ;
+          GHom& F = part_it->second.first;
+          std::set<GHom>& G = part_it->second.second;
           
-          if( not F.empty() )
+          for( std::set<GHom>::iterator it = G.begin() ; 
+              it != G.end();
+              ++it)
+              {
+                  s.insert((*it)(d));                  
+              } 
+          
+          
+          GDDD v = F(d);
+          if( v != GDDD::null )
           {
-              
-              GHom all = GHom::add(F);
-              
-              for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
-              {
-                  GDDD son = all(it->second);
-                  if( son != GDDD::null )
-                  {
-                      v.push_back(std::make_pair(it->first, son));
-                  }
-              }
-              
-              if( not v.empty() )
-              {
-                  s.insert(GDDD(var,v));
-              }
+              s.insert(v);
           }
-          
+
           return DED::add(s);
       }
   }
@@ -297,96 +325,7 @@ public:
     GDDD
     eval(const GDDD &d) const
     {
-//        if( d == GDDD::null )
-//        {
-//            return GDDD::null;
-//        }
-//        else if( d == GDDD::one or d == GDDD::top )
-//        {
-//            return left(right(d));
-//        }
-//        else
-//        {
-//            
-//            int variable = d.variable();
-//            
-//            bool left_skip_variable = get_concret(left)->skip_variable(variable);
-//            bool right_skip_variable = get_concret(right)->skip_variable(variable);
-//            
-//            if( left_skip_variable and right_skip_variable )
-//            {
-//                GDDD::Valuation v;
-//                for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
-//                {
-//                    GDDD son = left(right(it->second));
-//                    if( son != GDDD::null )
-//                    {
-//                        v.push_back(std::make_pair(it->first, son));
-//                    }
-//                }
-//                
-//                if( v.empty() )
-//                {
-//                    return GDDD::null;
-//                }
-//                else
-//                {
-//                    return GDDD(d.variable(),v);
-//                }
-//                
-//            }
-//            else if( not left_skip_variable and right_skip_variable )
-//            {
-//                GDDD::Valuation v;
-//                for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
-//                {
-//                    GDDD son = right(it->second);
-//                    if( son != GDDD::null )
-//                    {
-//                        v.push_back(std::make_pair(it->first, son));
-//                    }
-//                }
-//                
-//                if( v.empty() )
-//                {
-//                    return left(GDDD::null);
-//                }
-//                else
-//                {
-//                    return left(GDDD(d.variable(),v));
-//                }
-//                
-//            }
-//            else if( left_skip_variable and not right_skip_variable )
-//            {
-//                GDDD d_prime = right(d);
-//                
-//                GDDD::Valuation v;
-//                for( GDDD::const_iterator it = d_prime.begin() ; it != d_prime.end() ; ++it )
-//                {
-//                    GDDD son = left(it->second);
-//                    if( son != GDDD::null )
-//                    {
-//                        v.push_back(std::make_pair(it->first, son));
-//                    }
-//                }
-//                
-//                if( v.empty() )
-//                {
-//                    return GDDD::null;
-//                }
-//                else
-//                {
-//                    return GDDD(d.variable(),v);
-//                }
-//                
-//                
-//            }
-//            else
-//            {
-                return left(right(d));
-//            }
-//        }
+        return left(right(d));
     }
     
     /* Memory Manager */
@@ -437,43 +376,7 @@ public:
     GDDD
     eval(const GDDD &d) const
     {
-        if( d == GDDD::null )
-        {
-            return GDDD::null;
-        }
-        else if( d == GDDD::one or d == GDDD::top )
-        {
-            return left ^ right(d);
-        }
-    
-        GDDD tmp;
-        
-        if( get_concret(right)->skip_variable(d.variable()) )
-        {
-            GDDD::Valuation v;
-            for( GDDD::const_iterator it = d.begin(); it != d.end() ; ++it )
-            {
-                GDDD son = right(it->second);
-                if( son != GDDD::null )
-                {
-                    v.push_back(std::make_pair(it->first,son));
-                }
-            }
-            
-            if( v.empty() )
-            {
-                tmp = GDDD::null;
-            }
-            else
-            {
-                tmp = GDDD(d.variable(),v);
-            }
-        }
-        else
-        {
-            tmp = right(d);
-        }
-        return left ^ tmp;
+        return left ^ right(d);
     }
            
     /* Memory Manager */
@@ -501,6 +404,12 @@ public:
   size_t hash() const{
     return 47*left.hash()+19*right.hash();
   }
+
+    bool
+    skip_variable(int var) const
+    {
+        return get_concret(left)->skip_variable(var);
+    }
 
   /* Eval */
   GDDD eval(const GDDD &d)const{
@@ -557,7 +466,7 @@ public:
 
     Fixpoint(const GHom &a,int ref=0)
     	:
-        _GHom(ref),
+        _GHom(ref,false),
         arg(a)
     {
     }
@@ -574,6 +483,12 @@ public:
         return 17 * arg.hash();
     }
     
+    bool
+    skip_variable(int var) const
+    {
+        return get_concret(arg)->skip_variable(var);
+    }
+    
     /* Eval */
     GDDD
     eval(const GDDD &d) const
@@ -588,83 +503,54 @@ public:
         }
         else
         {
-            // operations that can be forwarded to the next variable
-            std::set<GHom> F;
-            // operations that have to be applied at this level
-            std::set<GHom> G;
-            
-            bool have_id = false;
             int variable = d.variable();
+            
+            GDDD d1 = d;
+            GDDD d2 = d;
             
             // is it the fixpoint of an union ?
             if( typeid( *get_concret(arg) ) == typeid(Add) )
             {
                 // Check if we have ( Id + F + G )* where F can be forwarded to the next variable
-                const std::set<GHom>& parameters = ((Add*)get_concret(arg))->get_parameters();
-                for( std::set<GHom>::const_iterator it = parameters.begin();
-                    it != parameters.end();
-                    ++it)
-                {
-                    if( typeid(*get_concret(*it)) == typeid(Identity) )
-                    {
-                        have_id = true;
-                    }
-                    
-                    if( get_concret(*it)->skip_variable(variable) )
-                    {
-                        F.insert(*it);
-                    }
-                    else
-                    {
-                        G.insert(*it);
-                    }
-                }     
-            }
-
-            GDDD d1 = d;
-            GDDD d2 = d;
-            
-            // Rewrite ( Id + F + G )*
-            // into ( (G + Id) o (F + Id)* )* 
-            if( not F.empty() and have_id )
-            {
-                GHom F_part = fixpoint(GHom::add(F));
-                G.insert(GHom::id);
-                GHom G_part = GHom::add(G);
                 
-                do
+                // Rewrite ( Id + F + G )*
+                // into ( (G + Id) o (F + Id)* )* 
+                Add* add = ((Add*)get_concret(arg));
+                if( add->get_have_id() )
                 {
-                    d1 = d2;
-                    
-                    // Apply ( Id + F )* on all sons
-                    GDDD::Valuation v;
-                    for( GDDD::const_iterator it = d1.begin(); it != d1.end() ; ++it )
-                    {
-                        GDDD son = F_part(it->second);
-                        if( son != GDDD::null )
-                        {
-                            v.push_back(std::make_pair(it->first, son));
-                        }
-                    }
-                    
-                    d2 = d2 + ( v.empty() 
-                               ? GDDD::null 
-                               : G_part(GDDD(variable,v)));
+                    Add::partition partition = add->get_partition(variable);
 
+                    // operations that can be forwarded to the next variable
+                    GHom F_part = fixpoint(partition.first);
+
+                    // operations that have to be applied at this level
+                    std::set<GHom> G = partition.second;
+                    G.insert(GHom::id);
+                    GHom G_part = GHom::add(G);
+                    
+                    do
+                    {
+                        d1 = d2;
+
+                        // Apply ( Id + F )* on all sons
+                        d2 = F_part(d1);
+                    
+                        // Apply ( G + Id )
+                        d2 = G_part(d2);
+                        
+                    }
+                    while (d1 != d2);
+                    return d1;
                 }
-                while (d1 != d2);
-            
             }
-            else
+            
+            do
             {
-                do
-                {
-                    d1 = d2;
-                    d2 = arg(d2);
-                } 
-                while (d1 != d2);
-            }
-            
+                d1 = d2;
+                d2 = arg(d2);
+            } 
+            while (d1 != d2);
+
             return d1;
         }
     }
@@ -778,7 +664,9 @@ int GHom::refCounter() const{return concret->refCounter;}
 /* Sum */
 
 GHom GHom::add(const std::set<GHom>& s){
-  return(canonical(new Add(s)));
+    if( s.empty() )
+        return GDDD::null;
+    return(canonical(new Add(s)));
 }
 
 
