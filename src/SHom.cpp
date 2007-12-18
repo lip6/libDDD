@@ -48,6 +48,12 @@ public:
   bool operator==(const _GShom &h) const{return true;}
   size_t hash() const{return 17;}
 
+  bool
+  skip_variable(int) const 
+  {
+      return true;
+  }
+
   /* Eval */
   GSDD eval(const GSDD &d)const{return d;}
 };
@@ -64,6 +70,13 @@ public:
   bool operator==(const _GShom &h) const{
     return value==((Constant*)&h )->value;
   }
+
+  bool
+  skip_variable(int) const 
+  {
+      return false;
+  }
+
   size_t hash() const{
     return value.hash();
   }
@@ -109,44 +122,206 @@ public:
 
 /************************** Add */
 /************************** Add */
-class Add:public _GShom{
-private:
-//  set<GHom> parameters;
-  GShom left;
-  GShom right;
+class Add
+    :
+    public _GShom
+{
+
+// types
 public:
-  /* Constructor */
-  Add(const GShom &l, const GShom &r, int ref=0):_GShom(ref,true),left(l),right(r){}
-  /* Compare */
-  bool operator==(const _GShom &h) const{
-    return left==((Add*)&h )->left && right==((Add*)&h )->right;
-  }
-  size_t hash() const{
-    return 1039*left.hash()+1049*right.hash();
-  }
+	
+	typedef std::pair< GShom , std::set<GShom> > partition;
+    typedef std::map<int,partition> partition_cache_type;
+    
 
-  /* Eval */
-  GSDD eval(const GSDD &d)const{
-    int variable=d.variable();
-    std::set<GSDD> s;
-    GSDD cur;
-    for(GSDD::const_iterator vi=d.begin();vi!=d.end();++vi){
-      cur= GSDD(variable,*vi->first,vi->second);
-      s.insert(left(cur));
-      s.insert(right(cur));
+private:
+        
+    std::set<GShom> parameters;
+	mutable partition_cache_type partition_cache;
+	bool have_id;
+
+
+public:
+        
+    /* Constructor */
+    // Add(const GShom &l, const GShom &r, int ref=0)
+    // 	:
+    //     _GShom(ref,true),
+    //     left(l),
+    //     right(r)
+    // {
+    // }
+
+    Add(const std::set<GShom>& p, int ref=0)
+    	:
+        _GShom(ref,true),
+        parameters()
+    {
+        for( std::set<GShom>::const_iterator it = p.begin(); it != p.end(); ++it)
+        {
+            if( typeid( *get_concret(*it) ) == typeid(Add) )
+            {
+                std::set<GShom>& local_param = ((Add*)get_concret(*it))->parameters;
+                parameters.insert( local_param.begin() , local_param.end());
+            }
+            else
+            {
+                if( typeid(*get_concret(*it)) == typeid(Identity) )
+                {
+                    have_id = true;
+                }
+                parameters.insert(*it);
+            }
+        }
     }
-    if (s.empty())
-      return left(d) + right(d);
-    else
-      return SDED::add(s);
-//    return left(d) + right(d);
-  }
 
-  /* Memory Manager */
-  void mark() const{
-    left.mark();
-    right.mark();
-  }
+    bool
+    get_have_id() const
+    {
+        return have_id;
+    }
+
+    std::set<GShom>&
+    get_parameters()
+    {
+        return this->parameters;
+    }
+
+
+    /* Compare */
+    bool
+    operator==(const _GShom &h) const
+    {
+        // return left==((Add*)&h )->left && right==((Add*)&h )->right;
+    	return parameters==((Add*)&h )->parameters;	
+    }
+    
+    size_t
+    hash() const
+    {
+        // return 1039*left.hash()+1049*right.hash();
+	    size_t res=0;
+	    for(std::set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+	      res^=gi->hash();
+	    return res;
+
+    }
+
+	bool
+	skip_variable( int var ) const
+	{
+		bool result = false;
+		
+		partition_cache_type::iterator part_it = partition_cache.find(var);
+		if( part_it == partition_cache.end() )
+		{
+			partition& part = partition_cache.insert(std::make_pair(var,partition())).first->second;
+			
+			std::set<GShom> F;
+			for(	std::set<GShom>::const_iterator gi = parameters.begin();
+					gi != parameters.end();
+					++gi )
+			{
+				if( get_concret(*gi)->skip_variable(var) )
+                {
+                    // F part
+                    F.insert(*gi);
+                }
+                else
+                {
+                    // G part
+                    part.second.insert(*gi);
+                }
+			}
+			part.first = GShom::add(F);
+			result =  part.second.empty();
+		}
+		else
+		{
+			result = part_it->second.second.empty();
+		}
+		std::cout << (result == true ? "true" : "false") << std::endl;
+
+		return result;
+	}
+
+    partition
+    get_partition(int var)
+    {
+        this->skip_variable(var);
+        return partition_cache.find(var)->second;
+    }
+
+
+    /* Eval */
+	GSDD
+	eval(const GSDD& d)const
+	{
+		// std::set<GSDD> s;
+		// for(std::set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+		// {
+		// 	s.insert((*gi)(d));
+		// }
+		// return SDED::add(s);
+
+		if( d == GSDD::null )
+		{
+			return GSDD::null;
+		}
+		else if( d == GSDD::one || d == GSDD::top )
+		{
+			std::set<GSDD> s;
+		
+			for(std::set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+			{
+				s.insert((*gi)(d));
+			}
+			return SDED::add(s);
+		}
+		else
+		{
+			std::set<GSDD> s;
+			int var = d.variable();
+		
+			partition_cache_type::iterator part_it = partition_cache.find(var);
+			if( part_it == partition_cache.end() )
+			{
+				this->skip_variable(var);
+				part_it = partition_cache.find(var);
+			}              
+		
+			GShom& F = part_it->second.first;
+			std::set<GShom>& G = part_it->second.second;
+		
+			for( 	std::set<GShom>::const_iterator it = G.begin() ; 
+					it != G.end();
+					++it )
+			{
+				s.insert((*it)(d));                  
+			} 
+		
+			GSDD v = F(d);
+			if( v != GSDD::null )
+			{
+				s.insert(v);
+			}
+		
+			return SDED::add(s);
+		}
+
+	}
+
+    /* Memory Manager */
+    void
+    mark() const
+    {
+        // left.mark();
+        // right.mark();
+	    for(std::set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+	      gi->mark();
+
+    }
+
 };
 
 // class Sum:public _GShom{
@@ -165,21 +340,22 @@ public:
 //       res^=gi->hash();
 //     return res;
 //   }
-
+// 
 //   /* Eval */
 //   GSDD eval(const GSDD &d)const{
 //      set<GSDD> s;
 //      for(set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
 //        s.insert((*gi)(d));
-//      return HDED::add(s);
+//      return SDED::add(s);
 //   }
-
+// 
 //   /* Memory Manager */
 //   void mark() const{
 //     for(set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
 //       gi->mark();
 //   }
 // };
+
 /************************** Compose */
 class Compose:public _GShom{
 private:
@@ -195,6 +371,13 @@ public:
   size_t hash() const{
     return 13*left.hash()+7*right.hash();
   }
+
+	bool
+    skip_variable(int var) const 
+    {
+        return get_concret(left)->skip_variable(var)
+			and get_concret(right)->skip_variable(var);
+    }
 
   /* Eval */
   GSDD eval(const GSDD &d)const{
@@ -254,6 +437,13 @@ public:
     return 47*left.hash()+19*right.hash();
   }
 
+  bool
+  skip_variable(int var) const
+  {
+      return get_concret(left)->skip_variable(var);
+  }
+
+
   /* Eval */
   GSDD eval(const GSDD &d)const{
     return left(d)^right;
@@ -309,16 +499,88 @@ public:
     return 17*arg.hash();
   }
 
-  /* Eval */
-  GSDD eval(const GSDD &d)const{
-    GSDD d1=d,d2=d;
-    do {
-      d1=d2;
-      d2=arg(d2);
-    } while (d1 != d2);
-    
-    return d1;
+  bool
+  skip_variable(int var) const
+  {
+      return get_concret(arg)->skip_variable(var);
   }
+
+
+  /* Eval */
+GSDD 
+	eval(const GSDD &d) const
+{
+	// GSDD d1=d,d2=d;
+	// do {
+	//   d1=d2;
+	//   d2=arg(d2);
+	// } while (d1 != d2);
+	// 
+	// return d1;
+
+	if( d == GSDD::null )
+	{
+		return GSDD::null;
+	}
+	else if( d == GSDD::one or d == GSDD::top )
+	{
+		return arg(d);
+	}
+	else
+	{
+		int variable = d.variable();
+
+		GSDD d1 = d;
+		GSDD d2 = d;
+
+		// is it the fixpoint of an union ?
+		if( typeid( *get_concret(arg) ) == typeid(Add) )
+		{
+			// Check if we have ( Id + F + G )* where F can be forwarded to the next variable
+		
+			// Rewrite ( Id + F + G )*
+			// into ( (G + Id) o (F + Id)* )* 
+			Add* add = ((Add*)get_concret(arg));
+			if( add->get_have_id() )
+			{                           
+				Add::partition partition = add->get_partition(variable);
+
+				// operations that can be forwarded to the next variable
+				GShom F_part = fixpoint(partition.first);
+
+				// operations that have to be applied at this level
+				std::set<GShom> G = partition.second;
+				G.insert(GShom::id);
+				GShom G_part = GShom::add(G);
+
+				do
+				{
+					d1 = d2;
+
+					// Apply ( Id + F )* on all sons    
+					
+					d2 = F_part(d1);
+
+					// Apply ( G + Id )
+					d2 = G_part(d2);
+
+				}
+				while (d1 != d2);
+				return d1;
+			}
+		}                                                                                               
+
+		do
+		{
+			d1 = d2;
+			d2 = arg(d2);
+		}
+		while (d1 != d2);
+
+		return d1;
+	}
+
+}
 
   /* Memory Manager */
   void mark() const{
@@ -330,6 +592,49 @@ public:
 
 
 } // end namespace H_Homomorphism
+
+GSDD 
+_GShom::eval_skip(const GSDD& d) const
+{
+    if( d == GSDD::null )
+    {
+        return GSDD::null;
+    }
+    else if( d == GSDD::one )
+    {
+        // basic case, mustn't call d.variable()
+    }
+    else if( d == GSDD::top )
+    {
+        return GSDD::top;
+    }
+    else if( this->skip_variable(d.variable()) )
+    {
+        GSDD::Valuation v;
+        for( GSDD::const_iterator it = d.begin();
+            it != d.end();
+            ++it)
+        {
+            GSDD son = GShom(this)(it->second);
+            if( son != GSDD::null && !(it->first->empty()) )
+            {
+                v.push_back(std::make_pair(it->first->newcopy(),son));
+            }
+        }
+        
+        if( v.empty() )
+        {
+            return GSDD::null;
+        }
+        else
+        {
+            return GSDD(d.variable(),v);
+        }
+        
+    }
+    
+    return eval(d);
+}
 
 /*************************************************************************/
 /*                         Class StrongShom                               */
@@ -388,7 +693,7 @@ GSDD GShom::operator()(const GSDD &d) const{
 }
 
 GSDD GShom::eval(const GSDD &d) const{
-  return concret->eval(d);
+  return concret->eval_skip(d);
 }
 
 const GShom GShom::id(canonical(new S_Homomorphism::Identity(1)));
@@ -487,20 +792,30 @@ GShom fixpoint (const GShom &h) {
   return GShom(canonical(new S_Homomorphism::Fixpoint(h)));
 }
 
+GShom GShom::add(const std::set<GShom>& s)
+{
+	if( s.size() == 1 )
+		return *(s.begin());
+	else
+  		return GShom(canonical(new S_Homomorphism::Add(s)));   
+}
+
 GShom operator&(const GShom &h1,const GShom &h2){
   return GShom(canonical(new S_Homomorphism::Compose(h1,h2)));
 }
 
 GShom operator+(const GShom &h1,const GShom &h2){
-  if (h1 < h2) 
-    return GShom(canonical(new S_Homomorphism::Add(h1,h2)));
-  else
-    return GShom(canonical(new S_Homomorphism::Add(h2,h1)));
-//   set<GShom> s;
-//   s.insert(h1);
-//   s.insert(h2);
-// //  return(new Add(s));
-//   return GShom(canonical(new Add(s)));
+  // if (h1 < h2) 
+  //   return GShom(canonical(new S_Homomorphism::Add(h1,h2)));
+  // else
+ //   return GShom(canonical(new S_Homomorphism::Add(h2,h1)));
+
+  std::set<GShom> s;
+  s.insert(h1);
+  s.insert(h2);
+
+  return GShom(canonical(new S_Homomorphism::Add(s)));
+
 }
 
 GShom operator*(const GSDD &d,const GShom &h){

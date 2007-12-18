@@ -34,11 +34,14 @@ class GShom
 private:
   /// Open access to concret for Shom class
   friend class Shom;
+    /// Open access to _GShom based homomophisms
+  friend class _GShom;
 
   /// \name Friendly hard coded composition operators.
   /// Open full access for library implemented hard coded operations.    
   //@{
   friend GShom fixpoint(const GShom &);
+  friend GShom add(const std::set<GShom>&);
   friend GShom operator+(const GShom &,const GShom &); 
   friend GShom operator&(const GShom &,const GShom &); 
   friend GShom operator*(const GSDD &,const GShom &); 
@@ -111,7 +114,7 @@ public:
   /// Compute an n-ary sum between homomorphisms. This should be slightly more efficient 
   /// in evaluation than a composition of binary sums constructed using the friend operator+.
   /// \todo : move this to friend status not static member for more homogeneity with other operators.
-  static GShom add(const std::set<GShom>&);
+  static GShom add(const std::set<GShom>& s);
 
   /// \name  Memory Management routines. 
   //@{
@@ -280,7 +283,16 @@ private:
   /// If immediat==true,  eval is called without attempting a cache hit. 
   /// Currently only the constant homomorphism has this attribute set to true.
   mutable bool immediat;
+  
+    GSDD eval_skip(const GSDD &) const;
+  
 public:
+
+    virtual bool
+    skip_variable(int var) const
+    {
+        return false;
+    }
 
   /// Constructor. Note this class is abstract, so this is only used in initialization
   /// list of derived classes constructors (hard coded operations and StrongShom).
@@ -306,6 +318,16 @@ public:
 
   /// For garbage collection. Used in first phase of garbage collection.
   virtual void mark() const{};
+
+protected:
+    
+    // Enable access to the concrete GSHom for _GSHom homorphisms
+    const _GShom*
+    get_concret(const GShom& gshom) const
+    {
+        return gshom.concret;
+    }
+    
 
 };
 
