@@ -240,7 +240,6 @@ public:
 		{
 			result = part_it->second.second.empty();
 		}
-		std::cout << (result == true ? "true" : "false") << std::endl;
 
 		return result;
 	}
