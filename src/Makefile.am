@@ -35,7 +35,7 @@ AM_CPPFLAGS =  -Wall
 
 # default options => -o2 
 libDDD_a_SOURCES = $(SRCS)
-libDDD_a_CPPFLAGS = -O3  -Wall 
+#libDDD_a_CPPFLAGS = -O3  -Wall 
 
 # STL instantiated version for hash profiling
 # libDDD_i_a_SOURCES = $(SRCS)

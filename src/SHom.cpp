@@ -71,12 +71,6 @@ public:
     return value==((Constant*)&h )->value;
   }
 
-  bool
-  skip_variable(int) const 
-  {
-      return false;
-  }
-
   size_t hash() const{
     return value.hash();
   }
@@ -130,7 +124,8 @@ class Add
 // types
 public:
 	
-	typedef std::pair< GShom , std::set<GShom> > partition;
+	// typedef std::pair< GShom , std::set<GShom> > partition;
+	typedef std::pair< std::set<GShom> , std::set<GShom> > partition;
     typedef std::map<int,partition> partition_cache_type;
     
 
@@ -181,11 +176,11 @@ public:
         return have_id;
     }
 
-    std::set<GShom>&
-    get_parameters()
-    {
-        return this->parameters;
-    }
+    // std::set<GShom>&
+    // get_parameters()
+    // {
+    //     return this->parameters;
+    // }
 
 
     /* Compare */
@@ -225,7 +220,8 @@ public:
 				if( get_concret(*gi)->skip_variable(var) )
                 {
                     // F part
-                    F.insert(*gi);
+                    // F.insert(*gi);
+					part.first.insert(*gi);
                 }
                 else
                 {
@@ -233,7 +229,7 @@ public:
                     part.second.insert(*gi);
                 }
 			}
-			part.first = GShom::add(F);
+			// part.first = GShom::add(F);
 			result =  part.second.empty();
 		}
 		else
@@ -281,7 +277,7 @@ public:
 		{
 			std::set<GSDD> s;
 			int var = d.variable();
-		
+
 			partition_cache_type::iterator part_it = partition_cache.find(var);
 			if( part_it == partition_cache.end() )
 			{
@@ -289,22 +285,31 @@ public:
 				part_it = partition_cache.find(var);
 			}              
 		
-			GShom& F = part_it->second.first;
+			// GShom& F = part_it->second.first;
+			std::set<GShom>& F = part_it->second.first;
 			std::set<GShom>& G = part_it->second.second;
-		
-			for( 	std::set<GShom>::const_iterator it = G.begin() ; 
+
+			for( 	std::set<GShom>::const_iterator it = G.begin(); 
 					it != G.end();
 					++it )
 			{
 				s.insert((*it)(d));                  
 			} 
-		
-			GSDD v = F(d);
-			if( v != GSDD::null )
+
+			// GSDD v = F(d);
+			
+			for( 	std::set<GShom>::const_iterator it = F.begin(); 
+					it != F.end();
+					++it )
 			{
-				s.insert(v);
-			}
-		
+				s.insert((*it)(d));                  
+			} 
+			
+			// if( v != GSDD::null )
+			// {
+			// 	s.insert(v);
+			// }
+
 			return SDED::add(s);
 		}
 
@@ -545,24 +550,48 @@ GSDD
 				Add::partition partition = add->get_partition(variable);
 
 				// operations that can be forwarded to the next variable
-				GShom F_part = fixpoint(partition.first);
+				std::set<GShom> F;
+
+				for(	std::set<GShom>::const_iterator it = partition.first.begin();
+						it != partition.first.end();
+						++it)
+				{
+					F.insert(fixpoint( *it + GShom::id ));
+				}
 
 				// operations that have to be applied at this level
 				std::set<GShom> G = partition.second;
-				G.insert(GShom::id);
-				GShom G_part = GShom::add(G);
+				// GShom G_part = GShom::add(G);
 
 				do
 				{
 					d1 = d2;
-
-					// Apply ( Id + F )* on all sons    
 					
-					d2 = F_part(d1);
-
+					// Apply ( Id + F )* on all sons
+					// d2 = F_part(d2);
+					
+					GSDD d3;
+					
+					do
+					{				
+						d3 = d2;
+							
+						for( 	std::set<GShom>::const_iterator F_it = F.begin();
+								F_it != F.end();
+								++F_it )
+						{
+							d2 = (*F_it)(d2);
+						}
+					}
+					while( d3 != d2 );
+					
 					// Apply ( G + Id )
-					d2 = G_part(d2);
-
+					for (	std::set<GShom>::const_iterator G_it = G.begin();
+							G_it != G.end();
+							++G_it) 
+					{
+						d2 = (*G_it) (d2) + d2;
+					}
 				}
 				while (d1 != d2);
 				return d1;
