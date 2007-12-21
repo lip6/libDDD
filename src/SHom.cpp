@@ -477,44 +477,61 @@ GSDD
 				Add::partition partition = add->get_partition(variable);
 
 				// operations that can be forwarded to the next variable
-				std::set<GShom> F;
+				GShom F_part = fixpoint(partition.first);
 
-				for(	std::set<GShom>::const_iterator it = partition.first.begin();
-						it != partition.first.end();
-						++it)
-				{
-					F.insert(fixpoint( *it + GShom::id ));
-				}
+				// pour ah : ce truc sert à rien, ce sera fait récursivement eu niveau en dessous
+				// donc c'est déjà traité par la boucle en dessous (G)
+// 				std::set<GShom> F;
+				
+// 				for(	std::set<GShom>::const_iterator it = partition.first.begin();
+// 						it != partition.first.end();
+// 						++it(Gn-1+id) O( (Fn + Id)* ))
+// 				{
+// 					F.insert(fixpoint( *it + GShom::id ));
+// 				}
 
 				// operations that have to be applied at this level
 				std::set<GShom> G = partition.second;
-
+				
 				do
 				{
 					d1 = d2;
 					
-					// Apply (O( Fn + Id )*)*
-					GSDD d3;
-					do
-					{				
-						d3 = d2;
+					for( 	std::set<GShom>::const_iterator G_it = G.begin();
+						G_it != G.end();
+						++G_it) {
+					  // saturate successor nodes of currently reached set of paths
+					  d2 = F_part (d2);
+
+					  // chain application of Shom of this level
+					  d2 = (*G_it) (d2) + d2;
+					  
+					}
+
+					/// pour ah : Removed this part
+// 					// Apply (O( Fn + Id )*)*
+// 					GSDD d3;
+// 					do
+// 					{				
+// 						d3 = d2;
 							
-						for( 	std::set<GShom>::const_iterator F_it = F.begin();
-								F_it != F.end();
-								++F_it )
-						{
-							d2 = (*F_it)(d2);
-						}
-					}
-					while( d3 != d2 );
+// 						for( 	std::set<GShom>::const_iterator F_it = F.begin();
+// 								F_it != F.end();
+// 								++F_it )
+// 						{
+// 							d2 = (*F_it)(d2);
+// 						}
+// 					}
+// 					while( d3 != d2 );
 					
-					// Apply O( Gn + Id )
-					for (	std::set<GShom>::const_iterator G_it = G.begin();
-							G_it != G.end();
-							++G_it) 
-					{
-						d2 = (*G_it)(d2) + d2;
-					}
+					  /// pour ah : cette boucle existe encore mais elle applicque F entre chaque tour
+// 					// Apply O( Gn + Id )
+// 					for (	std::set<GShom>::const_iterator G_it = G.begin();
+// 							G_it != G.end();
+// 							++G_it) 
+// 					{
+// 						d2 = (*G_it)(d2) + d2;
+// 					}
 				}
 				while (d1 != d2);
 				return d1;
