@@ -477,7 +477,7 @@ GSDD
 				Add::partition partition = add->get_partition(variable);
 
 				// operations that can be forwarded to the next variable
-				GShom F_part = fixpoint(partition.first);
+				GShom F_part = fixpoint(GShom::add(partition.first));
 
 				// pour ah : ce truc sert à rien, ce sera fait récursivement eu niveau en dessous
 				// donc c'est déjà traité par la boucle en dessous (G)
@@ -497,15 +497,16 @@ GSDD
 				{
 					d1 = d2;
 					
+					d2 = F_part (d2);
 					for( 	std::set<GShom>::const_iterator G_it = G.begin();
 						G_it != G.end();
 						++G_it) {
+					  // PART INSIDE VERSION uncomment this line:
 					  // saturate successor nodes of currently reached set of paths
-					  d2 = F_part (d2);
+					  //d2 = F_part (d2);
 
 					  // chain application of Shom of this level
 					  d2 = (*G_it) (d2) + d2;
-					  
 					}
 
 					/// pour ah : Removed this part
