@@ -524,10 +524,8 @@ public:
                     GHom F_part = fixpoint(partition.first);
 
                     // operations that have to be applied at this level
-                    std::set<GHom> G = partition.second;
-                    G.insert(GHom::id);
-                    GHom G_part = GHom::add(G);
-                    
+                    // std::set<GHom> G = partition.second;
+
                     do
                     {
                         d1 = d2;
@@ -536,8 +534,9 @@ public:
                         d2 = F_part(d1);
                     
                         // Apply ( G + Id )
-                        d2 = G_part(d2);
-                        
+                        for (std::set<GHom>::const_iterator it = partition.second.begin() ; it != partition.second.end() ; ++it ) {
+			  d2 = (*it) (d2) + d2;
+			}
                     }
                     while (d1 != d2);
                     return d1;
