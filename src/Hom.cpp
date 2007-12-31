@@ -530,11 +530,12 @@ public:
                     {
                         d1 = d2;
 
-                        // Apply ( Id + F )* on all sons
-                        d2 = F_part(d1);
-                    
+                        
                         // Apply ( G + Id )
                         for (std::set<GHom>::const_iterator it = partition.second.begin() ; it != partition.second.end() ; ++it ) {
+			  // Apply ( Id + F )* on all sons
+			  d2 = F_part(d2);
+                    
 			  d2 = (*it) (d2) + d2;
 			}
                     }
