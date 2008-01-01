@@ -136,7 +136,8 @@ public:
     Add( const std::set<GHom> &param, int ref=0)
   		:
   		_GHom(ref,false),
-  		parameters()
+  		parameters(),
+		have_id(false)
     {
         for( std::set<GHom>::const_iterator it = param.begin(); it != param.end(); ++it)
         {
@@ -516,11 +517,12 @@ public:
                 // Rewrite ( Id + F + G )*
                 // into ( (G + Id) o (F + Id)* )* 
                 Add* add = ((Add*)get_concret(arg));
+
                 if( add->get_have_id() )
                 {
-                    Add::partition partition = add->get_partition(variable);
-
-                    // operations that can be forwarded to the next variable
+		    Add::partition partition = add->get_partition(variable);
+                    
+		    // operations that can be forwarded to the next variable
                     GHom F_part = fixpoint(partition.first);
 
                     // operations that have to be applied at this level
