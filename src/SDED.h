@@ -16,6 +16,8 @@ private:
   friend struct __gnu_cxx::hash<SDED>;
   friend struct std::equal_to<SDED>;
   _SDED *concret;
+
+
 public:
   GSDD eval();
   SDED(_SDED *c):concret(c){};
@@ -49,6 +51,12 @@ namespace std {
     bool operator()(const SDED&a,const SDED&b) const { return a == b ;};
   };
 }
+
+/****************************************************************************/
+
+// Library internal: square_union (cf FORTE'05)
+void
+square_union (std::map<GSDD,DataSet *> &res,const GSDD & s, DataSet* d);
 
 /******************************************************************************/
 class _SDED{
