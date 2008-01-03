@@ -115,6 +115,58 @@ public:
   }
 };
 
+
+/*************************************************************************/
+/*                         Class LocalApply                              */
+/*************************************************************************/
+
+class LocalApply
+	:
+	public StrongShom
+{
+
+public:
+
+  GHom h;
+  int target;
+
+
+  LocalApply (const GHom& hh,int t) :h(hh),target(t) {}
+
+  GSDD phiOne() const {
+	  // target not encountered !
+    return GSDD::top;
+  }     
+
+  // optimize away needless exploration of upstream modules that dont contain the place
+  bool skip_variable (int var) const {
+	  return var != target;
+  }
+  
+  GShom phi(int vr, const DataSet & vl) const {
+
+//    cerr << "target // curvar :" << target << " // " << vr<<endl;
+		assert( typeid(vl) == typeid(const DDD&) );
+		DDD v2 = h((const DDD &)vl);
+		return GShom(vr,v2);
+
+  }
+
+  void mark() const {
+    h.mark();
+  }  
+  
+  size_t hash() const {
+    return  h.hash() ^ target * 21727; 
+  }
+
+  bool operator==(const StrongShom &s) const {
+    LocalApply* ps = (LocalApply *)&s;
+    return target == ps->target && h ==  ps->h;
+  }  
+
+};
+
 /************************** Add */
 /************************** Add */
 class Add
@@ -144,6 +196,8 @@ public:
         _GShom(ref,true),
         parameters()
     {
+		std::map<int, GHom> local_homs;
+	
         for( std::set<GShom>::const_iterator it = p.begin(); it != p.end(); ++it)
         {
             if( typeid( *get_concret(*it) ) == typeid(Add) )
@@ -151,6 +205,21 @@ public:
                 std::set<GShom>& local_param = ((Add*)get_concret(*it))->parameters;
                 parameters.insert( local_param.begin() , local_param.end());
             }
+			else if( typeid(*get_concret(*it) ) == typeid(LocalApply) )
+			{
+				LocalApply* local = (LocalApply*)(get_concret(*it));
+				std::map<int, GHom>::iterator f = local_homs.find( local->target );
+				
+				if( f != local_homs.end() )
+				{
+					f->second = f->second + local->h;
+				}
+				else
+				{
+					local_homs.insert(std::make_pair(local->target,local->h));
+				}
+				
+			}
             else
             {
                 if( typeid(*get_concret(*it)) == typeid(Identity) )
@@ -160,6 +229,18 @@ public:
                 parameters.insert(*it);
             }
         }
+
+		for( 	std::map<int, GHom>::iterator it = local_homs.begin();
+			it != local_homs.end(); 
+			++it)
+		{
+			if( have_id )
+			{
+				it->second = it->second + GHom::id;
+			}
+			parameters.insert(localApply(it->second,it->first));
+		}
+		
     }
 
     bool
@@ -607,6 +688,9 @@ GSDD StrongShom::eval(const GSDD &d)const{
   }
 }
 
+
+
+
 /*************************************************************************/
 /*                         Class GShom                                    */
 /*************************************************************************/
@@ -732,6 +816,13 @@ Shom &Shom::operator=(const GShom &h){
 /* Operations */
 GShom fixpoint (const GShom &h) {
   return GShom(canonical(new S_Homomorphism::Fixpoint(h)));
+}
+
+GShom
+// localApply(int target,const GHom & h)
+localApply(const GHom & h, int target)
+{
+	return new S_Homomorphism::LocalApply(h,target);
 }
 
 GShom GShom::add(const std::set<GShom>& s)
