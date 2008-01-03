@@ -201,8 +201,6 @@ public:
 	
         for( std::set<GShom>::const_iterator it = p.begin(); it != p.end(); ++it)
         {
-			std::cout << typeid(*get_concret(*it)).name() << std::endl;
-
             if( typeid( *get_concret(*it) ) == typeid(Add) )
             {
                 std::set<GShom>& local_param = ((Add*)get_concret(*it))->parameters;
@@ -825,7 +823,6 @@ GShom
 // localApply(int target,const GHom & h)
 localApply(const GHom & h, int target)
 {
-	// std::cout << "LOCAL" << std::endl;
 	return new S_Homomorphism::LocalApply(h,target);
 }
 
