@@ -760,7 +760,14 @@ GHom fixpoint (const GHom &h) {
 }
 
 GHom operator&(const GHom &h1,const GHom &h2){
-  return GHom(canonical(new Compose(h1,h2)));
+	
+	if( h1 == GHom::id )
+		return h2;
+
+	if( h2 == GHom::id )
+		return h1;
+
+	return GHom(canonical(new Compose(h1,h2)));
 }
 
 GHom operator+(const GHom &h1,const GHom &h2){

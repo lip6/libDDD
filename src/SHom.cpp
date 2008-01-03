@@ -11,6 +11,7 @@
 #include "UniqueTable.h"
 #include "DataSet.h"
 #include "MemoryManager.h"
+#include <typeinfo>
 
 namespace namespace_SHom {
 
@@ -200,6 +201,8 @@ public:
 	
         for( std::set<GShom>::const_iterator it = p.begin(); it != p.end(); ++it)
         {
+			std::cout << typeid(*get_concret(*it)).name() << std::endl;
+
             if( typeid( *get_concret(*it) ) == typeid(Add) )
             {
                 std::set<GShom>& local_param = ((Add*)get_concret(*it))->parameters;
@@ -822,6 +825,7 @@ GShom
 // localApply(int target,const GHom & h)
 localApply(const GHom & h, int target)
 {
+	// std::cout << "LOCAL" << std::endl;
 	return new S_Homomorphism::LocalApply(h,target);
 }
 
@@ -834,7 +838,14 @@ GShom GShom::add(const std::set<GShom>& s)
 }
 
 GShom operator&(const GShom &h1,const GShom &h2){
-  return GShom(canonical(new S_Homomorphism::Compose(h1,h2)));
+	
+	if( h1 == GShom::id )
+		return h2;
+
+	if( h2 == GShom::id )
+		return h1;
+
+  	return GShom(canonical(new S_Homomorphism::Compose(h1,h2)));
 }
 
 GShom operator+(const GShom &h1,const GShom &h2){
