@@ -82,7 +82,8 @@ public:
 
 
 /******************** BASIS FOR CANONIZATION OPERATIONS **********************/
-inline void square_union (std::map<GSDD,DataSet *> &res,const GSDD & s, DataSet * d) {
+void square_union (std::map<GSDD,DataSet *> &res,const GSDD & s, DataSet * d) {
+	
   std::map<GSDD,DataSet *>::iterator kt = res.find(s);
   if (kt != res.end()) {
     /* found it in res compute union */

@@ -10,6 +10,7 @@
 #include "SDED.h"
 #include "UniqueTable.h"
 #include "DataSet.h"
+#include "MemoryManager.h"
 
 namespace namespace_SHom {
 
@@ -194,7 +195,7 @@ public:
 		{
 			partition& part = partition_cache.insert(std::make_pair(var,partition())).first->second;
 			
-			std::set<GShom> F;
+			// std::set<GShom> F;
 			for(	std::set<GShom>::const_iterator gi = parameters.begin();
 					gi != parameters.end();
 					++gi )
@@ -272,7 +273,7 @@ public:
 					it != F.end();
 					++it )
 			{
-				s.insert((*it)(d));                  
+				s.insert((*it)(d));
 			} 
 			
 			return SDED::add(s);
@@ -446,9 +447,9 @@ public:
 
 
   /* Eval */
-GSDD 
+	GSDD 
 	eval(const GSDD &d) const
-{
+	{
 	if( d == GSDD::null )
 	{
 		return GSDD::null;
@@ -479,17 +480,6 @@ GSDD
 				// operations that can be forwarded to the next variable
 				GShom F_part = fixpoint(GShom::add(partition.first));
 
-				// pour ah : ce truc sert à rien, ce sera fait récursivement eu niveau en dessous
-				// donc c'est déjà traité par la boucle en dessous (G)
-// 				std::set<GShom> F;
-				
-// 				for(	std::set<GShom>::const_iterator it = partition.first.begin();
-// 						it != partition.first.end();
-// 						++it(Gn-1+id) O( (Fn + Id)* ))
-// 				{
-// 					F.insert(fixpoint( *it + GShom::id ));
-// 				}
-
 				// operations that have to be applied at this level
 				std::set<GShom> G = partition.second;
 				
@@ -499,40 +489,13 @@ GSDD
 					
 					d2 = F_part (d2);
 					for( 	std::set<GShom>::const_iterator G_it = G.begin();
-						G_it != G.end();
-						++G_it) {
-					  // PART INSIDE VERSION uncomment this line:
-					  // saturate successor nodes of currently reached set of paths
-					  //d2 = F_part (d2);
-
+							G_it != G.end();
+							++G_it) 
+					{
 					  // chain application of Shom of this level
 					  d2 = (*G_it) (d2) + d2;
 					}
-
-					/// pour ah : Removed this part
-// 					// Apply (O( Fn + Id )*)*
-// 					GSDD d3;
-// 					do
-// 					{				
-// 						d3 = d2;
-							
-// 						for( 	std::set<GShom>::const_iterator F_it = F.begin();
-// 								F_it != F.end();
-// 								++F_it )
-// 						{
-// 							d2 = (*F_it)(d2);
-// 						}
-// 					}
-// 					while( d3 != d2 );
 					
-					  /// pour ah : cette boucle existe encore mais elle applicque F entre chaque tour
-// 					// Apply O( Gn + Id )
-// 					for (	std::set<GShom>::const_iterator G_it = G.begin();
-// 							G_it != G.end();
-// 							++G_it) 
-// 					{
-// 						d2 = (*G_it)(d2) + d2;
-// 					}
 				}
 				while (d1 != d2);
 				return d1;
@@ -579,6 +542,8 @@ _GShom::eval_skip(const GSDD& d) const
     else if( this->skip_variable(d.variable()) )
     {
         GSDD::Valuation v;
+		std::map<GSDD,DataSet *> res;
+
         for( GSDD::const_iterator it = d.begin();
             it != d.end();
             ++it)
@@ -586,9 +551,18 @@ _GShom::eval_skip(const GSDD& d) const
             GSDD son = GShom(this)(it->second);
             if( son != GSDD::null && !(it->first->empty()) )
             {
-                v.push_back(std::make_pair(it->first->newcopy(),son));
+                // v.push_back(std::make_pair(it->first->newcopy(),son));
+				square_union(res, son, it->first);
             }
         }
+
+		v.reserve(res.size());  
+	  	for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;
+				it!= res.end();
+				++it)
+		{
+			v.push_back(std::make_pair(it->second,it->first));
+		}
         
         if( v.empty() )
         {
