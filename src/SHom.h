@@ -4,7 +4,9 @@
 
 #include "DataSet.h"
 #include "SDD.h"
+#include "Hom.h"
 #include "hashfunc.hh"
+
 
 #include <string>
 #include <map>
@@ -41,7 +43,7 @@ private:
   /// Open full access for library implemented hard coded operations.    
   //@{
   friend GShom fixpoint(const GShom &);
-  friend GShom localApply(int target,const GShom &);
+  friend GShom localApply(const GHom &,int target);
   friend GShom add(const std::set<GShom>&);
   friend GShom operator+(const GShom &,const GShom &); 
   friend GShom operator&(const GShom &,const GShom &); 
@@ -153,7 +155,7 @@ public:
 GShom fixpoint(const GShom &);
 /// Apply a homomorphism on a target variable.
 /// This ensures that the operation is local to this variable, and is used to implement auto-saturation.
-GShom localApply(int target,const GShom &);
+ GShom localApply(const GHom &,int target);
 /// Composition by union of two homomorphisms. 
 /// See also GShom::add(). This commutative operation computes a homomorphism 
 /// that evaluates as the sum of two homomorphism.
