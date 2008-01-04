@@ -593,13 +593,15 @@ public:
 							++G_it) 
 					{
 
-						d2 = F_part(d2);
-						d2 = L_part(d2);
+						// d2 = F_part(d2);
+						// d2 = L_part(d2);
 
 						// apply local part
 						// d2 = L_part(d2);
 					  // chain application of Shom of this level
 					  d2 = (*G_it) (d2) + d2;
+					d2 = F_part(d2) + d2;
+					
 					}
 				}
 				while (d1 != d2);
@@ -865,6 +867,18 @@ GShom operator&(const GShom &h1,const GShom &h2){
 	if( h2 == GShom::id )
 		return h1;
 
+	if( typeid( *_GShom::get_concret(h1) ) == typeid(S_Homomorphism::LocalApply) 
+		&& typeid( *_GShom::get_concret(h2) ) == typeid(S_Homomorphism::LocalApply) )
+	{
+		S_Homomorphism::LocalApply* lh1 = (S_Homomorphism::LocalApply*)(_GShom::get_concret(h1));
+		S_Homomorphism::LocalApply* lh2 = (S_Homomorphism::LocalApply*)(_GShom::get_concret(h2));
+
+		if( lh1->target == lh2->target )
+		{
+			return localApply(  lh1->h & lh2->h, lh1->target );
+		}
+	}
+	
   	return GShom(canonical(new S_Homomorphism::Compose(h1,h2)));
 }
 
