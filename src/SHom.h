@@ -325,11 +325,12 @@ public:
   /// For garbage collection. Used in first phase of garbage collection.
   virtual void mark() const{};
 
-protected:
+public:
     
     // Enable access to the concrete GSHom for _GSHom homorphisms
-    const _GShom*
-    get_concret(const GShom& gshom) const
+    static
+	const _GShom*
+    get_concret(const GShom& gshom)
     {
         return gshom.concret;
     }
