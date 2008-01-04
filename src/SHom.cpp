@@ -290,7 +290,7 @@ public:
 			part_it = partition_cache.insert(std::make_pair(var,partition())).first;
 			partition& part = part_it->second;
 			part.has_local = false;
-			
+			part.L  = NULL;
 			std::set<GShom> F;
 			
 			for(	std::set<GShom>::const_iterator gi = parameters.begin();
@@ -369,7 +369,8 @@ public:
 			} 
 
 			s.insert( part_it->second.F(d) );
-			s.insert(GShom(part_it->second.L)(d));
+			if( part_it->second.L != NULL )
+			  s.insert(GShom(part_it->second.L)(d));
 			
 			return SDED::add(s);
 		}
