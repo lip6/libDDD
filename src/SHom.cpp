@@ -208,7 +208,8 @@ public:
     Add(const std::set<GShom>& p, int ref=0)
     	:
         _GShom(ref,true),
-        parameters()
+        parameters(),
+		have_id(false)
     {
 		std::map<int, GHom> local_homs;
 	
@@ -585,11 +586,15 @@ public:
 					
 					d2 = F_part(d2);
 					d2 = L_part(d2);
-					
+
 					for( 	std::set<GShom>::const_iterator G_it = partition.G.begin();
 							G_it != partition.G.end();
 							++G_it) 
 					{
+
+						d2 = F_part(d2);
+						d2 = L_part(d2);
+
 						// apply local part
 						// d2 = L_part(d2);
 					  // chain application of Shom of this level
