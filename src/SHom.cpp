@@ -185,14 +185,13 @@ public:
 	typedef
 	struct
 	{
-		std::set<GShom> F; 
+		GShom F; 
 		std::set<GShom> G;
 		LocalApply* L;
 		bool has_local;
 		
 	} partition;
 
-	// typedef std::pair< std::set<GShom> , std::set<GShom> > partition;
     typedef std::map<int,partition> partition_cache_type;
     
 
@@ -246,8 +245,8 @@ public:
         }
 
 		for( 	std::map<int, GHom>::iterator it = local_homs.begin();
-			it != local_homs.end(); 
-			++it)
+				it != local_homs.end();
+				++it)
 		{
 			if( have_id )
 			{
@@ -268,13 +267,13 @@ public:
     bool
     operator==(const _GShom &h) const
     {
-    	return parameters==((Add*)&h )->parameters;	
+    	return parameters == ((Add*)&h )->parameters;	
     }
     
     size_t
     hash() const
     {
-	    size_t res=0;
+	    size_t res = 0;
 	    for(std::set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
 	      res^=gi->hash();
 	    return res;
@@ -284,14 +283,14 @@ public:
 	bool
 	skip_variable( int var ) const
 	{
-		// bool result = false;
-		
 		partition_cache_type::iterator part_it = partition_cache.find(var);
 		if( part_it == partition_cache.end() )
 		{
 			part_it = partition_cache.insert(std::make_pair(var,partition())).first;
 			partition& part = part_it->second;
 			part.has_local = false;
+			
+			std::set<GShom> F;
 			
 			for(	std::set<GShom>::const_iterator gi = parameters.begin();
 					gi != parameters.end();
@@ -300,7 +299,7 @@ public:
 				if( get_concret(*gi)->skip_variable(var) )
                 {
                     // F part
-					part.F.insert(*gi);
+					F.insert(*gi);
                 }
 				else if( typeid(*get_concret(*gi) ) == typeid(LocalApply) )
 				{
@@ -315,12 +314,8 @@ public:
                     part.G.insert(*gi);
                 }
 			}
-			// result =  part.G.empty() && ! part.has_local;
+			part.F = GShom::add(F);
 		}
-		// else
-		// {
-		// 	result = part_it->second.G.empty() && ! part.has_local;
-		// }
 
 		return part_it->second.G.empty() && !part_it->second.has_local;
 	}
@@ -363,10 +358,7 @@ public:
 				part_it = partition_cache.find(var);
 			}              
 		
-			std::set<GShom>& F = part_it->second.F;
 			std::set<GShom>& G = part_it->second.G;
-
-			GShom F_Part = GShom::add(F);
 
 			for( 	std::set<GShom>::const_iterator it = G.begin(); 
 					it != G.end();
@@ -375,14 +367,7 @@ public:
 				s.insert((*it)(d));                  
 			} 
 
-			// for( 	std::set<GShom>::const_iterator it = F.begin(); 
-			// 		it != F.end();
-			// 		++it )
-			// {
-			// 	s.insert((*it)(d));
-			// } 
-
-			s.insert(F_Part(d));
+			s.insert( part_it->second.F(d) );
 			s.insert(GShom(part_it->second.L)(d));
 			
 			return SDED::add(s);
@@ -587,10 +572,7 @@ public:
 				Add::partition partition = add->get_partition(variable);
 
 				// operations that can be forwarded to the next variable
-				GShom F_part = fixpoint(GShom::add(partition.F));
-
-				// operations that have to be applied at this level
-				// std::set<GShom> G = partition.G;
+				GShom F_part = fixpoint(partition.F);
 
 				GShom L_part = partition.has_local
 							? localApply(fixpoint(GHom(partition.L->h)),variable)
@@ -601,7 +583,7 @@ public:
 				{
 					d1 = d2;
 					
-					d2 = F_part (d2);
+					d2 = F_part(d2);
 					d2 = L_part(d2);
 					
 					for( 	std::set<GShom>::const_iterator G_it = partition.G.begin();
