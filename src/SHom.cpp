@@ -594,14 +594,12 @@ public:
 					{
 
 						// d2 = F_part(d2);
-						// d2 = L_part(d2);
+						d2 = L_part(d2);
 
 						// apply local part
 						// d2 = L_part(d2);
 					  // chain application of Shom of this level
 					  d2 = (*G_it) (d2) + d2;
-					d2 = F_part(d2) + d2;
-					
 					}
 				}
 				while (d1 != d2);
@@ -848,6 +846,10 @@ GShom
 // localApply(int target,const GHom & h)
 localApply(const GHom & h, int target)
 {
+	if( h == GHom::id )
+	{
+		return GShom::id;
+	}
 	return new S_Homomorphism::LocalApply(h,target);
 }
 
@@ -875,6 +877,7 @@ GShom operator&(const GShom &h1,const GShom &h2){
 
 		if( lh1->target == lh2->target )
 		{
+			// std::cout << "TOTO" << std::endl;
 			return localApply(  lh1->h & lh2->h, lh1->target );
 		}
 	}
