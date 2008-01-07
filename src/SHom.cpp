@@ -855,6 +855,8 @@ localApply(const GHom & h, int target)
 
 GShom GShom::add(const std::set<GShom>& s)
 {
+  if (s.empty() ) 
+    return GSDD::null;
 	if( s.size() == 1 )
 		return *(s.begin());
 	else
