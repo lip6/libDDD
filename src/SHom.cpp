@@ -150,10 +150,17 @@ public:
   
   GShom phi(int vr, const DataSet & vl) const {
 
-//    cerr << "target // curvar :" << target << " // " << vr<<endl;
-		assert( typeid(vl) == typeid(const DDD&) );
-		DDD v2 = h((const DDD &)vl);
-		return GShom(vr,v2);
+    assert( typeid(vl) == typeid(const DDD&) );
+    
+    if( vr != target )
+      {
+	return GShom(vr,vl,this);
+      }
+    else
+      {
+	DDD v2 = h((const DDD &)vl);
+	return GShom(vr,v2);
+      }
 
   }
 
