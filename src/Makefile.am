@@ -43,7 +43,7 @@ libDDD_a_SOURCES = $(SRCS)
 
 # change options to debug 
 libDDD_d_a_SOURCES = $(SRCS)
-libDDD_d_a_CPPFLAGS = -g  -Wall 
+libDDD_d_a_CPPFLAGS = -g  -Wall -O0 
 
 # profiling version : -pg
 # libDDD_p_a_SOURCES = $(SRCS)
