@@ -140,7 +140,8 @@ public:
 
   GSDD phiOne() const {
 	  // target not encountered !
-    return GSDD::top;
+    // consider this is not a fault
+    return GSDD::one;
   }     
 
   // optimize away needless exploration of upstream modules that dont contain the place
