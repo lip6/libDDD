@@ -8,10 +8,9 @@ include_HEADERS = DataSet.h			\
 		  SDED.h 			\
 		  SHom.h 			\
 		  UniqueTable.h	                \
-		  IntDataSet.h
-
-# libDDD_p.a  DEACTIVATED BUILD
-# libDDD_i.a  BROKEN WITH GCC 3.4
+		  IntDataSet.h \
+		hashfunc.hh \
+			Cache.h
 
 SRCS 		= DED.cpp			\
 		  DDD.cpp 			\
@@ -50,8 +49,8 @@ libDDD_d_a_CPPFLAGS = -g  -Wall -O0
 # libDDD_p_a_CPPFLAGS = -g -D NDEBUG  -pg 
 
 # change options to activate OTF garbage collection (reference counting on GSDD) 
-libDDD_otfg_a_SOURCES = $(SRCS)
-libDDD_otfg_a_CPPFLAGS = -g -O3 -Wall -D OTF_GARBAGE
+#libDDD_otfg_a_SOURCES = $(SRCS)
+#libDDD_otfg_a_CPPFLAGS = -g -O3 -Wall -D OTF_GARBAGE
 
 # change options to activate EVDDD for distance functions
 # libDDD_ev_a_SOURCES = $(SRCS)
