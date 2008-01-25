@@ -1,5 +1,18 @@
+version 1.4 : January 2008. Release includes auto-saturation mechanisms and homomorphism rewrite rules.
+	* homomorphisms Skip predicate added
+	* rewriting rules implmented to produce dynamic saturation effect
+	* local apply mechanisms and related rules
+	* hanoi example added to repository
+	* INST_STL removed from build (was broken with gcc > 3.3 anyway)
 
-Version 1.1b : September 2005. Release includes minor updates and corrections.
+version 1.3 : May 2007. Release includes support for additive Edge valued DDD and SDD
+	* various cleanups and rewrites for compliance with gcc >= 4.1
+	* minor updates to allow build on 64 bit architectures
+	* added tests using uttk
+	* include a dot export example
+	
+Version 1.2 : September 2005. Release includes minor updates and corrections.
+	* include serialization and user homomorphisms
 	* Cleaned up includes
 	* Added doxygen documentation
 	* Changed hash functions
@@ -13,4 +26,4 @@ Version 1.1 : November 2004. First semi-public release of the libDDD. Release in
 	** libddd_otfg.a a version with experimental on the fly garbage collection
 	* Optionally, using gcc in versions 3.1, 3.2 or 3.3, it is possible to activate build of INST_STL version, modify src/Makefile.am for this.
 
-Pre 1.0 : Beta versions of the pure DDD library. Version 0.99 was version number for some time. 
+Pre 1.0 : 2001-2003. Beta versions of the pure DDD library. Version 0.99 was version number for some time. 
