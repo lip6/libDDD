@@ -11,7 +11,7 @@ version 1.3 : May 2007. Release includes support for additive Edge valued DDD an
 	* added tests using uttk
 	* include a dot export example
 	
-Version 1.2 : September 2005. Release includes minor updates and corrections.
+Version 1.2 : January 2006. Release includes the fixpoint construction for homomorphisms.
 	* include serialization and user homomorphisms
 	* Cleaned up includes
 	* Added doxygen documentation
