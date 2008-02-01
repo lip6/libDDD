@@ -2,8 +2,6 @@
 
 
 
-
-
 class NaryIntExpr : public IntExpression {
 protected :
   NaryParamType params ;

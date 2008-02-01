@@ -5,13 +5,8 @@
 #include <iostream>
 #include <string>
 #include <UniqueTable.h>
+#include "Variable.hpp"
 
-class Variable {
-  std::string name;
-public:
-  Variable(const std::string & nname):name(nname){};
-  const std::string & getName () const { return name; }
-};
 
 typedef enum { 
   CONST, // an integer constant

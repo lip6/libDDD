@@ -11,5 +11,5 @@ LDADD = $(DDD_BUILDDIR)/libDDD_d.a
 # AM_CPPFLAGS = -D INST_STL -I $(DDD_SRCDIR)
 # LDADD = $(DDD_BUILDDIR)/libDDD_i.a
 
-testExpr_SOURCES = IntExpression.hpp IntExpression.cpp main.cpp
+testExpr_SOURCES = IntExpression.hpp IntExpression.cpp BoolExpression.hpp BoolExpression.cpp main.cpp
 
