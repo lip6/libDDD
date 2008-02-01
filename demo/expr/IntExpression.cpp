@@ -1,5 +1,42 @@
 #include "IntExpression.hpp"
 
+#include <cmath>
+
+
+
+class VarExpr : public IntExpression {
+  const Variable & var;  
+
+public :
+  VarExpr (const Variable & vvar) : var(vvar){};
+  IntExprType getType() const  { return VAR; }
+
+  void print (std::ostream & os) const {
+    os << var.getName();
+  }
+
+  const IntExpression & eval () const {
+    return *this;
+  }
+};
+
+class ConstExpr : public IntExpression {
+  int val;
+
+public :
+  ConstExpr (int vval) : val(vval) {}
+  IntExprType getType() const  { return CONST; }
+
+  int getValue() const { return val; }
+  const IntExpression & eval () const {
+    return *this;
+  }
+
+  void print (std::ostream & os) const {
+    os << val;
+  }
+
+};
 
 
 class NaryIntExpr : public IntExpression {
@@ -7,8 +44,34 @@ protected :
   NaryParamType params ;
 public :
   virtual const char * getOpString() const = 0;
+  virtual ~NaryIntExpr () {
+    for (NaryParamType::iterator it = params.begin() ; it != params.end() ; it++)
+      delete *it;
+  }
+
+  const NaryParamType & getParams () const { return params; }
   
   NaryIntExpr (const NaryParamType & pparams):params(pparams) {};
+
+  virtual int constEval (int i, int j) const = 0;
+  const IntExpression & eval () const {
+    NaryParamType p ;
+    int constant=0;
+    for (NaryParamType::const_iterator it = getParams().begin(); it != getParams().end() ; ++it ) {
+      const IntExpression & e = (*it)->eval();
+      if (e.getType() == CONST) {
+	constant = constEval(constant, ((const ConstExpr &)e).getValue());
+      } else {
+	p.insert(&e);
+      }
+    }
+    p.insert ( IntExpressionFactory::createConstant(constant) );
+    if (p.size() == 1) 
+      return ** p.begin();
+    else 
+      return *IntExpressionFactory::createNary(getType(),p);
+  }
+
 
   void print (std::ostream & os) const {
     os << "( ";
@@ -30,7 +93,10 @@ public :
   PlusExpr (const NaryParamType & pparams):NaryIntExpr(pparams) {};
   IntExprType getType() const  { return PLUS; }
   const char * getOpString() const { return " + ";}
-
+  
+  int constEval (int i, int j) const {
+    return i+j;
+  }
 };
 
 class MultExpr : public NaryIntExpr {
@@ -39,6 +105,10 @@ public :
   MultExpr (const NaryParamType  & pparams):NaryIntExpr(pparams) {};
   IntExprType getType() const  { return MULT; }
   const char * getOpString() const { return " * ";}
+
+  int constEval (int i, int j) const {
+    return i*j;
+  }
 
 };
 
@@ -49,6 +119,21 @@ protected :
 public :
   virtual const char * getOpString() const = 0;
   BinaryIntExpr (const IntExpression * lleft, const IntExpression * rright) : left (lleft),right(rright){};
+
+  virtual int constEval (int i, int j) const = 0;
+
+  const IntExpression & eval () const {
+    const IntExpression & l = left->eval();
+    const IntExpression & r = right->eval();
+
+    if (l.getType() == CONST && r.getType() == CONST ) {
+      return * IntExpressionFactory::createConstant( constEval( ((const ConstExpr &) l).getValue(),
+								((const ConstExpr &) r).getValue()) );
+    } else {
+      return * IntExpressionFactory::createBinary( getType(), &l, &r );
+    }
+  }
+
   void print (std::ostream & os) const {
     os << "( ";
     left->print(os);
@@ -64,6 +149,9 @@ public :
   MinusExpr (const IntExpression * left, const IntExpression * right) : BinaryIntExpr(left,right) {};
   IntExprType getType() const  { return MINUS; }
   const char * getOpString() const { return " - ";}
+  int constEval (int i, int j) const {
+    return i-j;
+  }
 
 
 };
@@ -75,6 +163,10 @@ public :
   IntExprType getType() const  { return DIV; }
   const char * getOpString() const { return " / ";}
 
+  int constEval (int i, int j) const {
+    return i/j;
+  }
+
 
 };
 
@@ -84,6 +176,10 @@ public :
   ModExpr (const IntExpression * left, const IntExpression * right) : BinaryIntExpr(left,right) {};
   IntExprType getType() const  { return MOD; }
   const char * getOpString() const { return " % ";}
+
+  int constEval (int i, int j) const {
+    return i % j;
+  }
 
 
 };
@@ -95,32 +191,10 @@ public :
   IntExprType getType() const  { return POW; }
   const char * getOpString() const { return " ** ";}
 
-
-};
-
-class VarExpr : public IntExpression {
-  const Variable & var;  
-
-public :
-  VarExpr (const Variable & vvar) : var(vvar){};
-  IntExprType getType() const  { return VAR; }
-
-  void print (std::ostream & os) const {
-    os << var.getName();
+  int constEval (int i, int j) const {
+    return pow(i,j);
   }
 
-};
-
-class ConstExpr : public IntExpression {
-  int val;
-
-public :
-  ConstExpr (int vval) : val(vval) {}
-  IntExprType getType() const  { return CONST; }
-
-  void print (std::ostream & os) const {
-    os << val;
-  }
 
 };
 
@@ -182,31 +256,54 @@ namespace IntExpressionFactory {
 
 
 // namespace IntExpression {
-  const IntExpression & IntExpression::operator+(const IntExpression & e) const {
-    NaryParamType p;
-    p.insert(this);
-    p.insert(&e);
-    return * IntExpressionFactory::createNary(PLUS, p);
-  } 
-  const IntExpression & IntExpression::operator*(const IntExpression & e) const {
-    NaryParamType p;
-    p.insert(this);
-    p.insert(&e);
-    return * IntExpressionFactory::createNary(MULT, p);
+const IntExpression & operator+(const IntExpression & l,const IntExpression & r) {  
+  NaryParamType p;
+  if (l.getType() == PLUS) {
+    const NaryParamType & p2 = ((const NaryIntExpr &)l).getParams();
+    p.insert(p2.begin(), p2.end());
+  } else {
+    p.insert(&l);
   }
-  // binary
-  const IntExpression & IntExpression::operator-(const IntExpression & e) const {
-    return *IntExpressionFactory::createBinary(MINUS,this,&e);
+  if (r.getType() == PLUS) {
+    const NaryParamType & p2 = ((const NaryIntExpr &)r).getParams();
+    p.insert(p2.begin(), p2.end());
+  } else {
+    p.insert (&r);
   }
-  const IntExpression & IntExpression::operator/(const IntExpression & e) const {
-    return *IntExpressionFactory::createBinary(DIV,this,&e);
+  return * IntExpressionFactory::createNary(PLUS, p);
+} 
+
+const IntExpression & operator*(const IntExpression & l,const IntExpression & r) {  
+  NaryParamType p;
+  if (l.getType() == MULT) {
+    const NaryParamType & p2 = ((const NaryIntExpr &)l).getParams();
+    p.insert(p2.begin(), p2.end());
+  } else {
+    p.insert(&l);
   }
-  const IntExpression & IntExpression::operator%(const IntExpression & e) const {
-    return *IntExpressionFactory::createBinary(MOD,this,&e);
+  if (r.getType() == MULT) {
+    const NaryParamType & p2 = ((const NaryIntExpr &)r).getParams();
+    p.insert(p2.begin(), p2.end());
+  } else {
+    p.insert (&r);
   }
-  const IntExpression & IntExpression::operator^(const IntExpression & e) const {
-    return *IntExpressionFactory::createBinary(POW,this,&e);
-  }
+  return * IntExpressionFactory::createNary(MULT, p);
+} 
+
+
+// binary
+const IntExpression & IntExpression::operator-(const IntExpression & e) const {
+  return *IntExpressionFactory::createBinary(MINUS,this,&e);
+}
+const IntExpression & IntExpression::operator/(const IntExpression & e) const {
+  return *IntExpressionFactory::createBinary(DIV,this,&e);
+}
+const IntExpression & IntExpression::operator%(const IntExpression & e) const {
+  return *IntExpressionFactory::createBinary(MOD,this,&e);
+}
+const IntExpression & IntExpression::operator^(const IntExpression & e) const {
+  return *IntExpressionFactory::createBinary(POW,this,&e);
+}
 
 std::ostream & operator << (std::ostream & os, const IntExpression & e) {
   e.print(os);

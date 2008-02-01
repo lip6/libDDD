@@ -7,7 +7,11 @@ protected :
   NaryBoolParamType params ;
 public :
   virtual const char * getOpString() const = 0;
-  
+  virtual ~NaryBoolExpr () {
+    for (NaryBoolParamType::iterator it = params.begin() ; it != params.end() ; it++)
+      delete *it;
+  }
+
   NaryBoolExpr (const NaryBoolParamType & pparams):params(pparams) {};
 
   void print (std::ostream & os) const {
