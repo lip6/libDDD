@@ -29,7 +29,7 @@
 
 #ifndef DDD_MISC_HASHFUNC_HH
 #define DDD_MISC_HASHFUNC_HH
-//# include <cstddef>
+
 
 namespace ddd
 {
