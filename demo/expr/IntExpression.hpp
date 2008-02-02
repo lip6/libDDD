@@ -18,40 +18,44 @@ typedef enum {
   MOD, // binary modulo
   POW // binary power of
 } IntExprType ;
-//  NEG  // unary neg
-
 
 class _IntExpression ;
 
-// immutable class for handling integer expressions.
+// A class to handle integer expressions.
+// Relies on concrete a pointer into unique table.
+// Use factory to build instances.
 class IntExpression {
+  // concrete storage
   const _IntExpression * concrete;
+  // access to concrete
   friend class _IntExpression;
+  // access to _IntExpression* constructor
+  friend class VarExpr;
+  friend class ConstExpr;
+  friend class IntExpressionFactory;
 
-public :
-  // NOT FOR PUBLIC
+  // For factory use
   IntExpression (const _IntExpression * c); 
+public :
 
+  // copy constructor
   IntExpression (const IntExpression & other);
-  
+  // assignment
   IntExpression & operator= (const IntExpression & other);
+  // destructor (does not reclaim memory). Use IntExpressionFactory::garbage for that.
+  ~IntExpression();
+
+
+  // comparisons for set/hash storage (based on unique property of concrete).
   bool operator== (const IntExpression & other) const ;
   bool operator< (const IntExpression & other) const ;
-
-  ~IntExpression();
+  size_t hash () const;
   
-  typedef std::pair<const Variable&,const IntExpression &> Assignment;
-  
+  // return the type of an expression.
   IntExprType getType() const;
   // member print
   void print (std::ostream & os) const ;
   
-  // an operator to (partially) resolve expressions.
-  // replace occurrences of v (if any) by e.
-  const IntExpression & operator& (const Assignment &e) const;
-
-
-
   // basic operators between two expressions.
   // nary
   friend IntExpression operator+(const IntExpression & l,const IntExpression & r) ;
@@ -63,15 +67,19 @@ public :
   IntExpression operator%(const IntExpression & e) const ;
   IntExpression operator^(const IntExpression & e) const ;
 
-  IntExpression eval () const ;
-  
-  
-  size_t hash () const;
 
-  // for public convenience
+  // an operator to (partially) resolve expressions.
+  // replace occurrences of v (if any) by e.
+  typedef std::pair<const Variable&,const IntExpression &> Assignment;
+  const IntExpression & operator& (const Assignment &e) const;
+
+  // resolve what can be resolved at this stage. 
+  // Result is a constant expression iff. the expression has no more variables.
+  IntExpression eval () const ;
+
+  // for pretty print
   friend std::ostream & operator<< (std::ostream & os, const IntExpression & e);
 };
-
 
 
 typedef std::multiset<IntExpression> NaryParamType ;
@@ -84,15 +92,14 @@ public :
   static IntExpression  createConstant (int v);
   static IntExpression  createVariable (const Variable & v) ;
 
-
+  static void garbage() ;
+  static void printStats (std::ostream &os);
 };
 
 
+/**************  administrative trivia. *********************************/
 /******************************************************************************/
-namespace __gnu_cxx {
-  /// Computes a hash key for a DDD. 
-  /// Value returned is based on unicity of concret in unicity table.
-  /// Uses D. Knuth's hash function for pointers.  
+namespace __gnu_cxx { 
   template<>
   struct hash<IntExpression> {
     size_t operator()(const IntExpression &g) const{
@@ -102,8 +109,6 @@ namespace __gnu_cxx {
 }
 
 namespace std {
-  /// Compares two DDD in hash tables. 
-  /// Value returned is based on unicity of concret in unicity table.
   template<>
   struct equal_to<IntExpression> {
     bool operator()(const IntExpression &g1,const IntExpression &g2) const{
@@ -113,8 +118,6 @@ namespace std {
 }
 
 namespace std {
-  /// Compares two DDD in hash tables. 
-  /// Value returned is based on unicity of concret in unicity table.
   template<>
   struct less<IntExpression> {
     bool operator()(const IntExpression &g1,const IntExpression &g2) const{

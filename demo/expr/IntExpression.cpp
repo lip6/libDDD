@@ -6,20 +6,39 @@
 
 // unique storage class
 class _IntExpression {
+  // count references
   mutable size_t refCount;
-  
-  friend class IntExpression;
-
  public :
+  // add a ref
+  void ref () const { 
+    ++refCount;
+  }
+  // dereference
+  void deref () const { 
+    --refCount;
+    assert(refCount >=0);
+  }
+  // default constructor
   _IntExpression (): refCount(0) {}
+  // reclaim memory
   virtual ~_IntExpression () { assert (refCount==0); };
+  
+  ///////// Interface functions
+  // for hash storage
   virtual size_t hash () const = 0 ;
   virtual bool operator==(const _IntExpression & e) const = 0;
-  virtual IntExprType getType() const =0;
-  virtual void print (std::ostream & os) const =0 ;
-  virtual IntExpression eval() const = 0;
 
+  // to avoid excessive typeid RTTI calls.
+  virtual IntExprType getType() const =0;
+
+  // Because friend is not transitive. Offer access to IntExpression concrete to subclasses.
   static const _IntExpression * getConcrete ( const IntExpression & e) { return e.concrete ;}
+
+  // pretty print
+  virtual void print (std::ostream & os) const =0 ;
+
+  // Evaluate an expression.
+  virtual IntExpression eval() const = 0;
 };
 
 
@@ -41,14 +60,14 @@ namespace std {
   };
 }
 
-namespace std {
-  template<>
-  struct less<const IntExpression &> {
-    bool operator()(const IntExpression &g1,const IntExpression &g2) const{
-      return g1 < g2;
-    }
-  };
-}
+// namespace std {
+//   template<>
+//   struct less<const IntExpression &> {
+//     bool operator()(const IntExpression &g1,const IntExpression &g2) const{
+//       return g1 < g2;
+//     }
+//   };
+// }
 
 
 class VarExpr : public _IntExpression {
@@ -63,7 +82,7 @@ public :
   }
 
   IntExpression eval () const {
-    return this;
+    return this ;
   }
 
   bool operator==(const _IntExpression & e) const {
@@ -283,63 +302,64 @@ public :
 };
 
 
-namespace IntExpressionFactory {
+// namespace IntExpressionFactory {
 
-  UniqueTable<_IntExpression>  unique = UniqueTable<_IntExpression>();
+UniqueTable<_IntExpression>  IntExpressionFactory::unique = UniqueTable<_IntExpression>();
 
 
-  IntExpression createNary (IntExprType type, NaryParamType params) {
-    _IntExpression * create;
-    switch (type) {
-    case PLUS :
-      create = new PlusExpr (params);      
-      break;
-    case MULT :
-      create = new MultExpr (params);      
-      break;
-    default :
-      throw "Operator is not nary";
-    }
-    return unique(create);
-//    return create;
+IntExpression IntExpressionFactory::createNary (IntExprType type, NaryParamType params) {
+  _IntExpression * create;
+  switch (type) {
+  case PLUS :
+    create = new PlusExpr (params);      
+    break;
+  case MULT :
+    create = new MultExpr (params);      
+    break;
+  default :
+    throw "Operator is not nary";
   }
-
-  IntExpression  createBinary (IntExprType type, const IntExpression & l, const IntExpression & r) {
-    _IntExpression * create;
-    switch (type) {
-    case MINUS :
-      create = new MinusExpr (l,r);      
-      break;
-    case DIV :
-      create = new DivExpr (l,r);      
-      break;
-    case MOD :
-      create = new ModExpr (l,r);      
-      break;
-    case POW :
-      create = new PowExpr (l,r);      
-      break;
-    default :
-      throw "Operator is not binary";
-    }
-    return  unique(create);
-    //    return create;
-  }
-
-  IntExpression createConstant (int v) {
-    return unique (new ConstExpr(v));
-    //    return new ConstExpr(v);
-  }
-
-  const IntExpression createVariable (const Variable & v) {
-    return unique (new VarExpr(v));
-    //    return new VarExpr(v);
-  }
-
+  return unique(create);
+  //    return create;
 }
+
+IntExpression IntExpressionFactory::createBinary (IntExprType type, const IntExpression & l, const IntExpression & r) {
+  _IntExpression * create;
+  switch (type) {
+  case MINUS :
+    create = new MinusExpr (l,r);      
+    break;
+  case DIV :
+    create = new DivExpr (l,r);      
+    break;
+  case MOD :
+    create = new ModExpr (l,r);      
+    break;
+  case POW :
+    create = new PowExpr (l,r);      
+    break;
+  default :
+    throw "Operator is not binary";
+  }
+  return  unique(create);
+  //    return create;
+}
+
+IntExpression IntExpressionFactory::createConstant (int v) {
+  return unique (new ConstExpr(v));
+  //    return new ConstExpr(v);
+}
+
+IntExpression IntExpressionFactory::createVariable (const Variable & v) {
+  return unique (new VarExpr(v));
+  //    return new VarExpr(v);
+}
+
+// } end namespace IntExpressionFactory
 
 
 // namespace IntExpression {
+// friend operator
 IntExpression operator+(const IntExpression & l,const IntExpression & r) {  
   NaryParamType p;
   if (l.getType() == PLUS) {
@@ -379,24 +399,26 @@ IntExpression operator*(const IntExpression & l,const IntExpression & r) {
 // necessary administrative trivia
 // refcounting
 IntExpression::IntExpression (const _IntExpression * concret): concrete(concret) {
-  (concrete->refCount)++;
+  concrete->ref();
 }
 
 IntExpression::IntExpression (const IntExpression & other) {
   if (this != &other) {
     concrete = other.concrete;
-    (concrete->refCount)++;
+    concrete->ref();
   }
 }
 
 IntExpression::~IntExpression () {
-  concrete->refCount--;  
+  concrete->deref();  
 }
 
 IntExpression & IntExpression::operator= (const IntExpression & other) {
-  (concrete->refCount)--;
-  concrete = other.concrete;
-  (concrete->refCount)++;  
+  if (this != &other) {
+    concrete->deref();
+    concrete = other.concrete;
+    concrete->ref();
+  }
   return *this;
 }
 
