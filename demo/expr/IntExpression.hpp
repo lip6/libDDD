@@ -93,7 +93,6 @@ public :
   static IntExpression  createVariable (const Variable & v) ;
 
   static void destroy (_IntExpression * e);
-  static void garbage() ;
   static void printStats (std::ostream &os);
 };
 
