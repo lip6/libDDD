@@ -366,20 +366,6 @@ void IntExpressionFactory::destroy (_IntExpression * e) {
   }
 }
 
-void IntExpressionFactory::garbage() {
-  for(UniqueTable<_IntExpression>::Table::iterator di=unique.table.begin(); di!=unique.table.end(); ){
-    if(((*di)->refCount)==0){
-      UniqueTable<_IntExpression>::Table::iterator ci=di;
-      di++;
-      _IntExpression *g= *ci;
-      unique.table.erase(ci);
-      delete g;
-    } else {
-      di++;
-    }
-  }
-}
-
 void IntExpressionFactory::printStats (std::ostream &os) {
   os << "entries :" << unique.size() << std::endl;
 }
@@ -445,7 +431,8 @@ IntExpression::~IntExpression () {
 
 IntExpression & IntExpression::operator= (const IntExpression & other) {
   if (this != &other) {
-    concrete->deref();
+    // remove const qualifier for delete call
+    IntExpressionFactory::destroy((_IntExpression *) concrete);
     concrete = other.concrete;
     concrete->ref();
   }
