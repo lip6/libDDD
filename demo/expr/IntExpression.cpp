@@ -8,15 +8,17 @@
 class _IntExpression {
   // count references
   mutable size_t refCount;
+  // access to refcount for garbage purpose
+  friend class IntExpressionFactory;
  public :
   // add a ref
-  void ref () const { 
-    ++refCount;
+  size_t ref () const { 
+    return ++refCount;
   }
   // dereference
-  void deref () const { 
-    --refCount;
-    assert(refCount >=0);
+  size_t deref () const { 
+    assert(refCount >0);
+    return --refCount;
   }
   // default constructor
   _IntExpression (): refCount(0) {}
@@ -355,6 +357,33 @@ IntExpression IntExpressionFactory::createVariable (const Variable & v) {
   //    return new VarExpr(v);
 }
 
+void IntExpressionFactory::destroy (_IntExpression * e) {
+  if (  e->deref() == 0 ){
+    UniqueTable<_IntExpression>::Table::iterator ci = unique.table.find(e);
+    assert (ci != unique.table.end());
+    unique.table.erase(ci);
+    delete e;
+  }
+}
+
+void IntExpressionFactory::garbage() {
+  for(UniqueTable<_IntExpression>::Table::iterator di=unique.table.begin(); di!=unique.table.end(); ){
+    if(((*di)->refCount)==0){
+      UniqueTable<_IntExpression>::Table::iterator ci=di;
+      di++;
+      _IntExpression *g= *ci;
+      unique.table.erase(ci);
+      delete g;
+    } else {
+      di++;
+    }
+  }
+}
+
+void IntExpressionFactory::printStats (std::ostream &os) {
+  os << "entries :" << unique.size() << std::endl;
+}
+
 // } end namespace IntExpressionFactory
 
 
@@ -410,7 +439,8 @@ IntExpression::IntExpression (const IntExpression & other) {
 }
 
 IntExpression::~IntExpression () {
-  concrete->deref();  
+  // remove const qualifier for delete call
+  IntExpressionFactory::destroy((_IntExpression *) concrete);  
 }
 
 IntExpression & IntExpression::operator= (const IntExpression & other) {
