@@ -1,9 +1,0 @@
-
-
-#DEBUG=-g
-#DEBUG= -O3 -D NDEBUG
-DEBUG= -D NDEBUG  -pg
-LIB = libDDD_p.a 
-
-include MakeLib.rules
-
