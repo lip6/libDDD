@@ -41,6 +41,11 @@ class _IntExpression {
 
   // Evaluate an expression.
   virtual IntExpression eval() const = 0;
+
+  virtual IntExpression setAssertion (const Assertion & a) const {
+    return a.getValue(this);
+  }
+
 };
 
 
@@ -180,6 +185,16 @@ public :
     return res;
   }
 
+  IntExpression setAssertion (const Assertion & a) const {
+    NaryParamType res ;
+    for (NaryParamType::const_iterator it = params.begin() ; it != params.end()  ; ++it ) {
+      res.insert( (*it) & a );
+    }
+    IntExpression e = IntExpressionFactory::createNary(getType(),res);    
+    return a.getValue(e);
+  }
+
+
 };
 
 class PlusExpr : public NaryIntExpr {
@@ -246,6 +261,14 @@ public :
     right.print(os);
     os << " )";
   }
+
+  IntExpression setAssertion (const Assertion & a) const {
+    IntExpression l = left & a;
+    IntExpression r = right & a;
+    IntExpression e = IntExpressionFactory::createBinary(getType(),l,r);    
+    return a.getValue(e);
+  }
+
 };
 
 class MinusExpr : public BinaryIntExpr {
@@ -304,6 +327,21 @@ public :
 };
 
 
+/********************************************************/
+/***********  Assertion *********************************/
+
+Assertion::Assertion (const IntExpression & var, const IntExpression & val) : mapping(var,val) {};
+
+IntExpression Assertion::getValue (const IntExpression & v) const {
+  if (v == mapping.first) 
+    return mapping.second;
+  else 
+    return v;
+}
+
+
+/*******************************************************/
+/******* Factory ***************************************/
 // namespace IntExpressionFactory {
 
 UniqueTable<_IntExpression>  IntExpressionFactory::unique = UniqueTable<_IntExpression>();
@@ -355,6 +393,14 @@ IntExpression IntExpressionFactory::createConstant (int v) {
 IntExpression IntExpressionFactory::createVariable (const Variable & v) {
   return unique (new VarExpr(v));
   //    return new VarExpr(v);
+}
+
+Assertion IntExpressionFactory::createAssertion (const Variable & v,const IntExpression & e) {
+  return createAssertion (createVariable(v),e);
+}
+
+Assertion IntExpressionFactory::createAssertion (const IntExpression & v,const IntExpression & e) {
+  return Assertion(v,e);
 }
 
 void IntExpressionFactory::destroy (_IntExpression * e) {
@@ -454,6 +500,10 @@ void IntExpression::print (std::ostream & os) const {
 
 IntExpression IntExpression::eval () const {
   return concrete->eval();
+}
+
+IntExpression IntExpression::operator& (const Assertion &a) const {
+  return concrete->setAssertion(a);
 }
 
 IntExprType IntExpression::getType() const {
