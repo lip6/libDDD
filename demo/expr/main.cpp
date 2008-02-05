@@ -12,8 +12,8 @@ int main () {
     cout << "constant 3: " << three << endl;
     IntExpressionFactory::printStats(cout);
     
-    Variable *a = new Variable("a");
-    IntExpression aexpr = IntExpressionFactory::createVariable(*a);
+    Variable vara = Variable("a");
+    IntExpression aexpr = IntExpressionFactory::createVariable(vara);
     
     IntExpression aplus3 = aexpr + three;
     
@@ -26,6 +26,14 @@ int main () {
 
     IntExpression aplus6 = aplus3.eval();
     cout << "(eval) a + 3 + 3: " << aplus6 << endl;
+
+    IntExpression four = IntExpressionFactory::createConstant(4);
+
+    Assertion a = IntExpressionFactory::createAssertion (vara,four);
+
+    IntExpression fourplus6 = aplus3 & a ;
+    cout << "a + 3 + 3 & a:4 " << fourplus6 << endl;
+    cout << "(eval) : " << fourplus6.eval() << endl;
 
     cout << " In scope :" << endl;
     IntExpressionFactory::printStats(cout);

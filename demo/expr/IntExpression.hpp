@@ -21,6 +21,8 @@ typedef enum {
 
 class _IntExpression ;
 
+class Assertion;
+
 // A class to handle integer expressions.
 // Relies on concrete a pointer into unique table.
 // Use factory to build instances.
@@ -67,11 +69,7 @@ public :
   IntExpression operator%(const IntExpression & e) const ;
   IntExpression operator^(const IntExpression & e) const ;
 
-
-  // an operator to (partially) resolve expressions.
-  // replace occurrences of v (if any) by e.
-  typedef std::pair<const Variable&,const IntExpression &> Assignment;
-  const IntExpression & operator& (const Assignment &e) const;
+  IntExpression operator& (const Assertion &a) const;
 
   // resolve what can be resolved at this stage. 
   // Result is a constant expression iff. the expression has no more variables.
@@ -79,6 +77,14 @@ public :
 
   // for pretty print
   friend std::ostream & operator<< (std::ostream & os, const IntExpression & e);
+};
+
+
+class Assertion {
+  std::pair<IntExpression,IntExpression> mapping ;
+public :
+  Assertion (const IntExpression & var, const IntExpression & val);
+  IntExpression getValue (const IntExpression & v) const ;
 };
 
 
@@ -91,6 +97,9 @@ public :
   static IntExpression  createBinary (IntExprType type, const IntExpression & l, const IntExpression & r) ;
   static IntExpression  createConstant (int v);
   static IntExpression  createVariable (const Variable & v) ;
+  
+  static Assertion createAssertion (const Variable & v,const IntExpression & e);
+  static Assertion createAssertion (const IntExpression & v,const IntExpression & e);
 
   static void destroy (_IntExpression * e);
   static void printStats (std::ostream &os);
