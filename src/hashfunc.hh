@@ -4,6 +4,8 @@
 /*     						                            */
 /*     Copyright (C) 2001-2008 Yann Thierry-Mieg, Jean-Michel Couvreur      */
 /*                             and Denis Poitrenaud                         */
+/*    Based on a file written by Alexandre Duret-Lutz for Spot,             */
+/*                                     Alexandre.Duret-Lutz@lip6.fr         */
 /*     						                            */
 /*     This program is free software; you can redistribute it and/or modify */
 /*     it under the terms of the GNU Lesser General Public License as       */
@@ -19,17 +21,10 @@
 /*Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 /*     						                            */
 /****************************************************************************/
-
-// Copyright (C) 2004, 2005  Laboratoire d'Informatique de Paris 6 (LIP6),
-// département Systèmes Répartis Coopératifs (SRC), Université Pierre
-// et Marie Curie.
-//
-// This file is part of libDDD.
-// Written by Alexandre Duret-Lutz, Alexandre.Duret-Lutz@lip6.fr
-
 #ifndef DDD_MISC_HASHFUNC_HH
 #define DDD_MISC_HASHFUNC_HH
 
+/******************************************************************************/
 
 namespace ddd
 {
