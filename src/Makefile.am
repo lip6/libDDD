@@ -8,9 +8,11 @@ include_HEADERS = DataSet.h			\
 		  SDED.h 			\
 		  SHom.h 			\
 		  UniqueTable.h	                \
-		  IntDataSet.h \
-		hashfunc.hh \
-			Cache.h
+		  IntDataSet.h                  \
+		  hashfunc.hh                   \
+		  Cache.h                       \
+                  MLHom.h                       \
+		  AdditiveMap.hpp              
 
 SRCS 		= DED.cpp			\
 		  DDD.cpp 			\
@@ -28,13 +30,17 @@ SRCS 		= DED.cpp			\
 		  SDD.h		   		\
 		  SHom.h                        \
 		  IntDataSet.h                  \
-		  IntDataSet.cpp
+		  IntDataSet.cpp                \
+                  MLHom.h                       \
+                  MLHom.cpp 	                \
+		  AdditiveMap.hpp              
+
 
 AM_CPPFLAGS =  -Wall 
 
 # default options => -o2 
 libDDD_a_SOURCES = $(SRCS)
-#libDDD_a_CPPFLAGS = -O3  -Wall 
+libDDD_a_CPPFLAGS = -O3  -Wall 
 
 # STL instantiated version for hash profiling
 # libDDD_i_a_SOURCES = $(SRCS)
