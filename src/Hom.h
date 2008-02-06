@@ -39,6 +39,8 @@ class _GHom;
 class StrongHom;
 /// pre-declaration of V. Beaudenon's class for serialization/deserialization
 class MyGHom;
+/// predeclaration for compatibility with ML hom
+class MLHom;
 
 /// This class is the base class representing a homomorphism over DDD.
 /// A DDD homomorphism is a linear application that respects the better-defined relation (see ICATPN'2002 paper by Couvreur et al.).
@@ -115,6 +117,9 @@ public:
   /// Another MyGhom artifact
   /// \todo get rid of me !
   GHom(MyGHom *);
+
+  /// Encapsulate an MLHom, by setting a stop level for the upstream homomorphisms.
+  GHom(const MLHom &);
   
   /// Create a constant DDD homomorphism.
   /// These are the basic building bricks of more complex operations.
@@ -363,8 +368,7 @@ public:
   /// Constructor. Note this class is abstract, so this is only used in initialization
   /// list of derived classes constructors (hard coded operations and StrongShom).
   _GHom(int ref=0,bool im=false):refCounter(ref),marking(false),immediat(im){};
-  /// Destructor. Default behavior. 
-  /// \todo Remove this declaration ? compiler generated version sufficient.
+  /// Virtual Destructor. Default behavior. 
   virtual ~_GHom(){};
 
 
