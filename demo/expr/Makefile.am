@@ -1,5 +1,5 @@
 
-noinst_PROGRAMS = testExpr
+noinst_PROGRAMS = testExpr testML
 
 DDD_SRCDIR = $(top_srcdir)/src
 DDD_BUILDDIR = $(top_builddir)/src
@@ -13,3 +13,4 @@ LDADD = $(DDD_BUILDDIR)/libDDD_d.a
 
 testExpr_SOURCES = IntExpression.hpp IntExpression.cpp BoolExpression.hpp BoolExpression.cpp main.cpp
 
+testML_SOURCES = mainML.cpp
