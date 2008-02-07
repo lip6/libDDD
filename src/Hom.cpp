@@ -24,11 +24,14 @@
 #include <iostream>
 #include <cassert>
 #include <map>
+#include <set>
+
 
 #include "Hom.h"
 #include "DDD.h"
 #include "DED.h"
 #include "UniqueTable.h"
+#include "MLHom.h"
 
 #ifdef PARALLEL_DD
 #include <tbb/concurrent_vector.h>
@@ -621,6 +624,46 @@ _GHom::eval_skip(const GDDD& d) const
     return eval(d);
 }
 
+
+
+
+/*************************************************************************/
+/*                         MLHom  adapter class */
+/*************************************************************************/
+
+class MLHomAdapter :public _GHom{
+private:
+  MLHom h;
+public:
+  /* Constructor */
+  MLHomAdapter(const MLHom &hh):h(hh){}
+  /* Compare */
+  bool operator==(const _GHom &other) const{
+    return h==((MLHomAdapter*)& other )->h;
+  }
+  size_t hash() const{
+    return 19751*h.hash();
+  }
+
+  /* Eval */
+  GDDD eval(const GDDD &d)const{
+    HomNodeMap m = h (d);
+    std::set<GDDD> sum;
+    for (HomNodeMap::const_iterator it = m.begin() ; it != m.end() ; ++it) {
+      sum.insert(it->first (it->second));
+    }
+    return DED::add(sum);
+  }
+
+  /* Memory Manager */
+  void mark() const{
+    /// ???????
+    // h.mark();
+  }
+};
+
+
+
 /*************************************************************************/
 /*                         Class StrongHom                               */
 /*************************************************************************/
@@ -655,6 +698,9 @@ StrongHom::eval(const GDDD &d) const
 
 /* Constructor */
 GHom::GHom(_GHom *_h):concret(canonical(_h)) {};
+
+GHom::GHom(const MLHom &h):concret(canonical(new MLHomAdapter(h))) {};
+
 
 GHom::GHom(const GDDD& d):concret(canonical(new Constant(d))){}
 
@@ -778,6 +824,8 @@ GHom fixpoint (const GHom &h) {
   else
     return GHom::id;
 }
+
+
 
 GHom operator&(const GHom &h1,const GHom &h2){
 	
