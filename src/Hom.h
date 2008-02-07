@@ -156,7 +156,8 @@ public:
   ///  \param d the argument DDD
   ///  \return h(d) 
   GDDD eval(const GDDD &d) const;
-
+  
+  bool skip_variable(int var) const ;
 
   /// Accessor to visualize the reference count of the concret instance.
   /// See _GHom::refCounter for details.
