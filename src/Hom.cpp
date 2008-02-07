@@ -654,9 +654,7 @@ StrongHom::eval(const GDDD &d) const
 /*************************************************************************/
 
 /* Constructor */
-GHom::GHom(const StrongHom *h):concret(h){}
-
-GHom::GHom(StrongHom *h):concret(canonical(h)){}
+GHom::GHom(_GHom *_h):concret(canonical(_h)) {};
 
 GHom::GHom(const GDDD& d):concret(canonical(new Constant(d))){}
 
@@ -823,12 +821,6 @@ GHom operator-(const GHom &h,const GDDD &d){
 /*************************************************************************/
 /*                         Class MyGHom                                    */  
 /*************************************************************************/
-
-/* Constructor */
-GHom::GHom(const MyGHom *h):concret(h){}
-
-GHom::GHom(MyGHom *h):concret(canonical(h)){}
-
 
 
 void GHom::pstats(bool reinit)
