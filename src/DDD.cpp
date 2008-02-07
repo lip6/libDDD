@@ -179,7 +179,9 @@ std::ostream& operator<<(std::ostream &os,const GDDD &g){
   return(os);
 }
 
-GDDD::GDDD(_GDDD *_g):concret(_g){}
+GDDD::GDDD(_GDDD *_g):concret(canonical(_g)){}
+GDDD::GDDD(const _GDDD *_g):concret(_g){}
+
 
 GDDD::GDDD(int variable,Valuation value){
 #ifdef EVDDD
@@ -508,7 +510,7 @@ size_t DDD::set_hash() const {
 
 //My funs
 
-unsigned long int GDDD::nodeIndex(std::vector<_GDDD*> list) const{
+unsigned long int GDDD::nodeIndex(const std::vector<const _GDDD*> & list) const{
     assert(this);
     assert(concret);
     unsigned long int i=0;
@@ -519,7 +521,7 @@ unsigned long int GDDD::nodeIndex(std::vector<_GDDD*> list) const{
 }
 
 
-void GDDD::saveNode(std::ostream& os, std::vector<_GDDD*>& list)const {
+void GDDD::saveNode(std::ostream& os, std::vector<const _GDDD*>& list)const {
     assert(this);
     //assert(concret);
     unsigned long int index = nodeIndex(list);
@@ -542,7 +544,7 @@ void GDDD::saveNode(std::ostream& os, std::vector<_GDDD*>& list)const {
 
 
 void saveDDD(std::ostream& os, std::vector<DDD> list) {
-  std::vector<_GDDD*> SavedDDD;
+  std::vector<const _GDDD*> SavedDDD;
     for (unsigned int i= 0; i<list.size(); ++i) {
         list[i].saveNode(os, SavedDDD);
     }

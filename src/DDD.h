@@ -56,16 +56,18 @@ private:
   friend class DDD;
   /// The real implementation class. All true operations are delagated on this pointer.
   /// Construction/destruction take care of ensuring concret is only instantiated once in memory.
-  _GDDD *concret;
+  const _GDDD *concret;
   /// A private constructor used in internals. 
   /// \param _g The pointer provided should point into the unicity table
+  GDDD(const _GDDD *_g);
+  // call with additional canonization
   GDDD(_GDDD *_g);
   /// Internal function used in recursion for textual printing of GDDD.
   void print(std::ostream& os,std::string s) const;
   /// A function for DDD serialization (beta).
-  void saveNode(std::ostream&, std::vector<_GDDD*>& )const;
+  void saveNode(std::ostream&, std::vector<const _GDDD*>& )const;
   /// Another function used in serialization.
-  unsigned long int nodeIndex(std::vector<_GDDD*>)const;
+  unsigned long int nodeIndex(const std::vector<const _GDDD*> &)const;
 public:
   /// \name Public Accessors 
   //@{
