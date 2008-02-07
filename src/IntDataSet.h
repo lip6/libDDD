@@ -62,11 +62,11 @@ namespace std {
 class IntDataSet : public DataSet {
   static UniqueTable<vector<int> > canonical;
   
-  static vector<int> * empty_;
+  static const vector<int> * empty_;
   
-  vector<int>* data;
+  const vector<int>* data;
   // private constructors
-  IntDataSet (vector<int>* ddata): data(ddata) {};
+  IntDataSet (const vector<int>* ddata): data(ddata) {};
   
 public :
   /// typedef IntDataSet::const_iterator
@@ -97,7 +97,7 @@ public :
   /// returns a new instance with elements = this inter b
   DataSet *set_intersect (const DataSet & b) const  {
     vector<int> res ;
-    vector<int>* bvec = ((const IntDataSet &) b).data;
+    const vector<int>* bvec = ((const IntDataSet &) b).data;
     std::set_intersection(data->begin(), data->end(),bvec->begin(), bvec->end(),std::back_insert_iterator<vector<int> > (res));
     // trim
     vector<int>* trimres = new vector<int> (res);
@@ -107,7 +107,7 @@ public :
   /// returns a new instance with elements = this union b
   DataSet *set_union (const DataSet & b)  const {
     vector<int> res ;
-    vector<int>* bvec = ((const IntDataSet &) b).data;
+    const vector<int>* bvec = ((const IntDataSet &) b).data;
     std::set_union(data->begin(), data->end(),bvec->begin(), bvec->end(),std::back_insert_iterator<vector<int> > (res));
     // trim
     vector<int>* trimres = new vector<int> (res);
@@ -117,7 +117,7 @@ public :
   /// returns a new instance with elements = this setminus b
   DataSet *set_minus (const DataSet & b) const {
     vector<int> res ;
-    vector<int>* bvec = ((const IntDataSet &) b).data;
+    const vector<int>* bvec = ((const IntDataSet &) b).data;
     std::set_difference(data->begin(), data->end(),bvec->begin(), bvec->end(),std::back_insert_iterator<vector<int> > (res));
     // trim
     vector<int>* trimres = new vector<int> (res);
