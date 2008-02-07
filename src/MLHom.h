@@ -28,13 +28,10 @@
 
 class MLHom;
 
-class HomNodeMap : public AdditiveMap<GHom,GDDD> {
-public :
-  GDDD build () const ;
-};
+typedef AdditiveMap<GHom,GDDD> HomNodeMap ;
 
-class HomHomMap : public AdditiveMap<GHom,MLHom> {
-};
+typedef  AdditiveMap<GHom,MLHom> HomHomMap; 
+
 
 class _MLHom;
 class StrongMLHom;
@@ -48,7 +45,6 @@ class MLHom {
   /// Construction/destruction take care of ensuring concret is only instantiated once in memory.  
   const _MLHom* concret;
 
-  MLHom (const _MLHom *);
 public :
 
   /// Elementary homomorphism Identity, defined as a constant.
@@ -61,7 +57,8 @@ public :
   
   MLHom(const GHom &h);
 
-  MLHom(const StrongMLHom *);
+  MLHom (_MLHom *);
+  MLHom (const _MLHom *);
   
   
   /// Create variable/value pair and left concatenate to a homomorphism.
@@ -123,7 +120,7 @@ public :
 
   virtual bool operator==(const StrongMLHom &) const=0;
 
-  virtual HomNodeMap eval(const GDDD &) const ;
+  HomNodeMap eval(const GDDD &) const ;
 
   /// User defined behavior is input through this function
   virtual HomHomMap phi (int var,int val) const=0;   
