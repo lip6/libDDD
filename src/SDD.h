@@ -55,7 +55,7 @@ private:
   friend class _GSDD;
   /// The real implementation class. All true operations are delagated on this pointer.
   /// Construction/destruction take care of ensuring concret is only instantiated once in memory.
-  _GSDD *concret;
+  const _GSDD *concret;
   /// Internal function used in recursion for textual printing of GDDD.
   void print(std::ostream& os,std::string s) const;
 public:
@@ -115,9 +115,10 @@ public:
   GSDD(int var,const GSDD & val,const GSDD &d=one ); //var-val->d
   GSDD(int var,const class SDD & val,const GSDD &d=one ); //var-val->d
   /// A should be \e private constructor used in internals, DO NOT USE THIS. 
-  /// \param _g The pointer provided should point into the unicity table
-  /// \todo make this private
+  /// Calls canonical to uniquify the pointer provided
   GSDD(_GSDD *_g); 
+  /// \param _g The pointer provided should point into the unicity table
+  GSDD(const _GSDD *_g); 
 #ifdef OTF_GARBAGE
   /// In OTF garbage context, reference count maintaining is necessary for GSDD.
   /// Copy constructor with refcount.
