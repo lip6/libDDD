@@ -50,7 +50,7 @@ public:
   /// the table if it exists, or inserts and returns the address of the value inserted.
   /// \param _g the pointer to the value we want to find in the table.
   /// \return the address of an object stored in the UniqueTable such that (*_g == *return_value)
-  T *operator()(T *_g){
+  const T *  operator()(T *_g){
     std::pair<typename Table::iterator, bool> ref=table.insert(_g); 
 
     
