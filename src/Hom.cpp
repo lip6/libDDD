@@ -706,6 +706,10 @@ GHom::GHom(const GDDD& d):concret(canonical(new Constant(d))){}
 
 GHom::GHom(int var, int val, const GHom &h):concret(canonical(new LeftConcat(GDDD(var,val),h))){}
 
+bool GHom::skip_variable(int var) const {
+  return concret->skip_variable(var);
+}
+
 /* Eval */
 GDDD
 GHom::operator()(const GDDD &d) const
