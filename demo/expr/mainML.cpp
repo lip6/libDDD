@@ -136,10 +136,13 @@ int main () {
 
   GHom be = AssignVar(B,E);
   GHom eb = AssignVar(E,B);
+  GHom bg = AssignVar(B,G);
+
 
   cout << "Input :" << test5 << endl;
   cout << "b:=e :" << be(test5) << endl;
   cout << "e:=b :" << eb(test5) << endl;
+  cout << "b:=g :" << bg(test5) << endl;
 
   return 0;
 }
