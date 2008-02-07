@@ -84,7 +84,40 @@ public:
 
 using namespace nsMLHom;
 
+
+/************* Class MLHom *******************/
+
 const MLHom MLHom::id(canonical(new Identity(1)));
 
-
+MLHom::~MLHom () {};
 MLHom::MLHom (const _MLHom *h):concret(h){};
+MLHom::MLHom (_MLHom *h):concret(canonical(h)){};
+
+
+/************* Class StrongMLHom ***************/
+
+
+bool StrongMLHom::operator==(const _MLHom &h) const {
+    return typeid(*this)==typeid(h)?*this==*(StrongMLHom*)&h:false;
+}
+
+
+HomNodeMap StrongMLHom::eval(const GDDD &d) const {
+  HomNodeMap res;
+
+  int var = d.variable();
+
+  for (GDDD::const_iterator dit = d.begin() ; dit != d.end() ; ++dit) {   
+
+    HomHomMap phires = phi(var,dit->first);
+    for (HomHomMap::const_iterator homit = phires.begin() ; homit!= phires.end() ; ++homit) {
+      HomNodeMap down = homit->second(dit->second); 
+      
+      for (HomNodeMap::const_iterator downit = down.begin() ; downit != down.end() ; ++downit) {
+	res.add(homit->first & downit->first, downit->second);
+      }
+    }
+  }
+  return res;
+
+}
