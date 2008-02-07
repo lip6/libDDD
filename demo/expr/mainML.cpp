@@ -96,7 +96,7 @@ public:
     } else {
       // must be varl given the skip variable constraint      
       // set stop level and propagate an MLHom
-      return GHom( queryML(varl,varr));
+      return GHom(MLHom(vr,vl,queryML(varl,varr)));
     }
   }
   size_t hash() const {
@@ -126,7 +126,7 @@ void initName() {
 using namespace std;
 
 int main () {
-
+  initName();
 
   DDD test1 = GDDD(A,1,GDDD(B,2,GDDD(C,3,GDDD(D,4,GDDD(E,5,GDDD(F,6,GDDD(G,7)))))));
   DDD test2 = GDDD(A,2,GDDD(B,2,GDDD(C,3,GDDD(D,5,GDDD(E,5,GDDD(F,6,GDDD(G,7)))))));
