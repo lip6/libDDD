@@ -17,8 +17,12 @@ public :
   AdditiveMap(){};
 
   // delegate iterator operations to map
-  const_iterator end() { return map.end(); }
-  const_iterator begin() { return map.begin();}
+  const_iterator end() const { return map.end(); }
+  const_iterator begin() const { return map.begin();}
+
+  int addAll (const AdditiveMap<K,V> & other) {
+    return addAll(other.begin(),other.end());
+  }
 
   // adds a set of mappings 
   // returns the number of sums computed
