@@ -55,7 +55,7 @@ public :
     return ret;
   }
 
-  bool operator== (const StrongMLHom & s) {
+  bool operator== (const StrongMLHom & s) const {
     _QueryMLHom * ps = (_QueryMLHom *)&s;
     return a == ps->a && b == ps->b;    
   }
@@ -110,4 +110,36 @@ public:
 
 GHom AssignVar (int var, int val) {
   return new _AssignVar(var,val);
+}
+
+
+typedef enum {A, B, C, D,E, F, G} var;
+var variables;
+const char* vn[]= {"A", "B", "C", "D", "E", "F", "G"};
+
+void initName() {
+  for (int i=A; i<=G; i++)
+    DDD::varName(i,vn[i]);
+}
+
+#include <iostream>
+using namespace std;
+
+int main () {
+
+
+  DDD test1 = GDDD(A,1,GDDD(B,2,GDDD(C,3,GDDD(D,4,GDDD(E,5,GDDD(F,6,GDDD(G,7)))))));
+  DDD test2 = GDDD(A,2,GDDD(B,2,GDDD(C,3,GDDD(D,5,GDDD(E,5,GDDD(F,6,GDDD(G,7)))))));
+  DDD test3 = GDDD(A,1,GDDD(B,2,GDDD(C,12,GDDD(D,4,GDDD(E,5,GDDD(F,6,GDDD(G,9)))))));
+  DDD test4 = GDDD(A,1,GDDD(B,2,GDDD(C,12,GDDD(D,4,GDDD(E,5,GDDD(F,6,GDDD(G,7)))))));
+  DDD test5 = test1 + test2 + test3 + test4;
+
+  GHom be = AssignVar(B,E);
+  GHom eb = AssignVar(E,B);
+
+  cout << "Input :" << test5 << endl;
+  cout << "b:=e :" << be(test5) << endl;
+  cout << "e:=b :" << eb(test5) << endl;
+
+  return 0;
 }
