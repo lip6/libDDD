@@ -93,30 +93,20 @@ private:
   /// The real implementation class. All true operations are delagated on this pointer.
   /// Construction/destruction take care of ensuring concret is only instantiated once in memory.  
   const _GHom* concret;
-  /// A private constructor used in internals. 
+public:
+  /// A uncontrolled constructor used in internals. 
+  /// Made public for calls like return GHom(this) in StrongHom::phi definitions.
   /// \param _h The pointer provided should point into the unicity table
   GHom(const _GHom *_h):concret(_h){};
-public:
 
+  /// build a GHom from user provided homomorphisms such as StrongHom.
+  /// This call ensures canonization of h
+  GHom(_GHom *_h);
   /// \name Public Constructors 
   //@{
   /// Default public constructor.
   /// Builds Identity homomorphism : forall d in DDD, id(d) = d
   GHom():concret(id.concret){};
-  /// Create a (general) homomorphism from a user defined StrongHom.
-  /// Common usage is : GHom h = GHom ( new myUserDefinedStrongHom(parameters) )
-  GHom(const StrongHom *);
-  /// Create a (general) homomorphism from a user defined StrongHom.
-  /// Common usage is : GHom h = GHom ( new myUserDefinedStrongHom(parameters) )
-  GHom(StrongHom *);
-  
-  /// Create a (general) homomorphism from a user defined MyGHom.
-  /// Purpose of MyGhom is unknown... get rid of it ?
-  /// \todo : eliminate references to this class.
-  GHom(const MyGHom *);
-  /// Another MyGhom artifact
-  /// \todo get rid of me !
-  GHom(MyGHom *);
 
   /// Encapsulate an MLHom, by setting a stop level for the upstream homomorphisms.
   GHom(const MLHom &);
