@@ -321,7 +321,11 @@ GSDD::GSDD(const GSDD & g) :concret(g.concret) {
 }
 #endif
 
-GSDD::GSDD(_GSDD *_g):concret(_g){ 
+GSDD::GSDD(const _GSDD *_g):concret(_g){
+ // handle OTF GARBAGE ?
+} 
+
+GSDD::GSDD(_GSDD *_g):concret(canonical(_g)){ 
 #ifdef OTF_GARBAGE
   if ( ! concret->isSon  ) {
     if (!concret->tempCounter)
