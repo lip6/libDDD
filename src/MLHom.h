@@ -47,6 +47,8 @@ class MLHom {
   /// The real implementation class. All true operations are delagated on this pointer.
   /// Construction/destruction take care of ensuring concret is only instantiated once in memory.  
   const _MLHom* concret;
+
+  MLHom (const _MLHom *);
 public :
 
   /// Elementary homomorphism Identity, defined as a constant.
@@ -88,13 +90,11 @@ public :
   /// cache calls to eval
   HomNodeMap operator() (const GDDD &) const;
 
-  /// For garbage collection. Used in first phase of garbage collection.
-  virtual void mark() const{};
 
 };
 
 /// Composition by union of two homomorphisms. 
-/// See also GShom::add(). This commutative operation computes a homomorphism 
+/// This commutative operation computes a homomorphism 
 /// that evaluates as the sum of two homomorphism.
 ///
 /// Semantics : (h1 + h2) (d) = h1(d) + h2(d).
@@ -103,13 +103,25 @@ MLHom operator+(const MLHom &,const MLHom &);
 class _MLHom {
   mutable int refCounter;
 public:
+  _MLHom (int ref=0) : refCounter(ref) {}
+  /** test if caching should be done : default means should cache */
+  virtual bool shouldCache () const { return true ; }
+
   /// Virtual Destructor. 
   virtual ~_MLHom(){};
-  
+  virtual HomNodeMap eval(const GDDD &) const = 0;
+
+  /** unique table trivia */
+  virtual size_t hash() const = 0;
+  virtual bool operator==(const _MLHom &h) const=0;
 };
 
 class StrongMLHom : public _MLHom {
 public :
+
+  bool operator==(const _MLHom &h) const;
+
+  virtual bool operator==(const StrongMLHom &) const=0;
 
   virtual HomNodeMap eval(const GDDD &) const ;
 
