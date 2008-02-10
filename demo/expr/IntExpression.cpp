@@ -502,6 +502,18 @@ IntExpression IntExpression::eval () const {
   return concrete->eval();
 }
 
+/// only valid for CONST expressions
+/// use this call only in form : if (e.getType() == CONST) { int j = e.getValue() ; ...etc }
+/// Exceptions will be thrown otherwise.
+int IntExpression::getValue () const {
+  if (getType() != CONST) {
+    throw "Do not call getValue on non constant int expressions.";
+  } else {
+    return ((const ConstExpr *) concrete)->getValue();    
+  }
+}
+
+
 IntExpression IntExpression::operator& (const Assertion &a) const {
   return concrete->setAssertion(a);
 }
