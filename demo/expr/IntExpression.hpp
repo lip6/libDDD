@@ -75,6 +75,12 @@ public :
   // Result is a constant expression iff. the expression has no more variables.
   IntExpression eval () const ;
 
+  /// only valid for CONST expressions
+  /// use this call only in form : if (e.getType() == CONST) { int j = e.getValue() ; ...etc }
+  /// Exceptions will be thrown otherwise.
+  int getValue () const ;
+
+
   // for pretty print
   friend std::ostream & operator<< (std::ostream & os, const IntExpression & e);
 };
