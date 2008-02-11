@@ -159,6 +159,8 @@ public:
   
   bool skip_variable(int var) const ;
 
+  GHom compose (const GHom &r) const ;
+
   /// Accessor to visualize the reference count of the concret instance.
   /// See _GHom::refCounter for details.
   int refCounter() const;
@@ -170,6 +172,7 @@ public:
   /// \param anonymous the set of homomorphisms to put in the union.
   /// \todo std::set not very efficient for storage, replace by a sorted vector ?
   static GHom add(const std::set<GHom>&);
+
 
 
   /// \name Memory Management 
@@ -345,8 +348,8 @@ private:
   /// If immediat==true,  eval is called without attempting a cache hit. 
   /// Currently only the constant homomorphism has this attribute set to true.  
   mutable bool immediat;
-  
-    GDDD eval_skip(const GDDD &) const;
+ 
+  GDDD eval_skip(const GDDD &) const;
   
 public:
 
@@ -380,6 +383,8 @@ public:
 
   /// For garbage collection. Used in first phase of garbage collection.
   virtual void mark() const{};
+
+  virtual GHom compose (const GHom &r) const ;
 
 protected:
   
