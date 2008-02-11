@@ -13,13 +13,19 @@ int main () {
     IntExpressionFactory::printStats(cout);
     
     Variable vara = Variable("a");
+    Variable varb = Variable("b");
+        
     IntExpression aexpr = IntExpressionFactory::createVariable(vara);
     
     IntExpression aplus3 = aexpr + three;
     
     cout << "a + 3 : " << aplus3 << endl;
     IntExpressionFactory::printStats(cout);
-    
+
+    IntExpression bexpr = IntExpressionFactory::createVariable(varb);
+    IntExpression aplus3b = aplus3 + bexpr;
+    cout << "a + 3 + b : " << aplus3b << endl;
+
     aplus3 = aplus3 + three;
     cout << "a + 3 + 3: " << aplus3 << endl;
     IntExpressionFactory::printStats(cout);
