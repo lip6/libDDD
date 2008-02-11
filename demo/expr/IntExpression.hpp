@@ -91,6 +91,11 @@ class Assertion {
 public :
   Assertion (const IntExpression & var, const IntExpression & val);
   IntExpression getValue (const IntExpression & v) const ;
+
+  Assertion operator & (const Assertion & other) const;
+
+  size_t hash() const;
+  bool operator== (const Assertion & ) const ;
 };
 
 
