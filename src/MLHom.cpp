@@ -140,6 +140,36 @@ public:
   }
 };
 
+class ConstantUp:public _MLHom {
+  GHom  up;
+  MLHom down;
+public :
+  ConstantUp(const GHom & uup,const MLHom & ddown):up(uup),down(ddown){}
+
+  /* Compare */
+  bool operator==(const _MLHom &other) const{ 
+    return up==((ConstantUp*)&other )->up && down==((ConstantUp*)&other )->down;
+  }
+  size_t hash() const { 
+    return  10159*(up.hash()^(down.hash()+37));
+  }
+
+  bool
+  skip_variable(int var) const 
+  {
+    return false;
+  }
+
+  HomNodeMap eval(const GDDD &d) const { 
+    HomNodeMap m = down(d);
+    HomNodeMap res;
+    for (HomNodeMap::const_iterator it = m.begin() ; it != m.end() ; ++it ){
+      res.add(up.compose(it->first), it->second ); 
+    }
+    return res; 
+  }
+
+};
 
 class LeftConcat:public _MLHom{
   GDDD left;
@@ -188,7 +218,9 @@ MLHom::~MLHom () {};
 MLHom::MLHom (const _MLHom *h):concret(h){};
 MLHom::MLHom (_MLHom *h):concret(canonical(h)){};
 
+MLHom::MLHom (const GHom & up, const MLHom & down):concret(canonical(new ConstantUp(up,down))){}
 MLHom::MLHom (const GHom &h):concret (canonical(new GHomAdapter(h))) {}
+
 
 MLHom::MLHom (int var, int val, const MLHom &h):concret(canonical(new LeftConcat(GDDD(var,val),h))){}
 
@@ -216,7 +248,7 @@ HomNodeMap StrongMLHom::eval(const GDDD &d) const {
       HomNodeMap down = homit->second(dit->second); 
       
       for (HomNodeMap::const_iterator downit = down.begin() ; downit != down.end() ; ++downit) {
-	res.add(homit->first & downit->first, downit->second);
+	res.add(homit->first.compose(downit->first), downit->second);
       }
     }
   }

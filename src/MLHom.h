@@ -56,7 +56,7 @@ public :
   MLHom():concret(id.concret){};
   
   MLHom(const GHom &h);
-
+  MLHom (const GHom & up, const MLHom & down);
   MLHom (_MLHom *);
   MLHom (const _MLHom *);
   
