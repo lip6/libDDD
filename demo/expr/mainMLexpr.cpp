@@ -1,6 +1,7 @@
 #include "MLHom.h"
 #include "IntExpression.hpp"
 #include <iostream>
+#include <cassert>
 using namespace std;
 
 
@@ -16,6 +17,12 @@ void initName() {
 }
 
 
+// predeclarations
+GHom assignExpr (int var, const IntExpression & val);
+MLHom queryExpression (const IntExpression & e);
+GHom assertion (const Assertion & a);
+
+class _AssertionHom;
 
 // assign a constant to a value
 class _AssignExpr:public StrongHom {
@@ -42,13 +49,16 @@ public:
     e = e & IntExpressionFactory::createAssertion(globalVariables[vr],IntExpressionFactory::createConstant(vl));
       //    }
     e = e.eval();
-    if (e.getType() == CONST) {
-      // Constant :
-      return GHom(var, e.getValue());
-    } else {
+    if (vr == var) {
+      if (e.getType() == CONST) {
+	// Constant :
+	return GHom(var, e.getValue());
+      } else {
       // still need to resolve.
-      //      return MLHom(AssignExpr(var,e),)
-      return GHom::id;
+	return MLHom(assignExpr(var,e),MLHom(vr,vl,queryExpression(e)));
+      }
+    } else {
+      return GHom(vr,vl, assignExpr(var,e));
     }
   }
   size_t hash() const {
@@ -58,27 +68,38 @@ public:
     _AssignExpr* ps = (_AssignExpr*)&s;
     return var == ps->var && expr == ps->expr;
   }
+
+  GHom compose (const GHom & other) const ;
 };
 
-GHom AssignExpr (int var, IntExpression val) {
+GHom assignExpr (int var,const IntExpression & val) {
   return new _AssignExpr(var,val);
 }
 
-// a MLHom to handle : a := b
-// seeks value of b and returns an up part to assign to a
+// a MLHom to handle : a =? b
+// initialized by querying for a =? a and resolve until right hand side is constant
 class _QueryMLHom : public StrongMLHom {
-  int a,b;
+  IntExpression a;
+  IntExpression b;
 public :
-  _QueryMLHom (int aa, int bb) : a(aa),b(bb) {}
+  _QueryMLHom (const IntExpression & aa, const IntExpression & bb) : a(aa),b(bb) {}
 
   HomHomMap phi (int var,int val) const {
-    GHom homup = GHom::id;
+    IntExpression e = b ;
+    //    if (expr.contains(globalVariables[vr])) {
+    e = e & IntExpressionFactory::createAssertion(globalVariables[var],IntExpressionFactory::createConstant(val));
+    //}
+    e= e.eval();
+
+
+    GHom homup = assertion(IntExpressionFactory::createAssertion(a,e));
     MLHom homdown = MLHom::id;
-    if (var == b) {
-      homdown = GHom (var,val);
-      homup = AssignConst(a,val);
+    
+    if (e.getType() == CONST) {
+      // Constant :
+      homdown = GHom(var,val,GHom::id);
     } else {
-      homdown = MLHom(var,val,this);
+      homdown = MLHom (var,val,queryExpression(e));
     }
     HomHomMap ret;
     ret.add(homup,homdown);
@@ -91,22 +112,21 @@ public :
   }
 
   size_t hash() const {
-    return 7489*(a^b);
+    return 7489*(a.hash()^(b.hash()+1));
   }
 
 
 };
 
-MLHom queryML (int a, int b) {
-  return new _QueryMLHom(a,b);
+MLHom queryExpression (const IntExpression & a) {
+  return new _QueryMLHom(a,a);
 }
 
 // perform varl := varr independently of variable ordering.
-class _AssignVar:public StrongHom {
-  int varl;
-  int varr;
+class _AssertionHom:public StrongHom {
+  Assertion ass;
 public:
-  _AssignVar(int left, int right) : varl(left), varr(right) {}
+  _AssertionHom(const Assertion & expr) : ass(expr) {}
   
   GDDD phiOne() const {
     return GDDD::one;
@@ -115,32 +135,46 @@ public:
   bool
   skip_variable(int var) const
   {
-    return var != varr && var != varl ;
+    return false;
   }
 
+  Assertion getAssertion () const { return ass;}
+
   GHom phi(int vr, int vl) const {
-    if (vr == varr) {
-      // simple case, encounter varr before varl
-      // Basic homomorphisms can handle this case.
-      return GHom(vr,vl, AssignConst(varl,vl));
-    } else {
-      // must be varl given the skip variable constraint      
-      // set stop level and propagate an MLHom
-      return GHom(MLHom(vr,vl,queryML(varl,varr)));
-    }
+    assert(false);
+    return GDDD::null;
   }
   size_t hash() const {
-    return 7717*varl^varr;
+    return 7717*ass.hash();
   }
   bool operator==(const StrongHom &s) const {
-    _AssignVar* ps = (_AssignVar*)&s;
-    return varl == ps->varl && varr == ps->varr;
+    _AssertionHom* ps = (_AssertionHom*)&s;
+    return ass == ps->ass;
+  }
+
+  GHom compose (const GHom & other) const {
+    const _GHom * c = get_concret(other);
+    if (typeid(*c) == typeid(_AssertionHom)) {
+      return new _AssertionHom(ass &  ((const _AssertionHom *)c)->getAssertion());
+    } else {
+      return _GHom::compose(other);
+    }
   }
 };
 
-GHom AssignVar (int var, int val) {
-  return new _AssignVar(var,val);
+GHom assertion (const Assertion & e) {
+  return new _AssertionHom(e);
 }
+
+GHom _AssignExpr::compose (const GHom & other) const {
+  const _GHom * c = get_concret(other);
+  if (typeid(*c) == typeid(_AssertionHom)) {
+    return assignExpr(var,(expr & ((const _AssertionHom *)c)->getAssertion()).eval());
+  } else {
+    return _GHom::compose(other);
+  }
+}
+
 
 
 int main () {
@@ -152,15 +186,24 @@ int main () {
   DDD test4 = GDDD(A,1,GDDD(B,2,GDDD(C,12,GDDD(D,4,GDDD(E,5,GDDD(F,6,GDDD(G,7)))))));
   DDD test5 = test1 + test2 + test3 + test4;
 
-  GHom be = AssignVar(B,E);
-  GHom eb = AssignVar(E,B);
-  GHom bg = AssignVar(B,G);
+  GHom be = assignExpr(B,IntExpressionFactory::createVariable(globalVariables[E]));
+  GHom eb = assignExpr(E,IntExpressionFactory::createVariable(globalVariables[B]));
+  GHom bg = assignExpr(B,IntExpressionFactory::createVariable(globalVariables[G]));
 
+  
+  IntExpression Eexpr = IntExpressionFactory::createVariable(globalVariables[E]);
+  IntExpression Gexpr = IntExpressionFactory::createVariable(globalVariables[G]);
+  cout << Eexpr << endl ;
+  cout << Gexpr << endl ;
+
+  IntExpression eplusg = Eexpr + Gexpr ;
+  GHom beg = assignExpr(B,eplusg);
 
   cout << "Input :" << test5 << endl;
   cout << "b:=e :" << be(test5) << endl;
   cout << "e:=b :" << eb(test5) << endl;
   cout << "b:=g :" << bg(test5) << endl;
+  cout << "b:=e+g :" << beg(test5) << endl;
 
   return 0;
 }
