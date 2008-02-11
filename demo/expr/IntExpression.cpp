@@ -62,7 +62,7 @@ namespace std {
   template<>
   struct equal_to<_IntExpression*> {
     bool operator()(_IntExpression *g1,_IntExpression *g2) const{
-      return (typeid(g1) == typeid(g2) && *g1 == *g2);
+      return (typeid(*g1) == typeid(*g2) && *g1 == *g2);
     }
   };
 }
@@ -339,6 +339,17 @@ IntExpression Assertion::getValue (const IntExpression & v) const {
     return v;
 }
 
+size_t Assertion::hash() const {
+  return mapping.first.hash() ^ mapping.second.hash();
+}
+
+bool Assertion::operator== (const Assertion & other) const {
+  return mapping == other.mapping;
+}
+
+Assertion Assertion::operator & (const Assertion & other) const {
+  return IntExpressionFactory::createAssertion(mapping.first, (mapping.second & other).eval());
+}
 
 /*******************************************************/
 /******* Factory ***************************************/
