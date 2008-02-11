@@ -587,6 +587,10 @@ public:
     }
 };
 
+GHom _GHom::compose (const GHom &r) const { 
+  return GHom(this) & r; 
+}
+
 GDDD 
 _GHom::eval_skip(const GDDD& d) const
 {
@@ -708,6 +712,10 @@ GHom::GHom(int var, int val, const GHom &h):concret(canonical(new LeftConcat(GDD
 
 bool GHom::skip_variable(int var) const {
   return concret->skip_variable(var);
+}
+
+GHom GHom::compose (const GHom &r) const { 
+  return concret->compose(r); 
 }
 
 /* Eval */
