@@ -24,57 +24,119 @@ typedef enum {
 } BoolExprType ;
 
 
+class _BoolExpression ;
+
 // immutable class for handling boolean expressions.
 class BoolExpression {
+    // concrete storage
+  const _BoolExpression * concrete;
+  // access to concrete
+  friend class _BoolExpression;
+  friend class BoolConstExpr;
+  friend class BoolExpressionFactory;
+
+  // For factory use
+  BoolExpression (const _BoolExpression * c); 
+
 public :
-  virtual ~BoolExpression() {};
+
+  // copy constructor
+  BoolExpression (const BoolExpression & other);
+  // assignment
+  BoolExpression & operator= (const BoolExpression & other);
+  // destructor (does not reclaim memory). Use BoolExpressionFactory::garbage for that.
+  ~BoolExpression();
+
+  // comparisons for set/hash storage (based on unique property of concrete).
+  bool operator== (const BoolExpression & other) const ;
+  bool operator< (const BoolExpression & other) const ;
+  size_t hash () const;
   
-  typedef std::pair<const Variable&,const BoolExpression &> Assignment;
-  
-  virtual BoolExprType getType() const =0;
+  BoolExprType getType() const ;
   // member print
-  virtual void print (std::ostream & os) const = 0;
+  void print (std::ostream & os) const ;
   
   // an operator to (partially) resolve expressions.
   // replace occurrences of v (if any) by e.
-  const BoolExpression & operator& (const Assignment &e) const;
+  BoolExpression operator& (const Assertion &a) const;
   // basic operators between two expressions.
   // and
-  virtual const BoolExpression & operator&&(const BoolExpression & e) const ;
+  friend BoolExpression operator&&(const BoolExpression & l,const BoolExpression & r);
   // or
-  virtual const BoolExpression & operator||(const BoolExpression & e) const ;
+  friend BoolExpression operator||(const BoolExpression & l,const BoolExpression & r);
   // not
-  virtual const BoolExpression & operator! () const ;
+  BoolExpression operator! () const ;
+
+  // resolve what can be resolved at this stage. 
+  // Result is a constant expression iff. the expression has no more variables.
+  BoolExpression eval () const ;
+
+  /// only valid for CONST expressions
+  /// use this call only in form : if (e.getType() == BOOLCONST) { int j = e.getValue() ; ...etc }
+  /// Exceptions will be thrown otherwise.
+  bool getValue () const ;
 
   // for public convenience
   friend std::ostream & operator<< (std::ostream & os, const BoolExpression & e);
 };
 
 // binary comparisons
-const BoolExpression & operator==(const IntExpression & l, const IntExpression & r) ;
-const BoolExpression & operator!=(const IntExpression & l, const IntExpression & r) ;
-const BoolExpression & operator< (const IntExpression & l, const IntExpression & r) ;
-const BoolExpression & operator> (const IntExpression & l, const IntExpression & r) ;
-const BoolExpression & operator>=(const IntExpression & l, const IntExpression & r) ;
-const BoolExpression & operator<=(const IntExpression & l, const IntExpression & r) ;
+BoolExpression  operator==(const IntExpression & l, const IntExpression & r) ;
+BoolExpression  operator!=(const IntExpression & l, const IntExpression & r) ;
+BoolExpression  operator< (const IntExpression & l, const IntExpression & r) ;
+BoolExpression  operator> (const IntExpression & l, const IntExpression & r) ;
+BoolExpression  operator>=(const IntExpression & l, const IntExpression & r) ;
+BoolExpression  operator<=(const IntExpression & l, const IntExpression & r) ;
 
 
-typedef std::set<const BoolExpression *> NaryBoolParamType ;
+typedef std::set<BoolExpression> NaryBoolParamType ;
 
 class BoolExpressionFactory {
-  static UniqueTable<BoolExpression> unique;
+  static UniqueTable<_BoolExpression> unique;
 public :
   // and and or of boolean expressions
-  static const BoolExpression * createNary (BoolExprType type, NaryBoolParamType params) ;
+  static BoolExpression createNary (BoolExprType type, const NaryBoolParamType &params) ;
   // not !
-  static const BoolExpression * createNot  (const BoolExpression * e) ;
+  static BoolExpression createNot  (const BoolExpression & e) ;
   // a boolean constant T or F
-  static const BoolExpression * createConstant (bool b);
-  // a boolean variable
-  static const BoolExpression * createVariable (const Variable & v) ;
+  static BoolExpression createConstant (bool b);
 
   // a comparison (==,!=,<,>,<=,>=) between two integer expressions
-  static const BoolExpression * createComparison (BoolExprType type, const IntExpression * l, const IntExpression * r) ;
+  static BoolExpression createComparison (BoolExprType type, const IntExpression & l, const IntExpression & r) ;
+
+  static void destroy (_BoolExpression * e);
+  static void printStats (std::ostream &os);
 };
+
+
+/**************  administrative trivia. *********************************/
+/******************************************************************************/
+namespace __gnu_cxx { 
+  template<>
+  struct hash<BoolExpression> {
+    size_t operator()(const BoolExpression &g) const{
+      return g.hash(); 
+    }
+  };
+}
+
+namespace std {
+  template<>
+  struct equal_to<BoolExpression> {
+    bool operator()(const BoolExpression &g1,const BoolExpression &g2) const{
+      return g1==g2;
+    }
+  };
+}
+
+namespace std {
+  template<>
+  struct less<BoolExpression> {
+    bool operator()(const BoolExpression &g1,const BoolExpression &g2) const{
+      return g1<g2;
+    }
+  };
+}
+
 
 #endif
