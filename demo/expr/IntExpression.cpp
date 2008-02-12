@@ -140,19 +140,25 @@ public :
   
   NaryIntExpr (const NaryParamType & pparams):params(pparams) {};
 
+  // evaluate on two integers
   virtual int constEval (int i, int j) const = 0;
+  // neutral element w.r.t. operation (e.g 1 for *, 0 for +)
+  virtual int getNeutralElement () const = 0;
+
+
   IntExpression eval () const {
     NaryParamType p ;
-    int constant=0;
-    for (NaryParamType::const_iterator it = getParams().begin(); it != getParams().end() ; ++it ) {
-      const IntExpression & e = it->eval();
+    int constant = getNeutralElement();
+    for (NaryParamType::const_iterator it = params.begin(); it != params.end() ; ++it ) {
+      IntExpression e = it->eval();
       if (e.getType() == CONST) {
 	constant = constEval(constant, ((const ConstExpr &)* getConcrete(e)).getValue());
       } else {
 	p.insert(e);
       }
     }
-    p.insert ( IntExpressionFactory::createConstant(constant) );
+    if (constant != getNeutralElement() || p.empty())
+      p.insert ( IntExpressionFactory::createConstant(constant) );
     if (p.size() == 1) 
       return *p.begin();
     else 
@@ -174,7 +180,14 @@ public :
 
   bool operator== (const _IntExpression & e) const {
     const NaryIntExpr & other = (const NaryIntExpr &)e ;
-    return other.params == params;
+    if (params.size() != other.params.size()) 
+      return false;
+    NaryParamType::const_iterator it = params.begin();
+    NaryParamType::const_iterator jt = other.params.begin();
+    for ( ; it != params.end()  ; ++it,++jt ) 
+      if (! it->equals(*jt))
+	return false;
+    return true;
   }
 
   size_t hash () const {
@@ -207,6 +220,9 @@ public :
   int constEval (int i, int j) const {
     return i+j;
   }
+  int getNeutralElement () const {
+    return 0;
+  }
 };
 
 class MultExpr : public NaryIntExpr {
@@ -219,7 +235,9 @@ public :
   int constEval (int i, int j) const {
     return i*j;
   }
-
+  int getNeutralElement () const {
+    return 1;
+  }
 };
 
 class BinaryIntExpr : public _IntExpression {
@@ -233,12 +251,11 @@ public :
   virtual int constEval (int i, int j) const = 0;
 
   IntExpression eval () const {
-    const IntExpression & l = left.eval();
-    const IntExpression & r = right.eval();
+    IntExpression  l = left.eval();
+    IntExpression  r = right.eval();
 
     if (l.getType() == CONST && r.getType() == CONST ) {
-      return  IntExpressionFactory::createConstant( constEval( ((const ConstExpr &) l).getValue(),
-								((const ConstExpr &) r).getValue()) );
+      return  IntExpressionFactory::createConstant( constEval( l.getValue(), r.getValue()) );
     } else {
       return  IntExpressionFactory::createBinary( getType(), l, r );
     }
@@ -246,7 +263,7 @@ public :
 
   bool operator==(const _IntExpression & e) const{
     const BinaryIntExpr & other = (const BinaryIntExpr &)e ;
-    return other.left == left && other.right == right;
+    return other.left.equals(left) && other.right.equals(right);
   }
  
   size_t hash () const {
@@ -333,7 +350,7 @@ public :
 Assertion::Assertion (const IntExpression & var, const IntExpression & val) : mapping(var,val) {};
 
 IntExpression Assertion::getValue (const IntExpression & v) const {
-  if (v == mapping.first) 
+  if (v.equals(mapping.first)) 
     return mapping.second;
   else 
     return v;
@@ -344,7 +361,7 @@ size_t Assertion::hash() const {
 }
 
 bool Assertion::operator== (const Assertion & other) const {
-  return mapping == other.mapping;
+  return mapping.first.equals(other.mapping.first) && mapping.second.equals(other.mapping.second);
 }
 
 Assertion Assertion::operator & (const Assertion & other) const {
@@ -424,7 +441,7 @@ void IntExpressionFactory::destroy (_IntExpression * e) {
 }
 
 void IntExpressionFactory::printStats (std::ostream &os) {
-  os << "entries :" << unique.size() << std::endl;
+  os << "Integer expression entries :" << unique.size() << std::endl;
 }
 
 // } end namespace IntExpressionFactory
@@ -496,11 +513,11 @@ IntExpression & IntExpression::operator= (const IntExpression & other) {
   return *this;
 }
 
-bool IntExpression::operator== (const IntExpression & other) const {
+bool IntExpression::equals (const IntExpression & other) const {
   return concrete == other.concrete ;
 }
 
-bool IntExpression::operator< (const IntExpression & other) const {
+bool IntExpression::less (const IntExpression & other) const {
   return concrete < other.concrete;
 }
 
