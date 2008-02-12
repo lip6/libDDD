@@ -49,8 +49,9 @@ public :
 
 
   // comparisons for set/hash storage (based on unique property of concrete).
-  bool operator== (const IntExpression & other) const ;
-  bool operator< (const IntExpression & other) const ;
+  // uses equals and less because operator == and < are overloaded to produce BoolExpression
+  bool equals (const IntExpression & other) const ;
+  bool less (const IntExpression & other) const ;
   size_t hash () const;
   
   // return the type of an expression.
@@ -132,7 +133,7 @@ namespace std {
   template<>
   struct equal_to<IntExpression> {
     bool operator()(const IntExpression &g1,const IntExpression &g2) const{
-      return g1==g2;
+      return g1.equals(g2);
     }
   };
 }
@@ -141,7 +142,7 @@ namespace std {
   template<>
   struct less<IntExpression> {
     bool operator()(const IntExpression &g1,const IntExpression &g2) const{
-      return g1<g2;
+      return g1.less(g2);
     }
   };
 }
