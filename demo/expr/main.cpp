@@ -16,14 +16,11 @@ int main () {
     Variable vara = Variable("a");
     Variable varb = Variable("b");
         
-    IntExpression aexpr = IntExpressionFactory::createVariable(vara);
-    IntExpression bexpr = IntExpressionFactory::createVariable(varb);
-    
-    IntExpression aplus3 = aexpr + three;
+    IntExpression aplus3 = vara + IntExpression(3);
     cout << "a + 3 : " << aplus3 << endl;
     IntExpressionFactory::printStats(cout);
 
-    IntExpression aplus3b = aplus3 + bexpr;
+    IntExpression aplus3b = aplus3 + varb;
     cout << "a + 3 + b : " << aplus3b << endl;
 
     aplus3 = aplus3 + three;
@@ -42,9 +39,10 @@ int main () {
     cout << "(eval) : " << fourplus6.eval() << endl;
     
 
-    BoolExpression acompb = aexpr == bexpr;
+    IntExpression aexpr = IntExpression(vara);
+    BoolExpression acompb = aexpr == varb;
     
-    BoolExpression alessb = aexpr < bexpr;
+    BoolExpression alessb = aexpr < varb;
     Assertion b = IntExpressionFactory::createAssertion (varb,four);
     cout << acompb << endl
 	 << (acompb & a) << endl
