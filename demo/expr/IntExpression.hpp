@@ -40,6 +40,8 @@ class IntExpression {
   IntExpression (const _IntExpression * c); 
 public :
 
+  IntExpression (int cst);
+  IntExpression (const Variable &var);
   // copy constructor
   IntExpression (const IntExpression & other);
   // assignment
@@ -113,8 +115,11 @@ public :
   static Assertion createAssertion (const Variable & v,const IntExpression & e);
   static Assertion createAssertion (const IntExpression & v,const IntExpression & e);
 
-  static void destroy (_IntExpression * e);
   static void printStats (std::ostream &os);
+
+  // following administrative functions are not really for public usage.
+  static const _IntExpression * createUnique(_IntExpression *);
+  static void destroy (_IntExpression * e);
 };
 
 
