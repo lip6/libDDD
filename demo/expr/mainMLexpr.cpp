@@ -66,7 +66,7 @@ public:
   }
   bool operator==(const StrongHom &s) const {
     _AssignExpr* ps = (_AssignExpr*)&s;
-    return var == ps->var && expr == ps->expr;
+    return var == ps->var && expr.equals(ps->expr);
   }
 
   GHom compose (const GHom & other) const ;
@@ -108,7 +108,7 @@ public :
 
   bool operator== (const StrongMLHom & s) const {
     _QueryMLHom * ps = (_QueryMLHom *)&s;
-    return a == ps->a && b == ps->b;    
+    return a.equals(ps->a) && b.equals(ps->b);    
   }
 
   size_t hash() const {
@@ -186,24 +186,24 @@ int main () {
   DDD test4 = GDDD(A,1,GDDD(B,2,GDDD(C,12,GDDD(D,4,GDDD(E,5,GDDD(F,6,GDDD(G,7)))))));
   DDD test5 = test1 + test2 + test3 + test4;
 
-  GHom be = assignExpr(B,IntExpressionFactory::createVariable(globalVariables[E]));
-  GHom eb = assignExpr(E,IntExpressionFactory::createVariable(globalVariables[B]));
-  GHom bg = assignExpr(B,IntExpressionFactory::createVariable(globalVariables[G]));
-
-  
+  IntExpression Aexpr = IntExpressionFactory::createVariable(globalVariables[A]);
+  IntExpression Bexpr = IntExpressionFactory::createVariable(globalVariables[B]);
   IntExpression Eexpr = IntExpressionFactory::createVariable(globalVariables[E]);
   IntExpression Gexpr = IntExpressionFactory::createVariable(globalVariables[G]);
-  cout << Eexpr << endl ;
-  cout << Gexpr << endl ;
+  
 
-  IntExpression eplusg = Eexpr + Gexpr ;
+  GHom be = assignExpr(B,Eexpr);
+  GHom eb = assignExpr(E,Bexpr);
+  GHom bg = assignExpr(B,Gexpr);
+
+  IntExpression eplusg = Eexpr + Gexpr + Bexpr + Aexpr;
   GHom beg = assignExpr(B,eplusg);
 
-  cout << "Input :" << test5 << endl;
-  cout << "b:=e :" << be(test5) << endl;
-  cout << "e:=b :" << eb(test5) << endl;
-  cout << "b:=g :" << bg(test5) << endl;
-  cout << "b:=e+g :" << beg(test5) << endl;
+  cout << "Input :\n" << test5 << endl;
+  cout << "b:=" << Eexpr << " \n" << be(test5) << endl;
+  cout << "e:=" << Bexpr << " \n" << eb(test5) << endl;
+  cout << "b:=" << Gexpr << " \n" << bg(test5) << endl;
+  cout << "b:=" << eplusg << " \n" <<  beg(test5) << endl;
 
   return 0;
 }
