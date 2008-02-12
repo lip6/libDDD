@@ -387,8 +387,7 @@ IntExpression IntExpressionFactory::createNary (IntExprType type, NaryParamType 
   default :
     throw "Operator is not nary";
   }
-  return unique(create);
-  //    return create;
+  return unique(create);  
 }
 
 IntExpression IntExpressionFactory::createBinary (IntExprType type, const IntExpression & l, const IntExpression & r) {
@@ -410,17 +409,14 @@ IntExpression IntExpressionFactory::createBinary (IntExprType type, const IntExp
     throw "Operator is not binary";
   }
   return  unique(create);
-  //    return create;
 }
 
 IntExpression IntExpressionFactory::createConstant (int v) {
   return unique (new ConstExpr(v));
-  //    return new ConstExpr(v);
 }
 
 IntExpression IntExpressionFactory::createVariable (const Variable & v) {
   return unique (new VarExpr(v));
-  //    return new VarExpr(v);
 }
 
 Assertion IntExpressionFactory::createAssertion (const Variable & v,const IntExpression & e) {
@@ -429,6 +425,10 @@ Assertion IntExpressionFactory::createAssertion (const Variable & v,const IntExp
 
 Assertion IntExpressionFactory::createAssertion (const IntExpression & v,const IntExpression & e) {
   return Assertion(v,e);
+}
+
+const _IntExpression * IntExpressionFactory::createUnique(_IntExpression *e) {
+  return unique(e);
 }
 
 void IntExpressionFactory::destroy (_IntExpression * e) {
@@ -496,6 +496,17 @@ IntExpression::IntExpression (const IntExpression & other) {
     concrete = other.concrete;
     concrete->ref();
   }
+}
+
+
+IntExpression::IntExpression (int cst) {
+  concrete = IntExpressionFactory::createUnique(new ConstExpr(cst));
+  concrete->ref();
+}
+
+IntExpression::IntExpression (const Variable & var) {
+  concrete = IntExpressionFactory::createUnique(new VarExpr(var));
+  concrete->ref();
 }
 
 IntExpression::~IntExpression () {
