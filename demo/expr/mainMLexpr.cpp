@@ -1,5 +1,6 @@
 #include "MLHom.h"
 #include "IntExpression.hpp"
+#include "BoolExpression.hpp"
 #include <iostream>
 #include <cassert>
 using namespace std;
@@ -21,6 +22,7 @@ void initName() {
 GHom assignExpr (int var, const IntExpression & val);
 MLHom queryExpression (const IntExpression & e);
 GHom assertion (const Assertion & a);
+GHom predicate (const BoolExpression & e);
 
 class _AssertionHom;
 
@@ -176,6 +178,66 @@ GHom _AssignExpr::compose (const GHom & other) const {
 }
 
 
+class _Predicate:public StrongHom {
+  BoolExpression expr;
+public:
+  _Predicate(const BoolExpression & e) : expr(e) {}
+  
+  GDDD phiOne() const {
+    return GDDD::one;
+  }                   
+
+  bool
+  skip_variable(int var) const
+  {
+    return false // ! expr.contains(var) : add API to expression to get support variables
+      ;
+  }
+  
+  GHom phi(int vr, int vl) const {
+    BoolExpression e = expr ;
+    //    if (expr.contains(globalVariables[vr])) {
+    e = e & IntExpressionFactory::createAssertion(globalVariables[vr],IntExpressionFactory::createConstant(vl));
+    //    }
+    e = e.eval();
+    if (e.getType() == BOOLCONST) {
+      // Constant :
+      if (e.getValue()) 
+	return GHom(vr,vl);
+      else
+	return GDDD::null;
+    } else {
+      // still need to resolve.
+      return GHom(vr,vl, predicate(e));
+    }
+  }
+  size_t hash() const {
+    return 16363*expr.hash();
+  }
+  bool operator==(const StrongHom &s) const {
+    _Predicate* ps = (_Predicate*)&s;
+    return expr == ps->expr;
+  }
+
+  GHom compose (const GHom & other) const ;
+};
+
+GHom predicate (const BoolExpression & e) {
+  return new _Predicate(e);
+}
+
+GHom _Predicate::compose (const GHom & other) const {
+  const _GHom * c = get_concret(other);
+  if (typeid(*c) == typeid(_AssertionHom)) {
+    return predicate((expr & ((const _AssertionHom *)c)->getAssertion()).eval());
+  } else {
+    return _GHom::compose(other);
+  }
+}
+
+
+
+
 
 int main () {
   initName();
@@ -197,13 +259,21 @@ int main () {
   GHom bg = assignExpr(B,Gexpr);
 
   IntExpression eplusg = Eexpr + Gexpr + Bexpr + Aexpr;
-  GHom beg = assignExpr(B,eplusg);
+  GHom beg = assignExpr(B,eplusg);  
 
   cout << "Input :\n" << test5 << endl;
   cout << "b:=" << Eexpr << " \n" << be(test5) << endl;
   cout << "e:=" << Bexpr << " \n" << eb(test5) << endl;
   cout << "b:=" << Gexpr << " \n" << bg(test5) << endl;
   cout << "b:=" << eplusg << " \n" <<  beg(test5) << endl;
+
+  GHom gmax = predicate (Gexpr < 9);
+  GHom incrG = assignExpr(G, Gexpr+1);
+
+  cout <<  "g:=" <<  (Gexpr+1) << "["<<  (Gexpr < 9) << "]" << endl;
+  cout << (incrG & gmax) (test5) << endl ;
+  cout << "fixpoint :" << endl;
+  cout << fixpoint((incrG & gmax) + GHom::id) (test5)<< endl;
 
   return 0;
 }
