@@ -22,6 +22,7 @@ const Variable & Context::getVariable (int index) {
     throw "Unknown variable !!";
 }
 
+
 // assign an expression to a variable
 class _AssignExpr:public StrongHom {
   int var;
@@ -44,9 +45,9 @@ public:
 
   GHom phi(int vr, int vl) const {
     IntExpression e = expr ;
-    if (expr.isSupport(Context::getVariable(var))) {
+    //    if (expr.isSupport(Context::getVariable(var))) {
       e = e & IntExpressionFactory::createAssertion(Context::getVariable(vr),IntExpressionFactory::createConstant(vl));
-    }
+      //}
     e = e.eval();
     if (vr == var) {
       if (e.getType() == CONST) {
