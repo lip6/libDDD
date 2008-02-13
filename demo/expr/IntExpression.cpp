@@ -46,6 +46,8 @@ class _IntExpression {
     return a.getValue(this);
   }
 
+  virtual bool isSupport (const Variable & v) const = 0;
+
 };
 
 
@@ -100,6 +102,10 @@ public :
     return var.hash() * 70019;
   }
 
+  bool isSupport (const Variable & v) const {
+    return var == v;
+  }
+
 };
 
 class ConstExpr : public _IntExpression {
@@ -125,6 +131,10 @@ public :
 
   void print (std::ostream & os) const {
     os << val;
+  }
+
+  bool isSupport (const Variable & v) const {
+    return false;
   }
 
 };
@@ -207,6 +217,13 @@ public :
     return a.getValue(e);
   }
 
+  bool isSupport (const Variable & v) const {
+    for (NaryParamType::const_iterator it = params.begin() ; it != params.end()  ; ++it ) {
+      if (it->isSupport(v)) 
+	return true;
+    }
+    return false;
+  }
 
 };
 
@@ -284,6 +301,10 @@ public :
     IntExpression r = right & a;
     IntExpression e = IntExpressionFactory::createBinary(getType(),l,r);    
     return a.getValue(e);
+  }
+
+  bool isSupport (const Variable & v) const {
+    return left.isSupport(v) || right.isSupport(v);
   }
 
 };
@@ -552,6 +573,9 @@ int IntExpression::getValue () const {
   }
 }
 
+bool IntExpression::isSupport(const Variable & var) const {
+  return concrete->isSupport(var);
+}
 
 IntExpression IntExpression::operator& (const Assertion &a) const {
   return concrete->setAssertion(a);

@@ -45,6 +45,7 @@ class _BoolExpression {
 
   virtual BoolExpression setAssertion (const Assertion & a) const = 0;
 
+  virtual bool isSupport (const Variable & v) const = 0;
 };
 
 
@@ -135,6 +136,14 @@ public :
     }
     return BoolExpressionFactory::createNary(getType(),res);    
   }
+
+   bool isSupport (const Variable & v) const {
+    for (NaryBoolParamType::const_iterator it = params.begin() ; it != params.end()  ; ++it ) {
+      if (it->isSupport(v)) 
+	return true;
+    }
+    return false;
+  }
 };
 
 class OrExpr : public NaryBoolExpr {
@@ -202,6 +211,12 @@ public :
     right.print(os);
     os << " )";
   }
+
+  bool isSupport (const Variable & v) const {
+    return left.isSupport(v) || right.isSupport(v);
+  }
+
+
 };
 
 class BoolEq : public BinaryBoolComp {
@@ -315,6 +330,10 @@ public :
     os << " ) ";
   }
 
+  bool isSupport (const Variable & v) const {
+    return exp.isSupport(v);
+  }
+
 };
 
 class BoolConstExpr : public _BoolExpression {
@@ -342,6 +361,10 @@ public :
   }
   void print (std::ostream & os) const {
     os << val;
+  }
+
+  bool isSupport (const Variable & v) const {
+    return false;
   }
 
 };
@@ -493,6 +516,10 @@ BoolExpression::BoolExpression (const BoolExpression & other) {
     concrete = other.concrete;
     concrete->ref();
   }
+}
+
+bool BoolExpression::isSupport (const Variable & v) const {
+  return concrete->isSupport(v);
 }
 
 BoolExpression::~BoolExpression () {
