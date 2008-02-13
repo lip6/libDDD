@@ -389,6 +389,12 @@ Assertion Assertion::operator & (const Assertion & other) const {
   return IntExpressionFactory::createAssertion(mapping.first, (mapping.second & other).eval());
 }
 
+/// To determine whether a given variable is mentioned in an expression.
+bool Assertion::isSupport (const Variable & v) const {
+  return mapping.first.isSupport(v) || mapping.second.isSupport(v);
+}
+
+
 /*******************************************************/
 /******* Factory ***************************************/
 // namespace IntExpressionFactory {

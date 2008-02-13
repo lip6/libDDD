@@ -98,6 +98,9 @@ public :
   IntExpression getValue (const IntExpression & v) const ;
 
   Assertion operator & (const Assertion & other) const;
+  
+  /// To determine whether a given variable is mentioned in an expression.
+  bool isSupport (const Variable & v) const;
 
   size_t hash() const;
   bool operator== (const Assertion & ) const ;
