@@ -78,6 +78,9 @@ public :
 
   // for public convenience
   friend std::ostream & operator<< (std::ostream & os, const BoolExpression & e);
+
+  /// To determine whether a given variable is mentioned in an expression.
+  bool isSupport (const Variable & v) const;
 };
 
 // binary comparisons

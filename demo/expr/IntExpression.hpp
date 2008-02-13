@@ -83,6 +83,8 @@ public :
   /// Exceptions will be thrown otherwise.
   int getValue () const ;
 
+  /// To determine whether a given variable is mentioned in an expression.
+  bool isSupport (const Variable & v) const;
 
   // for pretty print
   friend std::ostream & operator<< (std::ostream & os, const IntExpression & e);
