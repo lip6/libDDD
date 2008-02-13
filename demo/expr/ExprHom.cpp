@@ -38,16 +38,14 @@ public:
   skip_variable(int var) const
   {
     return var != this->var 
-      && ! expr.isSupport(Context::getVariable(var)) 
-      && false
-      ;
+      && ! expr.isSupport(Context::getVariable(var));
   }
 
   GHom phi(int vr, int vl) const {
     IntExpression e = expr ;
-    //    if (expr.isSupport(Context::getVariable(var))) {
+    if (expr.isSupport(Context::getVariable(vr))) {
       e = e & IntExpressionFactory::createAssertion(Context::getVariable(vr),IntExpressionFactory::createConstant(vl));
-      //}
+    }
     e = e.eval();
     if (vr == var) {
       if (e.getType() == CONST) {
@@ -84,11 +82,18 @@ class _QueryMLHom : public StrongMLHom {
 public :
   _QueryMLHom (const IntExpression & aa, const IntExpression & bb) : a(aa),b(bb) {}
 
+  bool
+  skip_variable(int var) const
+  {
+    return ! b.isSupport(Context::getVariable(var));
+  }
+
+
   HomHomMap phi (int var,int val) const {
     IntExpression e = b ;
-    //    if (expr.contains(globalVariables[vr])) {
-    e = e & IntExpressionFactory::createAssertion(Context::getVariable(var),IntExpressionFactory::createConstant(val));
-    //}
+    if (e.isSupport(Context::getVariable(var))) {
+      e = e & IntExpressionFactory::createAssertion(Context::getVariable(var),IntExpressionFactory::createConstant(val));
+    }
     e= e.eval();
 
 
@@ -135,7 +140,7 @@ public:
   bool
   skip_variable(int var) const
   {
-    return false;
+    return ! ass.isSupport(Context::getVariable(var));
   }
 
   Assertion getAssertion () const { return ass;}
@@ -188,7 +193,7 @@ public:
   bool
   skip_variable(int var) const
   {
-    return false && ! expr.isSupport(Context::getVariable(var)) ;
+    return ! expr.isSupport(Context::getVariable(var)) ;
   }
   
   GHom phi(int vr, int vl) const {
