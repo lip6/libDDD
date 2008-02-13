@@ -17,4 +17,4 @@ testExpr_SOURCES = $(EXPR_SRCS) main.cpp
 
 testML_SOURCES = mainML.cpp
 
-testMLExpr_SOURCES =  $(EXPR_SRCS) mainMLexpr.cpp
+testMLExpr_SOURCES =  $(EXPR_SRCS) mainMLexpr.cpp ExprHom.cpp ExprHom.hpp
