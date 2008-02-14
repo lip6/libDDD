@@ -84,6 +84,10 @@ public:
 
   /// Setter for style.
   void setStyle (OutputType style);
+
+  /// Accessors
+  double getTime() const { return total_time; }
+  long double getNbStates () const { return nb_Stat; }
   
 };
 
