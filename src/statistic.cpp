@@ -95,12 +95,12 @@ void Statistic::print_line (std::ostream & os) {
   os << nb_Stat  << value_sep[style] ;
   os << total_time <<  value_sep[style] ;
   os << memory << value_sep[style];
-  os << SDD_size << value_sep[style];
+  if (! isPureDDD) os << SDD_size << value_sep[style];
   os << DDD_size << value_sep[style];
-  os << SDD_peak_size << value_sep[style];
+  if (! isPureDDD) os << SDD_peak_size << value_sep[style];
   os << DDD_peak_size << value_sep[style];
-  os << nbShom << value_sep[style];
-  os << sdd_cache << value_sep[style];
+  if (! isPureDDD) os << nbShom << value_sep[style];
+  if (! isPureDDD) os << sdd_cache << value_sep[style];
   os << nbHom << value_sep[style] ;
   os << ddd_cache ;
   os << line_sep[style] ;
