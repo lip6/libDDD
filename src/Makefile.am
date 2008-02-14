@@ -12,6 +12,8 @@ include_HEADERS = DataSet.h			\
 		  hashfunc.hh                   \
 		  Cache.h                       \
                   MLHom.h                       \
+		  statistic.hpp                 \
+		  process.hpp                   \
 		  AdditiveMap.hpp              
 
 SRCS 		= DED.cpp			\
@@ -33,6 +35,10 @@ SRCS 		= DED.cpp			\
 		  IntDataSet.cpp                \
                   MLHom.h                       \
                   MLHom.cpp 	                \
+		  statistic.hpp                 \
+		  statistic.cpp                 \
+		  process.hpp                   \
+		  process.cpp                   \
 		  AdditiveMap.hpp              
 
 
