@@ -1,4 +1,4 @@
-#include "process.h"
+#include "process.hpp"
 
 // for times
 #include <sys/times.h>
