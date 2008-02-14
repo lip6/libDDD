@@ -1,4 +1,4 @@
-SUBDIRS = hanoi
+SUBDIRS = hanoi expr
 
 noinst_PROGRAMS = tst1 tst2 tst3 tst4 tst5 tst6 tst7 tst8 tst9 tst10 tst11 tst12 #tst13
 
