@@ -27,12 +27,21 @@
 static const char * const value_sep[] = {","," & "};
 static const char * const line_sep[] = {"\n","\\\\ \n \\hline \n"};
 
+std::string remove_bad_latex (const std::string & s) {
+  std::string news;
+  for (std::string::const_iterator it = s.begin() ; it != s.end(); ++it) {
+    if (*it == '_')
+      news.push_back('\\');
+    news.push_back(*it);
+  }
+  return news;
+}
 
-Statistic::Statistic (const SDD & s, const std::string & name, OutputType sstyle): isPureDDD(false),style(sstyle),stat_name(name) {
+Statistic::Statistic (const SDD & s, const std::string & name, OutputType sstyle): isPureDDD(false),style(sstyle),stat_name(remove_bad_latex (name)) {
   load (s);
 }
 
-Statistic::Statistic (const DDD & s, const std::string & name, OutputType sstyle): isPureDDD(true),style(sstyle),stat_name(name) {
+Statistic::Statistic (const DDD & s, const std::string & name, OutputType sstyle): isPureDDD(true),style(sstyle),stat_name(remove_bad_latex (name)) {
   load (s);
 }
 
@@ -64,17 +73,18 @@ void Statistic::load (const DDD & s) {
 void Statistic::print_header (std::ostream & os) {
   
   if (style == LATEX) {
-    os << "\\documentclass[a4paper,10pt]{article} \n \n";
-    os << "\\usepackage{rotating} \n \n" ;
-    os << "\\begin{document} \n \n" ;
-    os << "\\pagestyle{empty} \n \n" ;
-    os << "\\begin{sidewaystable} \n";
-    if (! isPureDDD) os << "\\begin{tabular}{|c||c|c|c|c|c|c|c|c|c|c|c|} \n \\hline \n" ;
-    else os << "\\begin{tabular}{|c||c|c|c|c|c|c|c|} \n \\hline \n" ;
+    os << "\\documentclass[a4paper,10pt]{article} \n \n"
+       << "\\usepackage[usenames]{color}\n"
+       << "\\usepackage{rotating,colortbl}\n\n"
+       << "\\usepackage{lscape,longtable}\n\n"
+       << "\\begin{document} \n \\pagestyle{empty}\n"
+       << "\\begin{landscape} \n";
+    if (! isPureDDD) os << "\\begin{longtable}{|c||c|c|c|c|c|c|c|c|c|c|c|} \n \\hline \n" ;
+    else os << "\\begin{longtable}{|c||c|c|c|c|c|c|c|} \n \\hline \n" ;
   }
 
   os << "Model " << value_sep[style];
-  os << "Nb. States "<< value_sep[style]; 
+  os << "|S| "<< value_sep[style]; 
   os << "Time "<< value_sep[style];
   os << "Mem(kb) "<< value_sep[style];
   if (! isPureDDD) os << "fin. SDD "<< value_sep[style];
@@ -109,7 +119,7 @@ void Statistic::print_line (std::ostream & os) {
 
 void Statistic::print_trailer (std::ostream & os, bool withLegend) {
   if (style == LATEX) {
-    os << "\\hline \n\\end{tabular} \n  \n \\end{sidewaystable} \n\\end{document} \n";
+    os << "\\hline \n\\end{longtable}\n\\end{landscape} \n\n \n\\end{document} \n";
   }
 }
 
