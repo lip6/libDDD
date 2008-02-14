@@ -69,7 +69,6 @@ void Statistic::print_header (std::ostream & os) {
     os << "\\begin{document} \n \n" ;
     os << "\\pagestyle{empty} \n \n" ;
     os << "\\begin{sidewaystable} \n";
-    os << "# \\begin{footnotesize} \n ";
     if (! isPureDDD) os << "\\begin{tabular}{|c||c|c|c|c|c|c|c|c|c|c|c|} \n \\hline \n" ;
     else os << "\\begin{tabular}{|c||c|c|c|c|c|c|c|} \n \\hline \n" ;
   }
