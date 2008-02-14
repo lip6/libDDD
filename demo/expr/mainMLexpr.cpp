@@ -1,4 +1,5 @@
 #include "MLHom.h"
+#include "statistic.hpp"
 
 #include "ExprHom.hpp"
 #include <iostream>
@@ -56,6 +57,9 @@ int main () {
   cout << (incrG & gmax) (test5) << endl ;
   cout << "fixpoint :" << endl;
   cout << fixpoint((incrG & gmax) + GHom::id) (test5)<< endl;
+
+  Statistic stat = Statistic(test5, "stats") ;
+  stat.print_table (cout);
 
   return 0;
 }
