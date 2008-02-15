@@ -32,10 +32,11 @@
 #include "DED.h"
 #include "UniqueTable.h"
 #include "MLHom.h"
+#include "util/configuration.hh"
 
 #ifdef PARALLEL_DD
-#include <tbb/concurrent_vector.h>
-#include <tbb/parallel_reduce.h>
+#include <tbb/blocked_range.h>
+#include <tbb/parallel_for.h>
 #endif
 
 /* Unique Table */
@@ -677,23 +678,130 @@ bool StrongHom::operator==(const _GHom &h) const{
   return typeid(*this)==typeid(h)?*this==*(StrongHom*)&h:false;
 }
 
+// typedef tbb::concurrent_vector< std::pair<int, GDDD> > GDDD_vec;
+// 
+// struct reducer
+// {
+// 	std::set<GDDD> result_;
+// 	const StrongHom& hom_;
+// 	int variable_;
+// 	
+// 	reducer( const StrongHom& hom,
+// 			 int variable)
+// 		:
+// 		result_(),
+// 		hom_(hom),
+// 		variable_(variable)
+// 	{}
+// 	
+// 	reducer( reducer& r, tbb::split)
+// 		:
+// 		result_(r.result_),
+// 		hom_(r.hom_),
+// 		variable_(r.variable_)
+// 	{}
+// 	
+// 	void
+// 	operator()( const GDDD_vec::range_type& vec)
+// 	{
+// 		assert( std::distance(vec.begin(),vec.end()) == 1 );
+// 		std::pair< int, GDDD > element = *vec.begin();
+// 		result_.insert( hom_.phi( variable_, element.first)(element.second) );
+// 	}
+// 	
+// 	void
+// 	join(const reducer& r)
+// 	{
+// 		this->result_.insert(r.result_.begin(), r.result_.end());
+// 	}
+// };
+
+#ifdef PARALLEL_DD
+
+typedef d3::util::set<GDDD,std::less<GDDD>,std::allocator<GDDD>,configuration::set_type > GDDD_set;
+typedef tbb::blocked_range<GDDD::const_iterator> varval_range;
+
+class apply_hom
+{
+  
+  const StrongHom& hom_;
+  const GDDD& d_;
+  GDDD_set& set_;
+  
+public:
+    
+    apply_hom( const StrongHom& hom,
+               const GDDD& d,
+               GDDD_set& set)
+    :
+    hom_(hom),
+    d_(d),
+    set_(set)
+  {
+  }
+  
+  void
+  operator()(const varval_range& range) const
+  {
+    GDDD_set& set_ = this->set_;
+    const StrongHom& hom_ = this->hom_;
+      
+    int variable = d_.variable();
+    
+    for( GDDD::const_iterator vi = range.begin();
+         vi != range.end();
+         ++vi)
+    {
+      set_.insert(hom_.phi( variable, vi->first)(vi->second) );
+    }
+  }
+  
+};
+
+#endif // PARALLEL_DD
 
 /* Eval */
-GDDD 
+GDDD
 StrongHom::eval(const GDDD &d) const
 {
-    if( d == GDDD::one )
-    {
-        return phiOne();
-    }
+  if( d== GDDD::null)
+  {
+    return GDDD::null;
+  }
+  else if( d == GDDD::one)
+  {
+    return phiOne();
+  }
+  else if( d== GDDD::top)
+  {
+    return GDDD::top;
+  }
+  else
+  {
+
+#ifdef PARALLEL_DD
     
-    int variable=d.variable();
+    GDDD_set s;
+    
+    tbb::parallel_for( varval_range(d.begin(),d.end(),2),
+                       apply_hom(*this, d, s));
+    
+    return DED::add(s.get_set());
+    
+#else // NOT PARALLEL_DD
+
+    int variable = d.variable();
     std::set<GDDD> s;
-    for(GDDD::const_iterator vi=d.begin();vi!=d.end();++vi)
+    for( GDDD::const_iterator vi = d.begin();
+         vi!=d.end();
+         ++vi)
     {
         s.insert(phi(variable,vi->first)(vi->second));
     }
     return DED::add(s);
+
+#endif // PARALLEL_DD
+  }
 }
 
 /*************************************************************************/

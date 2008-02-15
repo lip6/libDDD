@@ -137,9 +137,6 @@ namespace std {
 
 // map<int,string> mapVarName;
 #ifdef PARALLEL_DD
-//typedef tbb::queuing_rw_mutex mutex_t;
-typedef tbb::mutex mutex_t;
-mutex_t mutex;
 
 static tbb::atomic<size_t> Max_SDD;
 class SDD_parallel_init
@@ -439,6 +436,8 @@ unsigned int GSDD::refCounter() const{
 
 class SddSize{
 private:
+
+  bool firstError;
   std::set<GSDD> s;
   // Was used to compute number of nodes in referenced datasets as well
   // but dataset doesn't define what we need as it is not necessarily 
@@ -447,7 +446,7 @@ private:
   // trying to repair it : consider we reference only SDD or DDD for now, corresponds to current usage patterns
   std::set<GDDD> sd3;
 
-  bool firstError;
+
 
   void sddsize(const GSDD& g)
 {
@@ -500,10 +499,12 @@ public:
 		firstError(true)
 #ifdef PARALLEL_DD
 			,
-			res(0),
-			d3res(0),
+			s(),
 			sd3(),
-			s()
+			res(0),
+			d3res(0)
+
+
 #endif	
 	{
 	};

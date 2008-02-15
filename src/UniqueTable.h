@@ -24,8 +24,13 @@
 #ifndef UNIQUETABLE_H
 #define UNIQUETABLE_H
 
-
+#include <cassert>
 #include <ext/hash_set>
+
+#ifdef PARALLEL_DD
+#include "tbb/queuing_mutex.h"
+#include "tbb/mutex.h"
+#endif
 
 /// This class implements a unicity table mechanism, based on an STL hash_set.
 /// Requirements on the contained type are thus those of hash_set.
@@ -34,11 +39,21 @@ class UniqueTable{
 
 private:
 	
+#ifdef PARALLEL_DD
+  // typedef tbb::queuing_mutex table_mutex_t;
+  typedef tbb::mutex table_mutex_t;
+  table_mutex_t table_mutex_;
+#endif
+
 public:
-	/// Constructor, builds a default table.
-	UniqueTable()
-	{
-	}
+  /// Constructor, builds a default table.
+  UniqueTable()
+#ifdef PARALLEL_DD
+    :
+    table_mutex_()
+#endif
+  {
+  }
 
   /// Typedef helps hide implementation type (currently gnu gcc's hash_set).
   typedef __gnu_cxx::hash_set<T*> Table;
@@ -50,24 +65,31 @@ public:
   /// the table if it exists, or inserts and returns the address of the value inserted.
   /// \param _g the pointer to the value we want to find in the table.
   /// \return the address of an object stored in the UniqueTable such that (*_g == *return_value)
-  const T *  operator()(T *_g){
+  const T*
+  operator()(T *_g)
+  {
+#ifdef PARALLEL_DD
+    table_mutex_t::scoped_lock lock(table_mutex_);
+#endif
+
     std::pair<typename Table::iterator, bool> ref=table.insert(_g); 
 
+    typename Table::iterator ti=ref.first;
     
-	typename Table::iterator ti=ref.first;
-	if (!ref.second){
-		delete _g;
-	}
+    if ( !ref.second)
+      {
+		assert( _g != *ti );
+        delete _g;
+      }
+    return *ti;
+  }
 
-	return *ti;
-// scoped lock released
-	}
-
-	/// Returns the current number of filled entries in the table.
-	size_t size() const{
-		return table.size();
-	}
-
+  /// Returns the current number of filled entries in the table.
+  size_t
+  size() const
+  {
+    return table.size();
+  }
 };
 
 #endif

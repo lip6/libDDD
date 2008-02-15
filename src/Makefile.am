@@ -10,7 +10,6 @@ include_HEADERS = DataSet.h			\
 		  UniqueTable.h	                \
 		  IntDataSet.h                  \
 		  hashfunc.hh                   \
-		  Cache.h                       \
                   MLHom.h                       \
 		  statistic.hpp                 \
 		  process.hpp                   \

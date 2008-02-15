@@ -1,0 +1,6 @@
+#ifndef _D3_MEMORY_ALLOCATION_HH_
+#define _D3_MEMORY_ALLOCATION_HH_
+
+
+
+#endif

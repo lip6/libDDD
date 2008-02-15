@@ -23,7 +23,7 @@
 #include <iostream>
 using namespace std;
 // for ::hash functions
-using namespace __gnu_cxx;
+// using namespace __gnu_cxx;
 
 #include "DDD.h"
 #include "Hom.h"
@@ -62,7 +62,7 @@ public :
   }
 
   size_t hash() const {
-    return var ^ ::hash<GHom>()(h);
+    return var ^ __gnu_cxx::hash<GHom>()(h);
   }
 
   bool operator==(const StrongHom &s) const {

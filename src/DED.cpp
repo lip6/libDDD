@@ -25,17 +25,15 @@
 #include <set>
 #include <iostream>
 #include <map>
-// modif
-#include <assert.h>
-//#include <ext/hash_map>
+#include <cassert>
 #include <typeinfo>
 // ajout
 
+#include "util/configuration.hh"
 #include "DDD.h"
 #include "DED.h"
 #include "Hom.h"
-
-#include "Cache.h"
+#include "util/hash_map.hh"
 
 #ifdef PARALLEL_DD
 #include "tbb/atomic.h"
@@ -43,7 +41,34 @@
 /******************************************************************************/
 
 //typedef __gnu_cxx::hash_map<DED,GDDD> Cache;
-typedef __Cache<DED,GDDD> Cache;
+//typedef _Cache< DED, GDDD, DED_hash >::cache Cache;
+//typedef Old_Cache< DED, GDDD > Cache;
+
+struct DED_hash
+{
+  size_t 
+  operator()(const DED &e) const
+  {
+    return e.hash();
+  }
+};
+
+struct DED_equal
+{
+  bool
+  operator()(const DED &e1,const DED &e2) const
+  {
+    return e1==e2;
+  }
+};
+
+typedef hash_map< DED,
+                  GDDD,
+                  DED_hash,
+                  DED_equal,
+                  std::allocator<GDDD>,
+                  configuration::hash_map_type > Cache;
+
 static Cache cache;
 
 #ifdef PARALLEL_DD
@@ -580,7 +605,7 @@ void DED::garbage(){
       Cache::iterator ci=di;
       di++;
       _DED *d=ci->first.concret;
-      cache.erase(ci);
+      cache.erase(ci->first);
       delete d;
   } 
   //cache.clear();
@@ -595,43 +620,55 @@ bool DED::operator==(const DED& e) const{
 };
 
 // eval and std::set to NULL the DED
-GDDD DED::eval(){
+GDDD
+DED::eval()
+{
+  if( typeid(*concret) == typeid(_DED_GDDD) )
+    {
+      GDDD res=concret->eval();
+      delete concret;
+      return res;
+    }
 
-	if(typeid(*concret)==typeid(_DED_GDDD))
-	{
-		GDDD res=concret->eval();
-		delete concret;
+  //Cache::const_iterator ci = cache.find(*this);
+  // there should be a way to promote a const_accessor to an accessor...
+  Cache::accessor access;  
+  cache.find(access,*this);
+  
+  if( access.empty() )
+    {
+      // *this is not in the cache
+		Misses++;
+		GDDD res = concret->eval(); 
+        cache.insert(access,*this);
+        access->second = res;
+		concret = NULL;
 		return res;
-	}
-//  else 
-//     if (! concret->shouldCache() ){
-//       // we don't need to store it
-//       GDDD res=concret->eval(); // compute the result
-      
-//       delete concret;
+    }
+  else
+    {
+      Hits++;
+      delete concret;
+      return access->second;
+    }
+
+//   if(ci==cache.end())
+//     { 
+//       // *this is not in the cache
 //       Misses++;
+//       GDDD res=concret->eval(); // compute the result
+//       cache[*this]=res;
+//       concret=NULL;
 //       return res;
 //     }
-
- 	Cache::const_iterator ci=cache.find(*this); // search e in the cache
-
-	if(ci==cache.end())
-	{ // *this is not in the cache
-		Misses++;
-//		std::cout << "NOT IN CACHE" << std::endl;
-		GDDD res=concret->eval(); // compute the result
-    	cache[*this]=res;
-		concret=NULL;
-		return res;
-	}
-	else 
-	{// *this is in the cache
-//		std::cout << "IN CACHE" << std::endl;
-		Hits++;
-		delete concret;
-		return ci->second;
-	}
-};
+//   else 
+//     {
+//       // *this is in the cache
+//       Hits++;
+//       delete concret;
+//       return ci->second;
+//     }
+}
 
 size_t DED::hash () const {
   return concret->hash();
@@ -654,23 +691,21 @@ GDDD operator+(const GDDD &g1,const GDDD &g2){
   s.insert(g1);
   s.insert(g2);
   return DED::add(s);
-};
+}
 
 GDDD operator*(const GDDD &g1,const GDDD &g2){
   DED e(_DED_Mult::create(g1,g2));
   return e.eval();
-};
+}
 
 GDDD operator^(const GDDD &g1,const GDDD &g2){
   DED e(_DED_Concat::create(g1,g2));
   return e.eval();
-};
+}
 
 GDDD operator-(const GDDD &g1,const GDDD &g2){
   DED e(_DED_Minus::create(g1,g2));
   return e.eval();
-};
+}
 
 /******************************************************************************/
-
-

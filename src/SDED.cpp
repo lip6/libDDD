@@ -23,53 +23,74 @@
 /* -*- C++ -*- */
 #include <set>
 #include <map>
-// modif
-#include <ext/hash_map>
 #include <typeinfo>
-// ajout
 #include <cassert>
 #include <iostream>
 
+#include "util/configuration.hh"
 #include "DataSet.h"
 #include "DED.h"
 #include "SDD.h"
 #include "SDED.h"
 #include "SHom.h"
-
-#include "Cache.h"
+#include "util/hash_map.hh"
 
 #ifdef PARALLEL_DD
-#include "tbb/atomic.h"
+# include "tbb/atomic.h"
 #endif
 
 /******************************************************************************/
+
+struct SDED_hash
+{
+  size_t 
+  operator()(const SDED &e) const
+  {
+    return e.hash();
+  }
+};
+
+struct SDED_equal_to
+{
+  bool 
+  operator()(const SDED &e1,const SDED &e2) const
+  {
+    return e1 == e2;
+  }
+};
+
 namespace namespace_SDED {
 
-//typedef __gnu_cxx::hash_map<SDED,GSDD> Cache;
-typedef __Cache<SDED,GSDD> Cache;
-static Cache cache;
-static Cache recentCache;
-
+  typedef hash_map< SDED,
+                    GSDD,
+                    SDED_hash,
+                    SDED_equal_to,
+                    std::allocator<GSDD>,
+                    configuration::hash_map_type > Cache;
+  
+  static Cache cache;
+  static Cache recentCache;
+  
 #ifdef PARALLEL_DD
 
-static tbb::atomic<int> Hits;
-static tbb::atomic<int> Misses;
-static tbb::atomic<size_t> Max_SDED;
-
-class SDED_parallel_init
-{
-public:
-	 
-	SDED_parallel_init()
-	{
-		Hits = 0;
-		Misses = 0;
-		Max_SDED = 0;
-	}
-		
-};
-static SDED_parallel_init SDED_init;
-
+  static tbb::atomic<int> Hits;
+  static tbb::atomic<int> Misses;
+  static tbb::atomic<size_t> Max_SDED;
+  
+  class SDED_parallel_init
+  {
+  public:
+    
+    SDED_parallel_init()
+    {
+      Hits = 0;
+      Misses = 0;
+      Max_SDED = 0;
+    }
+    
+  };
+  static SDED_parallel_init SDED_init;
+  
 #else
   
 static int Hits=0;
@@ -785,15 +806,20 @@ void SDED::garbage(){
 #ifdef OTF_GARBAGE
   recentGarbage();
 #endif
-  if (namespace_SDED::cache.size() > namespace_SDED::Max_SDED) 
-    namespace_SDED::Max_SDED=namespace_SDED::cache.size();  
-  for(namespace_SDED::Cache::iterator di=namespace_SDED::cache.begin();di!=namespace_SDED::cache.end();){
-      namespace_SDED::Cache::iterator ci=di;
-      di++;
-      _SDED *d=ci->first.concret;
-      namespace_SDED::cache.erase(ci);
-      delete d;
-  } 
+
+	if (namespace_SDED::cache.size() > namespace_SDED::Max_SDED)
+	{
+		namespace_SDED::Max_SDED=namespace_SDED::cache.size();
+	}
+	for(namespace_SDED::Cache::iterator di=namespace_SDED::cache.begin();di!=namespace_SDED::cache.end();)
+	{
+		namespace_SDED::Cache::iterator ci = di;
+		di++;
+		_SDED* d = ci->first.concret;
+		namespace_SDED::cache.erase(ci->first);
+		delete d;
+	} 
+
 #ifdef OTF_GARBAGE
   for(namespace_SDED::Cache::iterator di=namespace_SDED::recentCache.begin();di!=namespace_SDED::recentCache.end();){
       namespace_SDED::Cache::iterator ci=di;
@@ -836,13 +862,24 @@ GSDD SDED::eval(){
 
 	// search in long term cache
 #ifndef OTF_GARBAGE
-	namespace_SDED::Cache::const_iterator 
+	// namespace_SDED::Cache::const_iterator
+	namespace_SDED::Cache::const_accessor const_access;
 #endif
-	ci=namespace_SDED::cache.find(*this); // search e in the long term storage cache
+	
+	// ci=namespace_SDED::cache.find(*this); // search e in the long term storage cache
+	namespace_SDED::cache.find(const_access,*this);
 
-	if (ci==namespace_SDED::cache.end()){ // *this is not in the long term storage cache
-	  namespace_SDED::Misses++;  // this constitutes a cache miss (double truly) !!
-	  GSDD res=concret->eval(); // compute the result
+	// if (ci==namespace_SDED::cache.end()){ // *this is not in the long term storage cache
+	//   namespace_SDED::Misses++;  // this constitutes a cache miss (double truly) !!
+	//   GSDD res=concret->eval(); // compute the result
+
+    if( const_access.empty() )
+      { 
+        const_access.release();
+        namespace_SDED::Misses++;
+        GSDD res = concret->eval();
+
+
 #ifdef OTF_GARBAGE
 	  // test if result is eligible for long term storage status
  	  if ( ! res.isSon() ) {
@@ -851,7 +888,15 @@ GSDD SDED::eval(){
  	  } else {
 #endif
  	    // eligible
- 	    namespace_SDED::cache[*this]=res;
+ 	    // namespace_SDED::cache[*this]=res;
+
+          {
+            namespace_SDED::Cache::accessor access;
+            namespace_SDED::cache.insert(access,*this);
+            access->second = res;
+          }
+
+
 #ifdef OTF_GARBAGE
 	    // Should we quick Garbage HERE ???
 	    recentGarbage();
@@ -866,7 +911,8 @@ GSDD SDED::eval(){
 #ifdef OTF_GARBAGE
 	  recentGarbage();
 #endif
-	  return ci->second;
+
+          return const_access->second;
 	}
 #ifdef OTF_GARBAGE
       } else { // parameters make Shom ineligible for long term storage	
