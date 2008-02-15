@@ -317,6 +317,36 @@ public:
 #endif
 
   //@}
+
+
+}; // DDD class
+
+/******************************************************************************/
+struct GDDD_hash
+{
+  size_t
+  operator()(const GDDD &g) const
+  {
+    return g.hash();
+  }
+};
+
+struct GDDD_equal_to
+{
+  bool
+  operator()( const GDDD &g1, const GDDD &g2) const
+  {
+    return g1 == g2;
+  }
+};
+
+struct GDDD_less
+{
+  bool
+  operator()(const GDDD &g1,const GDDD &g2) const
+  {
+    return g1 < g2;
+  }
 };
 
 /******************************************************************************/

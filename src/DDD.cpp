@@ -27,20 +27,22 @@
 #include <set>
 // modif
 #include <cassert>
-//#include <ext/hash_map>
+#include <ext/hash_map>
 #include <map>
 // modif
 #include <sstream>
 
+#include "util/configuration.hh"
 #include "DDD.h"
 #include "UniqueTable.h"
 #include "DED.h"
+#include "util/hash_map.hh"
 
 #ifdef PARALLEL_DD
 #include "tbb/atomic.h"
+#include "tbb/mutex.h"
 #endif
 
-#include "Cache.h"
 
 /******************************************************************************/
 /*                             class _GDDD                                     */
@@ -266,9 +268,8 @@ class MyNbStates{
 private:
   int val; // val=0 donne nbState , val=1 donne noSharedSize
 //  static hash_map<GDDD,long double> s;
-  //static __gnu_cxx::hash_map<GDDD,long double> s;
-	typedef __Cache<GDDD, long double> s_t;
-	static s_t s;
+  static __gnu_cxx::hash_map<GDDD,long double> s;
+	//typedef __Cache<GDDD, long double> s_t;
 
 long double nbStates(const GDDD& g){
 
@@ -277,8 +278,8 @@ long double nbStates(const GDDD& g){
 	else if(g==GDDD::top || g==GDDD::null)
 		return 0;
 	else{
-//		__gnu_cxx::hash_map<GDDD,long double>::const_iterator i=s.find(g);
-		s_t::const_iterator i = s.find(g);
+		__gnu_cxx::hash_map<GDDD,long double>::const_iterator i=s.find(g);
+		// s_t::const_iterator i = s.find(g);
 		if(i==s.end()){
 			long double res=0;
 			for(GDDD::const_iterator gi=g.begin();gi!=g.end();++gi)
@@ -306,10 +307,18 @@ public:
   }
 };
 
-//__gnu_cxx::hash_map<GDDD,long double> MyNbStates::s = __gnu_cxx::hash_map<GDDD,long double> ();
-__Cache<GDDD,long double> MyNbStates::s = __Cache<GDDD,long double> ();
+__gnu_cxx::hash_map<GDDD,long double> MyNbStates::s = __gnu_cxx::hash_map<GDDD,long double> ();
+//__Cache<GDDD,long double> MyNbStates::s = __Cache<GDDD,long double> ();
 
-long double GDDD::nbStates() const{
+  //Old_Cache<GDDD,long double> MyNbStates::s = Old_Cache<GDDD,long double>();
+
+long double
+GDDD::nbStates() const
+{
+#ifdef PARALLEL_DD
+tbb::mutex nb_states_mutex_;
+  tbb::mutex::scoped_lock lock(nb_states_mutex_);
+#endif
   static MyNbStates myNbStates(0);
   return myNbStates(*this);
 }
