@@ -224,11 +224,16 @@ unsigned int GDDD::refCounter() const{
 class MySize{
 
 private:
+#ifdef PARALLEL_DD
+	tbb::atomic<unsigned long int> res;
+#else
   unsigned long int res;
+#endif
+
   std::set<GDDD> s;
   void mysize(const GDDD& g)
   {
-    if(s.find(g)==s.end())
+    if( s.find(g) == s.end() )
 	{
 		s.insert(g);
 		res++;
@@ -238,28 +243,17 @@ private:
   }
 
 public:
-  MySize()
-#ifdef PARALLEL_DD
-	:
-	res(0),
-	s()
-#endif	
-	{};
+
   unsigned long int operator()(const GDDD& g){
-#ifndef PARALLEL_DD
     res=0;
     s.clear();
-#endif
     mysize(g);
     return res;
   }
 };
 
 unsigned long int GDDD::size() const{
-#ifndef PARALLEL_DD
- static	
-#endif
-  MySize mysize;
+ static	MySize mysize;
 
   return mysize(*this);
 }
@@ -525,8 +519,7 @@ unsigned long int GDDD::nodeIndex(const std::vector<const _GDDD*> & list) const{
     unsigned long int i=0;
     for (i=0; i<list.size();++i)
       if (concret==list[i]) return i;
-    return ULONG_MAX;
-    assert (false);
+    return std::numeric_limits<unsigned long>::max();
 }
 
 
@@ -534,7 +527,7 @@ void GDDD::saveNode(std::ostream& os, std::vector<const _GDDD*>& list)const {
     assert(this);
     //assert(concret);
     unsigned long int index = nodeIndex(list);
-    if (index==ULONG_MAX) {
+    if (index == std::numeric_limits<unsigned long>::max() ) {
 
         if (*this==one) list.push_back(concret);
         else 
