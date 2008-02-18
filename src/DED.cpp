@@ -667,22 +667,6 @@ DED::eval()
       return access->second;
     }
 
-//   if(ci==cache.end())
-//     { 
-//       // *this is not in the cache
-//       Misses++;
-//       GDDD res=concret->eval(); // compute the result
-//       cache[*this]=res;
-//       concret=NULL;
-//       return res;
-//     }
-//   else 
-//     {
-//       // *this is in the cache
-//       Hits++;
-//       delete concret;
-//       return ci->second;
-//     }
 }
 
 size_t DED::hash () const {
