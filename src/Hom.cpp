@@ -678,44 +678,6 @@ bool StrongHom::operator==(const _GHom &h) const{
   return typeid(*this)==typeid(h)?*this==*(StrongHom*)&h:false;
 }
 
-// typedef tbb::concurrent_vector< std::pair<int, GDDD> > GDDD_vec;
-// 
-// struct reducer
-// {
-// 	std::set<GDDD> result_;
-// 	const StrongHom& hom_;
-// 	int variable_;
-// 	
-// 	reducer( const StrongHom& hom,
-// 			 int variable)
-// 		:
-// 		result_(),
-// 		hom_(hom),
-// 		variable_(variable)
-// 	{}
-// 	
-// 	reducer( reducer& r, tbb::split)
-// 		:
-// 		result_(r.result_),
-// 		hom_(r.hom_),
-// 		variable_(r.variable_)
-// 	{}
-// 	
-// 	void
-// 	operator()( const GDDD_vec::range_type& vec)
-// 	{
-// 		assert( std::distance(vec.begin(),vec.end()) == 1 );
-// 		std::pair< int, GDDD > element = *vec.begin();
-// 		result_.insert( hom_.phi( variable_, element.first)(element.second) );
-// 	}
-// 	
-// 	void
-// 	join(const reducer& r)
-// 	{
-// 		this->result_.insert(r.result_.begin(), r.result_.end());
-// 	}
-// };
-
 #ifdef PARALLEL_DD
 
 typedef d3::util::set<GDDD,std::less<GDDD>,std::allocator<GDDD>,configuration::set_type > GDDD_set;
@@ -743,6 +705,7 @@ public:
   void
   operator()(const varval_range& range) const
   {
+	// helps the compiler to optimize
     GDDD_set& set_ = this->set_;
     const StrongHom& hom_ = this->hom_;
       
@@ -757,7 +720,6 @@ public:
   }
   
 };
-
 #endif // PARALLEL_DD
 
 /* Eval */
@@ -779,16 +741,16 @@ StrongHom::eval(const GDDD &d) const
   else
   {
 
-#ifdef PARALLEL_DD
-    
-    GDDD_set s;
-    
-    tbb::parallel_for( varval_range(d.begin(),d.end(),2),
-                       apply_hom(*this, d, s));
-    
-    return DED::add(s.get_set());
-    
-#else // NOT PARALLEL_DD
+// #ifdef PARALLEL_DD
+//     
+//     GDDD_set s;
+//     
+//     tbb::parallel_for( varval_range(d.begin(),d.end(),2),
+//                        apply_hom(*this, d, s));
+//     
+//     return DED::add(s.get_set());
+//     
+// #else // NOT PARALLEL_DD
 
     int variable = d.variable();
     std::set<GDDD> s;
@@ -800,7 +762,7 @@ StrongHom::eval(const GDDD &d) const
     }
     return DED::add(s);
 
-#endif // PARALLEL_DD
+// #endif // PARALLEL_DD
   }
 }
 

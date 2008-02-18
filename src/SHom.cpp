@@ -34,6 +34,13 @@
 #include "DataSet.h"
 #include "MemoryManager.h"
 #include <typeinfo>
+#include "util/configuration.hh"
+
+#ifdef PARALLEL_DD
+#include <tbb/blocked_range.h>
+#include <tbb/parallel_for.h>
+#endif
+
 
 namespace namespace_SHom {
 
@@ -722,24 +729,90 @@ bool StrongShom::operator==(const _GShom &h) const{
   return typeid(*this)==typeid(h)?*this==*(StrongShom*)&h:false;
 }
 
+#ifdef PARALLEL_DD
+
+typedef d3::util::set<GSDD,std::less<GSDD>,std::allocator<GSDD>,configuration::set_type > GSDD_set;
+typedef tbb::blocked_range<GSDD::const_iterator> varval_range;
+
+class apply_hom
+{
+  
+  const StrongShom& hom_;
+  const GSDD& d_;
+  GSDD_set& set_;
+  
+public:
+    
+    apply_hom( const StrongShom& hom,
+               const GSDD& d,
+               GSDD_set& set)
+    :
+    hom_(hom),
+    d_(d),
+    set_(set)
+  {
+  }
+  
+  void
+  operator()(const varval_range& range) const
+  {
+	// helps the compiler to optimize
+    GSDD_set& set_ = this->set_;
+    const StrongShom& hom_ = this->hom_;
+      
+    int variable = d_.variable();
+    
+    for( GSDD::const_iterator vi = range.begin();
+         vi != range.end();
+         ++vi)
+    {
+      set_.insert(hom_.phi( variable, *vi->first)(vi->second) );
+    }
+  }
+  
+};
+#endif // PARALLEL_DD
+
 
 /* Eval */
-GSDD StrongShom::eval(const GSDD &d)const{
-  if(d==GSDD::null)
-    return GSDD::null;
-  else if(d==GSDD::one)
-    return phiOne();
-  else if(d==GSDD::top)
-    return GSDD::top;
-  else{
-    int variable=d.variable();
-    std::set<GSDD> s;
+GSDD 
+StrongShom::eval(const GSDD &d) const
+{
+	if(d==GSDD::null)
+	{
+		return GSDD::null;
+	}
+  	else if(d==GSDD::one)
+	{
+    	return phiOne();
+	}
+  	else if(d==GSDD::top)
+    {
+		return GSDD::top;
+	}
+  	else
+	{
+#ifdef PARALLEL_DD
+    
+    GSDD_set s;
+    
+    tbb::parallel_for( varval_range(d.begin(),d.end(),2),
+                       apply_hom(*this, d, s));
+    
+    return SDED::add(s.get_set());
+    
+#else // NOT PARALLEL_DD
 
-    for(GSDD::const_iterator vi=d.begin();vi!=d.end();++vi){
-      s.insert(phi(variable,*vi->first)(vi->second));
-    }
-    return SDED::add(s);
-  }
+    	int variable=d.variable();
+    	std::set<GSDD> s;
+
+    	for(GSDD::const_iterator vi=d.begin();vi!=d.end();++vi)
+		{
+      		s.insert(phi(variable,*vi->first)(vi->second));
+    	}
+    	return SDED::add(s);
+#endif // PARALLEL_DD
+  	}
 }
 
 

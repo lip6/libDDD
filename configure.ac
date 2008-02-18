@@ -21,6 +21,22 @@ test -z "$CXXFLAGS" && CXXFLAGS=
 #compile in C++
 AC_PROG_CXX
 
+AC_ARG_ENABLE(	[parallel],
+		[AC_HELP_STRING([--enable-parallel],[turn on on parallel mode])],
+		[  case "${enableval}" in
+		       yes) parallel=true
+			    ;;
+			no) parallel=false
+			    ;;
+			*)  AC_MSG_ERROR(Bad value ${enableval})
+			    ;;
+		  esac],
+		[parallel=false])
+
+AM_CONDITIONAL(	PARALLEL,
+		test "x$parallel" = xtrue)
+
+
 # automake :
 # build these Makefile using the Makefile.in files in each directory
 AC_CONFIG_FILES([
