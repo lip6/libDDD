@@ -6,10 +6,10 @@ DDD_BUILDDIR = $(top_builddir)/src
 
 AM_CPPFLAGS =  -I $(DDD_SRCDIR) -g -Wall
 LDADD = $(DDD_BUILDDIR)/libDDD_d.a
-AM_LDFLAGS = -ltbb
 
-# AM_CPPFLAGS = -D INST_STL -I $(DDD_SRCDIR)
-# LDADD = $(DDD_BUILDDIR)/libDDD_i.a
+if PARALLEL
+AM_LDFLAGS = -ltbb
+endif
 
 hanoi_v1_SOURCES = hanoi_v1.cpp
 hanoi_v1_bis_SOURCES = hanoi_v1_bis.cpp

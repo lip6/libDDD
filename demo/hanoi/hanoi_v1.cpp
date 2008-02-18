@@ -30,7 +30,8 @@ using namespace std;
 #include "DDD.h"
 #include "DED.h"
 #include "MemoryManager.h"
-
+#include "init.hh"
+// #include "tbb/task_scheduler_init.h"
 
 // we use one DDD variable per ring, ring 0 is the topmost, 
 // and is stored at the bottom of the DDD
@@ -186,7 +187,10 @@ main(int argc, char **argv)
     {
 		NB_RINGS = atoi(argv[1]);
 	}
-    
+
+	d3::init init;
+	// tbb::task_scheduler_init init;
+
     // Define a name for each variable
 	initName();
     
