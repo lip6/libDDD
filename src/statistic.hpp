@@ -66,26 +66,39 @@ class Statistic {
 public:
 
   /// Create a statistic for the current SDD s, style LATEX by default.
+  /// The statistic is sampled and stored, this call triggers SDD mode (more columns).
+  /// \param s the SDD used for final node and state count.
+  /// \param name the row name (first column)
+  /// \param style use LATEX for formatted latex table or CSV to import in excel or gnumeric.
   Statistic (const SDD & s, const std::string & name, OutputType style=LATEX);
   /// Create a statistic for the current DDD s, style LATEX by default.
+  /// The statistic is sampled and stored, this call triggers DDD mode (less columns).
+  /// \param s the DDD used for final node and state count.
+  /// \param name the row name (first column)
+  /// \param style use LATEX for formatted latex table or CSV to import in excel or gnumeric.
   Statistic (const DDD & s, const std::string & name, OutputType style=LATEX);
 
   /// Print column headers, using current style.
+  /// For latex this also outputs a header (\begin document etc...).
   void print_header (std::ostream & os);
 
   /// Print trailer.
+  /// The trailer includes a key to reading the columns. In latex mode it also closes the document.
   void print_trailer (std::ostream & os, bool withLegend=true);
 
-  /// Print a line for current statistic
+  /// Print a line for current statistic. 
+  /// To produce tables call print_header once then print_line for all your statistics.
   void print_line (std::ostream &os);
 
   /// Convenience print a table.
+  /// Useful if you have a single stat to show.
+  /// Calls print_header,print_line,print_trailer in this order.
   void print_table (std::ostream & os);
 
   /// Setter for style.
   void setStyle (OutputType style);
 
-  /// Accessors
+  /// Accessors.
   double getTime() const { return total_time; }
   long double getNbStates () const { return nb_Stat; }
   
