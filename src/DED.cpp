@@ -589,8 +589,23 @@ void DED::pstats(bool reinit)
 
 }
 
+#ifdef PARALLEL_DD
+static tbb::atomic<size_t> DEDpeak;
+class DEDpeak_parallel_init
+{
+public:
+	 
+	DEDpeak_parallel_init()
+	{
+		DEDpeak = 0;
+	}
+		
+};
+static DEDpeak_parallel_init DEDpeak_init;
 
+#else
 static size_t DEDpeak = 0;
+#endif
 
 size_t DED::peak() {
   if (cache.size() > DEDpeak)
