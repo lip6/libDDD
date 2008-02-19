@@ -78,24 +78,21 @@ private:
 
   /// Pointer to the data instance in the unicity table.
   const _GShom* concret;
-  /// Private constructor. This is only called with pointers into the unicity table.
-  /// \param _h pointer into the unicity table
-  GShom(const _GShom *_h):concret(_h){};
 public:
   /// \name Public Constructors 
   //@{
   /// Default constructor builds identity homomorphism.
   GShom():concret(id.concret){};
-  /// Construct a homomorphism from a (user defined) Strong homomorphism. 
-  /// Pointer provided should be into unicity table. 
-  /// \todo Where is this used ? is it useful ?
-  GShom(const StrongShom *);
-  /// Construct a homomorphism from a (user defined) Strong homomorphism. 
-  /// No constraints on the pointer which will be canonized for unicity.
-  GShom(StrongShom *);
 
-  GShom(const MyGShom*);
-  GShom(MyGShom*);
+  /// Pseudo-private constructor. This should only be called with pointers into the unicity table.
+    /// For example return this in a StrongHom phi() body is legal.
+  /// \param _h pointer into the unicity table
+    GShom(const _GShom *_h);
+
+    ///  To build GShom from pointers to user homomomorphisms. 
+    /// This call ensures unicity of representation.
+   GShom(_GShom *_h);
+
 
   /// Construct a constant homomorphism. Applied to any SDD this homomorphism
   /// will return the value it was initialized with.
