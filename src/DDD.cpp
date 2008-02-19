@@ -41,6 +41,7 @@
 #ifdef PARALLEL_DD
 #include "tbb/atomic.h"
 #include "tbb/mutex.h"
+#include "util/tbb_atomic_bool.hh"
 #endif
 
 
@@ -52,14 +53,44 @@ class _GDDD
 {
 public:
   /* Attributs*/
-  int variable;
+  const int variable;
   GDDD::Valuation valuation;
-  mutable unsigned long int refCounter;
-  mutable bool marking;
+
+#ifdef PARALLEL_DD
+	mutable tbb::atomic<unsigned long int> refCounter;
+	mutable tbb::atomic<bool> marking;	
+#else
+  	mutable unsigned long int refCounter;
+  	mutable bool marking;
+#endif
 
   /* Constructor */
-  _GDDD(int var,int cpt=0):variable(var),refCounter(cpt),marking(false){}; 
-  _GDDD(int var,GDDD::Valuation val,int cpt=0):variable(var),valuation(val),refCounter(cpt),marking(false){}; 
+	_GDDD(int var,int cpt=0)
+		: variable(var)
+#ifndef PARALLEL_DD
+		, refCounter(cpt)
+		, marking(false)
+#endif
+	{
+#ifdef PARALLEL_DD
+		refCounter = 0;
+		marking = false;
+#endif
+	} 
+
+	_GDDD(int var,GDDD::Valuation val,int cpt=0)
+		: variable(var)
+		, valuation(val)
+#ifndef PARALLEL_DD
+		, refCounter(cpt)
+		, marking(false)
+#endif
+	{
+#ifdef PARALLEL_DD
+		refCounter = 0;
+		marking = false;
+#endif
+	}
 
   /* Compare */
   bool operator==(const _GDDD& g) const{return variable==g.variable && valuation==g.valuation;};
