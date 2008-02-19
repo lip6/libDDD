@@ -41,7 +41,7 @@ int main () {
   GHom eb = assignExpr(E,Bexpr);
   GHom bg = assignExpr(B,Gexpr);
 
-  IntExpression eplusg = Eexpr + Gexpr + Bexpr + Aexpr;
+  IntExpression eplusg = Eexpr * Gexpr + (2 * Bexpr) - Aexpr;
   GHom beg = assignExpr(B,eplusg);  
 
   cout << "Input :\n" << test5 << endl;
