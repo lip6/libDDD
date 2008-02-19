@@ -203,7 +203,7 @@ public:
   }
 
   bool operator==(const StrongShom &s) const {
-    LocalApply* ps = (LocalApply *)&s;
+    const LocalApply* ps = (const LocalApply *)&s;
     return target == ps->target && h ==  ps->h;
   }  
 
@@ -224,7 +224,7 @@ public:
 	{
 		GShom F; 
 		std::set<GShom> G;
-		LocalApply* L;
+		const LocalApply* L;
 		bool has_local;
 		
 	} partition;
@@ -237,6 +237,40 @@ private:
     std::set<GShom> parameters;
 	mutable partition_cache_type partition_cache;
 	bool have_id;
+
+  void addParameter (const _GShom * h, 	std::map<int, GHom> & local_homs) {
+    const std::type_info & t = typeid( *h );
+    if( t == typeid(Add) )
+      {
+	const std::set<GShom>& local_param = ((const Add*) h)->parameters;
+	for (std::set<GShom>::const_iterator it = local_param.begin() ; it != local_param.end() ; ++it ){
+	  addParameter( get_concret(*it), local_homs  );
+	}
+      }
+    else if( t == typeid(LocalApply) )
+      {
+	const LocalApply* local = (const LocalApply*)(h);
+	std::map<int, GHom>::iterator f = local_homs.find( local->target );
+	
+	if( f != local_homs.end() )
+	  {
+	    f->second = f->second + local->h;
+	  }
+	else
+	  {
+	    local_homs.insert(std::make_pair(local->target,local->h));
+	  }
+	
+      }
+    else { 
+      if( t == typeid(Identity) )
+	{
+	  have_id = true;
+	}
+      parameters.insert(h);
+    }
+  }
+    
 
 
 public:
@@ -252,48 +286,23 @@ public:
 	
         for( std::set<GShom>::const_iterator it = p.begin(); it != p.end(); ++it)
         {
-            if( typeid( *get_concret(*it) ) == typeid(Add) )
-            {
-                std::set<GShom>& local_param = ((Add*)get_concret(*it))->parameters;
-                parameters.insert( local_param.begin() , local_param.end());
-            }
-			else if( typeid(*get_concret(*it) ) == typeid(LocalApply) )
-			{
-				LocalApply* local = (LocalApply*)(get_concret(*it));
-				std::map<int, GHom>::iterator f = local_homs.find( local->target );
-				
-				if( f != local_homs.end() )
-				{
-					f->second = f->second + local->h;
-				}
-				else
-				{
-					local_homs.insert(std::make_pair(local->target,local->h));
-				}
-				
-			}
-            else
-            {
-                if( typeid(*get_concret(*it)) == typeid(Identity) )
-                {
-                    have_id = true;
-                }
-                parameters.insert(*it);
-            }
+	  addParameter( get_concret(*it) , local_homs);
         }
-
-		for( 	std::map<int, GHom>::iterator it = local_homs.begin();
-				it != local_homs.end();
-				++it)
-		{
-			if( have_id )
-			{
-				it->second = it->second + GHom::id;
-			}
-			parameters.insert(localApply(it->second,it->first));
-		}
-		
+	
+	for( 	std::map<int, GHom>::iterator it = local_homs.begin();
+		it != local_homs.end();
+		++it)
+	  {
+	    if( have_id )
+	      {
+		it->second = it->second + GHom::id;
+	      }
+	    parameters.insert(localApply(it->second,it->first));
+	  }
+	
     }
+
+
 
     bool
     get_have_id() const
@@ -332,25 +341,25 @@ public:
 			
 			for(	std::set<GShom>::const_iterator gi = parameters.begin();
 					gi != parameters.end();
-					++gi )
+				++gi )
 			{
-				if( get_concret(*gi)->skip_variable(var) )
-                {
-                    // F part
-					F.insert(*gi);
-                }
-				else if( typeid(*get_concret(*gi) ) == typeid(LocalApply) )
-				{
-					// L part
-					assert (!part.has_local);
-					part.L = (LocalApply*)(get_concret(*gi));
-					part.has_local = true;
-				}
-                else
-                {
-                    // G part
-                    part.G.insert(*gi);
-                }
+			  if( get_concret(*gi)->skip_variable(var) )
+			    {
+			      // F part
+			      F.insert(*gi);
+			    }
+			  else if( typeid(*get_concret(*gi) ) == typeid(LocalApply) )
+			    {
+			      // L part
+			      assert (!part.has_local);
+			      part.L = (const LocalApply*)(get_concret(*gi));
+			      part.has_local = true;
+			    }
+			  else
+			    {
+			      // G part
+			      part.G.insert(*gi);
+			    }
 			}
 			part.F = GShom::add(F);
 		}
@@ -823,9 +832,9 @@ StrongShom::eval(const GSDD &d) const
 /*************************************************************************/
 
 /* Constructor */
-GShom::GShom(const StrongShom *h):concret(h){}
+GShom::GShom(const _GShom *h):concret(h){}
 
-GShom::GShom(StrongShom *h):concret(canonical(h)){}
+GShom::GShom(_GShom *h):concret(canonical(h)){}
 
 GShom::GShom(const GSDD& d):concret(canonical(new S_Homomorphism::Constant(d))){}
 
@@ -977,8 +986,8 @@ GShom operator&(const GShom &h1,const GShom &h2){
 	if( typeid( *_GShom::get_concret(h1) ) == typeid(S_Homomorphism::LocalApply) 
 		&& typeid( *_GShom::get_concret(h2) ) == typeid(S_Homomorphism::LocalApply) )
 	{
-		S_Homomorphism::LocalApply* lh1 = (S_Homomorphism::LocalApply*)(_GShom::get_concret(h1));
-		S_Homomorphism::LocalApply* lh2 = (S_Homomorphism::LocalApply*)(_GShom::get_concret(h2));
+	  const S_Homomorphism::LocalApply* lh1 = (const S_Homomorphism::LocalApply*)(_GShom::get_concret(h1));
+	  const S_Homomorphism::LocalApply* lh2 = (const S_Homomorphism::LocalApply*)(_GShom::get_concret(h2));
 
 		if( lh1->target == lh2->target )
 		{
@@ -1024,14 +1033,6 @@ GShom operator-(const GShom &h,const GSDD &d){
   return GShom(canonical(new S_Homomorphism::Minus(h,d)));
 }
 
-
-GShom::GShom(const MyGShom* h) :
-  concret(h)
-{}
-
-GShom::GShom(MyGShom* h) :
-  concret(h)
-{}
 
 void GShom::pstats(bool reinit)
 {
