@@ -40,8 +40,8 @@ int main(){
   // Define a name for each variable
   initName();
 
-  DDD d1(1,1);
-  DDD d2(2,2);
+  DDD d1(A,1);
+  DDD d2(B,2);
   d2=d1;
   cout<<"nbDDD="<<MemoryManager::nbDDD()<<endl;
   MemoryManager::garbage();
