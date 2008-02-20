@@ -53,12 +53,15 @@ A complex test, added by V. Beaudenon, that raised a bug in an old version of th
 ** tst12 :
 
 A example exhibiting the use of edge valued DDD in EVDDD mode.
+It also shows how to use the dotExporter functionality to produce dot graphs of DDD.
+
 This example is meant to be compared with the behavior of tst13.
+// FIXME : tst12 and tst13 could use more comments.
 
 ** tst13 :
 
 The same example exhibiting the use of edge valued DDD in EVDDD mode.
 We use the library defined special variable DISTANCE to indicate we use distance nodes.
-
+You must edit Makefile.am to build tst13, and also build libddd_ev.a which is not built by default, by editing src/Makefile.am.
 
 
