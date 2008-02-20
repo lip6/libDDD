@@ -6,10 +6,7 @@
 #include <unistd.h>
 
 #include <string>
-#include <iostream>
-#include <sstream>
-#include <fstream>
-
+#include <cstdio>
 using namespace std;
 
 namespace process {
@@ -19,35 +16,33 @@ double getTotalTime() {
     double m;
     times(&tbuff);
     m= ((double)tbuff.tms_utime+(double)tbuff.tms_stime ) / ((double) sysconf(_SC_CLK_TCK));
-     return m;
-}
-
-size_t getResidentMemory() {
-    size_t m;
-
-    string s;
-    string tmpfile = string("HaDDoCK_restmp");
-    int i=0;
-    stringstream spid; spid<<getpid();
-    string pid=spid.str();
-    stringstream command;
-    command<<"ps v "<<pid<<" >"<<tmpfile;
-    system (command.str().c_str());
-    ifstream f(tmpfile.c_str());
-    do {
-        f>>s;
-        i++;
-    } while (s!=string("RSS"));
-    do {
-        f>>s;
-    } while (s!=pid);
-    for (int j=2; j<i; j++) f>>s;
-    f>>m;
-
-    unlink(tmpfile.c_str());
-
     return m;
 }
+
+
+size_t getResidentMemory() {
+  static bool is_available = true;
+  if (! is_available) {
+    return 0;
+  }
+  size_t m;
+  char cmd [255];
+  const char * tmpff = "ps-run";
+  
+  sprintf (cmd,"ps --no-heading o rss %d > %s",getpid(),tmpff);
+  int ret = system (cmd);
+  FILE* fd ;
+  if (ret || ((fd = fopen(tmpff,"r")) == NULL)) {
+    printf ("When attempting to system execute : %s \n",cmd);
+    perror(" Error opening temporary file to sample resident shared size (raised in process.cpp).");
+    perror(" Will report 0 as resident memory.");
+    is_available = false;
+    return 0;
+  }
+  fscanf(fd,"%ld",&m);
+  unlink(tmpff);    
+  return m;
+ }
 
 
 } // namespace process
