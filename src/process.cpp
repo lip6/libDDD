@@ -33,9 +33,13 @@ size_t getResidentMemory() {
   int ret = system (cmd);
   FILE* fd ;
   if (ret || ((fd = fopen(tmpff,"r")) == NULL)) {
-    printf ("When attempting to system execute : %s \n",cmd);
-    perror(" Error opening temporary file to sample resident shared size (raised in process.cpp).");
-    perror(" Will report 0 as resident memory.");
+    if (ret) {
+      perror("Execution of ps command failed.\n"); 
+      fprintf(stderr,"When attempting to system execute : %s \n",cmd);
+    } else {
+      perror(" Error opening temporary file to sample resident shared size.");
+    }
+    fprintf(stderr," Will report 0 as resident memory \nThis is a known limitation on cygwin. Please report this to ddd@lip6.fr if you have another os.");
     is_available = false;
     return 0;
   }
