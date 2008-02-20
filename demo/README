@@ -1,0 +1,64 @@
+This folder contains simple examples designed to get you started with libDDD.
+
+The Makefile.am shows how to set flags to compile on either the debug version (libddd_d.a compiled with -g -o0) or the standard optimized libddd.a.
+
+** tst1 : 
+
+A simple example exhibiting terminal constants, definition of DDD variables, and use of the basic set theory operators over DDD.
+
+** tst2 :
+
+This example introduces some library provided homomorphisms for concatenation, use of constants...
+
+** tst3 :
+
+This examples shows how to define a custom homomorphism to increment a variable.
+
+** tst4 :
+
+A variant over the previous example which increments all variables.
+
+** tst5 :
+
+An example of a more complex homomorphism combination to assign the value of a variable to another using swap, up and down. (see icatpn'02 paper for a description).
+
+** tst6 :
+
+A variant over the previous to swap the value of two variables in a single pass.
+
+** tst7 :
+
+A simple example showing how to invoke the garbage collector.
+
+** tst8 :
+
+A simple example exhibiting how to carry operations inside homomorphisms.
+It also shows how to use Statistics class to produce tables of stats. 
+
+** tst9 :
+
+A small test, that raised a bug in an old version of the library.
+// FIXME : we should move this from demo/ to test/ folder.
+
+** tst10 :
+
+A small example showing the use of  a fixpoint to produce a saturation effect.
+This example does not use skip_variable of auto-saturation (available with libDDD >= 1.4)
+
+** tst11 :
+
+A complex test, added by V. Beaudenon, that raised a bug in an old version of the library.
+// FIXME : we should move this from demo/ to test/ folder.
+
+** tst12 :
+
+A example exhibiting the use of edge valued DDD in EVDDD mode.
+This example is meant to be compared with the behavior of tst13.
+
+** tst13 :
+
+The same example exhibiting the use of edge valued DDD in EVDDD mode.
+We use the library defined special variable DISTANCE to indicate we use distance nodes.
+
+
+
