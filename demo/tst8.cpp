@@ -101,8 +101,6 @@ int main(){
   Hom h(C,43);
 
   Statistic s(u,"initial",CSV);
-  s.print_header(cout);
-  s.print_line(cout);
 
   Hom fa = applyToVar(A,h);
   Hom fb = applyToVar(B,h);
@@ -116,9 +114,13 @@ int main(){
   cout <<"<D>(u)="<< endl<<fd(u)<<endl<<endl;
 
   Statistic s2(u,"after apply",CSV);
-  s2.print_line(cout);
+
   MemoryManager::garbage();
   Statistic s3(u,"after garbage",CSV);
+
+  s.print_header(cout);
+  s.print_line(cout);
+  s2.print_line(cout);
   s3.print_line(cout);
   s3.print_trailer(cout);
   return 1;
