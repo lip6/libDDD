@@ -27,6 +27,7 @@ using namespace std;
 #include "DED.h"
 #include "Hom.h"
 #include "MemoryManager.h"
+#include "statistic.hpp"
 
 typedef enum {A, B, C, D,E, F, G} var;
 var variables;
@@ -38,40 +39,52 @@ void initName() {
 }
 
 
-// Increment the first value of var
+// Apply the hom f to the first occurrence of var
 class _sub:public StrongHom {
   int var;
+  // We use the type GHom (instead of Hom) in the attributes of homomorphisms.
+  // This is necessary to allow correct memory reference counting.
+  // Similarly use an attribute of type GDDD instead of DDD.
+  // When using such attributes you must implement mark().
   GHom f;
 public:
   _sub(int vr,const GHom &g):var(vr),f(g) {};
 
   GDDD phiOne() const {
     return GDDD::top;
-  }                   
+  }      
+
+  bool skip_variable (int vr) const {
+    /** this definition is equivalent to placing :
+	if (vr != var)
+	   return GHom(vr,vl,this); 
+    * at the top of phi() function. 
+    * However it enables library optimizations when defined as "skip".*/
+    return var != vr;
+  }
 
   GHom phi(int vr, int vl) const {
-    if (vr == var)
-      return f&GHom(vr,vl);
-    else 
-      return GHom(vr,vl,GHom(this)); 
+    // implicitly vr == var because of skip_variable definition.
+    return f&GHom(vr,vl);
   }
 
   size_t hash() const {
-    return (size_t) var+__gnu_cxx::hash<GHom>()(f);
+    return (size_t) var + f.hash();
   }
 
   bool operator==(const StrongHom &s) const {
-    _sub* ps = (_sub*)&s;
-    return (var == ps->var)&&(f == ps->f);
+    const _sub & ps = (const _sub&)s;
+    return (var == ps.var)&&(f == ps.f);
   }
 
   void mark(){
-    MemoryManager::mark(f);
+    // must implement mark function if attributes of type GHom or GDDD
+    f.mark();
   }
 };
 
-// User function : Construct a Hom for a Strong Hom _plusplus
-GHom sub(int vr,const GHom &g){return new _sub(vr,g);};
+// User function : Construct a Hom to avoid user manipulation of "new..."
+GHom applyToVar (int vr,const GHom &g){return new _sub(vr,g);};
 
 int main(){
   initName();
@@ -83,44 +96,31 @@ int main(){
   DDD a=DDD(A,1,DDD(A,1));
   DDD b=DDD(C,1,DDD(A,1))+DDD(C,2,DDD(B,3));
   DDD u=a^b;
-  Hom h(C,43);
   cout <<"u="<< endl<<u<<endl;
+  // left concatenates a constant : h(d) = C-43->d
+  Hom h(C,43);
 
-  cout <<"******************************************************"<<endl;
-  cout <<"* Strong Hom <X++> : incremente the first value of X *"<<endl;
-  cout <<"******************************************************"<<endl;
+  Statistic s(u,"initial",CSV);
+  s.print_header(cout);
+  s.print_line(cout);
 
-  MemoryManager::garbage();
-  
-  cout<<MemoryManager::nbDDD()<<endl;
-  cout<<MemoryManager::nbHom()<<endl;
-  cout<<MemoryManager::nbDED()<<endl<<endl;
+  Hom fa = applyToVar(A,h);
+  Hom fb = applyToVar(B,h);
+  Hom fc = applyToVar(C,h);
+  Hom fd = applyToVar(D,h);
 
-  Hom fa = sub(A,h);
-  Hom fb = sub(B,h);
-  Hom fc = sub(C,h);
-  Hom fd = sub(D,h);
-
-  cout<<MemoryManager::nbDDD()<<endl;
-  cout<<MemoryManager::nbHom()<<endl;
-  cout<<MemoryManager::nbDED()<<endl<<endl;
 
   cout <<"<A>(u)="<< endl<<fa(u)<<endl;
   cout <<"<B>(u)="<< endl<<fb(u)<<endl;
   cout <<"<C>(u)="<< endl<<fc(u)<<endl;
   cout <<"<D>(u)="<< endl<<fd(u)<<endl<<endl;
 
-  cout<<MemoryManager::nbDDD()<<endl;
-  cout<<MemoryManager::nbHom()<<endl;
-  cout<<MemoryManager::nbDED()<<endl<<endl;
-
+  Statistic s2(u,"after apply",CSV);
+  s2.print_line(cout);
   MemoryManager::garbage();
-  
-  cout<<MemoryManager::nbDDD()<<endl;
-  cout<<MemoryManager::nbHom()<<endl;
-  cout<<MemoryManager::nbDED()<<endl;
-  MemoryManager::pstats();
-
+  Statistic s3(u,"after garbage",CSV);
+  s3.print_line(cout);
+  s3.print_trailer(cout);
   return 1;
 }
 
