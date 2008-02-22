@@ -51,7 +51,7 @@
 class _GSDD{
 public:
   /* Attributs*/
-  int variable;
+  const int variable;
   GSDD::Valuation valuation;
   mutable unsigned long int refCounter;
 #ifdef OTF_GARBAGE

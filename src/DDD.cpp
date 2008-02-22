@@ -58,7 +58,7 @@ public:
 
 #ifdef PARALLEL_DD
 	mutable tbb::atomic<unsigned long int> refCounter;
-	mutable tbb::atomic<bool> marking;	
+	mutable tbb::atomic<bool> marking;
 #else
   	mutable unsigned long int refCounter;
   	mutable bool marking;
