@@ -1,6 +1,9 @@
+#include <cassert>
+#include <typeinfo>
+
+
 #include "ExprHom.hpp"
 #include "MLHom.h"
-#include <cassert>
 
 // predeclarations
 MLHom queryExpression (const IntExpression & e);

@@ -25,13 +25,11 @@
 #include <iostream>
 #include <vector>
 #include <set>
-// modif
 #include <ext/hash_map>
 #include <map>
-// modif
 #include <sstream>
-// ajout
 #include <cassert>
+#include <typeinfo>
 
 #include "SDED.h"
 #include "SDD.h"

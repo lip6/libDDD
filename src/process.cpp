@@ -7,6 +7,8 @@
 
 #include <string>
 #include <cstdio>
+#include <cstdlib>
+
 using namespace std;
 
 namespace process {
@@ -30,7 +32,7 @@ size_t getResidentMemory() {
   const char * tmpff = "ps-run";
   
   sprintf (cmd,"ps --no-heading o rss %d > %s",getpid(),tmpff);
-  int ret = system (cmd);
+  int ret = ::system (cmd);
   FILE* fd ;
   if (ret || ((fd = fopen(tmpff,"r")) == NULL)) {
     if (ret) {

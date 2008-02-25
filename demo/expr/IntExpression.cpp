@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cassert>
 #include "hashfunc.hh"
+#include <typeinfo>
 
 // unique storage class
 class _IntExpression {
