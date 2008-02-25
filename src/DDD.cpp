@@ -31,6 +31,7 @@
 #include <map>
 // modif
 #include <sstream>
+#include <limits>
 
 #include "util/configuration.hh"
 #include "DDD.h"

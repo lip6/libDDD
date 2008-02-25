@@ -1,7 +1,7 @@
 #include "BoolExpression.hpp"
 #include "hashfunc.hh"
 #include <cassert>
-
+#include <typeinfo>
 
 
 

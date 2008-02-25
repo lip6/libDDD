@@ -22,6 +22,7 @@
 
 #include "MLHom.h"
 #include "UniqueTable.h"
+#include <typeinfo>
 
 /* Unique Table */
 namespace __gnu_cxx {

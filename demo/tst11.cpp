@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <cassert>
+#include <typeinfo>
 using namespace std;
 #include "DataSet.h"
 #include "DDD.h"
