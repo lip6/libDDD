@@ -120,7 +120,7 @@ public:
 #ifdef OTF_GARBAGE
   bool shouldCache () { return false; }
 #endif  
-  GSDD eval() const{return parameter;};
+  GSDD eval(versatile* v) const{return parameter;};
 };
 
 
@@ -193,7 +193,7 @@ public:
 #endif
 
   /* Transform */
-  GSDD eval() const;
+  GSDD eval(versatile* v) const;
 
   /* constructor*/
   ~_SDED_Add(){};
@@ -216,7 +216,7 @@ bool _SDED_Add::operator==(const _SDED &e)const{
 }
 
 /* Transform */
-GSDD _SDED_Add::eval() const{
+GSDD _SDED_Add::eval(versatile* v) const{
   assert(parameters.size() > 1);
   int variable=parameters.begin()->variable();
   // To compute the result 
@@ -352,9 +352,9 @@ GSDD _SDED_Add::eval() const{
 //   for (std::set<GSDD>::const_iterator it = parameters.begin() ; it != parameters.end() ; it++ ) {
 //     std::cerr << "PARAM "<< id++ << "  "<< *it << std::endl ;
 //   }
-  GSDD ret(variable,value);
+  // GSDD ret(variable,value);
 //   std::cerr << "produced node : " << ret << std::endl ;
-  return ret;
+  // return ret;
 
 
   return GSDD(variable,value);
@@ -427,7 +427,7 @@ public:
 #endif
 
   /* Transform */
-  GSDD eval() const;
+  GSDD eval(versatile* v) const;
 
   /* constructor*/
   ~_SDED_Mult(){};
@@ -444,7 +444,7 @@ bool _SDED_Mult::operator==(const _SDED &e)const{
 };
 
 /* Transform */
-GSDD _SDED_Mult::eval() const{
+GSDD _SDED_Mult::eval(versatile* v) const{
   assert(parameter1.variable()==parameter2.variable());
   int variable=parameter1.variable();
   std::map<GSDD,DataSet *> res;
@@ -518,7 +518,7 @@ public:
   }
 #endif
   /* Transform */
-  GSDD eval() const;
+  GSDD eval(versatile* v) const;
 
   /* constructor*/
   ~_SDED_Minus(){};
@@ -535,7 +535,7 @@ bool _SDED_Minus::operator==(const _SDED &e)const{
 };
 
 /* Transform */
-GSDD _SDED_Minus::eval() const{
+GSDD _SDED_Minus::eval(versatile* v) const{
   assert(parameter1.variable()==parameter2.variable());
   int variable=parameter1.variable();
 
@@ -627,7 +627,7 @@ public:
   }
 #endif
   /* Transform */
-  GSDD eval() const;
+  GSDD eval(versatile* v) const;
 
   /* constructor*/
   ~_SDED_Concat(){};
@@ -644,7 +644,7 @@ bool _SDED_Concat::operator==(const _SDED &e)const{
 };
 
 /* Transform */
-GSDD _SDED_Concat::eval() const{
+GSDD _SDED_Concat::eval(versatile* v) const{
   int variable=parameter1.variable();
 
   std::map<GSDD,DataSet *> res;
@@ -700,7 +700,7 @@ public:
   bool operator==(const _SDED &e)const;
 
   /* Transform */
-  GSDD eval() const;
+  GSDD eval(versatile* v) const;
 
   /* constructor*/
   ~_SDED_Shom(){};
@@ -717,8 +717,8 @@ bool _SDED_Shom::operator==(const _SDED &e)const{
 }
 
 /* Transform */
-GSDD _SDED_Shom::eval() const{
-  GSDD res = shom.eval(parameter);
+GSDD _SDED_Shom::eval(versatile* v) const{
+  GSDD res = shom.eval(parameter,v);
   return  res;
 }
 
@@ -841,11 +841,11 @@ bool SDED::operator==(const SDED& e) const{
 };
 
 // eval and std::set to NULL the DED
-GSDD SDED::eval(){
+GSDD SDED::eval(versatile* v){
 
 #ifndef OTF_GARBAGE
    if(typeid(*concret)==typeid(_SDED_GSDD)){
-     GSDD res=concret->eval();
+     GSDD res=concret->eval(v);
      delete concret;
      return res;
    }  else {
@@ -863,21 +863,20 @@ GSDD SDED::eval(){
 	// search in long term cache
 #ifndef OTF_GARBAGE
 	// namespace_SDED::Cache::const_iterator
-	namespace_SDED::Cache::const_accessor const_access;
+	namespace_SDED::Cache::accessor access;
 #endif
 	
 	// ci=namespace_SDED::cache.find(*this); // search e in the long term storage cache
-	namespace_SDED::cache.find(const_access,*this);
+	namespace_SDED::cache.find(access,*this);
 
 	// if (ci==namespace_SDED::cache.end()){ // *this is not in the long term storage cache
 	//   namespace_SDED::Misses++;  // this constitutes a cache miss (double truly) !!
 	//   GSDD res=concret->eval(); // compute the result
 
-    if( const_access.empty() )
+    if( access.empty() )
       { 
-        const_access.release();
         namespace_SDED::Misses++;
-        GSDD res = concret->eval();
+        GSDD res = concret->eval(v);
 
 
 #ifdef OTF_GARBAGE
@@ -912,13 +911,13 @@ GSDD SDED::eval(){
 	  recentGarbage();
 #endif
 
-          return const_access->second;
+          return access->second;
 	}
 #ifdef OTF_GARBAGE
       } else { // parameters make Shom ineligible for long term storage	
 	
 	// this constitutes a cache miss (simple) !!
-	GSDD res=concret->eval(); // compute the result
+	GSDD res=concret->eval(v); // compute the result
 	namespace_SDED::recentCache[*this]=res;	
 	concret=NULL;
 	return res;
@@ -942,35 +941,35 @@ size_t SDED::hash () const {
 
 /* binary operators */
 
-GSDD SDED::Shom(const GShom &h,const GSDD&g){
+GSDD SDED::Shom(const GShom &h,const GSDD&g, versatile* v){
   SDED e(_SDED_Shom::create(h,g));
-  return e.eval();
+  return e.eval(v);
 };
 
 
 GSDD SDED::add(const std::set<GSDD> &s){
    SDED e(_SDED_Add::create(s));
-   return e.eval();
+   return e.eval(NULL);
 };
 
 GSDD operator+(const GSDD &g1,const GSDD &g2){
   SDED e(_SDED_Add::create(g1,g2));
-  return e.eval();
+  return e.eval(NULL);
 };
 
 GSDD operator*(const GSDD &g1,const GSDD &g2){
   SDED e(_SDED_Mult::create(g1,g2));
-  return e.eval();
+  return e.eval(NULL);
 };
 
 GSDD operator^(const GSDD &g1,const GSDD &g2){
   SDED e(_SDED_Concat::create(g1,g2));
-  return e.eval();
+  return e.eval(NULL);
 };
 
 GSDD operator-(const GSDD &g1,const GSDD &g2){
   SDED e(_SDED_Minus::create(g1,g2));
-  return e.eval();
+  return e.eval(NULL);
 };
 
 /******************************************************************************/

@@ -39,6 +39,7 @@
 #ifdef PARALLEL_DD
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
+#include <tbb/task.h>
 #endif
 
 
@@ -86,7 +87,7 @@ public:
   }
 
   /* Eval */
-  GSDD eval(const GSDD &d)const{return d;}
+  GSDD eval(const GSDD &d, versatile* v)const{return d;}
 };
 
 /************************** Constant */
@@ -107,7 +108,7 @@ public:
   }
 
   /* Eval */
-  GSDD eval(const GSDD &d)const{
+  GSDD eval(const GSDD &d, versatile* v)const{
     return d==GSDD::null?GSDD::null:value;
   }
 
@@ -134,8 +135,8 @@ public:
   }
 
   /* Eval */
-  GSDD eval(const GSDD &d)const{
-    return left(d)*right;
+  GSDD eval(const GSDD &d,versatile* v)const{
+    return left.eval_proxy(d,v)*right;
   }
 
   /* Memory Manager */
@@ -377,7 +378,7 @@ public:
 
     /* Eval */
 	GSDD
-	eval(const GSDD& d)const
+	eval(const GSDD& d,versatile* v)const
 	{
 		if( d == GSDD::null )
 		{
@@ -389,7 +390,7 @@ public:
 		
 			for(std::set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
 			{
-				s.insert((*gi)(d));
+				s.insert((*gi).eval_proxy(d,v));
 			}
 			return SDED::add(s);
 		}
@@ -403,20 +404,23 @@ public:
 			{
 				this->skip_variable(var);
 				part_it = partition_cache.find(var);
-			}              
-		
+			}
+
+			if( part_it->second.L != NULL )
+			{
+				s.insert(GShom(part_it->second.L).eval_proxy(d,v));
+			}
+
+			s.insert( part_it->second.F.eval_proxy(d,v) );
+	
 			std::set<GShom>& G = part_it->second.G;
 
 			for( 	std::set<GShom>::const_iterator it = G.begin(); 
 					it != G.end();
 					++it )
 			{
-				s.insert((*it)(d));                  
+				s.insert((*it).eval_proxy(d,v));                  
 			} 
-
-			s.insert( part_it->second.F(d) );
-			if( part_it->second.L != NULL )
-			  s.insert(GShom(part_it->second.L)(d));
 			
 			return SDED::add(s);
 		}
@@ -462,8 +466,8 @@ public:
     }
 
   /* Eval */
-  GSDD eval(const GSDD &d)const{
-    return left(right(d));
+  GSDD eval(const GSDD &d,versatile* v)const{
+    return left.eval_proxy(right.eval_proxy(d,v),v);
   }
 
   /* Memory Manager */
@@ -491,8 +495,8 @@ public:
   }
 
   /* Eval */
-  GSDD eval(const GSDD &d)const{
-    return left^right(d);
+  GSDD eval(const GSDD &d,versatile* v)const{
+    return left^right.eval_proxy(d,v);
   }
 
   /* Memory Manager */
@@ -527,8 +531,8 @@ public:
 
 
   /* Eval */
-  GSDD eval(const GSDD &d)const{
-    return left(d)^right;
+  GSDD eval(const GSDD &d,versatile* v)const{
+    return left.eval_proxy(d,v)^right;
   }
 
   /* Memory Manager */
@@ -555,8 +559,8 @@ public:
   }
 
   /* Eval */
-  GSDD eval(const GSDD &d)const{
-    return left(d)-right;
+  GSDD eval(const GSDD &d, versatile* v)const{
+    return left.eval_proxy(d,v)-right;
   }
 
   /* Memory Manager */
@@ -567,16 +571,80 @@ public:
 };
 
 /************************** Fixpoint */
-class Fixpoint:public _GShom{
+
+//////////////////////////////////////////////////////////////////////////////
+
+#ifdef PARALLEL_DD
+class FL_task
+	: public tbb::task
+{
+private:
+	
+	const GShom& gshom_;
+	const GSDD& d_;
+	GSDD* result_;
+	versatile* v_;
+	bool type_;
+	
+public:
+
+	FL_task(const GShom& gshom,const GSDD& d, GSDD* result, versatile* v, bool type)
+		: gshom_(gshom)
+		, d_(d)
+		, result_(result)
+		, v_(v)
+		, type_(type)
+		
+	{
+		v_->set_parent_task(this);
+	}
+
+	task*
+	execute()
+	{
+		*result_ = gshom_.eval_proxy(d_,v_);
+		return NULL;
+	}
+	
+};
+
+//////////////////////////////////////////////////////////////////////////////
+
+// class G_task
+// 	: public tbb::task
+// {
+// public:
+// 	
+// 	task*
+// 	execute()
+// 	{
+// 		
+// 		return NULL;
+// 	}
+// 	
+// };
+
+#endif // PARALLEL_DD
+
+//////////////////////////////////////////////////////////////////////////////
+
+class Fixpoint
+	: public _GShom
+{
+
 private:
   GShom arg;
+
 public:
+
   /* Constructor */
   Fixpoint(const GShom &a,int ref=0):_GShom(ref),arg(a){}
   /* Compare */
+
   bool operator==(const _GShom &h) const{
     return arg==((Fixpoint*)&h )->arg ;
   }
+
   size_t hash() const{
     return 17*arg.hash();
   }
@@ -590,7 +658,7 @@ public:
 
   /* Eval */
 	GSDD 
-	eval(const GSDD &d) const
+	eval(const GSDD &d,versatile* v) const
 	{
 	if( d == GSDD::null )
 	{
@@ -598,7 +666,7 @@ public:
 	}
 	else if( d == GSDD::one or d == GSDD::top )
 	{
-		return arg(d);
+		return arg.eval_proxy(d,v);
 	}
 	else
 	{
@@ -630,9 +698,36 @@ public:
 				do
 				{
 					d1 = d2;
+
+#ifdef PARALLEL_DD
+				
+					tbb::task* parent_task = v->get_parent_task();
 					
-					d2 = F_part(d2);
-					d2 = L_part(d2);
+					versatile current_versatile_1;
+					versatile current_versatile_2;
+					
+					GSDD result_1;
+					GSDD result_2;
+					
+					FL_task& f_task = *new(parent_task->allocate_child()) FL_task(F_part,d2,&result_1,&current_versatile_1,true);
+					FL_task& l_task = *new(parent_task->allocate_child()) FL_task(L_part,d2,&result_2,&current_versatile_2,false);
+									
+					parent_task->set_ref_count(3);
+					
+					parent_task->spawn(f_task);
+					parent_task->spawn_and_wait_for_all(l_task);
+					
+					std::set<GSDD> s;
+					s.insert(result_1);
+					s.insert(result_2);
+
+					d2 =  SDED::add(s);
+			
+#else	
+					d2 = F_part.eval_proxy(d2,v);
+					d2 = L_part.eval_proxy(d2,v);
+
+#endif // PARALLEL_DD
 
 					for( 	std::set<GShom>::const_iterator G_it = partition.G.begin();
 							G_it != partition.G.end();
@@ -640,12 +735,12 @@ public:
 					{
 
 						// d2 = F_part(d2);
-						d2 = L_part(d2);
+						d2 = L_part.eval_proxy(d2,v);
 
 						// apply local part
 						// d2 = L_part(d2);
 					  // chain application of Shom of this level
-					  d2 = (*G_it) (d2) + d2;
+					  d2 = (*G_it).eval_proxy(d2,v) + d2;
 					}
 				}
 				while (d1 != d2);
@@ -656,7 +751,7 @@ public:
 		do
 		{
 			d1 = d2;
-			d2 = arg(d2);
+			d2 = arg.eval_proxy(d2,v);
 		}
 		while (d1 != d2);
 
@@ -676,7 +771,7 @@ public:
 } // end namespace H_Homomorphism
 
 GSDD 
-_GShom::eval_skip(const GSDD& d) const
+_GShom::eval_skip(const GSDD& d, versatile* v) const
 {
     if( d == GSDD::null )
     {
@@ -692,41 +787,41 @@ _GShom::eval_skip(const GSDD& d) const
     }
     else if( this->skip_variable(d.variable()) )
     {
-        GSDD::Valuation v;
+        GSDD::Valuation valuation;
 		std::map<GSDD,DataSet *> res;
 
         for( GSDD::const_iterator it = d.begin();
             it != d.end();
             ++it)
         {
-            GSDD son = GShom(this)(it->second);
+			const GShom gshom(this);
+            GSDD son = gshom.eval_proxy(it->second,v);
             if( son != GSDD::null && !(it->first->empty()) )
             {
-                // v.push_back(std::make_pair(it->first->newcopy(),son));
 				square_union(res, son, it->first);
             }
         }
 
-		v.reserve(res.size());  
+		valuation.reserve(res.size());  
 	  	for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;
 				it!= res.end();
 				++it)
 		{
-			v.push_back(std::make_pair(it->second,it->first));
+			valuation.push_back(std::make_pair(it->second,it->first));
 		}
         
-        if( v.empty() )
+        if( valuation.empty() )
         {
             return GSDD::null;
         }
         else
         {
-            return GSDD(d.variable(),v);
+            return GSDD(d.variable(),valuation);
         }
         
     }
     
-    return eval(d);
+    return eval(d,v);
 }
 
 /*************************************************************************/
@@ -738,54 +833,12 @@ bool StrongShom::operator==(const _GShom &h) const{
   return typeid(*this)==typeid(h)?*this==*(StrongShom*)&h:false;
 }
 
-#ifdef PARALLEL_DD
 
-typedef d3::util::set<GSDD,std::less<GSDD>,std::allocator<GSDD>,configuration::set_type > GSDD_set;
-typedef tbb::blocked_range<GSDD::const_iterator> varval_range;
-
-class apply_hom
-{
-  
-  const StrongShom& hom_;
-  const GSDD& d_;
-  GSDD_set& set_;
-  
-public:
-    
-    apply_hom( const StrongShom& hom,
-               const GSDD& d,
-               GSDD_set& set)
-    :
-    hom_(hom),
-    d_(d),
-    set_(set)
-  {
-  }
-  
-  void
-  operator()(const varval_range& range) const
-  {
-	// helps the compiler to optimize
-    GSDD_set& set_ = this->set_;
-    const StrongShom& hom_ = this->hom_;
-      
-    int variable = d_.variable();
-    
-    for( GSDD::const_iterator vi = range.begin();
-         vi != range.end();
-         ++vi)
-    {
-      set_.insert(hom_.phi( variable, *vi->first)(vi->second) );
-    }
-  }
-  
-};
-#endif // PARALLEL_DD
 
 
 /* Eval */
 GSDD 
-StrongShom::eval(const GSDD &d) const
+StrongShom::eval(const GSDD &d, versatile* v) const
 {
 	if(d==GSDD::null)
 	{
@@ -801,26 +854,14 @@ StrongShom::eval(const GSDD &d) const
 	}
   	else
 	{
-#ifdef PARALLEL_DD
-    
-    GSDD_set s;
-    
-    tbb::parallel_for( varval_range(d.begin(),d.end(),2),
-                       apply_hom(*this, d, s));
-    
-    return SDED::add(s.get_set());
-    
-#else // NOT PARALLEL_DD
-
     	int variable=d.variable();
     	std::set<GSDD> s;
 
     	for(GSDD::const_iterator vi=d.begin();vi!=d.end();++vi)
 		{
-      		s.insert(phi(variable,*vi->first)(vi->second));
+      		s.insert(phi(variable,*vi->first).eval_proxy(vi->second,v));
     	}
     	return SDED::add(s);
-#endif // PARALLEL_DD
   	}
 }
 
@@ -846,16 +887,90 @@ GShom::GShom(int var,const DataSet & val, const GShom &h) {
   }
 }
 
-/* Eval */
-GSDD GShom::operator()(const GSDD &d) const{
-  if(concret->immediat)
-    return concret->eval(d);
-  else
-    return SDED::Shom(*this,d);
+//////////////////////////////////////////////////////////////////////////////
+
+GSDD
+GShom::eval_proxy(const GSDD &d, versatile* v ) const
+{
+	if(concret->immediat)
+	{
+		return concret->eval(d,v);
+	}
+	else
+    {
+		return SDED::Shom(*this,d,v);
+	}
 }
 
-GSDD GShom::eval(const GSDD &d) const{
-  return concret->eval_skip(d);
+//////////////////////////////////////////////////////////////////////////////
+
+#ifdef PARALLEL_DD
+class root_task
+	: public tbb::task
+{
+private:
+	
+	const GShom& gshom_;
+	const GSDD& in_;
+	GSDD result_;
+	versatile* v_;
+	
+public:
+	
+	root_task( const GShom& gshom
+			 , const GSDD& in
+			 , versatile* v )
+		: gshom_(gshom)
+		, in_(in)
+		, result_()
+		, v_(v)
+	{
+	}
+	
+	task*
+	execute()
+	{
+		v_->set_parent_task(this);
+		
+		result_ = gshom_.eval_proxy(in_,v_);
+		return NULL;
+	}
+	
+	GSDD
+	get_result() const
+	{
+		return result_;
+	}
+	
+};
+#endif // PARALLEL_DD
+
+//////////////////////////////////////////////////////////////////////////////
+
+/* Eval */
+GSDD 
+GShom::operator()(const GSDD &d) const
+{
+	versatile v;
+
+#ifdef PARALLEL_DD
+	
+	root_task& task = *new(tbb::task::allocate_root()) root_task(*this,d,&v);
+	tbb::task::spawn_root_and_wait(task);
+	
+	return task.get_result();
+
+#else
+
+	return 	eval_proxy(d,&v);
+
+#endif
+}
+
+GSDD 
+GShom::eval(const GSDD &d, versatile* v) const
+{
+	return concret->eval_skip(d,v);
 }
 
 const GShom GShom::id(canonical(new S_Homomorphism::Identity(1)));
@@ -991,7 +1106,6 @@ GShom operator&(const GShom &h1,const GShom &h2){
 
 		if( lh1->target == lh2->target )
 		{
-			// std::cout << "TOTO" << std::endl;
 			return localApply(  lh1->h & lh2->h, lh1->target );
 		}
 	}
