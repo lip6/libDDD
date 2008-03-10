@@ -36,27 +36,20 @@ using std::vector;
 
 
 // a hash function for vector<int>
-namespace __gnu_cxx {
-  /// Computes a hash key for a vector<int>. 
-  template<>	
-  struct hash<vector<int> *> {
-    size_t operator()(const vector<int> *data) const{
-      size_t res=1;
-      for (vector<int>::const_iterator it= data->begin() ; it != data->end() ; it++) 
-	res += res*(*it)+2711;
-      return res;
-    }
-  };
-}
+namespace d3 { namespace util {
+    /// Computes a hash key for a vector<int>. 
+    template<>	
+      struct hash<vector<int> *> {
+	size_t operator()(const vector<int> *data) const{
+	  size_t res=1;
+	  for (vector<int>::const_iterator it= data->begin() ; it != data->end() ; it++) 
+	    res += res*(*it)+2711;
+	  return res;
+	}
+      };
+  }} // namespaces
 
-namespace std {
-  template<>
-  struct equal_to<vector<int> *> {
-    bool operator()(vector<int> *g1,vector<int> *g2) const{
-      return *g1==*g2;
-    }
-  };
-}
+
 /// This class is a very basic implementation of DataSet interface 
 /// based on std::vector<int> and a unicity table
 class IntDataSet : public DataSet {
@@ -143,7 +136,7 @@ public :
   }
   /// returns a hash function, used in the SDD hash function computation
   virtual size_t set_hash() const {
-    return __gnu_cxx::hash<vector<int>* > () (data);
+    return d3::util::hash<vector<int>* > () (data);
   }
   /// returns a formatted string description of the set
   virtual void set_print (std::ostream &os) const {
