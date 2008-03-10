@@ -37,6 +37,9 @@
 #include "IntDataSet.h"
 #include "DDD.h"
 #include "SHom.h"
+#include "util/hash_support.hh"
+#include "util/ext_hash_map.tcc"
+
 
 #ifdef PARALLEL_DD
 #include "tbb/atomic.h"
@@ -527,7 +530,8 @@ unsigned long int GSDD::size() const{
 class MySDDNbStates{
 private:
   int val; // val=0 donne nbState , val=1 donne noSharedSize
-  static __gnu_cxx::hash_map<GSDD,long double> s;
+  typedef ext_hash_map<GSDD,long double> cache_type;
+  static cache_type cache;
 	
 long double nbStates(const GSDD& g)
 {
@@ -537,18 +541,19 @@ long double nbStates(const GSDD& g)
 		return 0;
 	else
 	{
-		__gnu_cxx::hash_map<GSDD,long double>::const_iterator i=s.find(g);
-		if(i==s.end())
-		{
-			long double res=0;
-			for(GSDD::const_iterator gi=g.begin();gi!=g.end();++gi)
-				res+=(gi->first->set_size())*nbStates(gi->second)+val;
-			s[g]=res;
-			return res;
-		} 
+	  cache_type::accessor access;  
+	  cache.find(access,g);
+	  if( access.empty() ) {
+	    long double res=0;
+	    for(GSDD::const_iterator gi=g.begin();gi!=g.end();++gi)
+	      res+=(gi->first->set_size())*nbStates(gi->second)+val;
+	    cache.insert(access,g);
+	    access->second = res;
+	    return res;
+	  } 
 		else 
 		{
-			return i->second;
+			return access->second;
 		}
 	}
 }
@@ -562,11 +567,11 @@ public:
   }
 
   static void clear () {
-    s.clear();
+    cache.clear();
   }
 };
 
-__gnu_cxx::hash_map<GSDD,long double> MySDDNbStates::s = __gnu_cxx::hash_map<GSDD,long double> ();
+ext_hash_map<GSDD,long double> MySDDNbStates::cache = ext_hash_map<GSDD,long double> ();
 
 long double GSDD::nbStates() const{
   static MySDDNbStates myNbStates(0);
