@@ -1,31 +1,20 @@
 #include <ext/hash_map>
 #include <utility>
 
-struct gnu_hash_map_tag{};
-
 // Specialization for the TR1 unordered map
 template
 <
   typename Key,
   typename Data,
   typename HashKey,
-  typename EqualKey,
-  typename Allocator
+  typename EqualKey
 >
-class hash_map
-<
-  Key,
-  Data,
-  HashKey,
-  EqualKey,
-  Allocator,
-  gnu_hash_map_tag // <= Specialization
->
+class ext_hash_map
 {
   // Types
 public:
 
-  typedef __gnu_cxx::hash_map<Key,Data,HashKey,EqualKey,Allocator> internal_hash_map;
+  typedef __gnu_cxx::hash_map<Key,Data,HashKey,EqualKey> internal_hash_map;
   typedef typename internal_hash_map::iterator iterator;
   typedef typename internal_hash_map::const_iterator const_iterator;
   typedef typename internal_hash_map::size_type size_type;
@@ -42,8 +31,8 @@ public:
     // Attributes
   private:
 
+    friend class ext_hash_map;
     friend class accessor;
-    friend class hash_map;
     bool has_result_;
     const_iterator current_bucket_;
     
@@ -101,9 +90,9 @@ public:
 
     // Attributes
   private:
-    friend class hash_map;
     iterator current_bucket_;
 
+    friend class ext_hash_map;
     // Methods
   public:
 
@@ -126,12 +115,13 @@ public:
   // Attributes
 private:
 
+	friend class const_accessor;
   internal_hash_map map_;
 
   // Methods
 public:
 
-  hash_map()
+  ext_hash_map()
     :
     map_()
   {
