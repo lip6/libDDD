@@ -1,4 +1,5 @@
 #include <ext/hash_map>
+#include "util/hash_support.hh"
 #include <utility>
 
 // Specialization for the TR1 unordered map
@@ -6,8 +7,8 @@ template
 <
   typename Key,
   typename Data,
-  typename HashKey,
-  typename EqualKey
+  typename HashKey = d3::util::hash<Key>,
+  typename EqualKey = d3::util::equal<Key>
 >
 class ext_hash_map
 {
