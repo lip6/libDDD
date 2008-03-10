@@ -26,6 +26,7 @@
 
 #include <cassert>
 #include <ext/hash_set>
+#include "util/hash_support.hh"
 
 #ifdef PARALLEL_DD
 #include "tbb/queuing_mutex.h"
@@ -56,7 +57,7 @@ public:
   }
 
   /// Typedef helps hide implementation type (currently gnu gcc's hash_set).
-  typedef __gnu_cxx::hash_set<T*> Table;
+    typedef __gnu_cxx::hash_set<T*,d3::util::hash<T*>,d3::util::equal<T*> > Table;
   /// The actual table, operations on the UniqueTable are delegated on this.
   Table table; // Unique table of GDDD
 
