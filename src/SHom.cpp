@@ -33,8 +33,8 @@
 #include "UniqueTable.h"
 #include "DataSet.h"
 #include "MemoryManager.h"
-#include <typeinfo>
 #include "util/configuration.hh"
+#include "util/hash_support.hh"
 
 #ifdef PARALLEL_DD
 #include <tbb/blocked_range.h>
@@ -43,26 +43,14 @@
 #endif
 
 
-namespace namespace_SHom {
-
-} //end namespace namespace_SHom 
-
-/* Unique Table */
-namespace __gnu_cxx {
-  template<>  struct hash<_GShom*>{
-    size_t operator()(_GShom * _h) const{
-      return _h->hash();
-    }
-  };
-}
-
-namespace std {
-  template<>  struct equal_to<_GShom*>{
+namespace d3 { namespace util {
+  template<>
+  struct equal<_GShom*>{
     bool operator()(_GShom * _h1,_GShom * _h2){
       return (typeid(*_h1)==typeid(*_h2)?(*_h1)==(*_h2):false);
     }
   };
-}
+}}
 
 static UniqueTable<_GShom> canonical;
 /*************************************************************************/
