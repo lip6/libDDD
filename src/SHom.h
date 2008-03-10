@@ -35,6 +35,7 @@
 #include <set>
 
 #include "util/versatile.hh"
+#include "util/hash_support.hh"
 
 #ifdef PARALLEL_DD
 #include <tbb/task.h>
@@ -264,26 +265,6 @@ public:
 /******************************************************************************/
 
 
-namespace __gnu_cxx {
-  /// Computes a hash key for an Shom. 
-  /// Value returned is based on unicity of concret in unicity table.
-  /// Uses D. Knuth's hash function for pointers.
-  template<>  struct hash<GShom> {
-    size_t operator()(const GShom &g) const{
-      return g.hash();
-    }
-  };
-}
-
-namespace std {
-  /// Compares two GShom in hash tables. 
-  /// Value returned is based on unicity of concret in unicity table.
-  template<>  struct equal_to<GShom> {
-    bool operator()(const GShom &g1,const GShom &g2) const{
-      return g1==g2;
-    }
-  };
-}
 
 namespace std {
   /// Compares two GShom in hash tables. 
