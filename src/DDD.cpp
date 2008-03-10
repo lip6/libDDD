@@ -275,9 +275,9 @@ unsigned long int GDDD::size() const{
 class MyNbStates{
 private:
   int val; // val=0 donne nbState , val=1 donne noSharedSize
-//  static hash_map<GDDD,long double> s;
-  static __gnu_cxx::hash_map<GDDD,long double> s;
-	//typedef __Cache<GDDD, long double> s_t;
+  typedef ext_hash_map<GDDD,long double> cache_type;
+  static cache_type cache;
+
 
 long double nbStates(const GDDD& g){
 
@@ -286,19 +286,20 @@ long double nbStates(const GDDD& g){
 	else if(g==GDDD::top || g==GDDD::null)
 		return 0;
 	else{
-		__gnu_cxx::hash_map<GDDD,long double>::const_iterator i=s.find(g);
-		// s_t::const_iterator i = s.find(g);
-		if(i==s.end()){
-			long double res=0;
-			for(GDDD::const_iterator gi=g.begin();gi!=g.end();++gi)
-				res+=nbStates(gi->second)+val;
-			s[g]=res;
-			return res;
-		}
-		else{
-			return i->second;
-		}
-// end of lock
+	  cache_type::accessor access;  
+	  cache.find(access,g);
+  
+	  if( access.empty() ) {
+	    long double res=0;
+	    for(GDDD::const_iterator gi=g.begin();gi!=g.end();++gi)
+	      res+=nbStates(gi->second)+val;
+	    cache.insert(access,g);
+	    access->second = res;
+	    return res;
+	  } else {
+	    return access->second;
+	  }
+
 	}
 }
 
@@ -311,14 +312,11 @@ public:
   }
 
   static void clear () {
-    s.clear();
+    cache.clear();
   }
 };
 
-__gnu_cxx::hash_map<GDDD,long double> MyNbStates::s = __gnu_cxx::hash_map<GDDD,long double> ();
-//__Cache<GDDD,long double> MyNbStates::s = __Cache<GDDD,long double> ();
-
-  //Old_Cache<GDDD,long double> MyNbStates::s = Old_Cache<GDDD,long double>();
+ext_hash_map<GDDD,long double> MyNbStates::cache = ext_hash_map<GDDD,long double> ();
 
 long double
 GDDD::nbStates() const
