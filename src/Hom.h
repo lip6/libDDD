@@ -27,6 +27,7 @@
 #include "DDD.h"
 #include "DataSet.h"
 #include "hashfunc.hh"
+#include "util/hash_support.hh"
 
 #include <string>
 #include <set>
@@ -292,28 +293,6 @@ class Hom:public GHom /*, public DataSet*/ {
 };
 
 /******************************************************************************/
-namespace __gnu_cxx {
-  /// Computes a hash key for an GHom. 
-  /// Value returned is based on unicity of concret in unicity table.
-  /// Uses D. Knuth's hash function for pointers.
-  template<>
-  struct hash<GHom> {
-    size_t operator()(const GHom &g) const{
-      return g.hash();
-    }
-  };
-}
-
-namespace std {
-  /// Compares two GHom in hash tables. 
-  /// Value returned is based on unicity of concret in unicity table.
-  template<>
-  struct equal_to<GHom> {
-    bool operator()(const GHom &g1,const GHom &g2) const{
-      return g1==g2;
-    }
-  };
-}
 
 namespace std {
   /// Compares two GHom in hash tables. 
