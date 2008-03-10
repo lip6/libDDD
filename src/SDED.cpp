@@ -33,7 +33,6 @@
 #include "SDD.h"
 #include "SDED.h"
 #include "SHom.h"
-#include "util/hash_map.hh"
 
 #ifdef PARALLEL_DD
 # include "tbb/atomic.h"
@@ -41,32 +40,10 @@
 
 /******************************************************************************/
 
-struct SDED_hash
-{
-  size_t 
-  operator()(const SDED &e) const
-  {
-    return e.hash();
-  }
-};
-
-struct SDED_equal_to
-{
-  bool 
-  operator()(const SDED &e1,const SDED &e2) const
-  {
-    return e1 == e2;
-  }
-};
-
 namespace namespace_SDED {
 
   typedef hash_map< SDED,
-                    GSDD,
-                    SDED_hash,
-                    SDED_equal_to,
-                    std::allocator<GSDD>,
-                    configuration::hash_map_type > Cache;
+                    GSDD>::type Cache;
   
   static Cache cache;
   static Cache recentCache;
