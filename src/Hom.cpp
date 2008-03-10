@@ -33,23 +33,16 @@
 #include "UniqueTable.h"
 #include "MLHom.h"
 #include "util/configuration.hh"
+#include "util/hash_support.hh"
+
 
 #ifdef PARALLEL_DD
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
 #endif
 
-/* Unique Table */
-namespace __gnu_cxx {
-  template<> 
-  struct hash<_GHom*>{
-    size_t operator()(_GHom * _h) const{
-      return _h->hash();
-    }
-  };
-}
 
-namespace std {
+namespace d3 { namespace util {
   template<>
   struct equal_to<_GHom*>{
     bool operator()(_GHom * _h1,_GHom * _h2){
@@ -59,6 +52,34 @@ namespace std {
 }
 
 static UniqueTable<_GHom> canonical;
+
+
+/************************************************************************/
+/*      A cache for homomorphisms **************/
+// class Cache {
+//   typedef hash_map<GDDD,GDDD>::type valMap;
+//   typedef hash_map<GHom,valMap>::type cacheType;
+//   cacheType cache;
+// public :
+//   /** Determine if the cache contains the entry for h(d).
+//     * Returns true and the resulting value if cache entry exists, 
+//     * or false and GDDD::null otherwise. */ 
+//   std::pair<bool,GDDD> contains (const GHom & h, const GDDD & d);
+  
+//   /** Set the resulting value of h(d) = result. 
+//     * Returns true if the insert was actually performed or false if the value for h(d) was already in the cache.  */
+//   bool insert (const GHom & h, const GDDD & d, const GDDD & result);
+
+// };
+
+// std::pair<bool,GDDD> Cache::contains (const GHom & h, const GDDD & d) {
+//   if (cache.find(h) == cache.end()) {
+    
+//   }
+
+// }
+
+
 
 /*************************************************************************/
 /*                         Class _GHom                                   */
