@@ -33,41 +33,13 @@
 #include "DDD.h"
 #include "DED.h"
 #include "Hom.h"
-#include "util/hash_map.hh"
 
 #ifdef PARALLEL_DD
 #include "tbb/atomic.h"
 #endif
 /******************************************************************************/
 
-//typedef __gnu_cxx::hash_map<DED,GDDD> Cache;
-//typedef _Cache< DED, GDDD, DED_hash >::cache Cache;
-//typedef Old_Cache< DED, GDDD > Cache;
-
-struct DED_hash
-{
-  size_t 
-  operator()(const DED &e) const
-  {
-    return e.hash();
-  }
-};
-
-struct DED_equal
-{
-  bool
-  operator()(const DED &e1,const DED &e2) const
-  {
-    return e1==e2;
-  }
-};
-
-typedef hash_map< DED,
-                  GDDD,
-                  DED_hash,
-                  DED_equal,
-                  std::allocator<GDDD>,
-                  configuration::hash_map_type > Cache;
+typedef hash_map< DED, GDDD>::type Cache;
 
 static Cache cache;
 
