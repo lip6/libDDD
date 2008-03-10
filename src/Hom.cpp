@@ -44,12 +44,12 @@
 
 namespace d3 { namespace util {
   template<>
-  struct equal_to<_GHom*>{
+  struct equal<_GHom*>{
     bool operator()(_GHom * _h1,_GHom * _h2){
       return (typeid(*_h1)==typeid(*_h2)?(*_h1)==(*_h2):false);
     }
   };
-}
+}}
 
 static UniqueTable<_GHom> canonical;
 
