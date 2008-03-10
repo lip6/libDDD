@@ -321,58 +321,7 @@ public:
 
 }; // DDD class
 
-/******************************************************************************/
-struct GDDD_hash
-{
-  size_t
-  operator()(const GDDD &g) const
-  {
-    return g.hash();
-  }
-};
 
-struct GDDD_equal_to
-{
-  bool
-  operator()( const GDDD &g1, const GDDD &g2) const
-  {
-    return g1 == g2;
-  }
-};
-
-struct GDDD_less
-{
-  bool
-  operator()(const GDDD &g1,const GDDD &g2) const
-  {
-    return g1 < g2;
-  }
-};
-
-/******************************************************************************/
-namespace __gnu_cxx {
-  /// Computes a hash key for a DDD. 
-  /// Value returned is based on unicity of concret in unicity table.
-  /// Uses D. Knuth's hash function for pointers.  
-  template<>
-  struct hash<GDDD> {
-    size_t operator()(const GDDD &g) const{
-      //return (size_t) g.concret;
-      return g.hash(); 
-    }
-  };
-}
-
-namespace std {
-  /// Compares two DDD in hash tables. 
-  /// Value returned is based on unicity of concret in unicity table.
-  template<>
-  struct equal_to<GDDD> {
-    bool operator()(const GDDD &g1,const GDDD &g2) const{
-      return g1==g2;
-    }
-  };
-}
 
 namespace std {
   /// Compares two DDD in hash tables. 
