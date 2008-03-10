@@ -29,6 +29,7 @@
 #include <ext/hash_set>
 
 #include "DataSet.h"
+#include "util/hash_support.hh"
 #include "hashfunc.hh"
 
 /// pre-declaration of concrete (private) class implemented in .cpp file
@@ -344,31 +345,6 @@ namespace SDDutil {
   void foreachTable (void (*foo) (const GSDD & g)); 
 }
 
-
-/******************************************************************************/
-namespace __gnu_cxx {
-  /// Computes a hash key for an SDD. 
-  /// Value returned is based on unicity of concret in unicity table.
-  /// Uses D. Knuth's hash function for pointers.
-  template<>	
-  struct hash<GSDD> {
-    size_t operator()(const GSDD &g) const{
-      //return (size_t) g.concret;
-      return g.hash();
-    }
-  };
-}
-
-namespace std {
-  /// Compares two SDD in hash tables. 
-  /// Value returned is based on unicity of concret in unicity table.
-  template<>
-  struct equal_to<GSDD> {
-    bool operator()(const GSDD &g1,const GSDD &g2) const{
-      return g1==g2;
-    }
-  };
-}
 
 namespace std {
   /// Compares two SDD in hash tables. 
