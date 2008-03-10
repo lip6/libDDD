@@ -137,7 +137,7 @@ public:
   GSDD eval(const GSDD &d, versatile* v) const;
   //@}
   
-	GSDD GShom::eval_proxy(const GSDD &d, versatile* v) const;
+  GSDD eval_proxy(const GSDD &d, versatile* v) const;
 
 
   /// For debug and development purposes. Gives the reference count of the concrete data. 
