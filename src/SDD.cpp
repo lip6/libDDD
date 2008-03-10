@@ -108,30 +108,16 @@ public:
   /* Memory Manager */
   void mark()const;
 
+  size_t hash() const{
+    size_t res=(size_t) variable;
+    for(GSDD::const_iterator vi=valuation.begin();vi!=valuation.end();++vi)
+      res ^=   vi->first->set_hash()  
+	+  vi->second.hash()  ;
+    return res;
+  }
+
+
 };
-
-/******************************************************************************/
-// to be revised !!!
-
-namespace __gnu_cxx {
-  template<>  struct hash<_GSDD*> {
-    size_t operator()(_GSDD *g) const{
-      size_t res=(size_t) g->variable;
-      for(GSDD::const_iterator vi=g->valuation.begin();vi!=g->valuation.end();++vi)
-        res ^=   vi->first->set_hash()  
-	  +  vi->second.hash()  ;
-      return res;
-    }
-  };
-}
-
-namespace std {
-  template<>  struct equal_to<_GSDD*> {
-    bool operator()(_GSDD *g1,_GSDD *g2) const{
-      return *g1==*g2;
-    }
-  };
-}
 
 // map<int,string> mapVarName;
 #ifdef PARALLEL_DD
