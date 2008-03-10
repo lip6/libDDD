@@ -28,6 +28,7 @@
 
 #include "DataSet.h"
 #include "util/versatile.hh"
+#include "util/hash_support.hh"
 
 class _SDED;
 class GSDD;
@@ -36,10 +37,7 @@ class GShom;
 /******************************************************************************/
 class SDED{
 private:
-  friend struct __gnu_cxx::hash<SDED>;
-  friend struct std::equal_to<SDED>;
   _SDED *concret;
-
 
 public:
 	
@@ -62,21 +60,6 @@ public:
   size_t hash () const ;
 };
 
-
-/******************************************************************************/
-namespace __gnu_cxx {
-  template<>  struct hash<SDED> {
-    size_t operator()(const SDED&d) const { return d.hash(); }
-  };
-}
-
-namespace std {
-  template<>  struct equal_to<SDED> {
-    bool operator()(const SDED&a,const SDED&b) const { return a == b ;};
-  };
-}
-
-/****************************************************************************/
 
 // Library internal: square_union (cf FORTE'05)
 void
