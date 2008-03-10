@@ -27,6 +27,7 @@
 #include <set>
 #include "DDD.h"
 #include "Hom.h"
+#include "util/hash_support.hh"
 
 class _DED;
 class GDDD;
@@ -54,20 +55,6 @@ public:
 };
 
 
-/******************************************************************************/
-namespace __gnu_cxx {
-  template<>
-  struct hash<DED> {
-    size_t operator()(const DED& d) const { return d.hash(); }
-  };
-}
-
-namespace std {
-  template<>
-  struct equal_to<DED> {
-    bool operator()(const DED& a,const DED& b ) const { return a == b ;}
-  };
-}
 
 /******************************************************************************/
 class _DED{
