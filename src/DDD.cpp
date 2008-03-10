@@ -37,7 +37,6 @@
 #include "DDD.h"
 #include "UniqueTable.h"
 #include "DED.h"
-#include "util/hash_map.hh"
 
 #ifdef PARALLEL_DD
 #include "tbb/atomic.h"
@@ -99,32 +98,15 @@ public:
   /* Memory Manager */
   void mark()const;
 
+  size_t hash () const {
+    size_t res=(size_t) variable;
+    for(GDDD::const_iterator vi=valuation.begin();vi!=valuation.end();++vi)
+      res+=(size_t)(vi->first+1011)* vi->second.hash();
+    return res;
+  }
 
 };
 
-/******************************************************************************/
-// to be revised !!!
-
-namespace __gnu_cxx {
-  template<>
-  struct hash<_GDDD*> {
-    size_t operator()(_GDDD *g) const{
-      size_t res=(size_t) g->variable;
-      for(GDDD::const_iterator vi=g->valuation.begin();vi!=g->valuation.end();++vi)
-        res+=(size_t)(vi->first+1011)* vi->second.hash();
-      return res;
-    }
-  };
-}
-
-namespace std {
-  template<>
-  struct equal_to<_GDDD*> {
-    bool operator()(_GDDD *g1,_GDDD *g2) const{
-      return *g1==*g2;
-    }
-  };
-}
 
 static UniqueTable<_GDDD> canonical;
 std::map<int,std::string> mapVarName;
