@@ -24,24 +24,14 @@
 #include "UniqueTable.h"
 #include <typeinfo>
 
-/* Unique Table */
-namespace __gnu_cxx {
-  template<> 
-  struct hash<_MLHom*>{
-    size_t operator()(_MLHom * _h) const{
-      return _h->hash();
-    }
-  };
-}
-
-namespace std {
+namespace d3 { namespace util {
   template<>
-  struct equal_to<_MLHom*>{
+  struct equal<_MLHom*>{
     bool operator()(_MLHom * _h1,_MLHom * _h2){
       return (typeid(*_h1)==typeid(*_h2)?(*_h1)==(*_h2):false);
     }
   };
-}
+}}
 
 static UniqueTable<_MLHom> canonical;
 
