@@ -1,27 +1,30 @@
 #ifndef _D3_CONFIGURATION_HH_
 #define _D3_CONFIGURATION_HH_
 
-#include "util/hash_map.hh"
+#include "util/hash_support.hh"
 #include "util/set.hh"
+#include "util/ext_hash_map.tcc"
 
 #ifdef PARALLEL_DD
 #define CONCURR_HASH_MAP
 #define PROTECTED_SET
 #endif
 
-struct configuration
+
+template
+<
+  typename Key,
+  typename Data,
+  typename HashKey = d3::util::hash<Key>,
+  typename EqualKey = d3::util::equal<Key>
+> struct hash_map
 {
-
 # ifdef CONCURR_HASH_MAP
-  typedef concurrent_hash_map_tag hash_map_type;
+//   typedef hash_map tbb_hash_map;
 # else
-  typedef gnu_hash_map_tag hash_map_type;
-# endif
-
-# ifdef PROTECTED_SET
-  typedef protected_std_set_tag set_type;
-# endif
-  
+  typedef ext_hash_map<Key,Data,HashKey,EqualKey> type;
+#endif
 };
+
 
 #endif
