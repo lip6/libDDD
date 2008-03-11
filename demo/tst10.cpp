@@ -62,7 +62,7 @@ public :
   }
 
   size_t hash() const {
-    return var ^ __gnu_cxx::hash<GHom>()(h);
+    return var ^ h.hash();
   }
 
   bool operator==(const StrongHom &s) const {

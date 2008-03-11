@@ -1,3 +1,6 @@
+#ifndef _EXT_HASH_MAP_HH_
+#define _EXT_HASH_MAP_HH_
+
 #include <ext/hash_map>
 #include "util/hash_support.hh"
 #include <utility>
@@ -214,3 +217,5 @@ public:
   }
 
 };
+
+#endif

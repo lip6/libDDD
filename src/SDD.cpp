@@ -38,7 +38,7 @@
 #include "DDD.h"
 #include "SHom.h"
 #include "util/hash_support.hh"
-#include "util/ext_hash_map.tcc"
+#include "util/ext_hash_map.hh"
 
 
 #ifdef PARALLEL_DD

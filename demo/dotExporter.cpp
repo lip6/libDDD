@@ -26,6 +26,7 @@
 #include <sstream>
 #include <fstream>
 #include <ext/hash_set>
+#include "util/hash_support.hh"
 using namespace std;
 using namespace __gnu_cxx;
     
@@ -179,7 +180,9 @@ public :
 
   dotExporter(const string &s="test"):path(s) {};
 
-  void printColor (const GSDD & g, const string & color,hash_set<GSDD> &visited) {
+typedef  hash_set<GSDD,d3::util::hash<GSDD>, d3::util::equal<GSDD> > gsdd_hash_set;
+
+  void printColor (const GSDD & g, const string & color,gsdd_hash_set &visited) {
     if (visited.find(g) == visited.end() ) {
       *out << "     " << name.find(g)->second << " [color=\""<< color << "\"];"<<endl;
       visited.insert(g);
@@ -190,7 +193,7 @@ public :
   }
 
   void setColor(const GSDD & g, const string & color) {
-    hash_set<GSDD> visited;
+    gsdd_hash_set visited;
     collect(g);
     printColor(g,color,visited);
   }
