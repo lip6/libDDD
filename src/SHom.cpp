@@ -38,7 +38,7 @@
 
 #ifdef PARALLEL_DD
 #include <tbb/blocked_range.h>
-#include <tbb/parallel_for.h>
+#include <tbb/parallel_reduce.h>
 #include <tbb/task.h>
 #endif
 
@@ -563,26 +563,29 @@ public:
 //////////////////////////////////////////////////////////////////////////////
 
 #ifdef PARALLEL_DD
-class FL_task
+
+class F_Task
 	: public tbb::task
 {
 private:
 	
 	const GShom& gshom_;
 	const GSDD& d_;
-	GSDD* result_;
+	GSDD& result_;
+	// GSDD::Valuation& result_;
 	versatile* v_;
-	bool type_;
 	
 public:
 
-	FL_task(const GShom& gshom,const GSDD& d, GSDD* result, versatile* v, bool type)
+	F_Task(	  const GShom& gshom
+			, const GSDD& d
+			// , GSDD::Valuation& result
+			, GSDD& result
+			, versatile* v)
 		: gshom_(gshom)
 		, d_(d)
 		, result_(result)
 		, v_(v)
-		, type_(type)
-		
 	{
 		v_->set_parent_task(this);
 	}
@@ -590,7 +593,40 @@ public:
 	task*
 	execute()
 	{
-		*result_ = gshom_.eval_proxy(d_,v_);
+		// // GSDD::Valuation valuation;
+		// // std::map<GSDD,DataSet*> res;
+		// 
+		//         for( GSDD::const_iterator it = d_.begin();
+		//             it != d_.end();
+		//             ++it)
+		//         {
+		//             GSDD son = gshom_.eval_proxy(it->second,v_);
+		// 	result_.push_back(std::make_pair(it->first,son));
+		// 	
+		// 		//             if( son != GSDD::null && !(it->first->empty()) )
+		// 		//             {
+		// 		// square_union(res, son, it->first);
+		// 		//             }
+		//         }
+		// 
+		// // valuation.reserve(res.size());  
+		// // 	  	for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;
+		// // 		it!= res.end();
+		// // 		++it)
+		// // {
+		// // 	valuation.push_back(std::make_pair(it->second,it->first));
+		// // }
+		// //         
+		// //         if( valuation.empty() )
+		// //         {
+		// //             return GSDD::null;
+		// //         }
+		// //         else
+		// //         {
+		// //             return GSDD(d.variable(),valuation);
+		// //         }
+        
+		result_ = gshom_.eval_proxy(d_,v_);
 		return NULL;
 	}
 	
@@ -598,19 +634,41 @@ public:
 
 //////////////////////////////////////////////////////////////////////////////
 
-// class G_task
-// 	: public tbb::task
-// {
-// public:
-// 	
-// 	task*
-// 	execute()
-// 	{
-// 		
-// 		return NULL;
-// 	}
-// 	
-// };
+class L_Task
+	: public tbb::task
+{
+private:
+	
+	const GShom& gshom_;
+	const GSDD& d_;
+	GSDD& result_;
+	// GSDD::Valuation& result_;
+	
+	versatile* v_;
+	
+public:
+
+	L_Task(	  const GShom& gshom
+		 	, const GSDD& d
+			// , GSDD::Valuation& result
+			, GSDD& result
+			, versatile* v)
+		: gshom_(gshom)
+		, d_(d)
+		, result_(result)
+		, v_(v)
+	{
+		v_->set_parent_task(this);
+	}
+
+	task*
+	execute()
+	{
+		result_ = gshom_.eval_proxy(d_,v_);
+		return NULL;
+	}
+	
+};
 
 #endif // PARALLEL_DD
 
@@ -687,35 +745,40 @@ public:
 				{
 					d1 = d2;
 
-#ifdef PARALLEL_DD
-				
-					tbb::task* parent_task = v->get_parent_task();
-					
-					versatile current_versatile_1;
-					versatile current_versatile_2;
-					
-					GSDD result_1;
-					GSDD result_2;
-					
-					FL_task& f_task = *new(parent_task->allocate_child()) FL_task(F_part,d2,&result_1,&current_versatile_1,true);
-					FL_task& l_task = *new(parent_task->allocate_child()) FL_task(L_part,d2,&result_2,&current_versatile_2,false);
-									
-					parent_task->set_ref_count(3);
-					
-					parent_task->spawn(f_task);
-					parent_task->spawn_and_wait_for_all(l_task);
-					
-					std::set<GSDD> s;
-					s.insert(result_1);
-					s.insert(result_2);
-
-					d2 =  SDED::add(s);
-			
-#else	
+// #ifdef PARALLEL_DD
+// 				
+// 					tbb::task* parent_task = v->get_parent_task();
+// 					
+// 					versatile current_versatile_1;
+// 					versatile current_versatile_2;
+// 					
+// 					// GSDD::Valuation result_1;
+// 					// GSDD::Valuation result_2;
+// 					GSDD result_1;
+// 					GSDD result_2;
+// 					
+// 					F_Task& f_task = *new(parent_task->allocate_child()) 
+// 						F_Task(F_part,d2,result_1,&current_versatile_1);
+// 
+// 					L_Task& l_task = *new(parent_task->allocate_child())
+// 						L_Task(L_part,d2,result_2,&current_versatile_2);
+// 									
+// 					parent_task->set_ref_count(3);
+// 					
+// 					parent_task->spawn(f_task);
+// 					parent_task->spawn_and_wait_for_all(l_task);
+// 					
+// 					std::set<GSDD> s;
+// 					s.insert(result_1);
+// 					s.insert(result_2);
+// 					
+// 					d2 =  SDED::add(s);
+// 			
+// #else	
 					d2 = F_part.eval_proxy(d2,v);
 					d2 = L_part.eval_proxy(d2,v);
 
-#endif // PARALLEL_DD
+// #endif // PARALLEL_DD
 
 					for( 	std::set<GShom>::const_iterator G_it = partition.G.begin();
 							G_it != partition.G.end();
@@ -758,6 +821,91 @@ public:
 
 } // end namespace H_Homomorphism
 
+typedef std::map<GSDD,DataSet*> GSDD_DataSet_map;
+
+#ifdef PARALLEL_DD
+
+typedef tbb::blocked_range<GSDD::const_iterator> varval_range;
+typedef std::vector< std::pair<DataSet*,GSDD> > gsdd_dataset_vec;
+
+class hom_reducer
+{
+private:
+	
+	const GShom& gshom_;
+	const GSDD& gsdd_;
+	GSDD_DataSet_map res_;
+	versatile* v_;
+	
+public:
+
+	// standard constructor
+	hom_reducer(  const GShom& gshom
+				, const GSDD& gsdd
+				, versatile* v)
+			
+			: gshom_(gshom)
+			, gsdd_(gsdd)
+			, res_()
+			, v_(v)
+	{
+	}
+
+
+	// "splitting constructor", called by tbb internally
+	hom_reducer(const hom_reducer& reducer,
+				tbb::split)
+
+		: gshom_(reducer.gshom_)
+		, gsdd_(reducer.gsdd_)
+		, res_()
+		, v_(reducer.v_)
+	{
+	}
+
+	// what to do when reducing this and hom_apply
+	// so here, we make a square_union
+	void
+	join(const hom_reducer& reducer)
+	{
+		const GSDD_DataSet_map& to_reduce = reducer.res_;
+		for( GSDD_DataSet_map::const_iterator it = to_reduce.begin() 
+		   ; it != to_reduce.end()
+		   ; ++it )
+		{
+			square_union(res_, it->first, it->second);
+		}
+	}
+		
+	void
+	operator()(const varval_range& range)
+	{
+		GSDD_DataSet_map& res = this->res_;
+		
+		for( GSDD::const_iterator it = range.begin();
+			 it != range.end();
+			 ++it)
+		{
+			GSDD son = gshom_.eval_proxy(it->second,v_);
+            if( son != GSDD::null && !(it->first->empty()) )
+            {
+				square_union(res, son, it->first);
+            }
+		}
+	}
+	
+	const GSDD_DataSet_map&
+	get_results() 
+	const
+	{
+		return res_;
+	}
+	
+	
+};
+
+#endif
+
 GSDD 
 _GShom::eval_skip(const GSDD& d, versatile* v) const
 {
@@ -775,14 +923,23 @@ _GShom::eval_skip(const GSDD& d, versatile* v) const
     }
     else if( this->skip_variable(d.variable()) )
     {
-        GSDD::Valuation valuation;
-		std::map<GSDD,DataSet *> res;
+		std::map<GSDD,DataSet*> res;
+
+		const GShom gshom(this);
+
+#ifdef PARALLEL_DD
+
+		hom_reducer reducer(gshom, d, v); 
+
+		tbb::parallel_reduce( varval_range(d.begin(),d.end(),2) 
+						 	, reducer);
+
+#else
 
         for( GSDD::const_iterator it = d.begin();
             it != d.end();
             ++it)
         {
-			const GShom gshom(this);
             GSDD son = gshom.eval_proxy(it->second,v);
             if( son != GSDD::null && !(it->first->empty()) )
             {
@@ -790,6 +947,9 @@ _GShom::eval_skip(const GSDD& d, versatile* v) const
             }
         }
 
+#endif
+
+        GSDD::Valuation valuation;
 		valuation.reserve(res.size());  
 	  	for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;
 				it!= res.end();
