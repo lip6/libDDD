@@ -26,7 +26,7 @@ using namespace std;
 #include "DDD.h"
 #include "DED.h"
 #include "MemoryManager.h"
-#include "dotExporter.h"
+#include "util/dotExporter.h"
 
 
 typedef enum {A, dA, B, dB, C, dC} var;
