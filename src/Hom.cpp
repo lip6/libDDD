@@ -699,50 +699,6 @@ bool StrongHom::operator==(const _GHom &h) const{
   return typeid(*this)==typeid(h)?*this==*(StrongHom*)&h:false;
 }
 
-#ifdef PARALLEL_DD
-
-typedef d3::util::set<GDDD,std::less<GDDD>,std::allocator<GDDD>,configuration::set_type > GDDD_set;
-typedef tbb::blocked_range<GDDD::const_iterator> varval_range;
-
-class apply_hom
-{
-  
-  const StrongHom& hom_;
-  const GDDD& d_;
-  GDDD_set& set_;
-  
-public:
-    
-    apply_hom( const StrongHom& hom,
-               const GDDD& d,
-               GDDD_set& set)
-    :
-    hom_(hom),
-    d_(d),
-    set_(set)
-  {
-  }
-  
-  void
-  operator()(const varval_range& range) const
-  {
-	// helps the compiler to optimize
-    GDDD_set& set_ = this->set_;
-    const StrongHom& hom_ = this->hom_;
-      
-    int variable = d_.variable();
-    
-    for( GDDD::const_iterator vi = range.begin();
-         vi != range.end();
-         ++vi)
-    {
-      set_.insert(hom_.phi( variable, vi->first)(vi->second) );
-    }
-  }
-  
-};
-#endif // PARALLEL_DD
-
 /* Eval */
 GDDD
 StrongHom::eval(const GDDD &d) const
@@ -762,17 +718,6 @@ StrongHom::eval(const GDDD &d) const
   else
   {
 
-// #ifdef PARALLEL_DD
-//     
-//     GDDD_set s;
-//     
-//     tbb::parallel_for( varval_range(d.begin(),d.end(),2),
-//                        apply_hom(*this, d, s));
-//     
-//     return DED::add(s.get_set());
-//     
-// #else // NOT PARALLEL_DD
-
     int variable = d.variable();
     std::set<GDDD> s;
     for( GDDD::const_iterator vi = d.begin();
@@ -782,8 +727,6 @@ StrongHom::eval(const GDDD &d) const
         s.insert(phi(variable,vi->first)(vi->second));
     }
     return DED::add(s);
-
-// #endif // PARALLEL_DD
   }
 }
 

@@ -1,26 +1,16 @@
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/mutex.h>
 
-struct concurrent_hash_map_tag{};
+#include "util/hash_support.hh"
 
-// Specialization for the tbb::concurrent_hash_map
 template
 <
   typename Key,
   typename Data,
-  typename HashKey,
-  typename EqualKey,
-  typename Allocator
+  typename HashKey = d3::util::hash<Key>,
+  typename EqualKey = d3::util::equal<Key>
 >
-struct hash_map
-<
-  Key,
-  Data,
-  HashKey,
-  EqualKey,
-  Allocator,
-  concurrent_hash_map_tag // <= Specialization
->
+struct tbb_hash_map
 {
   struct hash_compare
   {    
@@ -52,7 +42,7 @@ struct hash_map
   mutex map_mutex_;
 
   // Methods
-  hash_map()
+  tbb_hash_map()
     :
     map_(),
     map_mutex_()
