@@ -2,9 +2,8 @@
 #define _D3_CONFIGURATION_HH_
 
 #include "util/hash_support.hh"
-#include "util/set.hh"
-#include "util/ext_hash_map.tcc"
-#include "util/concurrent_hash_map.tcc"
+#include "util/ext_hash_map.hh"
+#include "util/tbb_hash_map.hh"
 
 #ifdef PARALLEL_DD
 #define CONCURR_HASH_MAP

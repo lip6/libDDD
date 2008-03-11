@@ -1,3 +1,8 @@
+#ifndef _CONCURRENT_HASH_MAP_HH_
+#define _CONCURRENT_HASH_MAP_HH_
+
+#ifdef PARALLEL_DD
+
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/mutex.h>
 
@@ -124,3 +129,7 @@ struct tbb_hash_map
   }
 
 };
+
+#endif // PARALLEL_DD
+
+#endif /* _CONCURRENT_HASH_MAP_HH_ */
