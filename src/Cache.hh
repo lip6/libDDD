@@ -47,7 +47,6 @@ std::pair<bool,NodeType> Cache<HomType,NodeType>::contains (const HomType & h, c
     } else {
       // return cached value
       ++hits;
-      assert(val_access->second.variable() < 6);
       return std::make_pair(true,val_access->second);
     }
   }
