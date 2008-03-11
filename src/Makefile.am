@@ -13,7 +13,8 @@ include_HEADERS = DataSet.h			\
                   MLHom.h                       \
 		  statistic.hpp                 \
 		  process.hpp                   \
-		  AdditiveMap.hpp              
+		  AdditiveMap.hpp               \
+		  util/dotExporter.h
 
 SRCS 		= DED.cpp			\
 		  DDD.cpp 			\
@@ -38,7 +39,9 @@ SRCS 		= DED.cpp			\
 		  statistic.cpp                 \
 		  process.hpp                   \
 		  process.cpp                   \
-		  AdditiveMap.hpp              
+		  AdditiveMap.hpp               \
+		  util/dotExporter.cpp               \
+		  util/dotExporter.h
 
 
 AM_CPPFLAGS =  -Wall 
