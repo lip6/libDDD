@@ -34,7 +34,7 @@
 #include "MLHom.h"
 #include "util/configuration.hh"
 #include "util/hash_support.hh"
-
+#include "Cache.hh"
 
 #ifdef PARALLEL_DD
 #include <tbb/blocked_range.h>
@@ -53,32 +53,9 @@ namespace d3 { namespace util {
 
 static UniqueTable<_GHom> canonical;
 
+typedef Cache<GHom,GDDD> HomCache;
 
-/************************************************************************/
-/*      A cache for homomorphisms **************/
-// class Cache {
-//   typedef hash_map<GDDD,GDDD>::type valMap;
-//   typedef hash_map<GHom,valMap>::type cacheType;
-//   cacheType cache;
-// public :
-//   /** Determine if the cache contains the entry for h(d).
-//     * Returns true and the resulting value if cache entry exists, 
-//     * or false and GDDD::null otherwise. */ 
-//   std::pair<bool,GDDD> contains (const GHom & h, const GDDD & d);
-  
-//   /** Set the resulting value of h(d) = result. 
-//     * Returns true if the insert was actually performed or false if the value for h(d) was already in the cache.  */
-//   bool insert (const GHom & h, const GDDD & d, const GDDD & result);
-
-// };
-
-// std::pair<bool,GDDD> Cache::contains (const GHom & h, const GDDD & d) {
-//   if (cache.find(h) == cache.end()) {
-    
-//   }
-
-// }
-
+static HomCache cache;
 
 
 /*************************************************************************/
