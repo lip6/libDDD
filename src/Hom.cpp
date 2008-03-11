@@ -32,8 +32,8 @@
 #include "DED.h"
 #include "UniqueTable.h"
 #include "MLHom.h"
-#include "util/configuration.hh"
 #include "util/hash_support.hh"
+#include "util/configuration.hh"
 #include "Cache.hh"
 
 #ifdef PARALLEL_DD
@@ -733,13 +733,26 @@ GHom GHom::compose (const GHom &r) const {
 GDDD
 GHom::operator()(const GDDD &d) const
 {
-    if(concret->immediat)
+  if(concret->immediat)
     {
-        return concret->eval(d);
+      return concret->eval(d);
     }
-    else
+  else
     {
-        return DED::hom(*this,d);
+//      return DED::hom(*this,d);
+      if (d == GDDD::null) {
+	return d;
+      } else {
+	std::pair<bool,GDDD> res = cache.contains(*this,d);
+	if (res.first) {
+	  // cache hit
+	  return res.second;
+	} else {
+	  GDDD result = eval(d);
+	  cache.insert (*this,d,result);
+	  return result;
+	}
+      }
     }
 }
 
