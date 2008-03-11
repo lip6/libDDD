@@ -11,7 +11,12 @@ class Cache {
   typedef typename hash_map<NodeType,NodeType>::type valMap;
   typedef typename hash_map<HomType,valMap>::type cacheType;
   cacheType cache;
+
+  long hits;
+  long misses;
 public :
+
+  Cache() : hits(0),misses(0) {}
   /** Determine if the cache contains the entry for h(d).
     * Returns true and the resulting value if cache entry exists, 
     * or false and NodeType::null otherwise. */ 
@@ -30,15 +35,18 @@ std::pair<bool,NodeType> Cache<HomType,NodeType>::contains (const HomType & h, c
 
   if (access.empty()) {
     // first time we hit this homomorphism : no cache
+    ++misses;
     return std::make_pair(false,NodeType::null);
   } else {
     typename valMap::const_accessor val_access ;
     access->second.find(val_access,d);
     if (val_access.empty()) {
       // no application of h(d) found
+      ++misses;
       return std::make_pair(false,NodeType::null);
     } else {
       // return cached value
+      ++hits;
       return std::make_pair(true,val_access->second);
     }
   }
