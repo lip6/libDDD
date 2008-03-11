@@ -29,7 +29,7 @@ public:
     // Types
   public:
 
-    typedef const typename std::pair<const Key, Data> value_type;
+    typedef typename std::pair<const Key, Data> value_type;
 
     // Attributes
   private:
@@ -37,7 +37,7 @@ public:
     friend class ext_hash_map;
     friend class accessor;
     bool has_result_;
-    const_iterator current_bucket_;
+    iterator current_bucket_;
     
     // Methods
   public:
@@ -52,16 +52,16 @@ public:
     bool
     empty() const
     {
-      return has_result_;
+      return ! has_result_;
     }
 
-    const value_type&
+    value_type&
     operator*() const
     {
       return *current_bucket_;
     }
 
-    const value_type* 
+    value_type* 
     operator->() const
     {
       return &operator*();
@@ -82,43 +82,12 @@ public:
   };
 
   ////////////////////////////////////////////////////////////////
-
-  class accessor
-    :
-    public const_accessor
-  {
-    // Types
-  public:
-    typedef typename std::pair<const Key, Data> value_type;
-
-    // Attributes
-  private:
-    iterator current_bucket_;
-
-    friend class ext_hash_map;
-    // Methods
-  public:
-
-    value_type&
-    operator*() const
-    {
-      return *(this->current_bucket_);
-    }
-
-    value_type* 
-    operator->() const
-    {
-      return &operator*();
-    }
-
-  };
-
-  ////////////////////////////////////////////////////////////////
+  typedef const_accessor accessor;
 
   // Attributes
 private:
 
-	friend class const_accessor;
+  friend class const_accessor;
   internal_hash_map map_;
 
   // Methods
@@ -173,30 +142,11 @@ public:
   }
 
   bool
-  find( const_accessor& result, const Key& key) const
-  {
-    const_iterator ci =  map_.find(key);
-    result.current_bucket_ = ci;
-    result.has_result_ = ( ci == map_.end() );
-    return result.has_result_;
-  }
-
-  bool
   find( accessor& result, const Key& key)
   {
     iterator i =  map_.find(key);
     result.current_bucket_ = i;
-    result.has_result_ = ( i == map_.end() );
-    return result.has_result_;
-  }
-
-  bool
-  insert( const_accessor& result, const Key& key)
-  {
-    std::pair<const Key, Data> value_to_insert(key,Data());
-    std::pair<iterator,bool> p(map_.insert(value_to_insert));
-    result.current_bucket_ = p.first;
-    result.has_result_ = p.second;
+    result.has_result_ = ( i != map_.end() );
     return result.has_result_;
   }
 
@@ -206,8 +156,8 @@ public:
     std::pair<const Key, Data> value_to_insert(key,Data());
     std::pair<iterator,bool> p(map_.insert(value_to_insert));
     result.current_bucket_ = p.first;
-    result.has_result_ = p.second;
-    return result.has_result_;
+    result.has_result_ = true;
+    return p.second;
   }
 
   bool
