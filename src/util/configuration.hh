@@ -4,6 +4,7 @@
 #include "util/hash_support.hh"
 #include "util/set.hh"
 #include "util/ext_hash_map.tcc"
+#include "util/concurrent_hash_map.tcc"
 
 #ifdef PARALLEL_DD
 #define CONCURR_HASH_MAP
@@ -20,7 +21,7 @@ template
 > struct hash_map
 {
 # ifdef CONCURR_HASH_MAP
-//   typedef hash_map tbb_hash_map;
+  typedef tbb_hash_map<Key,Data,HashKey,EqualKey> type;
 # else
   typedef ext_hash_map<Key,Data,HashKey,EqualKey> type;
 #endif

@@ -2,7 +2,6 @@
 #include "util/hash_support.hh"
 #include <utility>
 
-// Specialization for the TR1 unordered map
 template
 <
   typename Key,
