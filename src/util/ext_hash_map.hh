@@ -29,7 +29,7 @@ public:
     // Types
   public:
 
-    typedef typename std::pair<const Key, Data> value_type;
+    typedef const typename std::pair<const Key, Data> value_type;
 
     // Attributes
   private:
@@ -37,7 +37,7 @@ public:
     friend class ext_hash_map;
     friend class accessor;
     bool has_result_;
-    iterator current_bucket_;
+    const_iterator current_bucket_;
     
     // Methods
   public:
@@ -55,13 +55,13 @@ public:
       return ! has_result_;
     }
 
-    value_type&
+    const value_type&
     operator*() const
     {
       return *current_bucket_;
     }
 
-    value_type* 
+    const value_type* 
     operator->() const
     {
       return &operator*();
@@ -82,8 +82,38 @@ public:
   };
 
   ////////////////////////////////////////////////////////////////
-  typedef const_accessor accessor;
+  class accessor
+    :
+    public const_accessor
+  {
+    // Types
+  public:
+    typedef typename std::pair<const Key, Data> value_type;
+    
+    // Attributes
+  private:
+    iterator current_bucket_;
+    
+    friend class ext_hash_map;
+    // Methods
+  public:
+    
+    value_type&
+    operator*() const
+    {
+      return *(this->current_bucket_);
+    }
+    
+    value_type*
+    operator->() const
+    {
+      return &operator*();
+    }
 
+  };
+  
+  ////////////////////////////////////////////////////////////////
+  
   // Attributes
 private:
 
@@ -145,6 +175,15 @@ public:
   find( accessor& result, const Key& key)
   {
     iterator i =  map_.find(key);
+    result.current_bucket_ = i;
+    result.has_result_ = ( i != map_.end() );
+    return result.has_result_;
+  }
+
+  bool
+  find( const_accessor& result, const Key& key) const
+  {
+    const_iterator i =  map_.find(key);
     result.current_bucket_ = i;
     result.has_result_ = ( i != map_.end() );
     return result.has_result_;
