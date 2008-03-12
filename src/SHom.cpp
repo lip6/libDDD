@@ -37,9 +37,13 @@
 #include "util/hash_support.hh"
 
 #ifdef PARALLEL_DD
-#include <tbb/blocked_range.h>
-#include <tbb/parallel_reduce.h>
-#include <tbb/task.h>
+# include <tbb/blocked_range.h>
+# ifdef PARALLEL_REDUCE
+#  include <tbb/parallel_reduce.h>
+# else
+#  include <tbb/parallel_for.h>
+#  include <tbb/concurrent_vector.h>
+# endif
 #endif
 
 
@@ -680,7 +684,8 @@ typedef std::map<GSDD,DataSet*> GSDD_DataSet_map;
 #ifdef PARALLEL_DD
 
 typedef tbb::blocked_range<GSDD::const_iterator> varval_range;
-typedef std::vector< std::pair<DataSet*,GSDD> > gsdd_dataset_vec;
+
+# ifdef PARALLEL_REDUCE
 
 class hom_reducer
 {
@@ -759,7 +764,52 @@ public:
 	
 };
 
-#endif
+# else // NOT PARALLEL_REDUCE
+
+typedef tbb::concurrent_vector<std::pair<DataSet *,GSDD> > concurrent_valuation;
+
+class hom_for
+{
+private:
+
+	const GShom& gshom_;
+	const GSDD& gsdd_;
+	concurrent_valuation& res_;
+	versatile* v_;
+
+public:
+
+	hom_for( const GShom& ghsom
+	       , const GSDD& gsdd
+		   , concurrent_valuation& res 
+		   , versatile* v)
+		
+		: gshom_(ghsom)
+		, gsdd_(gsdd)
+		, res_(res)
+		, v_(v)
+	{
+	}
+	
+	void operator()(const varval_range& range)
+	const
+	{
+		concurrent_valuation& res = this->res_;
+		
+		for( GSDD::const_iterator it = range.begin();
+			 it != range.end();
+			 ++it)
+		{
+			res.push_back( std::make_pair( it->first
+										  , gshom_.eval_proxy(it->second,v_) ));
+		}	
+	}
+
+};
+
+# endif // PARALLEL_REDUCE
+
+#endif // PARALLEL_DD
 
 GSDD 
 _GShom::eval_skip(const GSDD& d, versatile* v) const
@@ -778,21 +828,45 @@ _GShom::eval_skip(const GSDD& d, versatile* v) const
     }
     else if( this->skip_variable(d.variable()) )
     {
-		
 
 		const GShom gshom(this);
-
+		
 #ifdef PARALLEL_DD
 
-		hom_reducer reducer(gshom, d, v); 
+# ifdef PARALLEL_REDUCE
 
+		hom_reducer reducer(gshom, d, v); 
+		
 		tbb::parallel_reduce( varval_range(d.begin(),d.end(),5) 
 						 	, reducer);
-
+		
 		const GSDD_DataSet_map& res = reducer.get_results();
 
-#else
+# else
 
+		// for square union
+		GSDD_DataSet_map res;
+		
+		// stores valuations computed by different threads
+		concurrent_valuation val;
+
+		tbb::parallel_for( varval_range(d.begin(), d.end())
+						 , hom_for(gshom, d, val, v));
+
+		for( concurrent_valuation::iterator it = val.begin()
+		   ; it != val.end()
+		   ; ++it )
+		{
+			if( it->second != GSDD::null and not (it->first->empty()) )
+			{
+				square_union( res, it->second, it->first);
+			}
+		}
+
+# endif // PARALLEL_REDUCE
+#else // NOT PARALLEL_DD
+
+		// for square union
 		GSDD_DataSet_map res;
 
         for( GSDD::const_iterator it = d.begin();
@@ -806,7 +880,7 @@ _GShom::eval_skip(const GSDD& d, versatile* v) const
             }
         }
 
-#endif
+#endif // PARALLEL_DD
 
         GSDD::Valuation valuation;
 		valuation.reserve(res.size());  
@@ -827,7 +901,7 @@ _GShom::eval_skip(const GSDD& d, versatile* v) const
         }
         
     }
-    
+
     return eval(d,v);
 }
 
