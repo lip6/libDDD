@@ -36,12 +36,6 @@
 #include "util/configuration.hh"
 #include "Cache.hh"
 
-#ifdef PARALLEL_DD
-#include <tbb/blocked_range.h>
-#include <tbb/parallel_for.h>
-#endif
-
-
 namespace d3 { namespace util {
   template<>
   struct equal<_GHom*>{
