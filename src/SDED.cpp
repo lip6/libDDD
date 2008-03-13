@@ -97,7 +97,7 @@ public:
 #ifdef OTF_GARBAGE
   bool shouldCache () { return false; }
 #endif  
-  GSDD eval(versatile* v) const{return parameter;};
+  GSDD eval() const{return parameter;};
 };
 
 
@@ -170,7 +170,7 @@ public:
 #endif
 
   /* Transform */
-  GSDD eval(versatile* v) const;
+  GSDD eval() const;
 
   /* constructor*/
   ~_SDED_Add(){};
@@ -193,7 +193,7 @@ bool _SDED_Add::operator==(const _SDED &e)const{
 }
 
 /* Transform */
-GSDD _SDED_Add::eval(versatile* v) const{
+GSDD _SDED_Add::eval() const{
   assert(parameters.size() > 1);
   int variable=parameters.begin()->variable();
   // To compute the result 
@@ -404,7 +404,7 @@ public:
 #endif
 
   /* Transform */
-  GSDD eval(versatile* v) const;
+  GSDD eval() const;
 
   /* constructor*/
   ~_SDED_Mult(){};
@@ -421,7 +421,7 @@ bool _SDED_Mult::operator==(const _SDED &e)const{
 };
 
 /* Transform */
-GSDD _SDED_Mult::eval(versatile* v) const{
+GSDD _SDED_Mult::eval() const{
   assert(parameter1.variable()==parameter2.variable());
   int variable=parameter1.variable();
   std::map<GSDD,DataSet *> res;
@@ -495,7 +495,7 @@ public:
   }
 #endif
   /* Transform */
-  GSDD eval(versatile* v) const;
+  GSDD eval() const;
 
   /* constructor*/
   ~_SDED_Minus(){};
@@ -512,7 +512,7 @@ bool _SDED_Minus::operator==(const _SDED &e)const{
 };
 
 /* Transform */
-GSDD _SDED_Minus::eval(versatile* v) const{
+GSDD _SDED_Minus::eval() const{
   assert(parameter1.variable()==parameter2.variable());
   int variable=parameter1.variable();
 
@@ -604,7 +604,7 @@ public:
   }
 #endif
   /* Transform */
-  GSDD eval(versatile* v) const;
+  GSDD eval() const;
 
   /* constructor*/
   ~_SDED_Concat(){};
@@ -621,7 +621,7 @@ bool _SDED_Concat::operator==(const _SDED &e)const{
 };
 
 /* Transform */
-GSDD _SDED_Concat::eval(versatile* v) const{
+GSDD _SDED_Concat::eval() const{
   int variable=parameter1.variable();
 
   std::map<GSDD,DataSet *> res;
@@ -677,7 +677,7 @@ public:
   bool operator==(const _SDED &e)const;
 
   /* Transform */
-  GSDD eval(versatile* v) const;
+  GSDD eval() const;
 
   /* constructor*/
   ~_SDED_Shom(){};
@@ -694,8 +694,8 @@ bool _SDED_Shom::operator==(const _SDED &e)const{
 }
 
 /* Transform */
-GSDD _SDED_Shom::eval(versatile* v) const{
-  GSDD res = shom.eval(parameter,v);
+GSDD _SDED_Shom::eval() const{
+  GSDD res = shom.eval(parameter);
   return  res;
 }
 
@@ -818,11 +818,11 @@ bool SDED::operator==(const SDED& e) const{
 };
 
 // eval and std::set to NULL the DED
-GSDD SDED::eval(versatile* v){
+GSDD SDED::eval(){
 
 #ifndef OTF_GARBAGE
    if(typeid(*concret)==typeid(_SDED_GSDD)){
-     GSDD res=concret->eval(v);
+     GSDD res=concret->eval();
      delete concret;
      return res;
    }  else {
@@ -853,7 +853,7 @@ GSDD SDED::eval(versatile* v){
     if( access.empty() )
       { 
         namespace_SDED::Misses++;
-        GSDD res = concret->eval(v);
+        GSDD res = concret->eval();
 
 
 #ifdef OTF_GARBAGE
@@ -894,7 +894,7 @@ GSDD SDED::eval(versatile* v){
       } else { // parameters make Shom ineligible for long term storage	
 	
 	// this constitutes a cache miss (simple) !!
-	GSDD res=concret->eval(v); // compute the result
+	GSDD res=concret->eval(); // compute the result
 	namespace_SDED::recentCache[*this]=res;	
 	concret=NULL;
 	return res;
@@ -918,35 +918,35 @@ size_t SDED::hash () const {
 
 /* binary operators */
 
-GSDD SDED::Shom(const GShom &h,const GSDD&g, versatile* v){
+GSDD SDED::Shom(const GShom &h,const GSDD&g){
   SDED e(_SDED_Shom::create(h,g));
-  return e.eval(v);
+  return e.eval();
 };
 
 
 GSDD SDED::add(const std::set<GSDD> &s){
    SDED e(_SDED_Add::create(s));
-   return e.eval(NULL);
+   return e.eval();
 };
 
 GSDD operator+(const GSDD &g1,const GSDD &g2){
   SDED e(_SDED_Add::create(g1,g2));
-  return e.eval(NULL);
+  return e.eval();
 };
 
 GSDD operator*(const GSDD &g1,const GSDD &g2){
   SDED e(_SDED_Mult::create(g1,g2));
-  return e.eval(NULL);
+  return e.eval();
 };
 
 GSDD operator^(const GSDD &g1,const GSDD &g2){
   SDED e(_SDED_Concat::create(g1,g2));
-  return e.eval(NULL);
+  return e.eval();
 };
 
 GSDD operator-(const GSDD &g1,const GSDD &g2){
   SDED e(_SDED_Minus::create(g1,g2));
-  return e.eval(NULL);
+  return e.eval();
 };
 
 /******************************************************************************/

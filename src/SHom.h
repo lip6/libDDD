@@ -29,12 +29,10 @@
 #include "Hom.h"
 #include "hashfunc.hh"
 
-
 #include <string>
 #include <map>
 #include <set>
 
-#include "util/versatile.hh"
 #include "util/hash_support.hh"
 
 #ifdef PARALLEL_DD
@@ -135,12 +133,9 @@ public:
   /// The full evaluation, this is the computational procedure, that is called when 
   /// the computation cache yields a miss. Users should not use this function directly, 
   /// but only through GSDD::operator().
-  GSDD eval(const GSDD &d, versatile* v) const;
+  GSDD eval(const GSDD &d) const;
   //@}
   
-  GSDD eval_proxy(const GSDD &d, versatile* v) const;
-
-
   /// For debug and development purposes. Gives the reference count of the concrete data. 
   int refCounter() const;
 
@@ -300,7 +295,7 @@ private:
   /// Currently only the constant homomorphism has this attribute set to true.
   mutable bool immediat;
   
-    GSDD eval_skip(const GSDD &,versatile* v) const;
+    GSDD eval_skip(const GSDD &) const;
   
 public:
 
@@ -330,7 +325,7 @@ public:
   /// The computation function responsible for evaluation over a node.
   /// Users should not directly use this. Normal behavior is to use GShom::operator()
   /// that encapsulates this call with operation caching.
-  virtual GSDD eval(const GSDD &, versatile* v) const=0;
+  virtual GSDD eval(const GSDD &) const=0;
 
   /// For garbage collection. Used in first phase of garbage collection.
   virtual void mark() const{};
@@ -387,7 +382,7 @@ public:
   /// Let an SDD d= (var, Union_i (val_i, d_i) )
   ///
   /// h (d) = Sum_i ( phi(var, val_i) (d_i) ) 
-  GSDD eval(const GSDD &, versatile* v)const;  
+  GSDD eval(const GSDD &)const;  
 };
 
 class MyGShom : public _GShom{};

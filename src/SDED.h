@@ -27,7 +27,6 @@
 #include <set>
 
 #include "DataSet.h"
-#include "util/versatile.hh"
 #include "util/hash_support.hh"
 
 class _SDED;
@@ -41,12 +40,12 @@ private:
 
 public:
 	
-  GSDD eval(versatile* v);
+  GSDD eval();
   SDED(_SDED *c):concret(c){};
   bool operator==(const SDED&) const; 
   
   static GSDD add(const std::set<GSDD> &);
-  static GSDD Shom(const GShom &,const GSDD&,versatile* v);
+  static GSDD Shom(const GShom &,const GSDD&);
 
   /* Memory Manager */
   static  unsigned int statistics();
@@ -84,7 +83,7 @@ public:
   virtual bool operator==(const _SDED &) const=0;
 
   /* Transform */
-	virtual GSDD eval(versatile* v) const  = 0; 
+	virtual GSDD eval() const  = 0; 
 
 };
 
