@@ -1,6 +1,10 @@
 #ifndef __CACHE__H__
 #define __CACHE__H__
 
+#ifdef PARALLEL_DD
+#include "tbb/atomic.h"
+#endif
+
 #include "util/configuration.hh"
 #include "util/hash_support.hh"
 
@@ -12,11 +16,19 @@ class Cache {
   typedef typename hash_map<HomType,valMap>::type cacheType;
   cacheType cache;
 
+#ifdef PARALLEL_DD
+  mutable tbb::atomic<long> hits;
+  mutable tbb::atomic<long> misses;
+#else
   mutable long hits;
   mutable long misses;
+#endif
 public :
 
-  Cache() : hits(0),misses(0) {}
+  Cache() 
+	{
+		hits = misses = 0;
+	}
   /** Determine if the cache contains the entry for h(d).
     * Returns true and the resulting value if cache entry exists, 
     * or false and NodeType::null otherwise. */ 
