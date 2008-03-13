@@ -79,7 +79,7 @@ public:
   }
 
   /* Eval */
-  GSDD eval(const GSDD &d, versatile* v)const{return d;}
+  GSDD eval(const GSDD &d)const{return d;}
 };
 
 /************************** Constant */
@@ -100,7 +100,7 @@ public:
   }
 
   /* Eval */
-  GSDD eval(const GSDD &d, versatile* v)const{
+  GSDD eval(const GSDD &d)const{
     return d==GSDD::null?GSDD::null:value;
   }
 
@@ -127,8 +127,8 @@ public:
   }
 
   /* Eval */
-  GSDD eval(const GSDD &d,versatile* v)const{
-    return left.eval_proxy(d,v)*right;
+  GSDD eval(const GSDD &d)const{
+    return left(d)*right;
   }
 
   /* Memory Manager */
@@ -370,7 +370,7 @@ public:
 
     /* Eval */
 	GSDD
-	eval(const GSDD& d,versatile* v)const
+	eval(const GSDD& d)const
 	{
 		if( d == GSDD::null )
 		{
@@ -382,7 +382,7 @@ public:
 		
 			for(std::set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
 			{
-				s.insert((*gi).eval_proxy(d,v));
+				s.insert((*gi)(d));
 			}
 			return SDED::add(s);
 		}
@@ -400,10 +400,10 @@ public:
 
 			if( part_it->second.L != NULL )
 			{
-				s.insert(GShom(part_it->second.L).eval_proxy(d,v));
+				s.insert(GShom(part_it->second.L)(d));
 			}
 
-			s.insert( part_it->second.F.eval_proxy(d,v) );
+			s.insert( part_it->second.F(d) );
 	
 			std::set<GShom>& G = part_it->second.G;
 
@@ -411,7 +411,7 @@ public:
 					it != G.end();
 					++it )
 			{
-				s.insert((*it).eval_proxy(d,v));                  
+				s.insert((*it)(d));                  
 			} 
 			
 			return SDED::add(s);
@@ -458,8 +458,8 @@ public:
     }
 
   /* Eval */
-  GSDD eval(const GSDD &d,versatile* v)const{
-    return left.eval_proxy(right.eval_proxy(d,v),v);
+  GSDD eval(const GSDD &d)const{
+    return left(right(d));
   }
 
   /* Memory Manager */
@@ -487,8 +487,8 @@ public:
   }
 
   /* Eval */
-  GSDD eval(const GSDD &d,versatile* v)const{
-    return left^right.eval_proxy(d,v);
+  GSDD eval(const GSDD &d)const{
+    return left^right(d);
   }
 
   /* Memory Manager */
@@ -523,8 +523,8 @@ public:
 
 
   /* Eval */
-  GSDD eval(const GSDD &d,versatile* v)const{
-    return left.eval_proxy(d,v)^right;
+  GSDD eval(const GSDD &d)const{
+    return left(d)^right;
   }
 
   /* Memory Manager */
@@ -551,8 +551,8 @@ public:
   }
 
   /* Eval */
-  GSDD eval(const GSDD &d, versatile* v)const{
-    return left.eval_proxy(d,v)-right;
+  GSDD eval(const GSDD &d)const{
+    return left(d)-right;
   }
 
   /* Memory Manager */
@@ -594,7 +594,7 @@ public:
 
   /* Eval */
 	GSDD 
-	eval(const GSDD &d,versatile* v) const
+	eval(const GSDD &d) const
 	{
 	if( d == GSDD::null )
 	{
@@ -602,7 +602,7 @@ public:
 	}
 	else if( d == GSDD::one or d == GSDD::top )
 	{
-		return arg.eval_proxy(d,v);
+		return arg(d);
 	}
 	else
 	{
@@ -635,8 +635,8 @@ public:
 				{
 					d1 = d2;
 
-					d2 = F_part.eval_proxy(d2,v);
-					d2 = L_part.eval_proxy(d2,v);
+					d2 = F_part(d2);
+					d2 = L_part(d2);
 
 					for( 	std::set<GShom>::const_iterator G_it = partition.G.begin();
 							G_it != partition.G.end();
@@ -644,12 +644,12 @@ public:
 					{
 
 						// d2 = F_part(d2);
-						d2 = L_part.eval_proxy(d2,v);
+						d2 = L_part(d2);
 
 						// apply local part
 						// d2 = L_part(d2);
 					  // chain application of Shom of this level
-					  d2 = (*G_it).eval_proxy(d2,v) + d2;
+					  d2 = (*G_it)(d2) + d2;
 					}
 				}
 				while (d1 != d2);
@@ -660,7 +660,7 @@ public:
 		do
 		{
 			d1 = d2;
-			d2 = arg.eval_proxy(d2,v);
+			d2 = arg(d2);
 		}
 		while (d1 != d2);
 
@@ -694,19 +694,17 @@ private:
 	const GShom& gshom_;
 	const GSDD& gsdd_;
 	GSDD_DataSet_map res_;
-	versatile* v_;
 	
 public:
 
 	// standard constructor
 	hom_reducer( const GShom& gshom
 			   , const GSDD& gsdd
-			   , versatile* v)
+			   )
 			
 			: gshom_(gshom)
 			, gsdd_(gsdd)
 			, res_()
-			, v_(v)
 	{
 	}
 
@@ -718,9 +716,7 @@ public:
 		: gshom_(reducer.gshom_)
 		, gsdd_(reducer.gsdd_)
 		, res_()
-		, v_(reducer.v_)
 	{
-		// v_.set_depth( v_.get_depth() + 1 );
 	}
 
 	// what to do when reducing this and hom_apply
@@ -746,7 +742,7 @@ public:
 			 it != range.end();
 			 ++it)
 		{
-			GSDD son = gshom_.eval_proxy(it->second,v_);
+			GSDD son = gshom_(it->second);
             if( son != GSDD::null && !(it->first->empty()) )
             {
 				square_union(res, son, it->first);
@@ -775,19 +771,17 @@ private:
 	const GShom& gshom_;
 	const GSDD& gsdd_;
 	concurrent_valuation& res_;
-	versatile* v_;
 
 public:
 
 	hom_for( const GShom& ghsom
 	       , const GSDD& gsdd
 		   , concurrent_valuation& res 
-		   , versatile* v)
+		   )
 		
 		: gshom_(ghsom)
 		, gsdd_(gsdd)
 		, res_(res)
-		, v_(v)
 	{
 	}
 	
@@ -801,7 +795,7 @@ public:
 			 ++it)
 		{
 			res.push_back( std::make_pair( it->first
-										  , gshom_.eval_proxy(it->second,v_) ));
+										  , gshom_(it->second) ));
 		}	
 	}
 
@@ -812,7 +806,7 @@ public:
 #endif // PARALLEL_DD
 
 GSDD 
-_GShom::eval_skip(const GSDD& d, versatile* v) const
+_GShom::eval_skip(const GSDD& d) const
 {
     if( d == GSDD::null )
     {
@@ -835,9 +829,9 @@ _GShom::eval_skip(const GSDD& d, versatile* v) const
 
 # ifdef PARALLEL_REDUCE
 
-		hom_reducer reducer(gshom, d, v); 
+		hom_reducer reducer(gshom, d); 
 		
-		tbb::parallel_reduce( varval_range(d.begin(),d.end(),5) 
+		tbb::parallel_reduce( varval_range(d.begin(),d.end(), 2) 
 						 	, reducer);
 		
 		const GSDD_DataSet_map& res = reducer.get_results();
@@ -846,22 +840,24 @@ _GShom::eval_skip(const GSDD& d, versatile* v) const
 
 		// for square union
 		GSDD_DataSet_map res;
-		
+
 		// stores valuations computed by different threads
 		concurrent_valuation val;
 
-		tbb::parallel_for( varval_range(d.begin(), d.end())
-						 , hom_for(gshom, d, val, v));
+		tbb::parallel_for( varval_range(d.begin(), d.end(),10)
+					 	, hom_for(gshom, d, val));
 
 		for( concurrent_valuation::iterator it = val.begin()
-		   ; it != val.end()
-		   ; ++it )
+		     ; it != val.end()
+			 ; ++it )
 		{
 			if( it->second != GSDD::null and not (it->first->empty()) )
 			{
 				square_union( res, it->second, it->first);
 			}
 		}
+	
+
 
 # endif // PARALLEL_REDUCE
 #else // NOT PARALLEL_DD
@@ -870,10 +866,10 @@ _GShom::eval_skip(const GSDD& d, versatile* v) const
 		GSDD_DataSet_map res;
 
         for( GSDD::const_iterator it = d.begin();
-            it != d.end();
-            ++it)
+             it != d.end();
+             ++it)
         {
-            GSDD son = gshom.eval_proxy(it->second,v);
+            GSDD son = gshom(it->second);
             if( son != GSDD::null && !(it->first->empty()) )
             {
 				square_union(res, son, it->first);
@@ -884,9 +880,9 @@ _GShom::eval_skip(const GSDD& d, versatile* v) const
 
         GSDD::Valuation valuation;
 		valuation.reserve(res.size());  
-	  	for (GSDD_DataSet_map::const_iterator it =res.begin() ;
-				it!= res.end();
-				++it)
+	  	for ( GSDD_DataSet_map::const_iterator it = res.begin();
+			  it!= res.end();
+			  ++it)
 		{
 			valuation.push_back(std::make_pair(it->second,it->first));
 		}
@@ -902,7 +898,7 @@ _GShom::eval_skip(const GSDD& d, versatile* v) const
         
     }
 
-    return eval(d,v);
+    return eval(d);
 }
 
 /*************************************************************************/
@@ -919,7 +915,7 @@ bool StrongShom::operator==(const _GShom &h) const{
 
 /* Eval */
 GSDD 
-StrongShom::eval(const GSDD &d, versatile* v) const
+StrongShom::eval(const GSDD &d) const
 {
 	if(d==GSDD::null)
 	{
@@ -940,7 +936,7 @@ StrongShom::eval(const GSDD &d, versatile* v) const
 
     	for(GSDD::const_iterator vi=d.begin();vi!=d.end();++vi)
 		{
-      		s.insert(phi(variable,*vi->first).eval_proxy(vi->second,v));
+      		s.insert(phi(variable,*vi->first)(vi->second));
     	}
     	return SDED::add(s);
   	}
@@ -970,33 +966,24 @@ GShom::GShom(int var,const DataSet & val, const GShom &h) {
 
 //////////////////////////////////////////////////////////////////////////////
 
-GSDD
-GShom::eval_proxy(const GSDD &d, versatile* v ) const
-{
-	if(concret->immediat)
-	{
-		return concret->eval(d,v);
-	}
-	else
-    {
-		return SDED::Shom(*this,d,v);
-	}
-}
-
-//////////////////////////////////////////////////////////////////////////////
-
 /* Eval */
 GSDD 
 GShom::operator()(const GSDD &d) const
 {
-	versatile v;
-	return 	eval_proxy(d,&v);
+	if(concret->immediat)
+	{
+		return concret->eval(d);
+	}
+	else
+    {
+		return SDED::Shom(*this,d);
+	}
 }
 
 GSDD 
-GShom::eval(const GSDD &d, versatile* v) const
+GShom::eval(const GSDD &d) const
 {
-	return concret->eval_skip(d,v);
+	return concret->eval_skip(d);
 }
 
 const GShom GShom::id(canonical(new S_Homomorphism::Identity(1)));
