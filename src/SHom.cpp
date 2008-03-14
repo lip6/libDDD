@@ -836,127 +836,127 @@ public:
 GSDD 
 _GShom::eval_skip(const GSDD& d) const
 {
-    if( d == GSDD::null )
+  if( d == GSDD::null )
     {
-        return GSDD::null;
+      return GSDD::null;
     }
-    else if( d == GSDD::one )
+  else if( d == GSDD::one )
     {
-        // basic case, mustn't call d.variable()
+      // basic case, mustn't call d.variable()
     }
-    else if( d == GSDD::top )
+  else if( d == GSDD::top )
     {
-        return GSDD::top;
+      return GSDD::top;
     }
-    else if( this->skip_variable(d.variable()) )
+  else if( this->skip_variable(d.variable()) )
     {
-
-		const GShom gshom(this);
-		
+      
+      const GShom gshom(this);
+      
 #ifdef PARALLEL_DD
-
+      
 # ifdef PARALLEL_REDUCE
-
-		hom_reducer reducer(gshom, d); 
-		
-		tbb::parallel_reduce( varval_range(d.begin(),d.end(), 2) 
-						 	, reducer);
-		
-		const GSDD_DataSet_map& res = reducer.get_results();
-
+      
+      hom_reducer reducer(gshom, d); 
+      
+      tbb::parallel_reduce( varval_range(d.begin(),d.end(), 2) 
+			    , reducer);
+      
+      const GSDD_DataSet_map& res = reducer.get_results();
+      
 # else
-
-		// for square union
-		GSDD_DataSet_map res;
-
-		// stores valuations computed by different threads
-		// concurrent_valuation val;
-		GSDD::Valuation tmp_result(d.begin(), d.end());
-
-		// to hold index of entries not found in cache. size at most full node size.
-		int tosolve[d.nbsons()];
-		int tosolvesize = 0;
-
-		// one loop to pick up cached results
-		int i =0;
-		GSDD::Valuation::iterator out = tmp_result.begin();
-		for( GSDD::const_iterator it = d.begin();
-	            it != d.end();
-		     	++it,++i,++out)
-	        {
-				if (immediat)
-					return eval(it->second);
-				else {
-					std::pair<bool,GSDD> res = S_Homomorphism::cache.contains(gshom,d);
-					if (res.first) {
-						// cache hit
-						out->second = res.second;
-					} else {
-						tosolve[tosolvesize++] = i;
-					}
-				}
-			}
-			
-		std::cout 
-			<< "Valuation size " << d.nbsons()
-			<< " To solve size " << tosolvesize
-			<< std::endl;
-
-		tbb::parallel_for( varval_range( 0, tosolvesize, 1)
-							, hom_for(gshom, tmp_result, tosolve));
-
-		for( GSDD::Valuation::const_iterator it = tmp_result.begin()
-		     ; it != tmp_result.end()
-			 ; ++it )
-		{
-			if( it->second != GSDD::null and not (it->first->empty()) )
-			{
-				square_union( res, it->second, it->first);
-			}
-		}
-	
-
-
+      
+      // for square union
+      GSDD_DataSet_map res;
+      
+      // stores valuations computed by different threads
+      // concurrent_valuation val;
+      GSDD::Valuation tmp_result(d.begin(), d.end());
+      
+      // to hold index of entries not found in cache. size at most full node size.
+      int tosolve[d.nbsons()];
+      int tosolvesize = 0;
+      
+      // one loop to pick up cached results
+      int i =0;
+      GSDD::Valuation::iterator out = tmp_result.begin();
+      for( GSDD::const_iterator it = d.begin();
+	   it != d.end();
+	   ++it,++i,++out)
+	{
+	  if (immediat)
+	    return eval(it->second);
+	  else {
+	    std::pair<bool,GSDD> res = S_Homomorphism::cache.contains(gshom,d);
+	    if (res.first) {
+	      // cache hit
+	      out->second = res.second;
+	    } else {
+	      tosolve[tosolvesize++] = i;
+	    }
+	  }
+	}
+      
+      std::cout 
+	<< "Valuation size " << d.nbsons()
+	<< " To solve size " << tosolvesize
+	<< std::endl;
+      
+      tbb::parallel_for( varval_range( 0, tosolvesize, 1)
+			 , hom_for(gshom, tmp_result, tosolve));
+      
+      for( GSDD::Valuation::const_iterator it = tmp_result.begin()
+	     ; it != tmp_result.end()
+	     ; ++it )
+	{
+	  if( it->second != GSDD::null and not (it->first->empty()) )
+	    {
+	      square_union( res, it->second, it->first);
+	    }
+	}
+      
+      
+      
 # endif // PARALLEL_REDUCE
 #else // NOT PARALLEL_DD
+      
+      // for square union
+      GSDD_DataSet_map res;
 
-		// for square union
-		GSDD_DataSet_map res;
-
-        for( GSDD::const_iterator it = d.begin();
-             it != d.end();
-             ++it)
+      for( GSDD::const_iterator it = d.begin();
+	   it != d.end();
+	   ++it)
         {
-            GSDD son = gshom(it->second);
-            if( son != GSDD::null && !(it->first->empty()) )
+	  GSDD son = gshom(it->second);
+	  if( son != GSDD::null && !(it->first->empty()) )
             {
-				square_union(res, son, it->first);
+	      square_union(res, son, it->first);
             }
         }
-
+      
 #endif // PARALLEL_DD
-
-        GSDD::Valuation valuation;
-		valuation.reserve(res.size());  
-	  	for ( GSDD_DataSet_map::const_iterator it = res.begin();
-			  it!= res.end();
-			  ++it)
-		{
-			valuation.push_back(std::make_pair(it->second,it->first));
-		}
-        
-        if( valuation.empty() )
+      
+      GSDD::Valuation valuation;
+      valuation.reserve(res.size());  
+      for ( GSDD_DataSet_map::const_iterator it = res.begin();
+	    it!= res.end();
+	    ++it)
+	{
+	  valuation.push_back(std::make_pair(it->second,it->first));
+	}
+      
+      if( valuation.empty() )
         {
-            return GSDD::null;
+	  return GSDD::null;
         }
-        else
-        {
-            return GSDD(d.variable(),valuation);
-        }
-        
+      else
+	{
+	  return GSDD(d.variable(),valuation);
+	}
+      
     }
-
-    return eval(d);
+  
+  return eval(d);
 }
 
 /*************************************************************************/
