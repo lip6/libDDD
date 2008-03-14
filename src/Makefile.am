@@ -14,7 +14,11 @@ include_HEADERS = DataSet.h			\
 		  statistic.hpp                 \
 		  process.hpp                   \
 		  AdditiveMap.hpp               \
-		  util/dotExporter.h
+		  util/dotExporter.h \
+		  util/configuration.hh \
+		  util/ext_hash_map.hh \
+		  util/hash_support.hh \
+		  util/tbb_hash_map.hh
 
 SRCS 		= DED.cpp			\
 		  DDD.cpp 			\
@@ -33,8 +37,8 @@ SRCS 		= DED.cpp			\
 		  SHom.h                        \
 		  IntDataSet.h                  \
 		  IntDataSet.cpp                \
-                  MLHom.h                       \
-                  MLHom.cpp 	                \
+		  MLHom.h                       \
+          MLHom.cpp 	                \
 		  statistic.hpp                 \
 		  statistic.cpp                 \
 		  process.hpp                   \
