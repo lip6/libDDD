@@ -35,6 +35,7 @@
 #include "MemoryManager.h"
 #include "util/configuration.hh"
 #include "util/hash_support.hh"
+#include "Cache.hh"
 
 #ifdef PARALLEL_DD
 # include <tbb/blocked_range.h>
@@ -62,6 +63,12 @@ static UniqueTable<_GShom> canonical;
 /*************************************************************************/
 
 namespace S_Homomorphism {
+
+	typedef Cache<GShom,GSDD> ShomCache;
+
+	static ShomCache cache;
+
+
 /************************** Identity */
 class Identity:public _GShom{
 public:
@@ -683,7 +690,8 @@ typedef std::map<GSDD,DataSet*> GSDD_DataSet_map;
 
 #ifdef PARALLEL_DD
 
-typedef tbb::blocked_range<GSDD::const_iterator> varval_range;
+// typedef tbb::blocked_range<GSDD::const_iterator> varval_range;
+typedef tbb::blocked_range<int> varval_range;
 
 # ifdef PARALLEL_REDUCE
 
@@ -769,34 +777,54 @@ class hom_for
 private:
 
 	const GShom& gshom_;
-	const GSDD& gsdd_;
-	concurrent_valuation& res_;
+	// GSDD::Valuation& gsdd_;
+	GSDD::Valuation& val_;
+	// concurrent_valuation& res_;
+	int* to_solve_;
 
 public:
 
 	hom_for( const GShom& ghsom
-	       , const GSDD& gsdd
-		   , concurrent_valuation& res 
-		   )
+		   // 	       , const GSDD& gsdd
+		   // , concurrent_valuation& res 
+			// , GSDD::Valuation& gsdd
+			, GSDD::Valuation& val
+			, int* to_solve
+	   		)
 		
 		: gshom_(ghsom)
-		, gsdd_(gsdd)
-		, res_(res)
+		// , gsdd_(gsdd)
+		, val_(val)
+		// , res_(res)
+		, to_solve_(to_solve)
 	{
 	}
 	
 	void operator()(const varval_range& range)
 	const
 	{
-		concurrent_valuation& res = this->res_;
+		// concurrent_valuation& res = this->res_;
 		
-		for( GSDD::const_iterator it = range.begin();
-			 it != range.end();
-			 ++it)
+		
+		// for( GSDD::const_iterator it = range.begin();
+		// 	 it != range.end();
+		// 	 ++it)
+		// {
+		// 	res.push_back( std::make_pair( it->first
+		// 								  , gshom_(it->second) ));
+		// }	
+		GSDD::Valuation& val = this->val_;
+		int* to_solve = this->to_solve_;
+		
+		for( int i = range.begin(); i != range.end(); ++i)
 		{
-			res.push_back( std::make_pair( it->first
-										  , gshom_(it->second) ));
-		}	
+			// gshom_.eval skip cache lookup
+			
+			GSDD result = gshom_.eval( val[to_solve[i]].second) ;
+			S_Homomorphism::cache.insert( gshom_, val[to_solve[i]].second, result);
+			val[to_solve[i]].second = result;
+		}
+
 	}
 
 };
@@ -842,13 +870,43 @@ _GShom::eval_skip(const GSDD& d) const
 		GSDD_DataSet_map res;
 
 		// stores valuations computed by different threads
-		concurrent_valuation val;
+		// concurrent_valuation val;
+		GSDD::Valuation tmp_result(d.begin(), d.end());
 
-		tbb::parallel_for( varval_range(d.begin(), d.end(),10)
-					 	, hom_for(gshom, d, val));
+		// to hold index of entries not found in cache. size at most full node size.
+		int tosolve[d.nbsons()];
+		int tosolvesize = 0;
 
-		for( concurrent_valuation::iterator it = val.begin()
-		     ; it != val.end()
+		// one loop to pick up cached results
+		int i =0;
+		GSDD::Valuation::iterator out = tmp_result.begin();
+		for( GSDD::const_iterator it = d.begin();
+	            it != d.end();
+		     	++it,++i,++out)
+	        {
+				if (immediat)
+					return eval(it->second);
+				else {
+					std::pair<bool,GSDD> res = S_Homomorphism::cache.contains(gshom,d);
+					if (res.first) {
+						// cache hit
+						out->second = res.second;
+					} else {
+						tosolve[tosolvesize++] = i;
+					}
+				}
+			}
+			
+		std::cout 
+			<< "Valuation size " << d.nbsons()
+			<< " To solve size " << tosolvesize
+			<< std::endl;
+
+		tbb::parallel_for( varval_range( 0, tosolvesize, 1)
+							, hom_for(gshom, tmp_result, tosolve));
+
+		for( GSDD::Valuation::const_iterator it = tmp_result.begin()
+		     ; it != tmp_result.end()
 			 ; ++it )
 		{
 			if( it->second != GSDD::null and not (it->first->empty()) )
@@ -976,7 +1034,21 @@ GShom::operator()(const GSDD &d) const
 	}
 	else
     {
-		return SDED::Shom(*this,d);
+	//      return SDED::Shom(*this,d);
+		if (d == GSDD::null) {
+			return d;
+		} else {
+			std::pair<bool,GSDD> res = S_Homomorphism::cache.contains(*this,d);
+			if (res.first) {
+		// cache hit
+				return res.second;
+			} else {
+				GSDD result = eval(d);
+				S_Homomorphism::cache.insert (*this,d,result);
+				return result;
+			}
+		}
+
 	}
 }
 
