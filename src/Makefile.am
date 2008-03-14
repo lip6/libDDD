@@ -1,5 +1,6 @@
 lib_LIBRARIES 	= libDDD.a  libDDD_d.a #libDDD_otfg.a libDDD_ev.a
 include_HEADERS = DataSet.h			\
+		  Cache.hh \
 	  	  DDD.h 			\
 		  DED.h 			\
 		  Hom.h 			\
@@ -21,6 +22,7 @@ include_HEADERS = DataSet.h			\
 		  util/tbb_hash_map.hh
 
 SRCS 		= DED.cpp			\
+		  Cache.hh \
 		  DDD.cpp 			\
 		  Hom.cpp 			\
 		  SDED.cpp 			\
@@ -45,7 +47,11 @@ SRCS 		= DED.cpp			\
 		  process.cpp                   \
 		  AdditiveMap.hpp               \
 		  util/dotExporter.cpp               \
-		  util/dotExporter.h
+		  util/dotExporter.h \
+		  util/configuration.hh \
+		  util/ext_hash_map.hh \
+		  util/hash_support.hh \
+		  util/tbb_hash_map.hh
 
 
 AM_CPPFLAGS =  -Wall 
