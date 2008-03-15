@@ -778,7 +778,7 @@ private:
 
 	const GShom& gshom_;
 	// GSDD::Valuation& gsdd_;
-	GSDD::Valuation& val_;
+        std::vector<GSDD> & val_;
 	// concurrent_valuation& res_;
 	int* to_solve_;
 
@@ -788,7 +788,7 @@ public:
 		   // 	       , const GSDD& gsdd
 		   // , concurrent_valuation& res 
 			// , GSDD::Valuation& gsdd
-			, GSDD::Valuation& val
+		        , std::vector<GSDD>& val
 			, int* to_solve
 	   		)
 		
@@ -813,16 +813,18 @@ public:
 		// 	res.push_back( std::make_pair( it->first
 		// 								  , gshom_(it->second) ));
 		// }	
-		GSDD::Valuation& val = this->val_;
+	        std::vector<GSDD>& val = this->val_;
 		int* to_solve = this->to_solve_;
 		
 		for( int i = range.begin(); i != range.end(); ++i)
 		{
 			// gshom_.eval skip cache lookup
 			
-			GSDD result = gshom_.eval( val[to_solve[i]].second) ;
-			S_Homomorphism::cache.insert( gshom_, val[to_solve[i]].second, result);
-			val[to_solve[i]].second = result;
+ 			GSDD result = gshom_.eval( val[to_solve[i]]) ;
+ 			S_Homomorphism::cache.insert( gshom_, val[to_solve[i]], result);
+ 			val[to_solve[i]] = result;
+
+//			val[to_solve[i]] = gshom_(val[to_solve[i]]) ;
 		}
 
 	}
@@ -850,78 +852,102 @@ _GShom::eval_skip(const GSDD& d) const
     }
   else if( this->skip_variable(d.variable()) )
     {
-      
+      // build once, use many times on each son
       const GShom gshom(this);
+      // for square union
+      GSDD_DataSet_map res;
       
 #ifdef PARALLEL_DD
       
-# ifdef PARALLEL_REDUCE
+// # ifdef PARALLEL_REDUCE
       
-      hom_reducer reducer(gshom, d); 
+//       hom_reducer reducer(gshom, d); 
       
-      tbb::parallel_reduce( varval_range(d.begin(),d.end(), 2) 
-			    , reducer);
+//       tbb::parallel_reduce( varval_range(d.begin(),d.end(), 2) 
+// 			    , reducer);
       
-      const GSDD_DataSet_map& res = reducer.get_results();
+//       const GSDD_DataSet_map& res = reducer.get_results();      
       
-# else
+      // To hold the arcs of the node we are constructing
+      // For each arc <vl,son> of the node d we build an arc
+      // <vl, h(son)>. 
+      // Then we use square union to ensure canonicity of this arc set.
       
-      // for square union
-      GSDD_DataSet_map res;
+      // The node structure is preserved by application of h, since skip_var is true
+      std::vector<GSDD> son_result;
+      son_result.reserve(d.nbsons());
       
-      // stores valuations computed by different threads
-      // concurrent_valuation val;
-      GSDD::Valuation tmp_result(d.begin(), d.end());
+      // Parallel computation of h(son) is possible.
+      // However using a task to get a cache hit is counter productive, 
+      // so we first get h(son) from cache where possible and update tmp_result
+      // for cache misses we build tosolve, that contains the index of uncomputed h(son) arcs in tmp_result.
+      // We then use a parallel loop to resolve the remaining computations pointed to in tosolve using tasks.
       
       // to hold index of entries not found in cache. size at most full node size.
-      int tosolve[d.nbsons()];
-      int tosolvesize = 0;
+      int to_solve[d.nbsons()];
+      int to_solve_size = 0;
       
       // one loop to pick up cached results
+      
+      // current index in tmp_result
       int i =0;
-      GSDD::Valuation::iterator out = tmp_result.begin();
       for( GSDD::const_iterator it = d.begin();
-	   it != d.end();
-	   ++it,++i,++out)
-	{
-	  if (immediat)
-	    return eval(it->second);
-	  else {
-	    std::pair<bool,GSDD> res = S_Homomorphism::cache.contains(gshom,d);
-	    if (res.first) {
-	      // cache hit
-	      out->second = res.second;
-	    } else {
-	      tosolve[tosolvesize++] = i;
-	    }
+	   it != d.end() ;
+	   ++it) {
+	if (immediat) {
+	  // right concatenating a constant ? ah : Can this happen ?
+	  // if this assert is raised, remove it !
+	  son_result.push_back(eval(it->second));
+	  assert(false);
+	} else {
+	  std::pair<bool,GSDD> res = S_Homomorphism::cache.contains(gshom,d);
+	  if (res.first) {
+	    // cache hit
+	    son_result.push_back(res.second);
+	  } else {
+	    // cache miss : add index i to tosolve list
+	    to_solve[to_solve_size++] = i;
+	    // set current value in son_result to son
+	    son_result.push_back(it->second);
 	  }
 	}
+      }
       
       std::cout 
 	<< "Valuation size " << d.nbsons()
-	<< " To solve size " << tosolvesize
+	<< " To solve size " << to_solve_size
 	<< std::endl;
       
-      tbb::parallel_for( varval_range( 0, tosolvesize, 1)
-			 , hom_for(gshom, tmp_result, tosolve));
-      
-      for( GSDD::Valuation::const_iterator it = tmp_result.begin()
-	     ; it != tmp_result.end()
-	     ; ++it )
+      // filter pathological single son case
+      if (to_solve_size > 1) {
+	// the actual parrallel computation
+	//          for i in range given by varval_range : 0 < i < tosolvesize
+	// third parameter in range constructor is grain of parallelism : 1 => 1 task per arc created
+	tbb::parallel_for( varval_range( 0, to_solve_size, 1)
+			   // for task body computes  : sonresult[tosolve[i] = gshom(sonresult[tosolve[i]]) 
+			   , hom_for(gshom, son_result, to_solve));
+      } else if (to_solve_size == 1) {
+	GSDD result = gshom.eval( son_result[to_solve[0]]) ;
+	S_Homomorphism::cache.insert( gshom, son_result[to_solve[0]], result);
+	son_result[to_solve[0]] = result;
+      }
+
+      i=0;
+      for( GSDD::const_iterator it = d.begin()
+	     ; it != d.end()
+	     ; ++it,++i )
 	{
-	  if( it->second != GSDD::null and not (it->first->empty()) )
+	  // arcs to null are pruned
+	  if ( son_result[i] != GSDD::null && !(it->first->empty()))
 	    {
-	      square_union( res, it->second, it->first);
+	      // use arc value from node d and new son from son_result
+	      // note that arc values are copied into res, so d is const always
+	      square_union( res, son_result[i] , it->first);
 	    }
 	}
       
       
-      
-# endif // PARALLEL_REDUCE
-#else // NOT PARALLEL_DD
-      
-      // for square union
-      GSDD_DataSet_map res;
+#else // NOT PARALLEL_DD      
 
       for( GSDD::const_iterator it = d.begin();
 	   it != d.end();
@@ -942,7 +968,7 @@ _GShom::eval_skip(const GSDD& d) const
 	    it!= res.end();
 	    ++it)
 	{
-	  valuation.push_back(std::make_pair(it->second,it->first));
+	    valuation.push_back(std::make_pair(it->second,it->first));
 	}
       
       if( valuation.empty() )
@@ -994,7 +1020,7 @@ StrongShom::eval(const GSDD &d) const
 
     	for(GSDD::const_iterator vi=d.begin();vi!=d.end();++vi)
 		{
-      		s.insert(phi(variable,*vi->first)(vi->second));
+      		s.insert(phi(variable,*vi->first) (vi->second) );
     	}
     	return SDED::add(s);
   	}
