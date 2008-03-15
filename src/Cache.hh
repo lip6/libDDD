@@ -19,9 +19,11 @@ class Cache {
 #ifdef PARALLEL_DD
   mutable tbb::atomic<long> hits;
   mutable tbb::atomic<long> misses;
+    mutable tbb::atomic<long> recompute;
 #else
   mutable long hits;
   mutable long misses;
+  mutable long recompute;
 #endif
 public :
 
@@ -75,8 +77,21 @@ bool Cache<HomType,NodeType>::insert (const HomType & h, const NodeType & d, con
   
   typename valMap::accessor val_access ;
   if (! access->second.insert(val_access,d)) {
+	++recompute;
     // no insertion performed : value in cache
-    assert(result == val_access->second);
+    if(result != val_access->second)
+	{
+		std::cout 
+			<< "apply on" << std::endl
+			<< d << std::endl << "@@@@@@@@@@@@@@@" << std::endl
+			<< result << std::endl << "@@@@@@@@@@@@@@@"
+			<< val_access->second << std::endl << "@@@@@@@@@@@@@@@"
+			<< val_access->second -result<< std::endl << std::endl
+			<< "recompute: "<< recompute
+			<< std::endl;
+		assert(false);
+		
+	}
     return false;
   } else {
     // cache insertion
