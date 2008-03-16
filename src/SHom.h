@@ -35,10 +35,6 @@
 
 #include "util/hash_support.hh"
 
-#ifdef PARALLEL_DD
-#include <tbb/task.h>
-#endif
-
 /**********************************************************************/
 
 /// pre-declare the concrete storage class
