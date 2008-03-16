@@ -868,6 +868,9 @@ _GShom::eval_skip(const GSDD& d) const
       
 //       const GSDD_DataSet_map& res = reducer.get_results();      
       
+      // fallback to default except if parallel conditions met
+      if (false && d.nbsons() > 1 && (typeid(this) == typeid(const S_Homomorphism::Fixpoint*))) {
+
       // To hold the arcs of the node we are constructing
       // For each arc <vl,son> of the node d we build an arc
       // <vl, h(son)>. 
@@ -946,7 +949,8 @@ _GShom::eval_skip(const GSDD& d) const
 	    }
 	}
       
-      
+    } else {
+	// parallel conditions not enabled
 #else // NOT PARALLEL_DD      
 
       for( GSDD::const_iterator it = d.begin();
@@ -961,7 +965,10 @@ _GShom::eval_skip(const GSDD& d) const
         }
       
 #endif // PARALLEL_DD
-      
+#ifdef PARALLEL_DD
+      } // close else condition : no parallel
+#endif      
+
       GSDD::Valuation valuation;
       valuation.reserve(res.size());  
       for ( GSDD_DataSet_map::const_iterator it = res.begin();
