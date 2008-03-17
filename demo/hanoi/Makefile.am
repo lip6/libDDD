@@ -17,7 +17,7 @@ AM_CPPFLAGS     =  -I $(DDD_SRCDIR) -Wall -Wextra -O3
 
 LDADD           =   $(DDD_BUILDDIR)/libDDD.a
 
-if PARALLEL
+if REENTRANT
     AM_LDFLAGS = -ltbb
 endif
 

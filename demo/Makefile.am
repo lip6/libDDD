@@ -8,7 +8,7 @@ DDD_BUILDDIR = $(top_builddir)/src
 
 AM_CPPFLAGS =  -I $(DDD_SRCDIR) -g -Wall
 LDADD = $(DDD_BUILDDIR)/libDDD_d.a
-if PARALLEL
+if REENTRANT
 AM_LDFLAGS = -ltbb
 endif
 

@@ -20,14 +20,17 @@ test -z "$CXXFLAGS" && CXXFLAGS=
 #compile in C++
 AC_PROG_CXX
 
+reentrant=false
+parallel=false
+
 AC_ARG_ENABLE(	[reentrant],
         [AC_HELP_STRING([--enable-reentrant],[turn on on thread-safe mode])],
         [  case "${enable_reentrant}" in
-            yes) AC_DEFINE([REENTRANT],1,[Define if you want a thread-safe library.])
+            yes) reentrant=true
                 ;;
-            no)
+            no) 
                 ;;
-            *)
+            *)  AC_MSG_ERROR(Bad value ${enableval})
                 ;;
             esac])
 
@@ -36,17 +39,23 @@ AC_ARG_ENABLE(	[parallel],
         [AC_HELP_STRING([--enable-parallel],[turn on on parallel mode])],
         [  case "${enable_parallel}" in
             yes) parallel=true
-                 AC_DEFINE([PARALLEL_DD],1,[Define if you want parallel code.])
-                 AC_DEFINE([REENTRANT],1,[Define if you want a thread-safe library.])
+                 reentrant=true
                 ;;
-            no)  parallel=false
+            no) 
                 ;;
             *)  AC_MSG_ERROR(Bad value ${enableval})
                 ;;
-            esac],
-            [parallel=false])
+            esac])
 
-AM_CONDITIONAL( [PARALLEL], [test "x$parallel" = "xtrue" ])
+if test "x$parallel" = "xtrue"; then
+    AC_DEFINE([PARALLEL_DD],1,[Define if you want parallel code.])
+fi
+
+if test "x$reentrant" = "xtrue"; then
+    AC_DEFINE([REENTRANT],1,[Define if you want a thread-safe library.])
+fi
+
+AM_CONDITIONAL( [REENTRANT], [test "x$reentrant" = "xtrue" ])
 
 AC_CONFIG_FILES([   Makefile
                     demo/Makefile
