@@ -128,7 +128,7 @@ public :
     return 6961;
   }
   
-  bool operator==(const StrongHom &s) const {
+  bool operator==(const StrongHom&) const {
     return true;
   }
   

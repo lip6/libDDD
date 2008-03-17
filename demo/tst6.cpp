@@ -106,7 +106,7 @@ public:
     return GDDD::one;
   }                   
 
-  GHom phi(int vr, int vl) const {
+  GHom phi(int, int vl) const {
     return GHom(var,vl);
   }
 

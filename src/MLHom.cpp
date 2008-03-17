@@ -51,7 +51,7 @@ public:
   virtual bool shouldCache () const { return false ; }
 
   /* Compare */
-  bool operator==(const _MLHom &h) const{ return true; }
+  bool operator==(const _MLHom&) const{ return true; }
   size_t hash() const { return 8291; }
 
   bool
@@ -146,7 +146,7 @@ public :
   }
 
   bool
-  skip_variable(int var) const 
+  skip_variable(int) const 
   {
     return false;
   }
@@ -178,7 +178,7 @@ public:
   }
 
   bool
-  skip_variable(int var) const 
+  skip_variable(int) const 
   {
     return false;
   }

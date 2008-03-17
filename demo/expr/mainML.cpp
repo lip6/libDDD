@@ -18,7 +18,7 @@ public:
     return var != this->var;
   }
 
-  GHom phi(int vr, int vl) const {
+  GHom phi(int, int) const {
     return GHom(var, val);
   }
   size_t hash() const {
