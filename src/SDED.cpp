@@ -372,7 +372,7 @@ _SDED *_SDED_Add::create(const std::set<GSDD> &s){
     else{ 
       std::set<GSDD>::const_iterator si=parameters.begin();
       int variable = si->variable();
-      for(;(si!=parameters.end())?(variable == si->variable()):false;++si);
+      for(;(si!=parameters.end())?(variable == si->variable()):false;++si){}
       if(si!=parameters.end())// s contains at least 2 GDDDs with different variables
 	return new _SDED_GSDD(GSDD::top);
       return new _SDED_Add(parameters);    
