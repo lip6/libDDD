@@ -693,83 +693,6 @@ typedef std::map<GSDD,DataSet*> GSDD_DataSet_map;
 // typedef tbb::blocked_range<GSDD::const_iterator> varval_range;
 typedef tbb::blocked_range<int> varval_range;
 
-# ifdef PARALLEL_REDUCE
-
-class hom_reducer
-{
-private:
-	
-	const GShom& gshom_;
-	const GSDD& gsdd_;
-	GSDD_DataSet_map res_;
-	
-public:
-
-	// standard constructor
-	hom_reducer( const GShom& gshom
-			   , const GSDD& gsdd
-			   )
-			
-			: gshom_(gshom)
-			, gsdd_(gsdd)
-			, res_()
-	{
-	}
-
-
-	// "splitting constructor", called by tbb internally
-	hom_reducer(const hom_reducer& reducer,
-				tbb::split)
-
-		: gshom_(reducer.gshom_)
-		, gsdd_(reducer.gsdd_)
-		, res_()
-	{
-	}
-
-	// what to do when reducing this and hom_apply
-	// so here, we make a square_union
-	void
-	join(const hom_reducer& reducer)
-	{
-		const GSDD_DataSet_map& to_reduce = reducer.res_;
-		for( GSDD_DataSet_map::const_iterator it = to_reduce.begin() 
-		   ; it != to_reduce.end()
-		   ; ++it )
-		{
-			square_union(res_, it->first, it->second);
-		}
-	}
-		
-	void
-	operator()(const varval_range& range)
-	{
-		GSDD_DataSet_map& res = this->res_;
-		
-		for( GSDD::const_iterator it = range.begin();
-			 it != range.end();
-			 ++it)
-		{
-			GSDD son = gshom_(it->second);
-            if( son != GSDD::null && !(it->first->empty()) )
-            {
-				square_union(res, son, it->first);
-            }
-		}
-	}
-	
-	const GSDD_DataSet_map&
-	get_results() 
-	const
-	{
-		return res_;
-	}
-	
-	
-};
-
-# else // NOT PARALLEL_REDUCE
-
 typedef tbb::concurrent_vector<std::pair<DataSet *,GSDD> > concurrent_valuation;
 
 class hom_for
@@ -831,8 +754,6 @@ public:
 
 };
 
-# endif // PARALLEL_REDUCE
-
 #endif // PARALLEL_DD
 
 GSDD 
@@ -858,15 +779,6 @@ _GShom::eval_skip(const GSDD& d) const
       GSDD_DataSet_map res;
       
 #ifdef PARALLEL_DD
-      
-// # ifdef PARALLEL_REDUCE
-      
-//       hom_reducer reducer(gshom, d); 
-      
-//       tbb::parallel_reduce( varval_range(d.begin(),d.end(), 2) 
-// 			    , reducer);
-      
-//       const GSDD_DataSet_map& res = reducer.get_results();      
       
       // fallback to default except if parallel conditions met
       if (false && d.nbsons() > 1 && (typeid(this) == typeid(const S_Homomorphism::Fixpoint*))) {
@@ -916,10 +828,10 @@ _GShom::eval_skip(const GSDD& d) const
 	}
       }
       
-      std::cout 
-	<< "Valuation size " << d.nbsons()
-	<< " To solve size " << to_solve_size
-	<< std::endl;
+    //       std::cout 
+    // << "Valuation size " << d.nbsons()
+    // << " To solve size " << to_solve_size
+    // << std::endl;
       
       // filter pathological single son case
       if (to_solve_size > 1) {
