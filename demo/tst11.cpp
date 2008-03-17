@@ -46,7 +46,7 @@ class _selectAndSet : public StrongHom {
 	else return GDDD::null;
     }
 
-    size_t hash() const {return 640049*oldPC+640049^2*newPC;}
+    size_t hash() const {return 640049*oldPC+(640049^(2*newPC));}
 
     bool operator ==(const StrongHom &s) const {_selectAndSet *ps = (_selectAndSet*) &s; return oldPC == ps->oldPC && newPC == ps->newPC;}
 };

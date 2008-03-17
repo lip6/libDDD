@@ -227,7 +227,7 @@ _DED *_DED_Add::create(const std::set<GDDD> &s){
     else{ 
       std::set<GDDD>::const_iterator si=parameters.begin();
       int variable = si->variable();
-      for(;(si!=parameters.end())?(variable == si->variable()):false;++si);
+      for(;(si!=parameters.end())?(variable == si->variable()):false;++si){}
       if(si!=parameters.end())// s contains at least 2 GDDDs with different variables
 	return new _DED_GDDD(GDDD::top);
       return new _DED_Add(parameters);    
