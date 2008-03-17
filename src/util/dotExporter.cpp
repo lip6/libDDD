@@ -366,7 +366,7 @@ dotHighlight::dotHighlight (const string & path) { de= new dotExporter(path); };
 dotHighlight::~dotHighlight () { delete de; }
 
 // Call this to empty the "known nodes" lists
-void dotHighlight::initialize (const string & path) { de->init() ; }
+void dotHighlight::initialize (const string&) { de->init() ; }
 
 // This adds an SDD node and all  sons to a graph
 void dotHighlight::addSDD (const GSDD & g) {

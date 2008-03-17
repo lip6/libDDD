@@ -67,29 +67,17 @@ public:
   /* Constructor */
 	_GDDD(int var,int cpt=0)
 		: variable(var)
-#ifndef PARALLEL_DD
-		, refCounter(cpt)
-		, marking(false)
-#endif
 	{
-#ifdef PARALLEL_DD
-		refCounter = 0;
+		refCounter = cpt;
 		marking = false;
-#endif
 	} 
 
 	_GDDD(int var,GDDD::Valuation val,int cpt=0)
 		: variable(var)
 		, valuation(val)
-#ifndef PARALLEL_DD
-		, refCounter(cpt)
-		, marking(false)
-#endif
 	{
-#ifdef PARALLEL_DD
-		refCounter = 0;
+		refCounter = cpt;
 		marking = false;
-#endif
 	}
 
   /* Compare */
@@ -164,7 +152,7 @@ size_t GDDD::peak() {
 }
 
 
-void GDDD::pstats(bool reinit)
+void GDDD::pstats(bool)
 {
   std::cout << "Peak number of DDD nodes in unicity table :" << peak() << std::endl; 
 }

@@ -643,8 +643,11 @@ const GSDD GSDD::top(canonical(new _GSDD(-1,1)));
 /*                   class SDD:public GSDD                                    */
 /******************************************************************************/
 
-SDD::SDD(const SDD &g):GSDD(g.concret){
-  (concret->refCounter)++;
+SDD::SDD(const SDD &g)
+    : GSDD(g.concret)
+    , DataSet()
+{
+    (concret->refCounter)++;
 }
 
 SDD::SDD(const GSDD &g):GSDD(g.concret){

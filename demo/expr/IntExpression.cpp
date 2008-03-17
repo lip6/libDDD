@@ -134,7 +134,7 @@ public :
     os << val;
   }
 
-  bool isSupport (const Variable & v) const {
+  bool isSupport (const Variable&) const {
     return false;
   }
 

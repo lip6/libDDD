@@ -352,7 +352,7 @@ public :
     return val == ((const BoolConstExpr &)e).val;
   }
   
-  BoolExpression setAssertion (const Assertion & a) const {
+  BoolExpression setAssertion (const Assertion&) const {
     return this;
   }
 
@@ -363,7 +363,7 @@ public :
     os << val;
   }
 
-  bool isSupport (const Variable & v) const {
+  bool isSupport (const Variable&) const {
     return false;
   }
 

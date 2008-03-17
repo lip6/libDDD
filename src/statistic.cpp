@@ -117,7 +117,7 @@ void Statistic::print_line (std::ostream & os) {
 
 
 
-void Statistic::print_trailer (std::ostream & os, bool withLegend) {
+void Statistic::print_trailer (std::ostream & os, bool) {
   if (style == LATEX) {
     os << "\\hline \n\\end{longtable}\n\\end{landscape} \n\n \n\\end{document} \n";
   }

@@ -63,7 +63,7 @@ public:
   Identity(int ref=0):_GHom(ref,true){}
 
   /* Compare */
-  bool operator==(const _GHom &h) const{return true;}
+  bool operator==(const _GHom&) const{return true;}
   size_t hash() const{return 17;}
 
     bool
@@ -901,7 +901,7 @@ GHom operator-(const GHom &h,const GDDD &d){
 /*************************************************************************/
 
 
-void GHom::pstats(bool reinit)
+void GHom::pstats(bool)
 {
   std::cout << "*\nGHom Stats : size unicity table = " <<  canonical.size() << std::endl;
 }

@@ -132,7 +132,7 @@ public :
     return 6961;
   }
   
-  bool operator==(const StrongShom &s) const {
+  bool operator==(const StrongShom&) const {
     return true;
   }
   

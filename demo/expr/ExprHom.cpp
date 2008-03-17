@@ -148,7 +148,7 @@ public:
 
   Assertion getAssertion () const { return ass;}
 
-  GHom phi(int vr, int vl) const {
+  GHom phi(int, int) const {
     assert(false);
     return GDDD::null;
   }

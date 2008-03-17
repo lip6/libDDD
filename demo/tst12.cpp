@@ -93,7 +93,7 @@ public:
     return 37;
   }
 
-  bool operator==(const StrongHom &s) const {
+  bool operator==(const StrongHom &) const {
     return true ; //var = ((const _plusplus &)s).var;
   }
 };

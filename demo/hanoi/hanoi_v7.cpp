@@ -75,7 +75,7 @@ class transition_relation : public StrongShom {
     return  61907 ;
   }
 
-  bool operator==(const StrongShom &s) const {
+  bool operator==(const StrongShom&) const {
      return  true;
   }  
 }; 
@@ -164,7 +164,7 @@ public :
     return 6961;
   }
   
-  bool operator==(const StrongHom &s) const {
+  bool operator==(const StrongHom&) const {
     return true;
   }
   

@@ -333,7 +333,7 @@ private:
 public:
 
     virtual bool
-    skip_variable(int var) const
+    skip_variable(int) const
     {
         return false;
     }
