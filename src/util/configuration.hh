@@ -1,15 +1,15 @@
 #ifndef _D3_CONFIGURATION_HH_
 #define _D3_CONFIGURATION_HH_
 
+#ifdef PARALLEL_DD
+#define CONCURR_HASH_MAP
+#endif
+
+#include <ext/malloc_allocator.h>
+
 #include "util/hash_support.hh"
 #include "util/ext_hash_map.hh"
 #include "util/tbb_hash_map.hh"
-
-#ifdef PARALLEL_DD
-#define CONCURR_HASH_MAP
-#define PROTECTED_SET
-#endif
-
 
 template
 <
@@ -26,5 +26,22 @@ template
 #endif
 };
 
+namespace conf
+{
+
+template
+<
+	typename T
+>
+struct allocator
+{
+#ifdef PARALLEL_DD
+	typedef typename __gnu_cxx::malloc_allocator<T> type;
+#else
+	typedef typename std::allocator<T> type;
+#endif
+};
+
+} // conf
 
 #endif
