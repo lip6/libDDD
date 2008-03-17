@@ -1,10 +1,6 @@
 #ifndef _D3_CONFIGURATION_HH_
 #define _D3_CONFIGURATION_HH_
 
-#ifdef PARALLEL_DD
-#define CONCURR_HASH_MAP
-#endif
-
 #include <ext/malloc_allocator.h>
 
 #include "util/hash_support.hh"
@@ -19,7 +15,7 @@ template
   typename EqualKey = d3::util::equal<Key>
 > struct hash_map
 {
-# ifdef CONCURR_HASH_MAP
+# ifdef REENTRANT
   typedef tbb_hash_map<Key,Data,HashKey,EqualKey> type;
 # else
   typedef ext_hash_map<Key,Data,HashKey,EqualKey> type;
