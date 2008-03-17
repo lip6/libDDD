@@ -258,7 +258,7 @@ size_t GSDD::peak() {
   return Max_SDD;
 }
 
-void GSDD::pstats(bool reinit)
+void GSDD::pstats(bool)
 {
   std::cout << "Peak number of SDD nodes in unicity table :" << peak() << std::endl; 
 }
