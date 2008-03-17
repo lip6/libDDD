@@ -17,36 +17,44 @@ AC_PROG_RANLIB
 test -z "$CFLAGS" && CFLAGS=
 test -z "$CXXFLAGS" && CXXFLAGS=
 
-
 #compile in C++
 AC_PROG_CXX
 
+AC_ARG_ENABLE(	[reentrant],
+        [AC_HELP_STRING([--enable-reentrant],[turn on on thread-safe mode])],
+        [  case "${enable_reentrant}" in
+            yes) AC_DEFINE([REENTRANT],1,[Define if you want a thread-safe library.])
+                ;;
+            no)
+                ;;
+            *)
+                ;;
+            esac])
+
+
 AC_ARG_ENABLE(	[parallel],
-		[AC_HELP_STRING([--enable-parallel],[turn on on parallel mode])],
-		[  case "${enableval}" in
-		       yes) parallel=true
-			    ;;
-			no) parallel=false
-			    ;;
-			*)  AC_MSG_ERROR(Bad value ${enableval})
-			    ;;
-		  esac],
-		[parallel=false])
+        [AC_HELP_STRING([--enable-parallel],[turn on on parallel mode])],
+        [  case "${enable_parallel}" in
+            yes) parallel=true
+                 AC_DEFINE([PARALLEL_DD],1,[Define if you want parallel code.])
+                 AC_DEFINE([REENTRANT],1,[Define if you want a thread-safe library.])
+                ;;
+            no)  parallel=false
+                ;;
+            *)  AC_MSG_ERROR(Bad value ${enableval})
+                ;;
+            esac],
+            [parallel=false])
 
-AM_CONDITIONAL(	PARALLEL,
-		test "x$parallel" = xtrue)
+AM_CONDITIONAL( [PARALLEL], [test "x$parallel" = "xtrue" ])
 
+AC_CONFIG_FILES([   Makefile
+                    demo/Makefile
+                    demo/hanoi/Makefile
+                    demo/expr/Makefile
+                    src/Makefile])
+                    # doc/Doxyfile
+                    # doc/Makefile])
 
-# automake :
-# build these Makefile using the Makefile.in files in each directory
-AC_CONFIG_FILES([
-  Makefile
-  demo/Makefile
-  demo/hanoi/Makefile
-  demo/expr/Makefile
-  src/Makefile
-  doc/Doxyfile
-  doc/Makefile
-])
 # Do it !! (mandatory)
 AC_OUTPUT
