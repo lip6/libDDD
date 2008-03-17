@@ -1,14 +1,24 @@
+noinst_PROGRAMS =   hanoi_v1 \
+                    hanoi_v1_bis \
+                    hanoi_v1_ter \
+                    hanoi_v2 \
+                    hanoi_v3 \
+                    hanoi_v4 \
+                    hanoi_v5 \
+                    hanoi_v6 \
+                    hanoi_v7 \
+                    hanoi_v8 \
+                    hanoi_v9
 
-noinst_PROGRAMS = hanoi_v1 hanoi_v1_bis hanoi_v1_ter hanoi_v2 hanoi_v3 hanoi_v4 hanoi_v5 hanoi_v6 hanoi_v7 hanoi_v8 hanoi_v9
+DDD_SRCDIR      =   $(top_srcdir)/src
+DDD_BUILDDIR    =   $(top_builddir)/src
 
-DDD_SRCDIR = $(top_srcdir)/src
-DDD_BUILDDIR = $(top_builddir)/src
+AM_CPPFLAGS     =  -I $(DDD_SRCDIR) -Wall -Wextra -O3
 
-AM_CPPFLAGS =  -I $(DDD_SRCDIR) -g -Wall
-LDADD = $(DDD_BUILDDIR)/libDDD_d.a
+LDADD           =   $(DDD_BUILDDIR)/libDDD.a
 
 if PARALLEL
-AM_LDFLAGS = -ltbb
+    AM_LDFLAGS = -ltbb
 endif
 
 hanoi_v1_SOURCES = hanoi_v1.cpp
