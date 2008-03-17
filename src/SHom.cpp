@@ -76,7 +76,7 @@ public:
   Identity(int ref=0):_GShom(ref,true){}
 
   /* Compare */
-  bool operator==(const _GShom &h) const{return true;}
+  bool operator==(const _GShom&) const{return true;}
   size_t hash() const{return 17;}
 
   bool
@@ -1178,7 +1178,7 @@ GShom operator-(const GShom &h,const GSDD &d){
 }
 
 
-void GShom::pstats(bool reinit)
+void GShom::pstats(bool)
 {
   std::cout << "*\nGSHom Stats : size unicity table = " <<  canonical.size() << std::endl;
 }
