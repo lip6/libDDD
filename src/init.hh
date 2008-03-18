@@ -12,15 +12,15 @@ class init
 private:
 	
 #ifdef PARALLEL_DD
-	tbb::task_scheduler_init tbb_init_;
+    tbb::task_scheduler_init tbb_init_;
 #endif
 
 public:
 
 	init()
 #ifdef PARALLEL_DD
-		:
-		tbb_init_()
+        :
+        tbb_init_(1)
 #endif
 	{
 	}

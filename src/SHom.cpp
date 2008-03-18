@@ -719,9 +719,10 @@ public:
 
         for( int i = range.begin(); i != range.end(); ++i)
         {
-            GSDD result = gshom_.eval( val[to_solve[i]]) ;
-            S_Homomorphism::cache.insert( gshom_, val[to_solve[i]], result);
-            val[to_solve[i]] = result;
+            // GSDD result = gshom_( val[to_solve[i]]) ;
+            // S_Homomorphism::cache.insert( gshom_, val[to_solve[i]], result);
+            // val[to_solve[i]] = result;
+            val[to_solve[i]] = gshom_( val[to_solve[i]]) ;
         }
 
     }
@@ -759,7 +760,7 @@ _GShom::eval_skip(const GSDD& d) const
       if (d.nbsons() > 1)// && (typeid(this) == typeid(const S_Homomorphism::Fixpoint*))) 
       {
 
-          std::cout << "PARALLEL" << std::endl;
+          // std::cout << "PARALLEL" << std::endl;
 
       // To hold the arcs of the node we are constructing
       // For each arc <vl,son> of the node d we build an arc
@@ -809,18 +810,18 @@ _GShom::eval_skip(const GSDD& d) const
 	// the actual parrallel computation
 	//          for i in range given by varval_range : 0 < i < tosolvesize
 	// third parameter in range constructor is grain of parallelism : 1 => 1 task per arc created
-    // tbb::parallel_for( varval_range( 0, to_solve_size, 1)
-    //         // for task body computes  : sonresult[tosolve[i] = gshom(sonresult[tosolve[i]]) 
-    //         , hom_for(gshom, son_result, to_solve));
+    tbb::parallel_for( varval_range( 0, to_solve_size, 1)
+            // for task body computes  : sonresult[tosolve[i] = gshom(sonresult[tosolve[i]]) 
+            , hom_for(gshom, son_result, to_solve));
 
       
-      for( int j = 0; j != to_solve_size; ++j)
-      {
-          GSDD arg = son_result[to_solve[j]];
-          GSDD result = gshom( arg) ;
-          // S_Homomorphism::cache.insert( gshom, arg, result);
-          son_result[to_solve[j]] = result;
-      }
+      // for( int j = 0; j != to_solve_size; ++j)
+      // {
+      //     GSDD arg = son_result[to_solve[j]];
+      //     GSDD result = gshom( arg) ;
+      //     // S_Homomorphism::cache.insert( gshom, arg, result);
+      //     son_result[to_solve[j]] = result;
+      // }
 
 
       i=0;
@@ -839,7 +840,7 @@ _GShom::eval_skip(const GSDD& d) const
       
     } else {
 	// parallel conditions not enabled
-          std::cout << "SEQUENTIAL" << std::endl;
+          // std::cout << "SEQUENTIAL" << std::endl;
 
 #endif
 // #else // NOT PARALLEL_DD      
