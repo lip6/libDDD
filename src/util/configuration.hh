@@ -1,6 +1,12 @@
 #ifndef _D3_CONFIGURATION_HH_
 #define _D3_CONFIGURATION_HH_
 
+#ifdef PARALLEL_DD
+#ifndef REENTRANT
+#define REENTRANT
+#endif
+#endif
+
 #include <ext/malloc_allocator.h>
 
 #include "util/hash_support.hh"
