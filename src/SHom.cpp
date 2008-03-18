@@ -686,67 +686,45 @@ typedef std::map<GSDD,DataSet*> GSDD_DataSet_map;
 
 #ifdef PARALLEL_DD
 
-// typedef tbb::blocked_range<GSDD::const_iterator> varval_range;
 typedef tbb::blocked_range<int> varval_range;
 
-typedef tbb::concurrent_vector<std::pair<DataSet *,GSDD> > concurrent_valuation;
 
 class hom_for
 {
 private:
 
-	const GShom& gshom_;
-	// GSDD::Valuation& gsdd_;
-        std::vector<GSDD> & val_;
-	// concurrent_valuation& res_;
-	int* to_solve_;
+    const GShom& gshom_;
+    std::vector<GSDD> & val_;
+    
+    int* to_solve_;
 
 public:
 
-	hom_for( const GShom& ghsom
-		   // 	       , const GSDD& gsdd
-		   // , concurrent_valuation& res 
-			// , GSDD::Valuation& gsdd
-		        , std::vector<GSDD>& val
-			, int* to_solve
-	   		)
-		
-		: gshom_(ghsom)
-		// , gsdd_(gsdd)
-		, val_(val)
-		// , res_(res)
-		, to_solve_(to_solve)
+    hom_for( const GShom& ghsom
+            , std::vector<GSDD>& val
+            , int* to_solve
+            )
+
+        : gshom_(ghsom)
+        , val_(val)
+        , to_solve_(to_solve)
 	{
 	}
 	
 	void operator()(const varval_range& range)
 	const
 	{
-		// concurrent_valuation& res = this->res_;
-		
-		
-		// for( GSDD::const_iterator it = range.begin();
-		// 	 it != range.end();
-		// 	 ++it)
-		// {
-		// 	res.push_back( std::make_pair( it->first
-		// 								  , gshom_(it->second) ));
-		// }	
-	        std::vector<GSDD>& val = this->val_;
-		int* to_solve = this->to_solve_;
-		
-		for( int i = range.begin(); i != range.end(); ++i)
-		{
-			// gshom_.eval skip cache lookup
-			
- 			GSDD result = gshom_.eval( val[to_solve[i]]) ;
- 			S_Homomorphism::cache.insert( gshom_, val[to_solve[i]], result);
- 			val[to_solve[i]] = result;
+        std::vector<GSDD>& val = this->val_;
+        int* to_solve = this->to_solve_;
 
-//			val[to_solve[i]] = gshom_(val[to_solve[i]]) ;
-		}
+        for( int i = range.begin(); i != range.end(); ++i)
+        {
+            GSDD result = gshom_.eval( val[to_solve[i]]) ;
+            S_Homomorphism::cache.insert( gshom_, val[to_solve[i]], result);
+            val[to_solve[i]] = result;
+        }
 
-	}
+    }
 
 };
 
@@ -776,8 +754,12 @@ _GShom::eval_skip(const GSDD& d) const
       
 #ifdef PARALLEL_DD
       
+      // filter pathological single son case
       // fallback to default except if parallel conditions met
-      if (false && d.nbsons() > 1 && (typeid(this) == typeid(const S_Homomorphism::Fixpoint*))) {
+      if (d.nbsons() > 1)// && (typeid(this) == typeid(const S_Homomorphism::Fixpoint*))) 
+      {
+
+          std::cout << "PARALLEL" << std::endl;
 
       // To hold the arcs of the node we are constructing
       // For each arc <vl,son> of the node d we build an arc
@@ -803,25 +785,25 @@ _GShom::eval_skip(const GSDD& d) const
       // current index in tmp_result
       int i =0;
       for( GSDD::const_iterator it = d.begin();
-	   it != d.end() ;
-	   ++it) {
-	if (immediat) {
-	  // right concatenating a constant ? ah : Can this happen ?
-	  // if this assert is raised, remove it !
-	  son_result.push_back(eval(it->second));
-	  assert(false);
-	} else {
-	  std::pair<bool,GSDD> res = S_Homomorphism::cache.contains(gshom,d);
-	  if (res.first) {
-	    // cache hit
-	    son_result.push_back(res.second);
-	  } else {
-	    // cache miss : add index i to tosolve list
-	    to_solve[to_solve_size++] = i;
-	    // set current value in son_result to son
-	    son_result.push_back(it->second);
-	  }
-	}
+      it != d.end() ;
+      ++it) {
+          if (immediat) {
+      // right concatenating a constant ? ah : Can this happen ?
+      // if this assert is raised, remove it !
+              son_result.push_back(eval(it->second));
+              assert(false);
+          } else {
+              std::pair<bool,GSDD> local_res = S_Homomorphism::cache.contains(gshom,d);
+              if (local_res.first) {
+        // cache hit
+                  son_result.push_back(local_res.second);
+              } else {
+        // cache miss : add index i to tosolve list
+                  to_solve[to_solve_size++] = i;
+        // set current value in son_result to son
+                  son_result.push_back(it->second);
+              }
+          }
       }
       
     //       std::cout 
@@ -829,19 +811,22 @@ _GShom::eval_skip(const GSDD& d) const
     // << " To solve size " << to_solve_size
     // << std::endl;
       
-      // filter pathological single son case
-      if (to_solve_size > 1) {
 	// the actual parrallel computation
 	//          for i in range given by varval_range : 0 < i < tosolvesize
 	// third parameter in range constructor is grain of parallelism : 1 => 1 task per arc created
-	tbb::parallel_for( varval_range( 0, to_solve_size, 1)
-			   // for task body computes  : sonresult[tosolve[i] = gshom(sonresult[tosolve[i]]) 
-			   , hom_for(gshom, son_result, to_solve));
-      } else if (to_solve_size == 1) {
-	GSDD result = gshom.eval( son_result[to_solve[0]]) ;
-	S_Homomorphism::cache.insert( gshom, son_result[to_solve[0]], result);
-	son_result[to_solve[0]] = result;
+    // tbb::parallel_for( varval_range( 0, to_solve_size, 1)
+    //         // for task body computes  : sonresult[tosolve[i] = gshom(sonresult[tosolve[i]]) 
+    //         , hom_for(gshom, son_result, to_solve));
+
+      
+      for( int j = 0; j != to_solve_size; ++j)
+      {
+          GSDD arg = son_result[to_solve[j]];
+          GSDD result = gshom.eval( arg) ;
+          S_Homomorphism::cache.insert( gshom, arg, result);
+          son_result[to_solve[j]] = result;
       }
+
 
       i=0;
       for( GSDD::const_iterator it = d.begin()
@@ -859,7 +844,10 @@ _GShom::eval_skip(const GSDD& d) const
       
     } else {
 	// parallel conditions not enabled
-#else // NOT PARALLEL_DD      
+          std::cout << "SEQUENTIAL" << std::endl;
+
+#endif
+// #else // NOT PARALLEL_DD      
 
       for( GSDD::const_iterator it = d.begin();
 	   it != d.end();
@@ -872,7 +860,7 @@ _GShom::eval_skip(const GSDD& d) const
             }
         }
       
-#endif // PARALLEL_DD
+// #endif // PARALLEL_DD
 #ifdef PARALLEL_DD
       } // close else condition : no parallel
 #endif      
@@ -1021,7 +1009,7 @@ void GShom::mark()const{
     concret->marking=true;
     concret->mark();
   }
-};
+}
 
 void GShom::garbage(){
   // mark phase
