@@ -34,7 +34,7 @@
 #include "DED.h"
 #include "Hom.h"
 
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 #include "tbb/atomic.h"
 #endif
 /******************************************************************************/
@@ -43,7 +43,7 @@ typedef hash_map< DED, GDDD>::type Cache;
 
 static Cache cache;
 
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 
 static tbb::atomic<int> Hits;
 static tbb::atomic<int> Misses;
@@ -561,7 +561,7 @@ void DED::pstats(bool reinit)
 
 }
 
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 static tbb::atomic<size_t> DEDpeak;
 class DEDpeak_parallel_init
 {

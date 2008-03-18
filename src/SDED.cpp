@@ -34,7 +34,7 @@
 #include "SDED.h"
 #include "SHom.h"
 
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 # include "tbb/atomic.h"
 #endif
 
@@ -48,7 +48,7 @@ namespace namespace_SDED {
   static Cache cache;
   static Cache recentCache;
   
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 
   static tbb::atomic<int> Hits;
   static tbb::atomic<int> Misses;

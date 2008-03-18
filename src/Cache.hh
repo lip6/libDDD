@@ -1,7 +1,7 @@
 #ifndef __CACHE__H__
 #define __CACHE__H__
 
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 #include "tbb/atomic.h"
 #endif
 
@@ -16,7 +16,7 @@ class Cache {
   typedef typename hash_map<HomType,valMap>::type cacheType;
   cacheType cache;
 
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
   mutable tbb::atomic<long> hits;
   mutable tbb::atomic<long> misses;
     mutable tbb::atomic<long> recompute;
