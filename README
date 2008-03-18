@@ -1,0 +1,22 @@
+To build, simply run
+
+./configure
+make
+
+By default, the library "src/libddd.a" is built using optimized flags.
+
+Some options you can activate to build other library variants :
+
+--enable-debug : activates build of debug versions of all libraries activated : src/libddd_d.a src/libddd_mt_d.a src/libddd_par_d.a etc..
+
+--enable-evddd : activates build of edge valued variant of library "src/libddd_ev.a". Currently built in non reentrant mode.
+
+Multi-threaded and reentrant variants below require the open-source library Threading Building Blocks TBB from intel. If this library is not installed in your system folders, you should specify include path using the CPPFLAGS variable. 
+
+For instance, if tbb was built in /home/scott/tbb/ :
+
+./configure --enable-reentrant CPPFLAGS="-I /home/scott/tbb/include"
+
+--enable-reentrant : activates build of reentrant library version "src/libddd_mt.a", adapted to multi-threaded applications.
+
+--enable-parallel : activates build of internally "src/libddd_par.a" multi-threaded variant. Saturation procedures then run faster on multi-core architectures. User programs can try this variant interchangeably with the default version. However, flag -D PARALLEL_DD must be defined when including libddd headers.
