@@ -41,7 +41,7 @@
 #include "util/ext_hash_map.hh"
 
 
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 #include "tbb/atomic.h"
 #include "tbb/queuing_rw_mutex.h"
 #endif
@@ -123,7 +123,7 @@ public:
 };
 
 // map<int,string> mapVarName;
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 
 static tbb::atomic<size_t> Max_SDD;
 class SDD_parallel_init
@@ -484,7 +484,7 @@ public:
 	SddSize()
 		:
 		firstError(true)
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 			,
 			s(),
 			sd3(),
@@ -497,7 +497,7 @@ public:
 	};
 //  pair<unsigned long int,unsigned long int> operator()(const GSDD& g){
 	unsigned long int operator()(const GSDD& g){
-#ifndef PARALLEL_DD
+#ifndef REENTRANT
     res=0;
     d3res=0;
     sd3.clear();
@@ -512,7 +512,7 @@ public:
 
 
 std::pair<unsigned long int,unsigned long int> GSDD::node_size() const{
-#ifndef PARALLEL_DD
+#ifndef REENTRANT
 	static 
 #endif
 	SddSize sddsize;

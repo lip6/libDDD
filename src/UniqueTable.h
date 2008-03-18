@@ -28,7 +28,7 @@
 #include <ext/hash_set>
 #include "util/hash_support.hh"
 
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 #include "tbb/queuing_mutex.h"
 #include "tbb/mutex.h"
 #endif
@@ -40,7 +40,7 @@ class UniqueTable{
 
 private:
 	
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
   // typedef tbb::queuing_mutex table_mutex_t;
   typedef tbb::mutex table_mutex_t;
   table_mutex_t table_mutex_;
@@ -49,7 +49,7 @@ private:
 public:
   /// Constructor, builds a default table.
   UniqueTable()
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
     :
     table_mutex_()
 #endif
@@ -69,7 +69,7 @@ public:
   const T*
   operator()(T *_g)
   {
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
     table_mutex_t::scoped_lock lock(table_mutex_);
 #endif
 

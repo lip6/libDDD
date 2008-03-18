@@ -38,13 +38,9 @@
 #include "Cache.hh"
 
 #ifdef PARALLEL_DD
-# include <tbb/blocked_range.h>
-# ifdef PARALLEL_REDUCE
-#  include <tbb/parallel_reduce.h>
-# else
-#  include <tbb/parallel_for.h>
-#  include <tbb/concurrent_vector.h>
-# endif
+#include <tbb/blocked_range.h>
+#include <tbb/parallel_for.h>
+#include <tbb/concurrent_vector.h>
 #endif
 
 

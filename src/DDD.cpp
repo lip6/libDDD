@@ -38,7 +38,7 @@
 #include "UniqueTable.h"
 #include "DED.h"
 
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 #include "tbb/atomic.h"
 #include "tbb/mutex.h"
 #include "util/tbb_atomic_bool.hh"
@@ -56,7 +56,7 @@ public:
   const int variable;
   GDDD::Valuation valuation;
 
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 	mutable tbb::atomic<unsigned long int> refCounter;
 	mutable tbb::atomic<bool> marking;
 #else
@@ -99,7 +99,7 @@ public:
 static UniqueTable<_GDDD> canonical;
 std::map<int,std::string> mapVarName;
 
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 
 static tbb::atomic<size_t> Max_DDD;
 
@@ -226,7 +226,7 @@ unsigned int GDDD::refCounter() const{
 class MySize{
 
 private:
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 	tbb::atomic<unsigned long int> res;
 #else
   unsigned long int res;
@@ -309,7 +309,7 @@ ext_hash_map<GDDD,long double> MyNbStates::cache = ext_hash_map<GDDD,long double
 long double
 GDDD::nbStates() const
 {
-#ifdef PARALLEL_DD
+#ifdef REENTRANT
 tbb::mutex nb_states_mutex_;
   tbb::mutex::scoped_lock lock(nb_states_mutex_);
 #endif
