@@ -784,9 +784,9 @@ _GShom::eval_skip(const GSDD& d) const
       
       // current index in tmp_result
       int i =0;
-      for( GSDD::const_iterator it = d.begin();
-      it != d.end() ;
-      ++it) {
+      for(  GSDD::const_iterator it = d.begin();
+            it != d.end() ;
+            ++it,i++) {
           if (immediat) {
       // right concatenating a constant ? ah : Can this happen ?
       // if this assert is raised, remove it !
@@ -805,12 +805,7 @@ _GShom::eval_skip(const GSDD& d) const
               }
           }
       }
-      
-    //       std::cout 
-    // << "Valuation size " << d.nbsons()
-    // << " To solve size " << to_solve_size
-    // << std::endl;
-      
+            
 	// the actual parrallel computation
 	//          for i in range given by varval_range : 0 < i < tosolvesize
 	// third parameter in range constructor is grain of parallelism : 1 => 1 task per arc created
@@ -822,8 +817,8 @@ _GShom::eval_skip(const GSDD& d) const
       for( int j = 0; j != to_solve_size; ++j)
       {
           GSDD arg = son_result[to_solve[j]];
-          GSDD result = gshom.eval( arg) ;
-          S_Homomorphism::cache.insert( gshom, arg, result);
+          GSDD result = gshom( arg) ;
+          // S_Homomorphism::cache.insert( gshom, arg, result);
           son_result[to_solve[j]] = result;
       }
 
