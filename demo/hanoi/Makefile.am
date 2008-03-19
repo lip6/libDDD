@@ -13,12 +13,21 @@ noinst_PROGRAMS =   hanoi_v1 \
 DDD_SRCDIR      =   $(top_srcdir)/src
 DDD_BUILDDIR    =   $(top_builddir)/src
 
-AM_CPPFLAGS     =  -I $(DDD_SRCDIR) -Wall -Wextra -O3
+# Flags for TBB
+if WITH_LIBTBBINC_PATH
+TBBINC_FLAGS=-I $(LIBTBB_INC)
+endif
+
+if WITH_LIBTBBBIN_PATH
+TBBBIN_FLAGS=-L $(LIBTBB_BIN)
+endif
+
+AM_CPPFLAGS     =  -I $(DDD_SRCDIR) -Wall -Wextra -O3 $(TBBINC_FLAGS)
 
 LDADD           =   $(DDD_BUILDDIR)/libDDD.a
 
 if REENTRANT
-    AM_LDFLAGS = -ltbb
+    AM_LDFLAGS = -ltbb $(TBBBIN_FLAGS)
 endif
 
 hanoi_v1_SOURCES = hanoi_v1.cpp

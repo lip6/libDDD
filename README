@@ -20,3 +20,6 @@ For instance, if tbb was built in /home/scott/tbb/ :
 --enable-reentrant : activates build of reentrant library version "src/libddd_mt.a", adapted to multi-threaded applications.
 
 --enable-parallel : activates build of internally "src/libddd_par.a" multi-threaded variant. Saturation procedures then run faster on multi-core architectures. User programs can try this variant interchangeably with the default version. However, flag -D PARALLEL_DD must be defined when including libddd headers.
+
+For instance, to get parallel mode try :
+[ythierry@octopus trunk]$ ./configure --enable-parallel --with-libtbbinc=/home/ythierry/tbb20_017oss_src/include/ --with-libtbbbin=/home/ythierry/tbb20_017oss_src/build/linux_em64t_gcc_cc4.2.2_libc2.6.1_kernel2.6.22.9_release/
