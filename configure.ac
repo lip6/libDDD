@@ -23,6 +23,17 @@ AC_PROG_CXX
 reentrant=false
 parallel=false
 
+# option to indicate libtbb folder
+AC_ARG_WITH([libtbbinc],
+            [AC_HELP_STRING([--with-libtbbinc=/include/path/libtbb],
+                            [specify the include path of libtbb])])
+
+AC_ARG_WITH([libtbbbin],
+            [AC_HELP_STRING([--with-libtbbbin=/path/to/libtbb.a],
+                            [specify the library linker path of libtbb])])
+
+
+
 AC_ARG_ENABLE(	[reentrant],
         [AC_HELP_STRING([--enable-reentrant],[turn on on thread-safe mode])],
         [  case "${enable_reentrant}" in
@@ -56,6 +67,16 @@ if test "x$reentrant" = "xtrue"; then
 fi
 
 AM_CONDITIONAL( [REENTRANT], [test "x$reentrant" = "xtrue" ])
+
+AM_CONDITIONAL([WITH_LIBTBBINC_PATH], [test "x${with_libtbbinc}" != x])
+if test "x${with_libtbbinc}" != x; then
+    AC_SUBST([LIBTBB_INC],["${with_libtbbinc}"])
+fi
+
+AM_CONDITIONAL([WITH_LIBTBBBIN_PATH], [test "x${with_libtbbbin}" != x])
+if test "x${with_libtbbbin}" != x; then
+    AC_SUBST([LIBTBB_BIN],["${with_libtbbbin}"])
+fi
 
 AC_CONFIG_FILES([   Makefile
                     demo/Makefile
