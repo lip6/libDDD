@@ -8,12 +8,15 @@
 #include "util/configuration.hh"
 #include "util/hash_support.hh"
 
+
 /************************************************************************/
 /*      A cache for operations on nodes **************/
 template<typename HomType, typename NodeType>
 class Cache {
-  typedef typename hash_map<NodeType,NodeType>::type valMap;
-  typedef typename hash_map<HomType,valMap>::type cacheType;
+  typedef typename std::pair<HomType,NodeType> key_type;
+  typedef typename hash_map<key_type,NodeType>::type cacheType;
+  //  typedef typename hash_map<NodeType,NodeType>::type valMap;
+  //  typedef typename hash_map<HomType,valMap>::type cacheType;
   cacheType cache;
 
 #ifdef REENTRANT
@@ -38,7 +41,7 @@ public :
   
   /** Set the resulting value of h(d) = result. 
     * Returns true if the insert was actually performed or false if the value for h(d) was already in the cache.  */
-  bool insert (const HomType & h, const NodeType & d, const NodeType & result);
+  std::pair<bool,NodeType> insert (const HomType & h, const NodeType & d);
 
 };
 
@@ -47,56 +50,35 @@ std::pair<bool,NodeType> Cache<HomType,NodeType>::contains (const HomType & h, c
   typename cacheType::const_accessor access;  
 
 
-  if (!  cache.find(access,h) ) {
+  if (!  cache.find(access,std::make_pair(h,d)) ) {
     // first time we hit this homomorphism : no cache
     ++misses;
     return std::make_pair(false,NodeType::null);
   } else {
-    typename valMap::const_accessor val_access ;
-    
-    if (! access->second.find(val_access,d)) {
-      // no application of h(d) found
-      ++misses;
-      return std::make_pair(false,NodeType::null);
-    } else {
       // return cached value
       ++hits;
-      return std::make_pair(true,val_access->second);
-    }
+      return std::make_pair(true,access->second);
   }
+  
 
 }
 
 template<typename HomType, typename NodeType>
-bool Cache<HomType,NodeType>::insert (const HomType & h, const NodeType & d, const NodeType & result) {
+std::pair<bool,NodeType> Cache<HomType,NodeType>::insert (const HomType & h, const NodeType & d) {
 
   typename cacheType::accessor access;  
 
-  // will create a defult valMap if it does not exist yet
-  cache.insert(access,h);
+
+  std::cout << "hits/miss/recompute: "<< hits << "/" << misses << "/" << recompute << std::endl;
   
-  typename valMap::accessor val_access ;
-  if (! access->second.insert(val_access,d)) {
-	++recompute;
-    // no insertion performed : value in cache
-    if(result != val_access->second)
-	{
-		std::cout 
-			<< "apply on" << std::endl
-			<< d << std::endl << "@@@@@@@@@@@@@@@" << std::endl
-			<< result << std::endl << "@@@@@@@@@@@@@@@"
-			<< val_access->second << std::endl << "@@@@@@@@@@@@@@@"
-			<< val_access->second  + result<< std::endl << std::endl
-			<< "hits/miss/recompute: "<< hits << "/" << misses << "/" << recompute
-			<< std::endl;
-		assert(false);
-		
-	}
-    return false;
+  if (!  cache.insert(access,std::make_pair(h,d))) {
+	++hits;
+	return std::make_pair(false,access->second);
   } else {
     // cache insertion
-    val_access->second = result;
-    return true;
+    NodeType result = h.eval(d);
+    access->second = result;
+    return std::make_pair(true,result);
   }
 
 }

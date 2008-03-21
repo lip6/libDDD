@@ -980,9 +980,8 @@ GShom::operator()(const GSDD &d) const
 		// cache hit
 				return res.second;
 			} else {
-				GSDD result = eval(d);
-				S_Homomorphism::cache.insert (*this,d,result);
-				return result;
+			  std::pair<bool,GSDD> result = S_Homomorphism::cache.insert (*this,d);
+				return result.second;
 			}
 		}
 

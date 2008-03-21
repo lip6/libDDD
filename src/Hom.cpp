@@ -742,9 +742,9 @@ GHom::operator()(const GDDD &d) const
 	  // cache hit
 	  return res.second;
 	} else {
-	  GDDD result = eval(d);
-	  cache.insert (*this,d,result);
-	  return result;
+	  //	  GDDD result = eval(d);
+	  std::pair<bool,GDDD> res = cache.insert (*this,d);
+	  return res.second;
 	}
       }
     }
