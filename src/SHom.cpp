@@ -36,6 +36,7 @@
 #include "util/configuration.hh"
 #include "util/hash_support.hh"
 #include "Cache.hh"
+#include "hashfunc.hh"
 
 #ifdef PARALLEL_DD
 #include <tbb/blocked_range.h>
@@ -206,6 +207,13 @@ public:
 };
 
 /************************** Add */
+
+struct inthasher {
+  size_t operator()(int i) {
+    return ddd::wang32_hash(i);
+  };
+ };
+
 /************************** Add */
 class Add
     :
@@ -225,8 +233,7 @@ public:
 		
 	} partition;
 
-    typedef std::map<int,partition> partition_cache_type;
-    
+  typedef hash_map<int,partition,inthasher,std::equal_to<int> >::type partition_cache_type;
 
 private:
         
@@ -326,48 +333,52 @@ public:
 	bool
 	skip_variable( int var ) const
 	{
-		partition_cache_type::iterator part_it = partition_cache.find(var);
-		if( part_it == partition_cache.end() )
-		{
-			part_it = partition_cache.insert(std::make_pair(var,partition())).first;
-			partition& part = part_it->second;
-			part.has_local = false;
-			part.L  = NULL;
-			std::set<GShom> F;
+	  partition_cache_type::const_accessor caccess;  
+	  if (!  partition_cache.find(caccess,var) ) {
+	    // miss
+	    partition_cache_type::accessor access ;
+	    partition_cache.insert(access,var);
+	    partition& part = access->second;
+	    part.has_local = false;
+	    part.L  = NULL;
+	    std::set<GShom> F;
 			
-			for(	std::set<GShom>::const_iterator gi = parameters.begin();
-					gi != parameters.end();
-				++gi )
-			{
-			  if( get_concret(*gi)->skip_variable(var) )
-			    {
-			      // F part
-			      F.insert(*gi);
-			    }
-			  else if( typeid(*get_concret(*gi) ) == typeid(LocalApply) )
-			    {
-			      // L part
-			      assert (!part.has_local);
-			      part.L = (const LocalApply*)(get_concret(*gi));
-			      part.has_local = true;
-			    }
-			  else
-			    {
-			      // G part
-			      part.G.insert(*gi);
-			    }
-			}
-			part.F = GShom::add(F);
-		}
-
-		return part_it->second.G.empty() && !part_it->second.has_local;
+	    for(	std::set<GShom>::const_iterator gi = parameters.begin();
+			gi != parameters.end();
+			++gi )
+	      {
+		if( get_concret(*gi)->skip_variable(var) )
+		  {
+		    // F part
+		    F.insert(*gi);
+		  }
+		else if( typeid(*get_concret(*gi) ) == typeid(LocalApply) )
+		  {
+		    // L part
+		    assert (!part.has_local);
+		    part.L = (const LocalApply*)(get_concret(*gi));
+		    part.has_local = true;
+		  }
+		else
+		  {
+		    // G part
+		    part.G.insert(*gi);
+		  }
+	      }
+	    part.F = GShom::add(F);
+	    return part.G.empty() && !part.has_local;
+	  }
+	  // cache hit
+	  return caccess->second.G.empty() && !caccess->second.has_local;
 	}
 
     partition
     get_partition(int var)
     {
         this->skip_variable(var);
-        return partition_cache.find(var)->second;
+	partition_cache_type::const_accessor caccess;  
+	partition_cache.find(caccess,var);
+	return caccess->second;
     }
 
 
@@ -394,11 +405,11 @@ public:
 			std::set<GSDD> s;
 			int var = d.variable();
 
-			partition_cache_type::iterator part_it = partition_cache.find(var);
-			if( part_it == partition_cache.end() )
+			partition_cache_type::const_accessor part_it;
+			if( ! partition_cache.find(part_it,var) )
 			{
 				this->skip_variable(var);
-				part_it = partition_cache.find(var);
+				partition_cache.find(part_it,var);
 			}
 
 			if( part_it->second.L != NULL )
@@ -408,7 +419,7 @@ public:
 
 			s.insert( part_it->second.F(d) );
 	
-			std::set<GShom>& G = part_it->second.G;
+			const std::set<GShom>& G = part_it->second.G;
 
 			for( 	std::set<GShom>::const_iterator it = G.begin(); 
 					it != G.end();
@@ -832,6 +843,7 @@ _GShom::eval_skip(const GSDD& d) const
 	  // arcs to null are pruned
 	  if ( son_result[i] != GSDD::null && !(it->first->empty()))
 	    {
+	      assert( son_result[i].variable() != d.variable() );
 	      // use arc value from node d and new son from son_result
 	      // note that arc values are copied into res, so d is const always
 	      square_union( res, son_result[i] , it->first);
