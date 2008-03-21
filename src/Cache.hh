@@ -86,8 +86,8 @@ bool Cache<HomType,NodeType>::insert (const HomType & h, const NodeType & d, con
 			<< d << std::endl << "@@@@@@@@@@@@@@@" << std::endl
 			<< result << std::endl << "@@@@@@@@@@@@@@@"
 			<< val_access->second << std::endl << "@@@@@@@@@@@@@@@"
-			<< val_access->second -result<< std::endl << std::endl
-			<< "recompute: "<< recompute
+			<< val_access->second  + result<< std::endl << std::endl
+			<< "hits/miss/recompute: "<< hits << "/" << misses << "/" << recompute
 			<< std::endl;
 		assert(false);
 		
