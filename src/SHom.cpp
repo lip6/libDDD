@@ -768,7 +768,7 @@ _GShom::eval_skip(const GSDD& d) const
       
       // filter pathological single son case
       // fallback to default except if parallel conditions met
-      if (d.nbsons() > 1)// && (typeid(this) == typeid(const S_Homomorphism::Fixpoint*))) 
+      if (d.nbsons() > 1  && (typeid(*this) == typeid(const S_Homomorphism::Fixpoint))) 
       {
 
           // std::cout << "PARALLEL" << std::endl;
@@ -805,9 +805,9 @@ _GShom::eval_skip(const GSDD& d) const
               son_result.push_back(eval(it->second));
               assert(false);
           } else {
-              std::pair<bool,GSDD> local_res = S_Homomorphism::cache.contains(gshom,d);
+              std::pair<bool,GSDD> local_res = S_Homomorphism::cache.contains(gshom,it->second);
               if (local_res.first) {
-        // cache hit
+		// cache hit
                   son_result.push_back(local_res.second);
               } else {
         // cache miss : add index i to tosolve list
