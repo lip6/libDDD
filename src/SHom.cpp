@@ -209,7 +209,7 @@ public:
 /************************** Add */
 
 struct inthasher {
-  size_t operator()(int i) {
+  size_t operator()(int i) const {
     return ddd::wang32_hash(i);
   };
  };
