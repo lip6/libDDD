@@ -5,8 +5,10 @@
 #include "tbb/atomic.h"
 #endif
 
+#include "pthread.h"
 #include "util/configuration.hh"
 #include "util/hash_support.hh"
+#include <cstdio>
 
 
 /************************************************************************/
@@ -15,8 +17,6 @@ template<typename HomType, typename NodeType>
 class Cache {
   typedef typename std::pair<HomType,NodeType> key_type;
   typedef typename hash_map<key_type,NodeType>::type cacheType;
-  //  typedef typename hash_map<NodeType,NodeType>::type valMap;
-  //  typedef typename hash_map<HomType,valMap>::type cacheType;
   cacheType cache;
 
 #ifdef REENTRANT
@@ -68,21 +68,22 @@ std::pair<bool,NodeType> Cache<HomType,NodeType>::insert (const HomType & h, con
 
   typename cacheType::accessor access;  
 
+  //  printf("thread : %d   acquire lock <%p,%p>\n",pthread_self(), h.concret, d.concret);
+  //  std::cout << "hits/miss/recompute: " << hits <<"/" <<misses << "/" <<recompute << std::endl;
 
-  std::cout << "hits/miss/recompute: "<< hits << "/" << misses << "/" << recompute << std::endl;
-  
   if (!  cache.insert(access,std::make_pair(h,d))) {
 	++hits;
+	//	 printf("thread : %d  release lock <%p,%p>\n",pthread_self(), h.concret, d.concret);
 	return std::make_pair(false,access->second);
   } else {
     // cache insertion
     NodeType result = h.eval(d);
     access->second = result;
+    // printf("thread : %d  release lock <%p,%p>\n",pthread_self(), h.concret, d.concret);
     return std::make_pair(true,result);
   }
 
 }
-
 
 
 #endif
