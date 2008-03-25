@@ -36,7 +36,7 @@
 #include "util/configuration.hh"
 #include "util/hash_support.hh"
 #include "Cache.hh"
-#include "hashfunc.hh"
+
 
 #ifdef PARALLEL_DD
 #include <tbb/blocked_range.h>
@@ -206,14 +206,7 @@ public:
 
 };
 
-/************************** Add */
-
-struct inthasher {
-  size_t operator()(int i) const {
-    return ddd::wang32_hash(i);
-  };
- };
-
+  /************************** Add */
 /************************** Add */
 class Add
     :
@@ -233,7 +226,7 @@ public:
 		
 	} partition;
 
-  typedef hash_map<int,partition,inthasher,std::equal_to<int> >::type partition_cache_type;
+  typedef hash_map<int,partition >::type partition_cache_type;
 
 private:
         
@@ -805,16 +798,17 @@ _GShom::eval_skip(const GSDD& d) const
               son_result.push_back(eval(it->second));
               assert(false);
           } else {
-              std::pair<bool,GSDD> local_res = S_Homomorphism::cache.contains(gshom,it->second);
-              if (local_res.first) {
-		// cache hit
-                  son_result.push_back(local_res.second);
-              } else {
-        // cache miss : add index i to tosolve list
-                  to_solve[to_solve_size++] = i;
-        // set current value in son_result to son
-                  son_result.push_back(it->second);
-              }
+	    //  std::pair<bool,GSDD> local_res = S_Homomorphism::cache.contains(gshom,it->second);
+            //  if (local_res.first) {
+	    if (false) {
+	      // cache hit
+	      //                  son_result.push_back(local_res.second);
+	    } else {
+	      // cache miss : add index i to tosolve list
+	      to_solve[to_solve_size++] = i;
+	      // set current value in son_result to son
+	      son_result.push_back(it->second);
+	    }
           }
       }
             
@@ -975,14 +969,8 @@ GShom::operator()(const GSDD &d) const
 		if (d == GSDD::null) {
 			return d;
 		} else {
-			std::pair<bool,GSDD> res = S_Homomorphism::cache.contains(*this,d);
-			if (res.first) {
-		// cache hit
-				return res.second;
-			} else {
-			  std::pair<bool,GSDD> result = S_Homomorphism::cache.insert (*this,d);
-				return result.second;
-			}
+		  std::pair<bool,GSDD> res = S_Homomorphism::cache.insert(*this,d);
+		  return res.second;
 		}
 
 	}
