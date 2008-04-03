@@ -965,12 +965,13 @@ GShom::operator()(const GSDD &d) const
 	}
 	else
     {
-	//      return SDED::Shom(*this,d);
-		if (d == GSDD::null) {
+		if (d == GSDD::null)
+		{
 			return d;
-		} else {
-		  std::pair<bool,GSDD> res = S_Homomorphism::cache.insert(*this,d);
-		  return res.second;
+		}
+		else
+		{
+            return (S_Homomorphism::cache.insert(*this,d)).second;
 		}
 
 	}

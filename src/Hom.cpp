@@ -727,26 +727,20 @@ GHom GHom::compose (const GHom &r) const {
 GDDD
 GHom::operator()(const GDDD &d) const
 {
-  if(concret->immediat)
+    if(concret->immediat)
     {
-      return concret->eval(d);
+        return concret->eval(d);
     }
-  else
+    else
     {
-//      return DED::hom(*this,d);
-      if (d == GDDD::null) {
-	return d;
-      } else {
-	std::pair<bool,GDDD> res = cache.contains(*this,d);
-	if (res.first) {
-	  // cache hit
-	  return res.second;
-	} else {
-	  //	  GDDD result = eval(d);
-	  std::pair<bool,GDDD> res = cache.insert (*this,d);
-	  return res.second;
-	}
-      }
+        if (d == GDDD::null) 
+        {
+            return d;
+        }
+        else
+        {
+            return (cache.insert(*this,d)).second;
+        }
     }
 }
 
