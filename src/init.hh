@@ -20,7 +20,7 @@ public:
 	init()
 #ifdef PARALLEL_DD
         :
-        tbb_init_(1)
+        tbb_init_()
 #endif
 	{
 	}

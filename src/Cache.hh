@@ -1,90 +1,89 @@
-#ifndef __CACHE__H__
-#define __CACHE__H__
-
-#ifdef REENTRANT
-#include "tbb/atomic.h"
-#endif
-
-#include "pthread.h"
+#ifndef _CACHE_HH_
+#define _CACHE_HH_
+  
 #include "util/configuration.hh"
 #include "util/hash_support.hh"
-#include <cstdio>
 
 
-/************************************************************************/
-/*      A cache for operations on nodes **************/
-template<typename HomType, typename NodeType>
-class Cache {
-  typedef typename std::pair<HomType,NodeType> key_type;
-  typedef typename hash_map<key_type,NodeType>::type cacheType;
-  cacheType cache;
+template
+    <
+      typename HomType
+    , typename NodeType
+    >
+class Cache
+{
+private:
 
+    struct result_type
+    {
+        NodeType node_;
 #ifdef REENTRANT
-  mutable tbb::atomic<long> hits;
-  mutable tbb::atomic<long> misses;
-    mutable tbb::atomic<long> recompute;
-#else
-  mutable long hits;
-  mutable long misses;
-  mutable long recompute;
+        tbb::mutex mutex_;
+        bool computed_;
+#endif 
+        
+        result_type()
+            : node_()
+#ifdef REENTRANT
+            , mutex_()
+            , computed_(false)
 #endif
-public :
+        {
+        }
+        
+    };
 
-  Cache() 
-	{
-		hits = misses = 0;
-	}
-  /** Determine if the cache contains the entry for h(d).
-    * Returns true and the resulting value if cache entry exists, 
-    * or false and NodeType::null otherwise. */ 
-  std::pair<bool,NodeType> contains (const HomType & h, const NodeType & d) const;
-  
-  /** Set the resulting value of h(d) = result. 
-    * Returns true if the insert was actually performed or false if the value for h(d) was already in the cache.  */
-  std::pair<bool,NodeType> insert (const HomType & h, const NodeType & d);
+    typedef
+        typename  hash_map< std::pair<HomType, NodeType>, result_type >::type 
+        hash_map; 
+    hash_map cache_;
+    
+public:
+    
 
+    std::pair<bool,NodeType>
+    insert(const HomType& hom, const NodeType& node)
+    {
+        
+#ifdef REENTRANT
+        tbb::mutex::scoped_lock lock;
+#endif
+        result_type* result = NULL;
+        bool insertion;
+        
+        { // lock on current bucket
+            typename hash_map::accessor access;
+            insertion = cache_.insert(access, std::make_pair(hom,node));
+            result = &(access->second);
+#ifdef REENTRANT
+            if( insertion )
+            {
+                lock.acquire(result->mutex_);
+            }
+#endif
+        } // end of lock on the current bucket
+        
+        if( insertion )
+        {   // wasn't in cache
+            result->node_ = hom.eval(node);
+#ifdef REENTRANT
+            result->computed_ = true;
+            lock.release();
+#endif            
+        }
+#ifdef REENTRANT
+        else
+        {   // was in cache
+            if( not result->computed_ )
+            {   // need to wait for the end of computation by first thread
+                // arrived into the cache
+                lock.acquire(result->mutex_);
+            }
+        }
+#endif
+        return std::make_pair(insertion,result->node_);
+    }
+    
 };
 
-template<typename HomType, typename NodeType>
-std::pair<bool,NodeType> Cache<HomType,NodeType>::contains (const HomType & h, const NodeType & d) const {
-  typename cacheType::const_accessor access;  
-
-
-  if (!  cache.find(access,std::make_pair(h,d)) ) {
-    // first time we hit this homomorphism : no cache
-    ++misses;
-    return std::make_pair(false,NodeType::null);
-  } else {
-      // return cached value
-      ++hits;
-      return std::make_pair(true,access->second);
-  }
-  
-
-}
-
-template<typename HomType, typename NodeType>
-std::pair<bool,NodeType> Cache<HomType,NodeType>::insert (const HomType & h, const NodeType & d) {
-
-  typename cacheType::accessor access;  
-
-  //  printf("thread : %d   acquire lock <%p,%p>\n",pthread_self(), h.concret, d.concret);
-  //  std::cout << "hits/miss/recompute: " << hits <<"/" <<misses << "/" <<recompute << std::endl;
-
-  if (!  cache.insert(access,std::make_pair(h,d))) {
-	++hits;
-	//	 printf("thread : %d  release lock <%p,%p>\n",pthread_self(), h.concret, d.concret);
-	return std::make_pair(false,access->second);
-  } else {
-    // cache insertion
-    NodeType result = h.eval(d);
-    access->second = result;
-    // printf("thread : %d  release lock <%p,%p>\n",pthread_self(), h.concret, d.concret);
-    return std::make_pair(true,result);
-  }
-
-}
-
-
-#endif
-
+#endif /* _CACHE_HH_ */
