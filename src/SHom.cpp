@@ -144,7 +144,7 @@ public:
 
 
 /*************************************************************************/
-/*                         Class LocalApply                              */
+/*                         Class LocalApply : Hom version                */
 /*************************************************************************/
 
 class LocalApply
@@ -206,6 +206,69 @@ public:
 
 };
 
+/*************************************************************************/
+/*                         Class LocalApply : SHom version                */
+/*************************************************************************/
+
+class SLocalApply
+	:
+	public StrongShom
+{
+
+public:
+
+  GShom h;
+  int target;
+
+	SLocalApply()
+		:
+		h(), target(0)
+	{}
+
+  SLocalApply (const GShom& hh,int t) :h(hh),target(t) {}
+
+  GSDD phiOne() const {
+	  // target not encountered !
+    // consider this is not a fault
+    return GSDD::one;
+  }     
+
+  // optimize away needless exploration of upstream modules that dont contain the place
+  bool skip_variable (int var) const {
+	  return var != target;
+  }
+  
+  GShom phi(int vr, const DataSet & vl) const {
+
+    assert( typeid(vl) == typeid(const SDD&) );
+    
+    if( vr != target )
+      {
+	return GShom(vr,vl,this);
+      }
+    else
+      {
+	SDD v2 = h((const SDD &)vl);
+	return GShom(vr,v2);
+      }
+
+  }
+
+  void mark() const {
+    h.mark();
+  }  
+  
+  size_t hash() const {
+    return  h.hash() ^ target * 21727; 
+  }
+
+  bool operator==(const StrongShom &s) const {
+    const SLocalApply* ps = (const SLocalApply *)&s;
+    return target == ps->target && h ==  ps->h;
+  }  
+
+};
+
   /************************** Add */
 /************************** Add */
 class Add
@@ -221,7 +284,7 @@ public:
 	{
 		GShom F; 
 		std::set<GShom> G;
-		const LocalApply* L;
+		const _GShom* L;
 		bool has_local;
 		
 	} partition;
@@ -234,13 +297,13 @@ private:
 	mutable partition_cache_type partition_cache;
 	bool have_id;
 
-  void addParameter (const _GShom * h, 	std::map<int, GHom> & local_homs) {
+  void addParameter (const _GShom * h, 	std::map<int, GHom> & local_homs, std::map<int, GShom> & local_shoms) {
     const std::type_info & t = typeid( *h );
     if( t == typeid(Add) )
       {
 	const std::set<GShom>& local_param = ((const Add*) h)->parameters;
 	for (std::set<GShom>::const_iterator it = local_param.begin() ; it != local_param.end() ; ++it ){
-	  addParameter( get_concret(*it), local_homs  );
+	  addParameter( get_concret(*it), local_homs,local_shoms  );
 	}
       }
     else if( t == typeid(LocalApply) )
@@ -255,6 +318,21 @@ private:
 	else
 	  {
 	    local_homs.insert(std::make_pair(local->target,local->h));
+	  }
+	
+      }
+    else if( t == typeid(SLocalApply) )
+      {
+	const SLocalApply* local = (const SLocalApply*)(h);
+	std::map<int, GShom>::iterator f = local_shoms.find( local->target );
+	
+	if( f != local_shoms.end() )
+	  {
+	    f->second = f->second + local->h;
+	  }
+	else
+	  {
+	    local_shoms.insert(std::make_pair(local->target,local->h));
 	  }
 	
       }
@@ -279,10 +357,11 @@ public:
 		have_id(false)
     {
 		std::map<int, GHom> local_homs;
+		std::map<int, GShom> local_shoms;
 	
         for( std::set<GShom>::const_iterator it = p.begin(); it != p.end(); ++it)
         {
-	  addParameter( get_concret(*it) , local_homs);
+	  addParameter( get_concret(*it) , local_homs, local_shoms);
         }
 	
 	for( 	std::map<int, GHom>::iterator it = local_homs.begin();
@@ -292,6 +371,16 @@ public:
 	    if( have_id )
 	      {
 		it->second = it->second + GHom::id;
+	      }
+	    parameters.insert(localApply(it->second,it->first));
+	  }
+	for( 	std::map<int, GShom>::iterator it = local_shoms.begin();
+		it != local_shoms.end();
+		++it)
+	  {
+	    if( have_id )
+	      {
+		it->second = it->second + GShom::id;
 	      }
 	    parameters.insert(localApply(it->second,it->first));
 	  }
@@ -350,6 +439,13 @@ public:
 		    // L part
 		    assert (!part.has_local);
 		    part.L = (const LocalApply*)(get_concret(*gi));
+		    part.has_local = true;
+		  }
+		else if( typeid(*get_concret(*gi) ) == typeid(SLocalApply) )
+		  {
+		    // L part
+		    assert (!part.has_local);
+		    part.L = (const SLocalApply*)(get_concret(*gi));
 		    part.has_local = true;
 		  }
 		else
@@ -633,10 +729,18 @@ public:
 				// operations that can be forwarded to the next variable
 				GShom F_part = fixpoint(partition.F);
 
-				GShom L_part = partition.has_local
-							? localApply(fixpoint(GHom(partition.L->h)),variable)
-							: GShom::id
-							;
+				
+				GShom L_part ;
+				if (partition.has_local) {
+				  if (const LocalApply * loc = dynamic_cast<const LocalApply*> (partition.L)) {
+				    // Hom/DDD case
+				    L_part =  localApply(fixpoint(GHom(loc->h)),variable);
+				  } else {				    
+				    L_part =  localApply(fixpoint(GShom( ((const SLocalApply*)partition.L) ->h)),variable);
+				  }
+				} else {
+				  L_part = GShom::id ;
+				}
 				
 				do
 				{
@@ -1090,6 +1194,17 @@ localApply(const GHom & h, int target)
 	return new S_Homomorphism::LocalApply(h,target);
 }
 
+GShom
+// localApply(int target,const GHom & h)
+localApply(const GShom & h, int target)
+{
+	if( h == GShom::id )
+	{
+	  return GShom::id;
+	}
+	return new S_Homomorphism::SLocalApply(h,target);
+}
+
 GShom GShom::add(const std::set<GShom>& s)
 {
   if (s.empty() ) 
@@ -1113,6 +1228,18 @@ GShom operator&(const GShom &h1,const GShom &h2){
 	{
 	  const S_Homomorphism::LocalApply* lh1 = (const S_Homomorphism::LocalApply*)(_GShom::get_concret(h1));
 	  const S_Homomorphism::LocalApply* lh2 = (const S_Homomorphism::LocalApply*)(_GShom::get_concret(h2));
+
+		if( lh1->target == lh2->target )
+		{
+			return localApply(  lh1->h & lh2->h, lh1->target );
+		}
+	}
+
+	if( typeid( *_GShom::get_concret(h1) ) == typeid(S_Homomorphism::SLocalApply) 
+		&& typeid( *_GShom::get_concret(h2) ) == typeid(S_Homomorphism::SLocalApply) )
+	{
+	  const S_Homomorphism::SLocalApply* lh1 = (const S_Homomorphism::SLocalApply*)(_GShom::get_concret(h1));
+	  const S_Homomorphism::SLocalApply* lh2 = (const S_Homomorphism::SLocalApply*)(_GShom::get_concret(h2));
 
 		if( lh1->target == lh2->target )
 		{
