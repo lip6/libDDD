@@ -68,6 +68,7 @@ private:
   //@{
   friend GShom fixpoint(const GShom &);
   friend GShom localApply(const GHom &,int target);
+  friend GShom localApply(const GShom &,int target);
   friend GShom add(const std::set<GShom>&);
   friend GShom operator+(const GShom &,const GShom &); 
   friend GShom operator&(const GShom &,const GShom &); 
@@ -177,6 +178,8 @@ GShom fixpoint(const GShom &);
 /// Apply a homomorphism on a target variable.
 /// This ensures that the operation is local to this variable, and is used to implement auto-saturation.
  GShom localApply(const GHom &,int target);
+ GShom localApply(const GShom &,int target);
+
 /// Composition by union of two homomorphisms. 
 /// See also GShom::add(). This commutative operation computes a homomorphism 
 /// that evaluates as the sum of two homomorphism.
