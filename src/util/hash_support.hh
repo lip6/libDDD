@@ -22,6 +22,7 @@
 #define _HASH_SUPPORT_HH_
 
 #include <utility>
+#include <set>
 #include "hashfunc.hh"
 
 namespace d3 { namespace util {
@@ -83,6 +84,19 @@ template <typename T1,typename T2>
 struct hash<std::pair<T1,T2> > {
   size_t operator() (const std::pair<T1,T2> &p)const {
     return hash<T1>()(p.first) ^ hash<T2>()(p.second);
+  };
+};
+
+
+// Specialized version for std::set of hashable objects.
+template <typename T1>
+struct hash<std::set<T1> > {
+  size_t operator() (const std::set<T1> &p)const {
+    size_t res = 11317;
+    typename std::set<T1>::const_iterator it;
+    for ( it = p.begin() ; it != p.end() ; ++it )
+      res ^= it->hash();
+    return res;
   };
 };
 
