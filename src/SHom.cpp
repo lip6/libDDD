@@ -368,10 +368,10 @@ public:
 		it != local_homs.end();
 		++it)
 	  {
-	    if( have_id )
+	    if ( have_id )
 	      {
-		it->second = it->second + GHom::id;
-	      }
+		  it->second = it->second + GHom::id;
+	      }	    
 	    parameters.insert(localApply(it->second,it->first));
 	  }
 	for( 	std::map<int, GShom>::iterator it = local_shoms.begin();
@@ -380,7 +380,14 @@ public:
 	  {
 	    if( have_id )
 	      {
-		it->second = it->second + GShom::id;
+		const std::type_info & t = typeid( *  _GShom::get_concret(it->second) );
+		// avoid pushing id down if it was already done, i.e.
+		// unless it->second is of the form id + h1 + h2 + ...
+		if ( ! ( t == typeid(Add) &&
+			 ((Add*)  _GShom::get_concret(it->second))->get_have_id() ) )
+		  // push id down
+		  it->second = it->second + GShom::id;
+	      
 	      }
 	    parameters.insert(localApply(it->second,it->first));
 	  }
@@ -1180,6 +1187,8 @@ Shom &Shom::operator=(const GShom &h){
 
 /* Operations */
 GShom fixpoint (const GShom &h) {
+  if( typeid( *_GShom::get_concret(h) ) == typeid(S_Homomorphism::Fixpoint))
+      return h;
   return GShom(canonical(new S_Homomorphism::Fixpoint(h)));
 }
 
@@ -1205,14 +1214,23 @@ localApply(const GShom & h, int target)
 	return new S_Homomorphism::SLocalApply(h,target);
 }
 
+static hash_map<std::set<GShom>,GShom>::type addCache;
 GShom GShom::add(const std::set<GShom>& s)
 {
   if (s.empty() ) 
     return GSDD::null;
-	if( s.size() == 1 )
-		return *(s.begin());
-	else
-  		return GShom(canonical(new S_Homomorphism::Add(s)));   
+  if( s.size() == 1 )
+    return *(s.begin());
+  else {
+    hash_map<std::set<GShom>,GShom>::type::accessor acc;
+    if (addCache.insert(acc,s)) {
+      GShom added =  GShom(canonical(new S_Homomorphism::Add(s)));
+      acc->second = added;
+      return added;
+    } else {
+      return acc->second;
+    }
+  }
 }
 
 GShom operator&(const GShom &h1,const GShom &h2){
@@ -1260,7 +1278,7 @@ GShom operator+(const GShom &h1,const GShom &h2){
   s.insert(h1);
   s.insert(h2);
 
-  return GShom(canonical(new S_Homomorphism::Add(s)));
+  return GShom::add(s);
 
 }
 
