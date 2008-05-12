@@ -512,7 +512,7 @@ public:
 			{
 				s.insert(GShom(part_it->second.L)(d));
 			}
-
+			
 			s.insert( part_it->second.F(d) );
 	
 			const std::set<GShom>& G = part_it->second.G;
@@ -1072,7 +1072,7 @@ GShom::operator()(const GSDD &d) const
 {
 	if(concret->immediat)
 	{
-		return concret->eval(d);
+		return concret->eval_skip(d);
 	}
 	else
     {
@@ -1219,6 +1219,7 @@ GShom GShom::add(const std::set<GShom>& s)
 {
   if (s.empty() ) 
     return GSDD::null;
+  
   if( s.size() == 1 )
     return *(s.begin());
   else {
