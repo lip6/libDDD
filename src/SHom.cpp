@@ -762,12 +762,12 @@ public:
 					{
 
 						// d2 = F_part(d2);
-						d2 = L_part(d2);
+// 						d2 = L_part(d2);
 
 						// apply local part
 						// d2 = L_part(d2);
 					  // chain application of Shom of this level
-					  d2 = (*G_it)(d2) + d2;
+					  d2 =  ( (L_part &  (*G_it))(d2)) + d2;
 					}
 				}
 				while (d1 != d2);
