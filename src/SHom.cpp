@@ -84,6 +84,10 @@ public:
 
   /* Eval */
   GSDD eval(const GSDD &d)const{return d;}
+
+  void print (std::ostream & os) const {
+    os << "Id";
+  }
 };
 
 /************************** Constant */
@@ -112,6 +116,11 @@ public:
   void mark() const{
     value.mark();
   }
+
+  void print (std::ostream & os) const {
+    os << "(Constant:" << value << ")";
+  }
+
 };
 
 /************************** Mult */
@@ -140,6 +149,11 @@ public:
     left.mark();
     right.mark();
   }
+
+  void print (std::ostream & os) const {
+    os << "(Mult:" << left << "*" << right << ")";
+  }
+
 };
 
 
@@ -204,6 +218,11 @@ public:
     return target == ps->target && h ==  ps->h;
   }  
 
+  void print (std::ostream & os) const {
+    os << "(Local:" << "hom" << "," << target << ")";
+  }
+
+
 };
 
 /*************************************************************************/
@@ -266,6 +285,11 @@ public:
     const SLocalApply* ps = (const SLocalApply *)&s;
     return target == ps->target && h ==  ps->h;
   }  
+
+  void print (std::ostream & os) const {
+    os << "(SLocal:" << h << "," << target << ")";
+  }
+
 
 };
 
@@ -542,6 +566,18 @@ public:
 
     }
 
+  void print (std::ostream & os) const {
+    os << "(Add:" ;
+    std::set<GShom>::const_iterator gi=parameters.begin();
+    os << *gi ;
+    for( ++gi;
+	 gi!=parameters.end();
+	 ++gi)
+      {
+	os << " + " << *gi ;
+      }
+    os << ")";
+  }
 };
 
 /************************** Compose */
@@ -578,6 +614,11 @@ public:
     right.mark();
   }
 
+  void print (std::ostream & os) const {
+    os << "(Compose:" << left << " & " << right << ")";
+  }
+
+
 };
 
 /************************** LeftConcat */
@@ -605,6 +646,10 @@ public:
   void mark() const{
     left.mark();
     right.mark();
+  }
+
+  void print (std::ostream & os) const {
+    os << "(LeftConcat:" << left << " ^ " << right << ")";
   }
 
 };
@@ -642,6 +687,11 @@ public:
     left.mark();
     right.mark();
   }
+
+  void print (std::ostream & os) const {
+    os << "(RightConcat:" << left << " ^ " << right << ")";
+  }
+
 };
 
 /************************** Minus */
@@ -670,6 +720,11 @@ public:
     left.mark();
     right.mark();
   }
+
+  void print (std::ostream & os) const {
+    os << "(Minus:" << left << " - " << right << ")";
+  }
+
 };
 
 /************************** Fixpoint */
@@ -784,12 +839,17 @@ public:
 
 		return d1;
 	}
-}
+	}
 
   /* Memory Manager */
   void mark() const{
     arg.mark();
   }
+
+  void print (std::ostream & os) const {
+    os << "(Fix:" << arg << " *)";
+  }
+
 };
 
 
@@ -1035,13 +1095,16 @@ StrongShom::eval(const GSDD &d) const
     	std::set<GSDD> s;
 
     	for(GSDD::const_iterator vi=d.begin();vi!=d.end();++vi)
-		{
+	{
       		s.insert(phi(variable,*vi->first) (vi->second) );
     	}
     	return SDED::add(s);
   	}
 }
-
+  
+void StrongShom::print (std::ostream & os) const {
+  os << "(StrongHom)";
+}
 
 
 
@@ -1307,4 +1370,19 @@ GShom operator-(const GShom &h,const GSDD &d){
 void GShom::pstats(bool)
 {
   std::cout << "*\nGSHom Stats : size unicity table = " <<  canonical.size() << std::endl;
+  std::ostream & os = std::cout;
+  int i = 0;
+  for (UniqueTable<_GShom>::Table::const_iterator it= canonical.table.begin() ;
+       it != canonical.table.end();
+       ++it ){
+    os << i++ << " : " ;
+    (*it)->print(os);
+    os << std::endl;
+  }
+}
+
+// pretty print
+std::ostream & operator << (std::ostream & os, const GShom & h) {
+  h.concret->print(os);
+  return os;
 }
