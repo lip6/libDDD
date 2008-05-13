@@ -59,6 +59,8 @@ static UniqueTable<_GShom> canonical;
 /*                         Class _GShom                                   */
 /*************************************************************************/
 
+typedef std::map<GSDD,DataSet*> GSDD_DataSet_map;
+
 namespace S_Homomorphism {
 
 	typedef Cache<GShom,GSDD> ShomCache;
@@ -163,7 +165,7 @@ public:
 
 class LocalApply
 	:
-	public StrongShom
+	public _GShom
 {
 
 public:
@@ -178,31 +180,35 @@ public:
 
   LocalApply (const GHom& hh,int t) :h(hh),target(t) {}
 
-  GSDD phiOne() const {
-	  // target not encountered !
-    // consider this is not a fault
-    return GSDD::one;
-  }     
 
   // optimize away needless exploration of upstream modules that dont contain the place
   bool skip_variable (int var) const {
 	  return var != target;
   }
   
-  GShom phi(int vr, const DataSet & vl) const {
+  GSDD eval(const GSDD &d)const{
+    GSDD_DataSet_map res;
+    if (d == GSDD::one || d == GSDD::null || d == GSDD::top )
+      return d;
+    // for square union
+    std::set<GSDD> sum;
 
-    assert( typeid(vl) == typeid(const DDD&) );
-    
-    if( vr != target )
-      {
-	return GShom(vr,vl,this);
-      }
-    else
-      {
-	DDD v2 = h((const DDD &)vl);
-	return GShom(vr,v2);
-      }
-
+   // add application of h(arcval)
+   for( GSDD::const_iterator it = d.begin();
+	it != d.end();
+	++it)
+     {
+       assert( typeid(*it->first) == typeid(const DDD&) );
+       DDD v2 = h((const DDD &)*it->first);
+       if( ! (v2 == GDDD::null) )
+	 {
+	   sum.insert(GSDD(d.variable(), v2, it->second));
+	 }
+     }
+   if (sum.empty())
+     return GSDD::null;
+   else
+     return SDED::add(sum);
   }
 
   void mark() const {
@@ -213,7 +219,7 @@ public:
     return  h.hash() ^ target * 21727; 
   }
 
-  bool operator==(const StrongShom &s) const {
+  bool operator==(const _GShom &s) const {
     const LocalApply* ps = (const LocalApply *)&s;
     return target == ps->target && h ==  ps->h;
   }  
@@ -231,7 +237,7 @@ public:
 
 class SLocalApply
 	:
-	public StrongShom
+	public _GShom
 {
 
 public:
@@ -246,31 +252,35 @@ public:
 
   SLocalApply (const GShom& hh,int t) :h(hh),target(t) {}
 
-  GSDD phiOne() const {
-	  // target not encountered !
-    // consider this is not a fault
-    return GSDD::one;
-  }     
-
   // optimize away needless exploration of upstream modules that dont contain the place
   bool skip_variable (int var) const {
 	  return var != target;
   }
   
-  GShom phi(int vr, const DataSet & vl) const {
+  
 
-    assert( typeid(vl) == typeid(const SDD&) );
-    
-    if( vr != target )
-      {
-	return GShom(vr,vl,this);
-      }
-    else
-      {
-	SDD v2 = h((const SDD &)vl);
-	return GShom(vr,v2);
-      }
+  GSDD eval(const GSDD &d) const {
+   if (d == GSDD::one || d == GSDD::null || d == GSDD::top )
+      return d;
+    // for square union
+   std::set<GSDD> sum;
 
+   // add application of h(arcval)
+   for( GSDD::const_iterator it = d.begin();
+	it != d.end();
+	++it)
+     {
+       assert( typeid(*it->first) == typeid(const SDD&) );
+       SDD v2 = h((const SDD &)*it->first);
+       if( ! (v2 == GSDD::null) )
+	 {
+	   sum.insert(GSDD(d.variable(), v2, it->second));
+	 }
+     }
+   if (sum.empty())
+     return GSDD::null;
+   else
+     return SDED::add(sum);
   }
 
   void mark() const {
@@ -281,7 +291,7 @@ public:
     return  h.hash() ^ target * 21727; 
   }
 
-  bool operator==(const StrongShom &s) const {
+  bool operator==(const _GShom &s) const {
     const SLocalApply* ps = (const SLocalApply *)&s;
     return target == ps->target && h ==  ps->h;
   }  
@@ -857,7 +867,7 @@ public:
 
 } // end namespace H_Homomorphism
 
-typedef std::map<GSDD,DataSet*> GSDD_DataSet_map;
+
 
 #ifdef PARALLEL_DD
 
