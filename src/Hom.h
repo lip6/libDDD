@@ -174,7 +174,8 @@ public:
   /// \todo std::set not very efficient for storage, replace by a sorted vector ?
   static GHom add(const std::set<GHom>&);
 
-
+  // pretty print of homomorphisms
+  friend std::ostream & operator << (std::ostream & os, const GHom & h);
 
   /// \name Memory Management 
   //@{
@@ -365,6 +366,7 @@ public:
 
   virtual GHom compose (const GHom &r) const ;
 
+  virtual void print (std::ostream & os) const = 0;
 protected:
   
   // Enable access to the concrete GHom for _GHom homorphisms
@@ -412,6 +414,9 @@ public:
   /// to check for type mismatch (and return false if that is the case) or call 
   /// specialized comparators of derived subclasses otherwise.
   bool operator==(const _GHom &h) const;
+
+  /// pretty print
+  virtual void print (std::ostream & os) const ;
 
 
   /// The evaluation mechanism of strong homomorphisms. 

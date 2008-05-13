@@ -72,6 +72,10 @@ public:
         return true;
     }
 
+  void print (std::ostream & os) const {
+    os << "Id";
+  }
+
   /* Eval */
   GDDD eval(const GDDD &d)const{return d;}
 };
@@ -101,6 +105,12 @@ public:
   void mark() const{
     value.mark();
   }
+
+  void print (std::ostream & os) const {
+    os << "(Constant:" << value << ")";
+  }
+
+  
 };
 
 /************************** Mult */
@@ -129,6 +139,11 @@ public:
     left.mark();
     right.mark();
   }
+
+  void print (std::ostream & os) const {
+    os << "(Mult:" << left << "*" << right << ")";
+  }
+  
 };
 
 /************************** Add */
@@ -298,6 +313,19 @@ public:
     for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
       gi->mark();
   }
+
+ void print (std::ostream & os) const {
+    os << "(Add:" ;
+    std::set<GHom>::const_iterator gi=parameters.begin();
+    os << *gi ;
+    for( ++gi;
+	 gi!=parameters.end();
+	 ++gi)
+      {
+	os << " + " << *gi ;
+      }
+    os << ")";
+  }
 };
 /************************** Compose */
 class Compose
@@ -354,6 +382,10 @@ public:
         right.mark();
     }
 
+  void print (std::ostream & os) const {
+    os << "(Compose:" << left << " & " << right << ")";
+  }
+
 };
 
 /************************** LeftConcat */
@@ -406,6 +438,11 @@ public:
         right.mark();
     }
 
+  void print (std::ostream & os) const {
+    os << "(LeftConcat:" << left << " ^ " << right << ")";
+  }
+
+
 };
 
 /************************** RightConcat */
@@ -440,6 +477,11 @@ public:
     left.mark();
     right.mark();
   }
+
+  void print (std::ostream & os) const {
+    os << "(RightConcat:" << left << " ^ " << right << ")";
+  }
+
 };
 
 /************************** Minus */
@@ -468,6 +510,11 @@ public:
     left.mark();
     right.mark();
   }
+
+  void print (std::ostream & os) const {
+    os << "(Minus:" << left << " - " << right << ")";
+  }
+
 };
 
 /************************** Fixpoint */
@@ -578,6 +625,12 @@ public:
     void mark() const{
         arg.mark();
     }
+
+  void print (std::ostream & os) const {
+    os << "(Fix:" << arg << " *)";
+  }
+
+  
 };
 
 GHom _GHom::compose (const GHom &r) const { 
@@ -657,6 +710,11 @@ public:
     /// ???????
     // h.mark();
   }
+
+  void print (std::ostream & os) const {
+    os << "MLHom";
+  }
+
 };
 
 
@@ -700,6 +758,11 @@ StrongHom::eval(const GDDD &d) const
     return DED::add(s);
   }
 }
+
+void StrongHom::print (std::ostream & os) const {
+  os << "(StrongHom)";
+}
+
 
 /*************************************************************************/
 /*                         Class GHom                                    */
@@ -898,4 +961,22 @@ GHom operator-(const GHom &h,const GDDD &d){
 void GHom::pstats(bool)
 {
   std::cout << "*\nGHom Stats : size unicity table = " <<  canonical.size() << std::endl;
+
+  std::ostream & os = std::cout;
+  int i = 0;
+  for (UniqueTable<_GHom>::Table::const_iterator it= canonical.table.begin() ;
+       it != canonical.table.end();
+       ++it ){
+    os << i++ << " : " ;
+    (*it)->print(os);
+    os << std::endl;
+  }
+
+}
+
+
+// pretty print
+std::ostream & operator << (std::ostream & os, const GHom & h) {
+  h.concret->print(os);
+  return os;
 }
