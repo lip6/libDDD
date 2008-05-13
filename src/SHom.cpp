@@ -86,7 +86,7 @@ public:
   GSDD eval(const GSDD &d)const{return d;}
 
   void print (std::ostream & os) const {
-    os << "Id";
+    os << "SId";
   }
 };
 
@@ -118,7 +118,7 @@ public:
   }
 
   void print (std::ostream & os) const {
-    os << "(Constant:" << value << ")";
+    os << "(SConstant:" << value << ")";
   }
 
 };
@@ -151,7 +151,7 @@ public:
   }
 
   void print (std::ostream & os) const {
-    os << "(Mult:" << left << "*" << right << ")";
+    os << "(SMult:" << left << "*" << right << ")";
   }
 
 };
@@ -219,7 +219,7 @@ public:
   }  
 
   void print (std::ostream & os) const {
-    os << "(Local:" << "hom" << "," << target << ")";
+    os << "(Local:" << h << "," << target << ")";
   }
 
 
@@ -567,7 +567,7 @@ public:
     }
 
   void print (std::ostream & os) const {
-    os << "(Add:" ;
+    os << "(SAdd:" ;
     std::set<GShom>::const_iterator gi=parameters.begin();
     os << *gi ;
     for( ++gi;
@@ -615,7 +615,7 @@ public:
   }
 
   void print (std::ostream & os) const {
-    os << "(Compose:" << left << " & " << right << ")";
+    os << "(SCompose:" << left << " & " << right << ")";
   }
 
 
@@ -649,7 +649,7 @@ public:
   }
 
   void print (std::ostream & os) const {
-    os << "(LeftConcat:" << left << " ^ " << right << ")";
+    os << "(SLeftConcat:" << left << " ^ " << right << ")";
   }
 
 };
@@ -689,7 +689,7 @@ public:
   }
 
   void print (std::ostream & os) const {
-    os << "(RightConcat:" << left << " ^ " << right << ")";
+    os << "(SRightConcat:" << left << " ^ " << right << ")";
   }
 
 };
@@ -722,7 +722,7 @@ public:
   }
 
   void print (std::ostream & os) const {
-    os << "(Minus:" << left << " - " << right << ")";
+    os << "(SMinus:" << left << " - " << right << ")";
   }
 
 };
@@ -847,7 +847,7 @@ public:
   }
 
   void print (std::ostream & os) const {
-    os << "(Fix:" << arg << " *)";
+    os << "(SFix:" << arg << " *)";
   }
 
 };
@@ -1103,7 +1103,7 @@ StrongShom::eval(const GSDD &d) const
 }
   
 void StrongShom::print (std::ostream & os) const {
-  os << "(StrongHom)";
+  os << "(StrongSHom)";
 }
 
 
