@@ -935,6 +935,9 @@ _GShom::eval_skip(const GSDD& d) const
     {
       // build once, use many times on each son
       const GShom gshom(this);
+      // Id replies skip true, for correct rewriting rules. But should evaluate now !
+      if (gshom == GShom::id)
+	return d;
       // for square union
       GSDD_DataSet_map res;
       
@@ -1145,7 +1148,7 @@ GShom::operator()(const GSDD &d) const
 {
 	if(concret->immediat)
 	{
-		return concret->eval_skip(d);
+		return eval(d);
 	}
 	else
     {
