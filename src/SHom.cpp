@@ -386,7 +386,7 @@ public:
 
     Add(const std::set<GShom>& p, int ref=0)
     	:
-        _GShom(ref,true),
+        _GShom(ref,false),
         parameters(),
 		have_id(false)
     {
@@ -593,11 +593,13 @@ public:
 /************************** Compose */
 class Compose:public _GShom{
 private:
+public:
+  // left and right exposed for manipulation within Fixpoint::eval
   GShom left;
   GShom right;
-public:
+
   /* Constructor */
-  Compose(const GShom &l,const GShom &r,int ref=0):_GShom(ref,true),left(l),right(r){}
+  Compose(const GShom &l,const GShom &r,int ref=0):_GShom(ref,false),left(l),right(r){}
   /* Compare */
   bool operator==(const _GShom &h) const{
     return left==((Compose*)&h )->left && right==((Compose*)&h )->right;
@@ -813,7 +815,29 @@ public:
 				} else {
 				  L_part = GShom::id ;
 				}
-				
+				std::vector<GShom> G_part;
+				G_part.reserve(partition.G.size());
+				for( 	std::set<GShom>::const_iterator G_it = partition.G.begin();
+					G_it != partition.G.end();
+					++G_it) {
+				  const _GShom * pg =_GShom::get_concret(*G_it);
+				  if (const Compose * comp = dynamic_cast<const Compose*> (pg)) { 
+				    if (const LocalApply * loc = dynamic_cast<const LocalApply*> ( _GShom::get_concret(comp->left))) {
+				      if ( loc->target == d.variable() ) {
+					if ( _GShom::get_concret(comp->right)->skip_variable(d.variable())) {
+					  // We are in the case where g = l & f, with l=local(d.var,h) and f.skip(var) = true
+					  // rewrite into (L&l) & (F&f)
+				//	  std::cout  << "rew " << comp->left << " & " << comp->right << std::endl;
+					  G_part.push_back( (L_part & comp->left) & (F_part & comp->right));
+					  continue;
+					}
+				      }
+				    }
+				  }
+				  // default case 
+				  G_part.push_back(L_part & (*G_it));
+				}
+
 				do
 				{
 					d1 = d2;
@@ -821,9 +845,9 @@ public:
 					d2 = F_part(d2);
 					d2 = L_part(d2);
 
-					for( 	std::set<GShom>::const_iterator G_it = partition.G.begin();
-							G_it != partition.G.end();
-							++G_it) 
+					for(std::vector<GShom>::const_iterator G_it = G_part.begin();
+					    G_it != G_part.end();
+					    ++G_it) 
 					{
 
 						// d2 = F_part(d2);
@@ -832,7 +856,7 @@ public:
 						// apply local part
 						// d2 = L_part(d2);
 					  // chain application of Shom of this level
-					  d2 =  ( (L_part &  (*G_it))(d2)) + d2;
+					  d2 =  (*G_it)(d2) + d2;
 					}
 				}
 				while (d1 != d2);
@@ -918,7 +942,7 @@ public:
 
 GSDD 
 _GShom::eval_skip(const GSDD& d) const
-{
+{  
   if( d == GSDD::null )
     {
       return GSDD::null;
@@ -935,7 +959,6 @@ _GShom::eval_skip(const GSDD& d) const
     {
       // build once, use many times on each son
       const GShom gshom(this);
-      // Id replies skip true, for correct rewriting rules. But should evaluate now !
       if (gshom == GShom::id)
 	return d;
       // for square union
@@ -1148,7 +1171,7 @@ GShom::operator()(const GSDD &d) const
 {
 	if(concret->immediat)
 	{
-		return eval(d);
+	  return eval(d);
 	}
 	else
     {
