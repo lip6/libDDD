@@ -111,6 +111,14 @@ public :
 	  // should not happen
 	  SDD & arc = (SDD &) *gi->first;
 	  collect(arc);
+	  if (entryName.find(arc) == entryName.end()) {
+	    stringstream tmp2 ;
+	    tmp2 <<  "Mod" << "_" << nextPid++ ;
+	    entryName[arc] = tmp2.str() ;
+	    entryNb[arc] = 1;
+	  } else {
+	    entryNb[arc]++;
+	  }
 	}
       }
 
@@ -135,7 +143,7 @@ public :
 	  *out <<  "     " << myname << "->" << name[gi->second] << "    [label=\""<< entryd3Name[(DDD &)*gi->first] << "\"];" << endl;
 	     //"[style=dotted,minlen=2,constraint=false];\n" ;//constraint=false];\n" ;// minlen=2];\n" ;
 	else
-	  *out <<  "     " << myname << "->" << name[gi->second] << "    [label=\""<< ((SDD &)*gi->first).nbStates() << "\"];" << endl; 
+	  *out <<  "     " << myname << "->" << name[gi->second] << "    [label=\""<< entryName[(SDD &)*gi->first] << "\"];" << endl; 
 	// "  [style=dotted,minlen=2];\n" ;//constraint=false];\n" ;minlen=2];\n" ;//
 // 	if (g.variable() < 2)
 // 	  os << entryd3Name[(DDD &)*gi->first] << "  [style=dotted];\n" ;
