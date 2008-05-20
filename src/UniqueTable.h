@@ -25,13 +25,51 @@
 #define UNIQUETABLE_H
 
 #include <cassert>
+#include <vector>
 #include <ext/hash_set>
 #include "util/hash_support.hh"
+
 
 #ifdef REENTRANT
 #include "tbb/queuing_mutex.h"
 #include "tbb/mutex.h"
 #endif
+
+// the clone contract
+namespace unique {
+
+template<typename T>
+struct clone
+{
+  T*
+  operator()(const T& e1) const
+  {
+    return e1.clone();
+  }
+};
+
+template<typename T>
+struct clone<T*>
+{
+  T*
+  operator()(const T* e1) const
+  {
+    return e1->clone();
+  }
+};
+  
+template<>
+struct clone<std::vector<int> >
+{
+  std::vector<int>*
+  operator()(const std::vector<int>& e1) const
+     {
+       return new std::vector<int>(e1);
+     }
+};
+ 
+}
+
 
 /// This class implements a unicity table mechanism, based on an STL hash_set.
 /// Requirements on the contained type are thus those of hash_set.
@@ -57,7 +95,7 @@ public:
   }
 
   /// Typedef helps hide implementation type (currently gnu gcc's hash_set).
-    typedef __gnu_cxx::hash_set<T*,d3::util::hash<T*>,d3::util::equal<T*> > Table;
+    typedef __gnu_cxx::hash_set<const T*,d3::util::hash<const T*>,d3::util::equal<const T*> > Table;
   /// The actual table, operations on the UniqueTable are delegated on this.
   Table table; // Unique table of GDDD
 
@@ -67,22 +105,22 @@ public:
   /// \param _g the pointer to the value we want to find in the table.
   /// \return the address of an object stored in the UniqueTable such that (*_g == *return_value)
   const T*
-  operator()(T *_g)
+    operator()(const T &_g)
   {
 #ifdef REENTRANT
     table_mutex_t::scoped_lock lock(table_mutex_);
 #endif
 
-    std::pair<typename Table::iterator, bool> ref=table.insert(_g); 
-
-    typename Table::iterator ti=ref.first;
-    
-    if ( !ref.second)
-      {
-		assert( _g != *ti );
-        delete _g;
-      }
-    return *ti;
+    typename Table::const_iterator it = table.find(&_g); 
+    if (it != table.end() ) {
+      return *it;
+    } else {
+      T * clone = unique::clone<T>() (_g);
+      std::pair<typename Table::iterator, bool> ref=table.insert(clone); 
+      assert(ref.second);
+           
+      return clone;
+    }
   }
 
   /// Returns the current number of filled entries in the table.

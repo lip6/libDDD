@@ -117,6 +117,9 @@ public:
   GSDD(int var,const class SDD & val,const GSDD &d=one ); //var-val->d
   /// A should be \e private constructor used in internals, DO NOT USE THIS. 
   /// Calls canonical to uniquify the pointer provided
+  GSDD(const _GSDD &_g); 
+  /// UNIMPLEMENTED DELIBERATELY: see SHom.h for details. 
+  /// user should use version above const & or below const * into unique storage.
   GSDD(_GSDD *_g); 
   /// \param _g The pointer provided should point into the unicity table
   GSDD(const _GSDD *_g); 

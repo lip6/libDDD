@@ -23,6 +23,7 @@
 
 #include <utility>
 #include <set>
+#include <vector>
 #include "hashfunc.hh"
 
 namespace d3 { namespace util {
@@ -67,7 +68,7 @@ struct equal<T*>
   bool
   operator()(const T* e1,const T* e2) const
   {
-    return (*e1)==(*e2);
+    return (typeid(*e1)==typeid(*e2)?(*e1)==(*e2):false);
   }
 };
 
@@ -97,6 +98,38 @@ struct hash<std::set<T1> > {
     for ( it = p.begin() ; it != p.end() ; ++it )
       res ^= it->hash();
     return res;
+  };
+};
+// Specialized version for std::vector<int>.
+template <>
+struct hash<const std::vector<int> > {
+  size_t operator() (const std::vector<int> &p)const {
+    size_t res = 2473;
+    std::vector<int>::const_iterator it;
+    for ( it = p.begin() ; it != p.end() ; ++it )
+      res ^= (ddd::wang32_hash(*it)* res);
+    return res;
+  };
+};
+// could this be removed somehow ??
+template <>
+struct hash<std::vector<int> > {
+  size_t operator() (const std::vector<int> &p)const {
+    return hash<const std::vector<int> > () (p);
+  };
+};
+
+
+template <>
+struct hash<std::vector<int>* > {
+  size_t operator() (const std::vector<int> *p)const {    
+    return hash<const std::vector<int> > () (*p);
+  };
+};
+template <>
+struct hash<const std::vector<int>* > {
+  size_t operator() (const std::vector<int> *p)const {    
+    return hash<const std::vector<int> > () (*p);
   };
 };
 

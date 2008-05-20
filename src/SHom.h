@@ -90,11 +90,21 @@ public:
   /// Pseudo-private constructor. This should only be called with pointers into the unicity table.
     /// For example return this in a StrongHom phi() body is legal.
   /// \param _h pointer into the unicity table
-    GShom(const _GShom *_h);
+  GShom(const _GShom *_h);
+
+  /// THIS VERSION IS DELIBERATELY UNIMPLEMENTED
+  /// OTHERWISE bad calls like GShom(new myHom()) would promote to const _GShom *_h and bypass unicity.
+  /// User code prior to 20/05/08 would use this in the form : return new myHom(xx);
+  /// This is now illegal as we take up memory allocation now, so the user should
+  /// stack alloc and pass a reference as in GShom(const _GShom &_h). Exceptionally,
+  /// for efficiency, return this; in a phi user function is permitted hence public
+  ///  visibility of above GShom(const _GShom *_h);
+  /// This signature is here to ensure link errors in old user code.
+  GShom(_GShom *_h);
 
     ///  To build GShom from pointers to user homomomorphisms. 
     /// This call ensures unicity of representation.
-   GShom(_GShom *_h);
+   GShom(const _GShom &_h);
 
 
   /// Construct a constant homomorphism. Applied to any SDD this homomorphism
@@ -346,7 +356,6 @@ public:
     {
         return gshom.concret;
     }
-    
 
 };
 

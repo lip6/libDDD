@@ -185,7 +185,7 @@ std::ostream& operator<<(std::ostream &os,const GDDD &g){
   return(os);
 }
 
-GDDD::GDDD(_GDDD *_g):concret(canonical(_g)){}
+GDDD::GDDD(const _GDDD &_g):concret(canonical(_g)){}
 GDDD::GDDD(const _GDDD *_g):concret(_g){}
 
 
@@ -193,7 +193,7 @@ GDDD::GDDD(int variable,Valuation value){
 #ifdef EVDDD
   if (variable != DISTANCE) {
 #endif
-    concret=(value.size()!=0)? canonical(new _GDDD(variable,value)): null.concret;
+    concret=(value.size()!=0)? canonical(_GDDD(variable,value)): null.concret;
 #ifdef EVDDD
   } else {
     assert(value.size() == 1);
@@ -343,7 +343,7 @@ void GDDD::garbage(){
     if(!((*di)->marking)){
       UniqueTable<_GDDD>::Table::iterator ci=di;
       di++;
-      _GDDD *g=(*ci);
+      const _GDDD *g=(*ci);
       canonical.table.erase(ci);
       delete g;
     }
@@ -358,9 +358,9 @@ void GDDD::garbage(){
 
 
 /* Constants */
-const GDDD GDDD::one(canonical(new _GDDD(1,1)));
-const GDDD GDDD::null(canonical(new _GDDD(0,1)));
-const GDDD GDDD::top(canonical(new _GDDD(-1,1)));
+const GDDD GDDD::one(canonical(_GDDD(1,1)));
+const GDDD GDDD::null(canonical(_GDDD(0,1)));
+const GDDD GDDD::top(canonical(_GDDD(-1,1)));
 
 /******************************************************************************/
 /*                   class DDD:public GDDD                                    */
@@ -376,7 +376,7 @@ DDD::DDD(const GDDD &g):GDDD(g.concret){
 
 GDDD::GDDD(int var,int val,const GDDD &d):concret(null.concret){ //var-val->d
   if(d!=null){
-    _GDDD *_g = new _GDDD(var,0);
+    _GDDD _g = _GDDD(var,0);
 #ifdef EVDDD
     GDDD succ = d;
     if (var == DISTANCE) {
@@ -390,7 +390,7 @@ GDDD::GDDD(int var,int val,const GDDD &d):concret(null.concret){ //var-val->d
 #else
     std::pair<int,GDDD> x(val,d);
 #endif
-    _g->valuation.push_back(x);
+    _g.valuation.push_back(x);
     concret=canonical(_g);
   }
   //  concret->refCounter++;
@@ -398,10 +398,10 @@ GDDD::GDDD(int var,int val,const GDDD &d):concret(null.concret){ //var-val->d
 
 GDDD::GDDD(int var,int val1,int val2,const GDDD &d):concret(null.concret){ //var-[val1,val2]->d
   if(val1<=val2 && null!=d){
-    _GDDD *_g = new _GDDD(var,0);
+    _GDDD _g = _GDDD(var,0);
     for(int val=val1;val<=val2;++val){
       std::pair<int,GDDD> x(val,d);
-      _g->valuation.push_back(x);
+      _g.valuation.push_back(x);
     }
     concret=canonical(_g);
   }

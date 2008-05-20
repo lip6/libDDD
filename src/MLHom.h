@@ -57,6 +57,7 @@ public :
   
   MLHom(const GHom &h);
   MLHom (const GHom & up, const MLHom & down);
+  MLHom (const _MLHom &);
   MLHom (_MLHom *);
   MLHom (const _MLHom *);
   
@@ -111,6 +112,9 @@ public:
   /** unique table trivia */
   virtual size_t hash() const = 0;
   virtual bool operator==(const _MLHom &h) const=0;
+  // for use by unique table : return new MyConcreteClassName(*this);
+  virtual _MLHom * clone () const =0 ;
+  
 };
 
 class StrongMLHom : public _MLHom {

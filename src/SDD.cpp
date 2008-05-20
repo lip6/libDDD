@@ -310,7 +310,7 @@ GSDD::GSDD(const _GSDD *_g):concret(_g){
  // handle OTF GARBAGE ?
 } 
 
-GSDD::GSDD(_GSDD *_g):concret(canonical(_g)){ 
+GSDD::GSDD(const _GSDD &_g):concret(canonical(_g)){ 
 #ifdef OTF_GARBAGE
   if ( ! concret->isSon  ) {
     if (!concret->tempCounter)
@@ -322,12 +322,12 @@ GSDD::GSDD(_GSDD *_g):concret(canonical(_g)){
 
 GSDD::GSDD(int variable,Valuation value){
 #ifndef OTF_GARBAGE
-  concret= value.size() != 0 ?  canonical(new _GSDD(variable,value)) : null.concret;
+  concret= value.size() != 0 ?  canonical(_GSDD(variable,value)) : null.concret;
 #else
   if ( ! value.size() ) 
     concret = null.concret;
   else {
-    concret = canonical(new _GSDD(variable,value));
+    concret = canonical(_GSDD(variable,value));
     if ( ! concret->isSon  ) {
       if (!concret->tempCounter)
 	recent.insert(concret);
@@ -340,10 +340,10 @@ GSDD::GSDD(int variable,Valuation value){
 
 GSDD::GSDD(int var,const DataSet &val,const GSDD &d):concret(null.concret){ //var-val->d
   if(d!=null && ! val.empty() ){
-    _GSDD *_g = new _GSDD(var,0);
+    _GSDD _g = _GSDD(var,0);
     // cast to (DataSet*) to lose "const" type
     std::pair<DataSet *, GSDD> x( val.newcopy(),d);
-    _g->valuation.push_back(x);
+    _g.valuation.push_back(x);
     concret=canonical(_g);    
 #ifdef OTF_GARBAGE
     if ( ! concret->isSon  ) {
@@ -359,10 +359,10 @@ GSDD::GSDD(int var,const DataSet &val,const GSDD &d):concret(null.concret){ //va
 GSDD::GSDD(int var,const GSDD &va,const GSDD &d):concret(null.concret){ //var-val->d
   SDD val (va);
   if(d!=null && ! val.empty() ){
-    _GSDD *_g = new _GSDD(var,0);
+    _GSDD _g =  _GSDD(var,0);
     // cast to (DataSet*) to lose "const" type
     std::pair<DataSet *, GSDD> x( val.newcopy(),d);
-    _g->valuation.push_back(x);
+    _g.valuation.push_back(x);
     concret=canonical(_g);    
 #ifdef OTF_GARBAGE
     if ( ! concret->isSon  ) {
@@ -377,10 +377,10 @@ GSDD::GSDD(int var,const GSDD &va,const GSDD &d):concret(null.concret){ //var-va
 
 GSDD::GSDD(int var,const SDD &val,const GSDD &d):concret(null.concret){ //var-val->d
   if(d!=null && ! val.empty() ){
-    _GSDD *_g = new _GSDD(var,0);
+    _GSDD _g = _GSDD(var,0);
     // cast to (DataSet*) to lose "const" type
     std::pair<DataSet *, GSDD> x( val.newcopy(),d);
-    _g->valuation.push_back(x);
+    _g.valuation.push_back(x);
     concret=canonical(_g);    
 #ifdef OTF_GARBAGE
     if ( ! concret->isSon  ) {
@@ -617,7 +617,7 @@ void GSDD::garbage(){
     if(! (*di)->marking){
       UniqueTable<_GSDD>::Table::iterator ci=di;
       di++;
-      _GSDD *g=(*ci);
+      const _GSDD *g=(*ci);
       canonical.table.erase(ci);
       delete g;
     }
@@ -636,9 +636,9 @@ void GSDD::garbage(){
 // }
 
 /* Constants */
-const GSDD GSDD::one(canonical(new _GSDD(1,1)));
-const GSDD GSDD::null(canonical(new _GSDD(0,1)));
-const GSDD GSDD::top(canonical(new _GSDD(-1,1)));
+const GSDD GSDD::one(canonical( _GSDD(1,1)));
+const GSDD GSDD::null(canonical( _GSDD(0,1)));
+const GSDD GSDD::top(canonical( _GSDD(-1,1)));
 
 /******************************************************************************/
 /*                   class SDD:public GSDD                                    */
