@@ -339,7 +339,8 @@ private:
 	mutable partition_cache_type partition_cache;
 	bool have_id;
 
-  void addParameter (const _GShom * h, 	std::map<int, GHom> & local_homs, std::map<int, GShom> & local_shoms) {
+  void addParameter (const GShom & hh, 	std::map<int, GHom> & local_homs, std::map<int, GShom> & local_shoms) {
+    const _GShom * h = get_concret(hh);    
     const std::type_info & t = typeid( *h );
     if( t == typeid(Add) )
       {
@@ -383,7 +384,7 @@ private:
 	{
 	  have_id = true;
 	}
-      parameters.insert(h);
+      parameters.insert(hh);
     }
   }
     
@@ -403,7 +404,7 @@ public:
 	
         for( std::set<GShom>::const_iterator it = p.begin(); it != p.end(); ++it)
         {
-	  addParameter( get_concret(*it) , local_homs, local_shoms);
+	  addParameter( *it , local_homs, local_shoms);
         }
 	
 	for( 	std::map<int, GHom>::iterator it = local_homs.begin();
@@ -554,7 +555,7 @@ public:
 
 			if( part_it->second.L != NULL )
 			{
-				s.insert(GShom(part_it->second.L)(d));
+			  s.insert(GShom(part_it->second.L)(d));
 			}
 			
 			s.insert( part_it->second.F(d) );
@@ -1140,18 +1141,22 @@ void StrongShom::print (std::ostream & os) const {
 /*                         Class GShom                                    */
 /*************************************************************************/
 
+
+// constant Id
+const GShom GShom::id(S_Homomorphism::Identity(1));
+
 /* Constructor */
 GShom::GShom(const _GShom *h):concret(h){}
 
-GShom::GShom(_GShom *h):concret(canonical(h)){}
+GShom::GShom(const _GShom &h):concret(canonical(h)){}
 
-GShom::GShom(const GSDD& d):concret(canonical(new S_Homomorphism::Constant(d))){}
+GShom::GShom(const GSDD& d):concret(canonical( S_Homomorphism::Constant(d))){}
 
 GShom::GShom(int var,const DataSet & val, const GShom &h) {
   if ( ! val.empty() ) {
-    concret=  canonical(new S_Homomorphism::LeftConcat(GSDD(var,val),h));
+    concret=  canonical ( S_Homomorphism::LeftConcat(GSDD(var,val),h));
   } else {
-    concret = canonical(new S_Homomorphism::Constant(GSDD::null));
+    concret = canonical( S_Homomorphism::Constant(GSDD::null));
   }
 }
 
@@ -1185,7 +1190,7 @@ GShom::eval(const GSDD &d) const
 	return concret->eval_skip(d);
 }
 
-const GShom GShom::id(canonical(new S_Homomorphism::Identity(1)));
+
 
 int GShom::refCounter() const{return concret->refCounter;}
 
@@ -1222,7 +1227,7 @@ void GShom::garbage(){
     if(!(*di)->marking){
       UniqueTable<_GShom>::Table::iterator ci=di;
       di++;
-      _GShom *g=*ci;
+      const _GShom *g=*ci;
       canonical.table.erase(ci);
       delete g;
     }
@@ -1280,7 +1285,7 @@ Shom &Shom::operator=(const GShom &h){
 GShom fixpoint (const GShom &h) {
   if( typeid( *_GShom::get_concret(h) ) == typeid(S_Homomorphism::Fixpoint))
       return h;
-  return GShom(canonical(new S_Homomorphism::Fixpoint(h)));
+  return S_Homomorphism::Fixpoint(h);
 }
 
 GShom
@@ -1291,7 +1296,7 @@ localApply(const GHom & h, int target)
 	{
 		return GShom::id;
 	}
-	return new S_Homomorphism::LocalApply(h,target);
+	return S_Homomorphism::LocalApply(h,target);
 }
 
 GShom
@@ -1302,7 +1307,7 @@ localApply(const GShom & h, int target)
 	{
 	  return GShom::id;
 	}
-	return new S_Homomorphism::SLocalApply(h,target);
+	return S_Homomorphism::SLocalApply(h,target);
 }
 
 static hash_map<std::set<GShom>,GShom>::type addCache;
@@ -1316,7 +1321,7 @@ GShom GShom::add(const std::set<GShom>& s)
   else {
     hash_map<std::set<GShom>,GShom>::type::accessor acc;
     if (addCache.insert(acc,s)) {
-      GShom added =  GShom(canonical(new S_Homomorphism::Add(s)));
+      GShom added =  S_Homomorphism::Add(s);
       acc->second = added;
       return added;
     } else {
@@ -1357,14 +1362,14 @@ GShom operator&(const GShom &h1,const GShom &h2){
 		}
 	}
 	
-  	return GShom(canonical(new S_Homomorphism::Compose(h1,h2)));
+  	return S_Homomorphism::Compose(h1,h2);
 }
 
 GShom operator+(const GShom &h1,const GShom &h2){
   // if (h1 < h2) 
-  //   return GShom(canonical(new S_Homomorphism::Add(h1,h2)));
+  //   return GShom(canonical( S_Homomorphism::Add(h1,h2)));
   // else
- //   return GShom(canonical(new S_Homomorphism::Add(h2,h1)));
+ //   return GShom(canonical( S_Homomorphism::Add(h2,h1)));
 
   std::set<GShom> s;
   s.insert(h1);
@@ -1375,23 +1380,23 @@ GShom operator+(const GShom &h1,const GShom &h2){
 }
 
 GShom operator*(const GSDD &d,const GShom &h){
-  return GShom(canonical(new S_Homomorphism::Mult(h,d)));
+  return S_Homomorphism::Mult(h,d);
 }
 
 GShom operator*(const GShom &h,const GSDD &d){
-  return GShom(canonical(new S_Homomorphism::Mult(h,d)));
+  return S_Homomorphism::Mult(h,d);
 }
 
 GShom operator^(const GSDD &d,const GShom &h){
-  return GShom(canonical(new S_Homomorphism::LeftConcat(d,h)));
+  return S_Homomorphism::LeftConcat(d,h);
 }
 
 GShom operator^(const GShom &h,const GSDD &d){
-  return GShom(canonical(new S_Homomorphism::RightConcat(h,d)));
+  return S_Homomorphism::RightConcat(h,d);
 }
 
 GShom operator-(const GShom &h,const GSDD &d){
-  return GShom(canonical(new S_Homomorphism::Minus(h,d)));
+  return S_Homomorphism::Minus(h,d);
 }
 
 

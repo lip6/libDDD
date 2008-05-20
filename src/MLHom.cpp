@@ -54,6 +54,8 @@ public:
   bool operator==(const _MLHom&) const{ return true; }
   size_t hash() const { return 8291; }
 
+  _MLHom * clone () const { return new Identity(*this) ; }
+
   bool
   skip_variable(int) const 
   {
@@ -78,6 +80,7 @@ public:
   bool operator==(const _MLHom &h) const{ 
     return parameters==((Add*)&h )->parameters;
   }
+  _MLHom * clone () const { return new Add(*this) ; }
   size_t hash() const { 
     size_t res=0;
     for(std::set<MLHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
@@ -116,6 +119,7 @@ public:
   size_t hash() const { 
     return  17449*h.hash();
   }
+  _MLHom * clone () const { return new GHomAdapter(*this) ; }
 
   bool
   skip_variable(int var) const 
@@ -141,6 +145,7 @@ public :
   bool operator==(const _MLHom &other) const{ 
     return up==((ConstantUp*)&other )->up && down==((ConstantUp*)&other )->down;
   }
+  _MLHom * clone () const { return new ConstantUp(*this) ; }
   size_t hash() const { 
     return  10159*(up.hash()^(down.hash()+37));
   }
@@ -173,6 +178,7 @@ public:
   bool operator==(const _MLHom &other) const{ 
     return h==((LeftConcat*)&other )->h && left==((LeftConcat*)&other )->left;
   }
+  _MLHom * clone () const { return new LeftConcat(*this) ; }
   size_t hash() const { 
     return  19471*(h.hash()^left.hash());
   }
@@ -203,17 +209,17 @@ using namespace nsMLHom;
 
 /************* Class MLHom *******************/
 
-const MLHom MLHom::id(canonical(new Identity(1)));
+const MLHom MLHom::id(canonical(Identity(1)));
 
 MLHom::~MLHom () {};
 MLHom::MLHom (const _MLHom *h):concret(h){};
-MLHom::MLHom (_MLHom *h):concret(canonical(h)){};
+MLHom::MLHom (const _MLHom &h):concret(canonical(h)){};
 
-MLHom::MLHom (const GHom & up, const MLHom & down):concret(canonical(new ConstantUp(up,down))){}
-MLHom::MLHom (const GHom &h):concret (canonical(new GHomAdapter(h))) {}
+MLHom::MLHom (const GHom & up, const MLHom & down):concret(canonical( ConstantUp(up,down))){}
+MLHom::MLHom (const GHom &h):concret (canonical( GHomAdapter(h))) {}
 
 
-MLHom::MLHom (int var, int val, const MLHom &h):concret(canonical(new LeftConcat(GDDD(var,val),h))){}
+MLHom::MLHom (int var, int val, const MLHom &h):concret(canonical( LeftConcat(GDDD(var,val),h))){}
 
 HomNodeMap MLHom::operator() (const GDDD & d) const {
   return concret->eval(d);
@@ -253,5 +259,5 @@ MLHom operator+(const MLHom &h1,const MLHom &h2){
   std::set<MLHom> s;
   s.insert(h1);
   s.insert(h2);
-  return canonical(new Add(s));
+  return canonical( Add(s));
 }

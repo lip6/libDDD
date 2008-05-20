@@ -780,14 +780,14 @@ void StrongHom::print (std::ostream & os) const {
 /*************************************************************************/
 
 /* Constructor */
-GHom::GHom(_GHom *_h):concret(canonical(_h)) {};
+GHom::GHom(const _GHom &_h):concret(canonical(_h)) {};
 
-GHom::GHom(const MLHom &h):concret(canonical(new MLHomAdapter(h))) {};
+GHom::GHom(const MLHom &h):concret(canonical(MLHomAdapter(h))) {};
 
 
-GHom::GHom(const GDDD& d):concret(canonical(new Constant(d))){}
+GHom::GHom(const GDDD& d):concret(canonical(Constant(d))){}
 
-GHom::GHom(int var, int val, const GHom &h):concret(canonical(new LeftConcat(GDDD(var,val),h))){}
+GHom::GHom(int var, int val, const GHom &h):concret(canonical(LeftConcat(GDDD(var,val),h))){}
 
 bool GHom::skip_variable(int var) const {
   return concret->skip_variable(var);
@@ -822,7 +822,7 @@ GDDD GHom::eval(const GDDD &d) const{
   return concret->eval_skip(d);
 }
 
-const GHom GHom::id(canonical(new Identity(1)));
+const GHom GHom::id(canonical( Identity(1)));
 
 int GHom::refCounter() const{return concret->refCounter;}
 
@@ -831,7 +831,7 @@ int GHom::refCounter() const{return concret->refCounter;}
 GHom GHom::add(const std::set<GHom>& s){
     if( s.empty() )
         return GDDD::null;
-    return(canonical(new Add(s)));
+    return(canonical( Add(s)));
 }
 
 
@@ -861,7 +861,7 @@ void GHom::garbage(){
     if(!((*di)->marking)){
       UniqueTable<_GHom>::Table::iterator ci=di;
       di++;
-      _GHom *g=(*ci);
+      const _GHom *g=(*ci);
       canonical.table.erase(ci);
       delete g;
     }
@@ -918,7 +918,7 @@ Hom &Hom::operator=(const GHom &h){
 /* Operations */
 GHom fixpoint (const GHom &h) {
   if (h != GHom::id)
-    return GHom(canonical(new Fixpoint(h)));
+    return GHom(canonical( Fixpoint(h)));
   else
     return GHom::id;
 }
@@ -933,7 +933,7 @@ GHom operator&(const GHom &h1,const GHom &h2){
 	if( h2 == GHom::id )
 		return h1;
 
-	return GHom(canonical(new Compose(h1,h2)));
+	return GHom(canonical( Compose(h1,h2)));
 }
 
 GHom operator+(const GHom &h1,const GHom &h2){
@@ -941,27 +941,27 @@ GHom operator+(const GHom &h1,const GHom &h2){
   s.insert(h1);
   s.insert(h2);
 //  return(new Add(s));
-  return GHom(canonical(new Add(s)));
+  return GHom(canonical( Add(s)));
 }
 
 GHom operator*(const GDDD &d,const GHom &h){
-  return GHom(canonical(new Mult(h,d)));
+  return GHom(canonical( Mult(h,d)));
 }
 
 GHom operator*(const GHom &h,const GDDD &d){
-  return GHom(canonical(new Mult(h,d)));
+  return GHom(canonical( Mult(h,d)));
 }
 
 GHom operator^(const GDDD &d,const GHom &h){
-  return GHom(canonical(new LeftConcat(d,h)));
+  return GHom(canonical( LeftConcat(d,h)));
 }
 
 GHom operator^(const GHom &h,const GDDD &d){
-  return GHom(canonical(new RightConcat(h,d)));
+  return GHom(canonical( RightConcat(h,d)));
 }
 
 GHom operator-(const GHom &h,const GDDD &d){
-  return GHom(canonical(new Minus(h,d)));
+  return GHom(canonical( Minus(h,d)));
 }
 
 /*************************************************************************/

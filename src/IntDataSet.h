@@ -31,22 +31,7 @@
 
 #include "DataSet.h"
 #include "UniqueTable.h"
-
-
-// a hash function for std::vector<int>
-namespace d3 { namespace util {
-    /// Computes a hash key for a std::vector<int>. 
-    template<>	
-      struct hash<std::vector<int> *> {
-	size_t operator()(const std::vector<int> *data) const{
-	  size_t res=1;
-	  for (std::vector<int>::const_iterator it= data->begin() ; it != data->end() ; it++) 
-	    res += res*(*it)+2711;
-	  return res;
-	}
-      };
-  }} // namespaces
-
+#include "util/hash_support.hh"
 
 /// This class is a very basic implementation of DataSet interface 
 /// based on std::std::vector<int> and a unicity table
@@ -70,8 +55,8 @@ public :
 
   /// public constructor from non unique std::vector<int>
   IntDataSet (const std::vector<int> & ddata) {
-    std::vector<int> * tmp = new std::vector<int> (ddata);
-    sort( tmp->begin() , tmp->end() );
+    std::vector<int> tmp = std::vector<int> (ddata);
+    sort( tmp.begin() , tmp.end() );
     data = canonical( tmp );
   }
   /// public deafult constructor = empty set
@@ -91,8 +76,8 @@ public :
     const std::vector<int>* bvec = ((const IntDataSet &) b).data;
     std::set_intersection(data->begin(), data->end(),bvec->begin(), bvec->end(),std::back_insert_iterator<std::vector<int> > (res));
     // trim
-    std::vector<int>* trimres = new std::vector<int> (res);
-    assert (trimres->size() == trimres->capacity());
+    std::vector<int> trimres = std::vector<int> (res);
+    assert (trimres.size() == trimres.capacity());
     return new IntDataSet(canonical(trimres));	
   }
   /// returns a new instance with elements = this union b
@@ -101,8 +86,8 @@ public :
     const std::vector<int>* bvec = ((const IntDataSet &) b).data;
     std::set_union(data->begin(), data->end(),bvec->begin(), bvec->end(),std::back_insert_iterator<std::vector<int> > (res));
     // trim
-    std::vector<int>* trimres = new std::vector<int> (res);
-    assert (trimres->size() == trimres->capacity());
+    std::vector<int> trimres =  std::vector<int> (res);
+    assert (trimres.size() == trimres.capacity());
     return new IntDataSet(canonical(trimres));	
   }
   /// returns a new instance with elements = this setminus b
@@ -111,8 +96,8 @@ public :
     const std::vector<int>* bvec = ((const IntDataSet &) b).data;
     std::set_difference(data->begin(), data->end(),bvec->begin(), bvec->end(),std::back_insert_iterator<std::vector<int> > (res));
     // trim
-    std::vector<int>* trimres = new std::vector<int> (res);
-    assert (trimres->size() == trimres->capacity());
+    std::vector<int> trimres = std::vector<int> (res);
+    assert (trimres.size() == trimres.capacity());
     return new IntDataSet(canonical(trimres));
   }
   

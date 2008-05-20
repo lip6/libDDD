@@ -100,9 +100,19 @@ public:
   /// \param _h The pointer provided should point into the unicity table
   GHom(const _GHom *_h):concret(_h){};
 
+  /// THIS VERSION IS DELIBERATELY UNIMPLEMENTED
+  /// OTHERWISE bad calls like GShom(new myHom()) would promote to const _GShom *_h and bypass unicity.
+  /// User code prior to 20/05/08 would use this in the form : return new myHom(xx);
+  /// This is now illegal as we take up memory allocation now, so the user should
+  /// stack alloc and pass a reference as in GShom(const _GShom &_h). Exceptionally,
+  /// for efficiency, return this; in a phi user function is permitted hence public
+  ///  visibility of above GShom(const _GShom *_h);
+  /// This signature is here to ensure link errors in old user code.
+  GHom(_GHom *_h);
+
   /// build a GHom from user provided homomorphisms such as StrongHom.
   /// This call ensures canonization of h
-  GHom(_GHom *_h);
+  GHom(const _GHom &_h);
   /// \name Public Constructors 
   //@{
   /// Default public constructor.

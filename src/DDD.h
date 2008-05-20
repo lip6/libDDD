@@ -60,8 +60,11 @@ private:
   /// A private constructor used in internals. 
   /// \param _g The pointer provided should point into the unicity table
   GDDD(const _GDDD *_g);
+  /// UNIMPLEMENTED DELIBERATELY: see SHom.h for details. 
+  /// user should use version above const & or below const * into unique storage.
+  GDDD(_GDDD *_g); 
   // call with additional canonization
-  GDDD(_GDDD *_g);
+  GDDD(const _GDDD &_g);
   /// Internal function used in recursion for textual printing of GDDD.
   void print(std::ostream& os,std::string s) const;
   /// A function for DDD serialization (beta).

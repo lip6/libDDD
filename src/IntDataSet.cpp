@@ -27,4 +27,4 @@
 // static initialization
 UniqueTable<std::vector<int> > IntDataSet::canonical = UniqueTable<std::vector<int> > ();
 
-const std::vector<int> * IntDataSet::empty_ = canonical(new std::vector<int>(0));
+const std::vector<int> * IntDataSet::empty_ = canonical(std::vector<int>(0));
