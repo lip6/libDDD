@@ -68,9 +68,11 @@ public:
   /* Compare */
   virtual size_t hash() const =0;
   virtual bool operator==(const _DED &) const=0;
+  virtual _DED * clone () const=0;
 
   /* Transform */
   virtual GDDD eval() const=0; 
+
 
 };
 

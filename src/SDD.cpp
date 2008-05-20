@@ -94,6 +94,7 @@ public:
     }
   }
 
+    _GSDD * clone () const { return new _GSDD(*this); }
 
   /* Compare */
   bool operator==(const _GSDD& g) const 

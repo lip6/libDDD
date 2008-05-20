@@ -77,6 +77,7 @@ public:
   /* Compare */
   bool operator==(const _GShom&) const{return true;}
   size_t hash() const{return 17;}
+  _GShom * clone () const {  return new Identity(*this); }
 
   bool
   skip_variable(int) const 
@@ -108,6 +109,8 @@ public:
   size_t hash() const{
     return value.hash();
   }
+
+  _GShom * clone () const {  return new Constant(*this); }
 
   /* Eval */
   GSDD eval(const GSDD &d)const{
@@ -141,6 +144,7 @@ public:
     return 83*left.hash()+53*right.hash();
   }
 
+  _GShom * clone () const {  return new Mult(*this); }
   /* Eval */
   GSDD eval(const GSDD &d)const{
     return left(d)*right;
@@ -224,6 +228,8 @@ public:
     return target == ps->target && h ==  ps->h;
   }  
 
+  _GShom * clone () const {  return new LocalApply(*this); }
+
   void print (std::ostream & os) const {
     os << "(Local:" << h << "," << target << ")";
   }
@@ -295,6 +301,8 @@ public:
     const SLocalApply* ps = (const SLocalApply *)&s;
     return target == ps->target && h ==  ps->h;
   }  
+
+  _GShom * clone () const {  return new SLocalApply(*this); }
 
   void print (std::ostream & os) const {
     os << "(SLocal:" << h << "," << target << ")";
@@ -453,6 +461,8 @@ public:
 
     }
 
+  _GShom * clone () const {  return new Add(*this); }
+
 	bool
 	skip_variable( int var ) const
 	{
@@ -605,6 +615,7 @@ public:
   size_t hash() const{
     return 13*left.hash()+7*right.hash();
   }
+  _GShom * clone () const {  return new Compose(*this); }
 
 	bool
     skip_variable(int var) const 
@@ -646,6 +657,7 @@ public:
   size_t hash() const{
     return 23*left.hash()+47*right.hash();
   }
+  _GShom * clone () const {  return new LeftConcat(*this); }
 
   /* Eval */
   GSDD eval(const GSDD &d)const{
@@ -679,6 +691,7 @@ public:
   size_t hash() const{
     return 47*left.hash()+19*right.hash();
   }
+  _GShom * clone () const {  return new RightConcat(*this); }
 
   bool
   skip_variable(int var) const
@@ -719,6 +732,7 @@ public:
   size_t hash() const{
     return 5*left.hash()+61*right.hash();
   }
+  _GShom * clone () const {  return new Minus(*this); }
 
   /* Eval */
   GSDD eval(const GSDD &d)const{
@@ -759,6 +773,7 @@ public:
   size_t hash() const{
     return 17*arg.hash();
   }
+  _GShom * clone () const {  return new Fixpoint(*this); }
 
   bool
   skip_variable(int var) const
