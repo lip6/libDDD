@@ -93,7 +93,7 @@ class _no_ring_above : public StrongHom {
     	_no_ring_above* ps = (_no_ring_above*)&s;
         return i_ == ps->i_ && j_ == ps->j_ ;
     }
-    
+  _GHom * clone () const {  return new _no_ring_above(*this); }    
 };
 
 
@@ -147,6 +147,7 @@ class _move_ring : public StrongHom {
         return ring_ == ps->ring_;
     }
     
+  _GHom * clone () const {  return new _move_ring(*this); }
 };
 
 // to be more pleasant for users  

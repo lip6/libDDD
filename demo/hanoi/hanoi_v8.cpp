@@ -95,7 +95,8 @@ public :
     _no_ring_above* ps = (_no_ring_above*)&s;
     return set.set_equal(ps->set );
   }
-  
+
+  _GShom * clone () const {  return new _no_ring_above(*this); }  
 };
 
 // generic version no ring specified, just apply to current ring
@@ -136,6 +137,7 @@ public :
     return true;
   }
   
+  _GShom * clone () const {  return new _move_ring(*this); }
 };
 
 // to be more pleasant for users  

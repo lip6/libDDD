@@ -77,6 +77,8 @@ public:
     return (var == ps.var)&&(f == ps.f);
   }
 
+  _GHom * clone () const {  return new _sub(*this); }
+
   void mark(){
     // must implement mark function if attributes of type GHom or GDDD
     f.mark();

@@ -96,7 +96,8 @@ public :
     	_no_ring_above* ps = (_no_ring_above*)&s;
 	return i_ == ps->i_ && j_ == ps->j_ ;
   }
-  
+
+  _GHom * clone () const {  return new _no_ring_above(*this); }  
 };
 
 
@@ -153,6 +154,7 @@ public :
     _move_ring* ps = (_move_ring*)&s;
     return ring_ == ps->ring_;
   }
+  _GHom * clone () const {  return new _move_ring(*this); }
   
 };
 
