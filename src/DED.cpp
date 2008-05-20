@@ -76,6 +76,7 @@ public:
   bool  operator==(const _DED &e)const{
     return (parameter==((_DED_GDDD*)&e)->parameter);
   };
+  _DED * clone () const { return new _DED_GDDD(*this); }
   GDDD eval() const{return parameter;};
 };
 
@@ -91,7 +92,7 @@ public:
   /* Compare */
   size_t hash() const;
   bool operator==(const _DED &e)const;
-
+  _DED * clone () const { return new _DED_Add(*this); }
   /* Transform */
   GDDD eval() const;
 
@@ -138,6 +139,8 @@ public:
   bool operator==(const StrongHom &s) const {
     return dist == ((const _pushEVDDD &)s).dist;
   }
+
+  _GHom * clone () const { return new _pushEVDDD(*this); }
 };
 /// User function : Construct a Hom for a Strong Hom _plusplus
 GHom pushEVDDD(int v){return new _pushEVDDD(v);};
@@ -248,7 +251,7 @@ public:
   /* Compare */
   size_t hash() const;
   bool operator==(const _DED &e)const;
-
+  _DED * clone () const { return new _DED_Mult(*this); }
   /* Transform */
   GDDD eval() const;
 
@@ -361,7 +364,7 @@ public:
   /* Compare */
   size_t hash() const;
   bool operator==(const _DED &e)const;
-
+  _DED * clone () const { return new _DED_Minus(*this); }
   /* Transform */
   GDDD eval() const;
 
@@ -450,7 +453,7 @@ public:
   /* Compare */
   size_t hash() const;
   bool operator==(const _DED &e)const;
-
+  _DED * clone () const { return new _DED_Concat(*this); }
   /* Transform */
   GDDD eval() const;
 
@@ -508,6 +511,7 @@ public:
   /* Compare */
   size_t hash() const;
   bool operator==(const _DED &e)const;
+  _DED * clone () const { return new _DED_Hom(*this); }
 
   /* Transform */
   GDDD eval() const;

@@ -65,7 +65,7 @@ public:
   /* Compare */
   bool operator==(const _GHom&) const{return true;}
   size_t hash() const{return 17;}
-
+  _GHom * clone () const {  return new Identity(*this); }
     bool
     skip_variable(int) const 
     {
@@ -95,7 +95,7 @@ public:
   size_t hash() const{
     return value.hash();
   }
-
+  _GHom * clone () const {  return new Constant(*this); }
   /* Eval */
   GDDD eval(const GDDD &d)const{
     return d==GDDD::null?GDDD::null:value;
@@ -128,6 +128,7 @@ public:
   size_t hash() const{
     return 83*left.hash()+53*right.hash();
   }
+  _GHom * clone () const {  return new Mult(*this); }
 
   /* Eval */
   GDDD eval(const GDDD &d)const{
@@ -227,7 +228,7 @@ public:
         }
         return res;
     }
-
+  _GHom * clone () const {  return new Add(*this); }
   
     bool
     skip_variable(int var) const
@@ -361,6 +362,8 @@ public:
     {
         return 13*left.hash() + 7*right.hash();
     }
+
+  _GHom * clone () const {  return new Compose(*this); }
     
     bool
     skip_variable(int var) const
@@ -423,6 +426,8 @@ public:
         return 23*left.hash()+47*right.hash();
     }
 
+  _GHom * clone () const {  return new LeftConcat(*this); }
+
     /* Eval */
     GDDD
     eval(const GDDD &d) const
@@ -460,6 +465,8 @@ public:
   size_t hash() const{
     return 47*left.hash()+19*right.hash();
   }
+  _GHom * clone () const {  return new RightConcat(*this); }
+
 
     bool
     skip_variable(int var) const
@@ -499,6 +506,7 @@ public:
   size_t hash() const{
     return 5*left.hash()+61*right.hash();
   }
+  _GHom * clone () const {  return new Minus(*this); }
 
   /* Eval */
   GDDD eval(const GDDD &d)const{
@@ -549,6 +557,8 @@ public:
         return 17 * arg.hash();
     }
     
+  _GHom * clone () const {  return new Fixpoint(*this); }
+
     bool
     skip_variable(int var) const
     {
@@ -694,6 +704,7 @@ public:
   size_t hash() const{
     return 19751*h.hash();
   }
+  _GHom * clone () const {  return new MLHomAdapter(*this); }
 
   /* Eval */
   GDDD eval(const GDDD &d)const{

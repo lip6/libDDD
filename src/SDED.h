@@ -81,7 +81,7 @@ public:
   /* Compare */
   virtual size_t hash() const =0;
   virtual bool operator==(const _SDED &) const=0;
-
+  virtual _SDED * clone () const =0;
   /* Transform */
 	virtual GSDD eval() const  = 0; 
 

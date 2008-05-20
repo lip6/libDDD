@@ -86,6 +86,8 @@ public:
   /* Memory Manager */
   void mark()const;
 
+  _GDDD * clone () const { return new _GDDD(*this); }
+
   size_t hash () const {
     size_t res=(size_t) variable;
     for(GDDD::const_iterator vi=valuation.begin();vi!=valuation.end();++vi)

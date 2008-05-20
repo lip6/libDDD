@@ -94,6 +94,7 @@ public:
   bool  operator==(const _SDED &e)const{
     return (parameter==((_SDED_GSDD*)&e)->parameter);
   };
+  _SDED * clone () const { return new _SDED_GSDD(*this); }
 #ifdef OTF_GARBAGE
   bool shouldCache () { return false; }
 #endif  
@@ -139,6 +140,7 @@ public:
   bool operator==(const StrongShom &s) const {
     return dist == ((const _pushEVSDD &)s).dist;
   }
+  _GShom * clone () const { return new _pushEVSDD(*this); }
 };
 /// User function : Construct a Hom for a Strong Hom _plusplus
 GShom pushEVSDD(int v){return new _pushEVSDD(v);};
@@ -159,7 +161,7 @@ public:
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
-
+  _SDED * clone () const { return new _SDED_Add(*this); }
 #ifdef OTF_GARBAGE
   bool shouldCache () {
     for(std::set<GSDD>::const_iterator si=parameters.begin();si!=parameters.end();++si)
@@ -396,7 +398,7 @@ public:
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
-
+  _SDED * clone () const { return new _SDED_Mult(*this); }
 #ifdef OTF_GARBAGE
   bool shouldCache () {
     return  ( parameter1.isSon() &&  parameter2.isSon());
@@ -488,7 +490,7 @@ public:
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
-
+  _SDED * clone () const { return new _SDED_Minus(*this); }
 #ifdef OTF_GARBAGE
   bool shouldCache () {
     return  ( parameter1.isSon() &&  parameter2.isSon());
@@ -597,7 +599,7 @@ public:
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
-
+  _SDED * clone () const { return new _SDED_Concat(*this); }
 #ifdef OTF_GARBAGE
   bool shouldCache () {
     return  ( parameter1.isSon() &&  parameter2.isSon()) ;
@@ -675,7 +677,7 @@ public:
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
-
+  _SDED * clone () const { return new _SDED_Shom(*this); }
   /* Transform */
   GSDD eval() const;
 

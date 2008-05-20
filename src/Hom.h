@@ -356,6 +356,9 @@ public:
   /// may be quite costly.
   virtual size_t hash() const=0;
 
+  // for use by unique table : return new MyConcreteClassName(*this);
+  virtual _GHom * clone () const =0 ;
+
   /// The computation function responsible for evaluation over a node.
   /// Users should not directly use this. Normal behavior is to use GShom::operator()
   /// that encapsulates this call with operation caching.
