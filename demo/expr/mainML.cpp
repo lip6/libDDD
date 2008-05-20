@@ -28,6 +28,7 @@ public:
     _AssignConst* ps = (_AssignConst*)&s;
     return var == ps->var && val == ps->val;
   }
+  _GHom * clone () const {  return new _AssignConst(*this); }
 };
 
 GHom AssignConst (int var, int val) {
@@ -64,6 +65,7 @@ public :
     return 7489*(a^b);
   }
 
+  _MLHom * clone () const {  return new _QueryMLHom(*this); }
 
 };
 
@@ -106,6 +108,7 @@ public:
     _AssignVar* ps = (_AssignVar*)&s;
     return varl == ps->varl && varr == ps->varr;
   }
+  _GHom * clone () const {  return new _AssignVar(*this); }
 };
 
 GHom AssignVar (int var, int val) {

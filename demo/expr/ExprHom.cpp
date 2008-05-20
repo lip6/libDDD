@@ -69,6 +69,7 @@ public:
     _AssignExpr* ps = (_AssignExpr*)&s;
     return var == ps->var && expr.equals(ps->expr);
   }
+  _GHom * clone () const {  return new _AssignExpr(*this); }
 
   GHom compose (const GHom & other) const ;
 };
@@ -122,7 +123,7 @@ public :
   size_t hash() const {
     return 7489*(a.hash()^(b.hash()+1));
   }
-
+  _MLHom * clone () const {  return new _QueryMLHom(*this); }
 
 };
 
@@ -159,7 +160,7 @@ public:
     _AssertionHom* ps = (_AssertionHom*)&s;
     return ass == ps->ass;
   }
-
+  _GHom * clone () const {  return new _AssertionHom(*this); }
   GHom compose (const GHom & other) const {
     const _GHom * c = get_concret(other);
     if (typeid(*c) == typeid(_AssertionHom)) {
@@ -223,7 +224,7 @@ public:
     _Predicate* ps = (_Predicate*)&s;
     return expr == ps->expr;
   }
-
+  _GHom * clone () const {  return new _Predicate(*this); }
   GHom compose (const GHom & other) const ;
 };
 
