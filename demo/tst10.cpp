@@ -69,6 +69,7 @@ public :
     _seek* ps = (_seek*)&s;
     return var == ps->var && h==ps->h;
   }
+  _GHom * clone () const {  return new _seek(*this); }
 };  
 
 /// increment the value of the next variable
@@ -91,6 +92,7 @@ public:
   bool operator==(const StrongHom&) const {
     return true;
   }
+  _GHom * clone () const {  return new _plusplus(*this); }
 };
 
 /// User function : Construct a Hom for a Strong Hom _plusplus
@@ -124,6 +126,8 @@ public:
     _selectVarLim* ps = (_selectVarLim*)&s;
     return lim == ps->lim;
   }
+
+  _GHom * clone () const {  return new _selectVarLim(*this); }
 };
 
 

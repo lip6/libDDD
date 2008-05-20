@@ -107,7 +107,8 @@ public :
     _no_ring_above* ps = (_no_ring_above*)&s;
     return set.set_equal(ps->set );
   }
-  
+
+  _GShom * clone () const {  return new _no_ring_above(*this); }  
 };
 
 // generic version no ring specified, just apply to current ring
@@ -158,6 +159,7 @@ public :
   bool operator==(const StrongShom &s) const {
     return p1== ((const _move_ring &) s).p1 &&  p2== ((const _move_ring &) s).p2;
   }
+  _GShom * clone () const {  return new _move_ring(*this); }
   
 };
 

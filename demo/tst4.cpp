@@ -62,6 +62,7 @@ public:
     _plusplus* ps = (_plusplus*)&s;
     return var == ps->var;
   }
+  _GHom * clone () const {  return new _plusplus(*this); }
 };
 
 // User function : Construct a Hom for a Strong Hom _plusplus

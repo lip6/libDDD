@@ -65,6 +65,7 @@ public:
     PermuteUp* ps = (PermuteUp*)&s;
     return (var == ps->var && val == ps->val);
   }
+  _GHom * clone () const {  return new PermuteUp(*this); }
 };
 
 // **********************************************
@@ -93,6 +94,7 @@ public:
     PermuteDown* ps = (PermuteDown*)&s;
     return var == ps->var && val == ps->val;
   }
+  _GHom * clone () const {  return new PermuteDown(*this); }
 };
 
 
@@ -118,6 +120,7 @@ public:
     PermuteFin* ps = (PermuteFin*)&s;
     return var == ps->var;
   }
+  _GHom * clone () const {  return new PermuteFin(*this); }
 };
 
 // **********************************************
@@ -146,6 +149,7 @@ public:
     Permute* ps = (Permute*)&s;
     return var1 == ps->var1 && var2 == ps->var2;
   }
+  _GHom * clone () const {  return new Permute(*this); }
 };
 
 // User function : Construct a Hom for a Strong Hom _SetVar

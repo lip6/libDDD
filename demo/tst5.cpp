@@ -66,6 +66,8 @@ public:
     _SetCst* ps = (_SetCst*)&s;
     return var == ps->var && val == ps->val;
   }
+
+  _GHom * clone () const {  return new _SetCst(*this); }
 };
 
 // **********************************************
@@ -90,6 +92,8 @@ public:
     _SetVarUp* ps = (_SetVarUp*)&s;
     return var == ps->var && val == ps->val;
   }
+
+  _GHom * clone () const {  return new _SetVarUp(*this); }
 };
 
 // **********************************************
@@ -117,6 +121,7 @@ public:
     _SetVarDown* ps = (_SetVarDown*)&s;
     return var1 == ps->var1 && var2 == ps->var2;
   }
+  _GHom * clone () const {  return new _SetVarDown(*this); }
 };
 
 // **********************************************
@@ -145,6 +150,7 @@ public:
     _SetVar* ps = (_SetVar*)&s;
     return var1 == ps->var1 && var2 == ps->var2;
   }
+  _GHom * clone () const {  return new _SetVar(*this); }
 };
 
 // User function : Construct a Hom for a Strong Hom _SetVar

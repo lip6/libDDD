@@ -64,6 +64,7 @@ public:
   bool operator==(const StrongHom &s) const {
     return var == ((const _plusplus &)s).var;
   }
+  _GHom * clone () const {  return new _plusplus(*this); }
 };
 
 /// User function : Construct a Hom for a Strong Hom _plusplus
@@ -96,6 +97,8 @@ public:
   bool operator==(const StrongHom &) const {
     return true ; //var = ((const _plusplus &)s).var;
   }
+
+  _GHom * clone () const {  return new _push(*this); }
 };
 
 /// User function : Construct a Hom for a Strong Hom _plusplus

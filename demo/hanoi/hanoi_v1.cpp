@@ -96,7 +96,7 @@ class _no_ring_above
             _no_ring_above* ps = (_no_ring_above*)&s;
             return i_ == ps->i_ && j_ == ps->j_ ;
         }
-        
+  _GHom * clone () const {  return new _no_ring_above(*this); }        
     };
 
 
@@ -171,6 +171,7 @@ class _swap_pole : public StrongHom {
 		_swap_pole* ps = (_swap_pole*)&s;
 		return ring_ == ps->ring_ && ori_ == ps->ori_ && dest_ == ps->dest_ ;
 	}
+  _GHom * clone () const {  return new _swap_pole(*this); }
     
 };
 

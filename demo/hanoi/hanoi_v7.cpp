@@ -78,6 +78,7 @@ class transition_relation : public StrongShom {
   bool operator==(const StrongShom&) const {
      return  true;
   }  
+  _GShom * clone () const {  return new transition_relation(*this); }
 }; 
 
 // SDD application
@@ -129,7 +130,8 @@ public :
     	_no_ring_above* ps = (_no_ring_above*)&s;
 	return i_ == ps->i_ && j_ == ps->j_ ;
   }
-  
+
+  _GHom * clone () const {  return new _no_ring_above(*this); }  
 };
 
 // generic version no ring specified, just apply to current ring
@@ -167,6 +169,8 @@ public :
   bool operator==(const StrongHom&) const {
     return true;
   }
+
+  _GHom * clone () const {  return new _move_ring(*this); }
   
 };
 
