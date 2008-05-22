@@ -52,7 +52,7 @@ class _selectAndSet : public StrongHom {
   _GHom * clone () const {  return new _selectAndSet(*this); }
 };
 
-GHom selectAndSet(int oldPC, int newPC) {return GHom(new _selectAndSet(oldPC, newPC));}
+GHom selectAndSet(int oldPC, int newPC) {return _selectAndSet(oldPC, newPC);}
 
 class _rebuild : public StrongShom {
 int v; SDD t; 
@@ -69,7 +69,7 @@ GShom phi(int var, const DataSet& val) const{
 	return GShom(v,t,GShom::id);
     else
 //	return GShom(new _rebuild(v,t^((GSDD) ((SDD&)val))));
-	return GShom(new _rebuild(v,t^GSDD(var,val)));
+	return GShom(_rebuild(v,t^GSDD(var,val)));
 }
 
 size_t hash() const {return 640061*v;} //TODO
@@ -85,7 +85,7 @@ bool operator ==(const StrongShom &s) const {_rebuild *ps = (_rebuild*) &s; retu
 
 GShom rebuild(int v) {
     //return GShom::id;
-    return GShom(new _rebuild(v, GSDD::one));
+    return _rebuild(v, GSDD::one);
 }
 
 
@@ -124,7 +124,7 @@ bool operator ==(const StrongShom &s) const {_updatePC *ps = (_updatePC*) &s; re
 
 
 
-GShom updatePC(int oldPC, int newPC, const GShom& hom) {return GShom(new _updatePC(oldPC, newPC, hom));}
+GShom updatePC(int oldPC, int newPC, const GShom& hom) {return  _updatePC(oldPC, newPC, hom);}
 
 
 class _setPC : public StrongShom {
@@ -161,7 +161,7 @@ bool operator ==(const StrongShom &s) const {_setPC *ps = (_setPC*) &s; return i
 };
 
 GShom setPC(int index, int oldPC, int newPC, const DataSet& essai) {
-    return GShom(new _setPC(index, oldPC, newPC, essai));
+    return _setPC(index, oldPC, newPC, essai);
 }
 
 

@@ -27,6 +27,7 @@ using namespace std;
 #include "DED.h"
 #include "Hom.h"
 #include "MemoryManager.h"
+#include "PlusPlus.hh"
 
 typedef enum {A, B, C, D,E, F, G} var;
 var variables;
@@ -36,39 +37,6 @@ void initName() {
   for (int i=A; i<=G; i++)
     DDD::varName(i,vn[i]);
 }
-
-
-// Increment the first value of var
-class _plusplus:public StrongHom {
-  int var;
-public:
-  _plusplus(int vr):var(vr) {};
-
-  GDDD phiOne() const {
-    return GDDD::one;
-  }
-
-  GHom phi(int vr, int vl) const {
-    if (vr == var)
-      return GHom(vr,vl+1);
-    else
-      return GHom(vr,vl,GHom(this));
-  }
-
-  size_t hash() const {
-    return (size_t) var;
-  }
-
-  bool operator==(const StrongHom &s) const {
-    _plusplus* ps = (_plusplus*)&s;
-    return var == ps->var;
-  }
-
-  _GHom * clone () const {  return new _plusplus(*this); }
-};
-
-// User function : Construct a Hom for a Strong Hom _plusplus
-GHom plusplus(int vr){return new _plusplus(vr);};
 
 int main(){
   initName();

@@ -27,6 +27,7 @@ using namespace std;
 #include "DED.h"
 #include "Hom.h"
 #include "MemoryManager.h"
+#include "PlusPlus.hh"
 
 typedef enum {A, B, C, D,E, F, G} var;
 var variables;
@@ -36,37 +37,6 @@ void initName() {
   for (int i=A; i<=G; i++)
     DDD::varName(i,vn[i]);
 }
-
-// incremente all values of X
-class _plusplus:public StrongHom {
-  int var;
-public:
-  _plusplus(int vr):var(vr) {}
-
-  GDDD phiOne() const {
-    return GDDD::one;
-  }                   
-
-  GHom phi(int vr, int vl) const {
-    if (vr == var)
-      return GHom(vr,vl+1)&GHom(this);
-    else 
-      return GHom(vr,vl)&GHom(this); 
-  }
-
-  size_t hash() const {
-    return var;
-  }
-
-  bool operator==(const StrongHom &s) const {
-    _plusplus* ps = (_plusplus*)&s;
-    return var == ps->var;
-  }
-  _GHom * clone () const {  return new _plusplus(*this); }
-};
-
-// User function : Construct a Hom for a Strong Hom _plusplus
-GHom plusplus(int vr){return new _plusplus(vr);};
 
 int main(){
   initName();
@@ -85,10 +55,10 @@ int main(){
   cout <<"* Strong Hom <!X++> : incremente all values of X *"<<endl;
   cout <<"**************************************************"<<endl;
 
-  Hom fa = plusplus(A);
-  Hom fb = plusplus(B);
-  Hom fc = plusplus(C);
-  Hom fd = plusplus(D);
+  Hom fa = plusplusAll(A);
+  Hom fb = plusplusAll(B);
+  Hom fc = plusplusAll(C);
+  Hom fd = plusplusAll(D);
 
   cout <<"<!A++>(u)="<< endl<<fa(u)<<endl;
   cout <<"<!B++>(u)="<< endl<<fb(u)<<endl;

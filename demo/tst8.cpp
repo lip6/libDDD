@@ -85,8 +85,8 @@ public:
   }
 };
 
-// User function : Construct a Hom to avoid user manipulation of "new..."
-GHom applyToVar (int vr,const GHom &g){return new _sub(vr,g);};
+// User function : Construct a Hom 
+GHom applyToVar (int vr,const GHom &g){return _sub(vr,g);};
 
 int main(){
   initName();
