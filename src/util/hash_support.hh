@@ -24,6 +24,7 @@
 #include <utility>
 #include <set>
 #include <vector>
+#include <typeinfo>
 #include "hashfunc.hh"
 
 namespace d3 { namespace util {
