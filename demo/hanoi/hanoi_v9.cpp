@@ -146,7 +146,7 @@ public :
     } else {
       // hierarchy, vl is SDD
       SDD vl2 = GShom(this) ((const SDD &) vl);
-      return (GShom (vr , vl2 ) & new _no_ring_above(p1 , p2))  + (GShom (vr , vl) & (this + GShom::id) );
+      return (GShom (vr , vl2 ) & _no_ring_above(p1 , p2))  + (GShom (vr , vl) & (this + GShom::id) );
     }
 
   }
@@ -165,7 +165,7 @@ public :
 
 // to be more pleasant for users  
 GShom move_ring (int i, int j ) {
-  return new _move_ring (i,j);
+  return _move_ring (i,j);
 }
 
 // "saturate" fires all events that can be fired from a given node to
