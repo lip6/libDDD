@@ -81,7 +81,8 @@ int main(){
 
   DDD f(A,1,DDD(B,1));
   DDD g(A,1,DDD(A,1));
-  cout <<f+g<<endl;
+  DDD h = f+g;
+  cout << h <<endl;
 
   cout<<MemoryManager::nbDDD()<<endl;
   cout<<MemoryManager::nbHom()<<endl;
