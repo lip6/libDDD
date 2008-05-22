@@ -31,7 +31,7 @@ size_t getResidentMemory() {
   char cmd [255];
   const char * tmpff = "ps-run";
   
-  sprintf (cmd,"ps --no-heading o rss %d > %s",getpid(),tmpff);
+  sprintf (cmd,"ps o rss %d > %s",getpid(),tmpff);
   int ret = ::system (cmd);
   FILE* fd ;
   if (ret || ((fd = fopen(tmpff,"r")) == NULL)) {
@@ -45,7 +45,8 @@ size_t getResidentMemory() {
     is_available = false;
     return 0;
   }
-  fscanf(fd,"%ld",&m);
+
+  fscanf(fd,"%s\n%ld",cmd,&m);
   unlink(tmpff);    
   return m;
  }
