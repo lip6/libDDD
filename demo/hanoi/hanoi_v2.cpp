@@ -74,11 +74,8 @@ int main(int argc, char **argv){
     }
   } while (ss != tmp);
 
-  // stats
-  cout << "Number of states : " << ss.nbStates() << endl ;
-  cout << "Final/Peak nodes : " << ss.size() << "/" << DDD::peak() << endl;
-  cout << "Cache entries : " << MemoryManager::nbDED() <<endl ;
-  
-  MemoryManager::pstats();
-  
+ // stats
+  Statistic S = Statistic(ss,"hanoiv2." + toString(NB_RINGS) + "." + toString(NB_POLES),CSV);  
+  S.print_header(std::cout);
+  S.print_line(std::cout);
 }

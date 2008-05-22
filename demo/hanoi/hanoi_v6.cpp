@@ -63,7 +63,7 @@ int main(int argc, char **argv){
   DDD ss = saturate() (M0);
 
   // stats
-  cout << "Number of states : " << ss.nbStates() << endl ;
-  cout << "Final/Peak nodes : " << ss.size() << "/" << DDD::peak() << endl;
-  cout << "Cache entries : " << MemoryManager::nbDED() <<endl ;
+  Statistic S = Statistic(ss,"hanoiv6." + toString(NB_RINGS) + "." + toString(NB_POLES),CSV);  
+  S.print_header(std::cout);
+  S.print_line(std::cout);
 }
