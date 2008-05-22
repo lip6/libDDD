@@ -32,7 +32,7 @@ public:
 };
 
 GHom AssignConst (int var, int val) {
-  return new _AssignConst(var,val);
+  return _AssignConst(var,val);
 }
 
 // a MLHom to handle : a := b
@@ -70,7 +70,7 @@ public :
 };
 
 MLHom queryML (int a, int b) {
-  return new _QueryMLHom(a,b);
+  return _QueryMLHom(a,b);
 }
 
 // perform varl := varr independently of variable ordering.
@@ -112,7 +112,7 @@ public:
 };
 
 GHom AssignVar (int var, int val) {
-  return new _AssignVar(var,val);
+  return _AssignVar(var,val);
 }
 
 

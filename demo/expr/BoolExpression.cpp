@@ -30,6 +30,7 @@ class _BoolExpression {
   // for hash storage
   virtual size_t hash () const = 0 ;
   virtual bool operator==(const _BoolExpression & e) const = 0;
+  virtual _BoolExpression * clone () const = 0;
 
   // to avoid excessive typeid RTTI calls.
   virtual BoolExprType getType() const =0;
@@ -152,7 +153,7 @@ public :
   OrExpr (const NaryBoolParamType & pparams):NaryBoolExpr(pparams) {};
   BoolExprType getType() const  { return OR; }
   const char * getOpString() const { return " || ";}
-
+  virtual _BoolExpression * clone () const { return new OrExpr(*this);}
 };
 
 class AndExpr : public NaryBoolExpr {
@@ -161,7 +162,7 @@ public :
   AndExpr (const NaryBoolParamType  & pparams):NaryBoolExpr(pparams) {};
   BoolExprType getType() const  { return AND; }
   const char * getOpString() const { return " && ";}
-
+  virtual _BoolExpression * clone () const { return new AndExpr(*this);}
 };
 
 class BinaryBoolComp : public _BoolExpression {
@@ -229,6 +230,7 @@ public :
   bool constEval (int i, int j) const {
     return i==j;
   }
+  virtual _BoolExpression * clone () const { return new BoolEq(*this);}
 };
 
 class BoolNeq : public BinaryBoolComp {
@@ -242,6 +244,7 @@ public :
     return i!=j;
   }
 
+  virtual _BoolExpression * clone () const { return new BoolNeq(*this);}
 };
 
 class BoolGeq : public BinaryBoolComp {
@@ -254,7 +257,7 @@ public :
   bool constEval (int i, int j) const {
     return i>=j;
   }
-
+  virtual _BoolExpression * clone () const { return new BoolGeq(*this);}
 };
 
 
@@ -268,7 +271,7 @@ public :
   bool constEval (int i, int j) const {
     return i<=j;
   }
-
+  virtual _BoolExpression * clone () const { return new BoolLeq(*this);}
 };
 
 class BoolLt : public BinaryBoolComp {
@@ -281,7 +284,7 @@ public :
   bool constEval (int i, int j) const {
     return i<j;
   }
-
+  virtual _BoolExpression * clone () const { return new BoolLt(*this);}
 };
 
 class BoolGt : public BinaryBoolComp {
@@ -294,7 +297,7 @@ public :
   bool constEval (int i, int j) const {
     return i>j;
   }
-
+  virtual _BoolExpression * clone () const { return new BoolGt(*this);}
 };
 
 
@@ -319,7 +322,7 @@ public :
     const NotExpr & other = (const NotExpr &)e ;
     return other.exp == exp;
   }
-  
+  virtual _BoolExpression * clone () const { return new NotExpr(*this);}
   size_t hash () const {
     return  7829 * exp.hash();
   }
@@ -351,7 +354,7 @@ public :
   bool operator==(const _BoolExpression & e) const {
     return val == ((const BoolConstExpr &)e).val;
   }
-  
+  virtual _BoolExpression * clone () const { return new BoolConstExpr(*this);}
   BoolExpression setAssertion (const Assertion&) const {
     return this;
   }
@@ -374,55 +377,42 @@ public :
 UniqueTable<_BoolExpression>  BoolExpressionFactory::unique = UniqueTable<_BoolExpression>();
 
 BoolExpression BoolExpressionFactory::createNary (BoolExprType type, const NaryBoolParamType & params) {
-    _BoolExpression * create;
     switch (type) {
     case OR :
-      create = new OrExpr (params);      
-      break;
+      return unique(OrExpr (params));      
     case AND :
-      create = new AndExpr (params);      
-      break;
+      return unique(AndExpr (params));      
     default :
       throw "Operator is not nary";
     }
-    return unique(create);
   }
 
 BoolExpression BoolExpressionFactory::createNot  (const BoolExpression & e) {
-    _BoolExpression * create = new NotExpr(e);
-    return unique(create);
-  }
+  return unique(NotExpr(e));
+}
 
 BoolExpression BoolExpressionFactory::createConstant (bool b) {
-  return unique(new BoolConstExpr(b));
+  return unique(BoolConstExpr(b));
 }
 
 // a comparison (==,!=,<,>,<=,>=) between two integer expressions
 BoolExpression BoolExpressionFactory::createComparison (BoolExprType type, const IntExpression & l, const IntExpression & r) {
-  _BoolExpression * create;
   switch (type) {
   case EQ :
-    create = new BoolEq (l,r);
-    break;
+    return unique(BoolEq (l,r));
   case NEQ :
-    create = new BoolNeq (l,r);
-    break;
+    return unique(BoolNeq (l,r));
   case GEQ :
-    create = new BoolGeq (l,r);
-    break;
+    return unique(BoolGeq (l,r));
   case LEQ :
-    create = new BoolLeq (l,r);
-    break;
+    return unique(BoolLeq (l,r));
   case LT :
-    create = new BoolLt (l,r);
-    break;
+    return unique(BoolLt (l,r));
   case GT :
-    create = new BoolGt (l,r);
-    break;      
+    return unique(BoolGt (l,r));      
   default :
     throw "not a binary comparison operator !";
   }
-  return unique(create);
 }
 
 
