@@ -68,7 +68,7 @@ public:
 };
 
 /// User function : Construct a Hom for a Strong Hom _plusplus
-GHom plusplus(int v){return new _plusplus(v);};
+GHom plusplus(int v){return _plusplus(v);};
 
 
 /// push distance down
@@ -102,7 +102,7 @@ public:
 };
 
 /// User function : Construct a Hom for a Strong Hom _plusplus
-GHom push(){return new _push();};
+GHom push(){return _push();};
 
 int main(){
   // Define a name for each variable

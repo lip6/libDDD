@@ -28,6 +28,7 @@ using namespace std;
 #include "DDD.h"
 #include "Hom.h"
 #include "MemoryManager.h"
+#include "PlusPlus.hh"
 
 typedef enum {A, B, C, D,E, F, G} var;
 var variables;
@@ -37,6 +38,8 @@ void initName() {
   for (int i=A; i<=G; i++)
     DDD::varName(i,vn[i]);
 }
+
+
 
 /// This Hom seeks a variable and applies its argument homomorphism when found.
 class _seek:public StrongHom {
@@ -72,31 +75,6 @@ public :
   _GHom * clone () const {  return new _seek(*this); }
 };  
 
-/// increment the value of the next variable
-class _plusplus:public StrongHom {
-public:
-  _plusplus() {}
-
-  GDDD phiOne() const {
-    return GDDD::one;
-  }                   
-
-  GHom phi(int vr, int vl) const {
-    return GHom(vr,vl+1);
-  }
-
-  size_t hash() const {
-    return 23;
-  }
-
-  bool operator==(const StrongHom&) const {
-    return true;
-  }
-  _GHom * clone () const {  return new _plusplus(*this); }
-};
-
-/// User function : Construct a Hom for a Strong Hom _plusplus
-GHom plusplus(){return new _plusplus();};
 
 /// selects only paths such that first occurrence of path has value < x.
 /// i.e if next value on arc is strictly superior to lim, path is destroyed.
@@ -132,7 +110,7 @@ public:
 
 
 // User function : Construct a Hom for a Strong Hom _selectVarLim
-GHom selectVarLim(int lim){return new _selectVarLim(lim);};
+GHom selectVarLim(int lim){return _selectVarLim(lim);};
 
 /// This example is built to show how superior saturation using fixpoint is to breadth first search.
 /// It also gives a simple saturation example.
@@ -159,7 +137,7 @@ int main(){
   cout <<"u="<< endl<<u<<endl;
 
   /// instantiate a plusplus hom
-  Hom fc = plusplus();
+  Hom fc = plusplusFirst();
   /// chooose the target limit
   Hom limc = selectVarLim(39);
 
@@ -171,7 +149,7 @@ int main(){
   cout <<"**************************************************"<<endl;
 
   Hom satLim = fixpoint( GHom::id + ( fc & limc) );
-  Hom full = GHom(new _seek(C,satLim));
+  Hom full = GHom(_seek(C,satLim));
 
   cerr <<"<!C++<=6>(u)="<< endl<<full(u).nbStates()<<endl;
   }
@@ -187,7 +165,7 @@ int main(){
   cout <<"* up to limit = 40, using a naive \"iterate until fixpoint\" strategy *"<<endl;
   cout <<"**************************************************"<<endl;
 
-  Hom full = GHom(new _seek(C,fc & limc));
+  Hom full = GHom(_seek(C,fc & limc));
 
   /// the external fixpoint iteration
   DDD v = u;
