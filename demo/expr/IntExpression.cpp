@@ -30,6 +30,7 @@ class _IntExpression {
   // for hash storage
   virtual size_t hash () const = 0 ;
   virtual bool operator==(const _IntExpression & e) const = 0;
+  virtual _IntExpression * clone () const = 0;
 
   // to avoid excessive typeid RTTI calls.
   virtual IntExprType getType() const =0;
@@ -103,6 +104,8 @@ public :
     return var.hash() * 70019;
   }
 
+  _IntExpression * clone () const { return new VarExpr(*this); }
+
   bool isSupport (const Variable & v) const {
     return var == v;
   }
@@ -129,6 +132,8 @@ public :
   virtual size_t hash () const {
     return val * 70019;
   }
+
+  _IntExpression * clone () const { return new ConstExpr(*this); }
 
   void print (std::ostream & os) const {
     os << val;
@@ -241,6 +246,8 @@ public :
   int getNeutralElement () const {
     return 0;
   }
+
+  _IntExpression * clone () const { return new PlusExpr(*this); }
 };
 
 class MultExpr : public NaryIntExpr {
@@ -256,6 +263,7 @@ public :
   int getNeutralElement () const {
     return 1;
   }
+  _IntExpression * clone () const { return new MultExpr(*this); }
 };
 
 class BinaryIntExpr : public _IntExpression {
@@ -319,7 +327,7 @@ public :
   int constEval (int i, int j) const {
     return i-j;
   }
-
+  _IntExpression * clone () const { return new MinusExpr(*this); }
 
 };
 
@@ -334,6 +342,7 @@ public :
     return i/j;
   }
 
+  _IntExpression * clone () const { return new DivExpr(*this); }
 
 };
 
@@ -348,6 +357,7 @@ public :
     return i % j;
   }
 
+  _IntExpression * clone () const { return new ModExpr(*this); }
 
 };
 
@@ -361,7 +371,7 @@ public :
   int constEval (int i, int j) const {
     return int(pow(i,j));
   }
-
+  _IntExpression * clone () const { return new PowExpr(*this); }
 
 };
 
@@ -404,47 +414,37 @@ UniqueTable<_IntExpression>  IntExpressionFactory::unique = UniqueTable<_IntExpr
 
 
 IntExpression IntExpressionFactory::createNary (IntExprType type, NaryParamType params) {
-  _IntExpression * create;
   switch (type) {
   case PLUS :
-    create = new PlusExpr (params);      
-    break;
+    return unique(PlusExpr (params));      
   case MULT :
-    create = new MultExpr (params);      
-    break;
+    return unique(MultExpr (params));      
   default :
     throw "Operator is not nary";
   }
-  return unique(create);  
 }
 
 IntExpression IntExpressionFactory::createBinary (IntExprType type, const IntExpression & l, const IntExpression & r) {
-  _IntExpression * create;
   switch (type) {
   case MINUS :
-    create = new MinusExpr (l,r);      
-    break;
+    return unique(MinusExpr (l,r));      
   case DIV :
-    create = new DivExpr (l,r);      
-    break;
+    return unique(DivExpr (l,r));      
   case MOD :
-    create = new ModExpr (l,r);      
-    break;
+    return unique(ModExpr (l,r));      
   case POW :
-    create = new PowExpr (l,r);      
-    break;
+    return unique(PowExpr (l,r));      
   default :
     throw "Operator is not binary";
   }
-  return  unique(create);
 }
 
 IntExpression IntExpressionFactory::createConstant (int v) {
-  return unique (new ConstExpr(v));
+  return unique (ConstExpr(v));
 }
 
 IntExpression IntExpressionFactory::createVariable (const Variable & v) {
-  return unique (new VarExpr(v));
+  return unique (VarExpr(v));
 }
 
 Assertion IntExpressionFactory::createAssertion (const Variable & v,const IntExpression & e) {
@@ -455,7 +455,7 @@ Assertion IntExpressionFactory::createAssertion (const IntExpression & v,const I
   return Assertion(v,e);
 }
 
-const _IntExpression * IntExpressionFactory::createUnique(_IntExpression *e) {
+const _IntExpression * IntExpressionFactory::createUnique(const _IntExpression &e) {
   return unique(e);
 }
 
@@ -528,12 +528,12 @@ IntExpression::IntExpression (const IntExpression & other) {
 
 
 IntExpression::IntExpression (int cst) {
-  concrete = IntExpressionFactory::createUnique(new ConstExpr(cst));
+  concrete = IntExpressionFactory::createUnique(ConstExpr(cst));
   concrete->ref();
 }
 
 IntExpression::IntExpression (const Variable & var) {
-  concrete = IntExpressionFactory::createUnique(new VarExpr(var));
+  concrete = IntExpressionFactory::createUnique(VarExpr(var));
   concrete->ref();
 }
 

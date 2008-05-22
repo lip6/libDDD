@@ -123,7 +123,7 @@ public :
   static void printStats (std::ostream &os);
 
   // following administrative functions are not really for public usage.
-  static const _IntExpression * createUnique(_IntExpression *);
+  static const _IntExpression * createUnique(const _IntExpression &);
   static void destroy (_IntExpression * e);
 };
 

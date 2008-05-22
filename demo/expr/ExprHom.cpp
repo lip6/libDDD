@@ -75,7 +75,7 @@ public:
 };
 
 GHom assignExpr (int var,const IntExpression & val) {
-  return new _AssignExpr(var,val);
+  return _AssignExpr(var,val);
 }
 
 // a MLHom to handle : a =? b
@@ -128,7 +128,7 @@ public :
 };
 
 MLHom queryExpression (const IntExpression & a) {
-  return new _QueryMLHom(a,a);
+  return _QueryMLHom(a,a);
 }
 
 // perform varl := varr independently of variable ordering.
@@ -164,7 +164,7 @@ public:
   GHom compose (const GHom & other) const {
     const _GHom * c = get_concret(other);
     if (typeid(*c) == typeid(_AssertionHom)) {
-      return new _AssertionHom(ass &  ((const _AssertionHom *)c)->getAssertion());
+      return _AssertionHom(ass &  ((const _AssertionHom *)c)->getAssertion());
     } else {
       return _GHom::compose(other);
     }
@@ -172,7 +172,7 @@ public:
 };
 
 GHom assertion (const Assertion & e) {
-  return new _AssertionHom(e);
+  return _AssertionHom(e);
 }
 
 GHom _AssignExpr::compose (const GHom & other) const {
@@ -229,7 +229,7 @@ public:
 };
 
 GHom predicate (const BoolExpression & e) {
-  return new _Predicate(e);
+  return _Predicate(e);
 }
 
 GHom _Predicate::compose (const GHom & other) const {
