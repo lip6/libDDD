@@ -1,8 +1,10 @@
 #ifndef __HANOI_HOM_HH__
 #define __HANOI_HOM_HH__
 
+#include <string>
 #include "Hom.h"
 #include "SHom.h"
+#include "statistic.hpp"
 
 // Global constants.
 // we use one DDD variable per ring, ring 0 is the topmost, 
@@ -13,6 +15,11 @@ extern int NB_POLES ;
 
 // name the DDD variables for prettier print.
 void initName() ;
+
+// int -> string
+std::string toString (int i);
+// float -> string
+std::string toString (double i);
 
 // moves ring "ring" from pole ori to pole dest if possible.
 GHom swap_pole ( int ring, int ori, int dest ) ;

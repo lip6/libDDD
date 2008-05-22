@@ -67,9 +67,8 @@ int main(int argc, char **argv){
   // Saturate topmost node <=> reach fixpoint over transition relation
   SDD ss =  saturateSDD_singleDepth() (M1) ;
 
-  // stats
-  cout << "Number of states : " << ss.nbStates() << endl ;
-  cout << "DDD Final/Peak nodes : " << ss.node_size().second << "/" << DDD::peak() << endl;
-  cout << "SDD Final/Peak nodes : " << ss.node_size().first << "/" << SDD::peak() << endl;
-  cout << "Cache entries DDD/SDD : " << MemoryManager::nbDED() <<  "/" <<  MemoryManager::nbSDED() << endl ;
+ // stats
+  Statistic S = Statistic(ss,"hanoiv7." + toString(NB_RINGS) + "." + toString(NB_POLES),CSV);  
+  S.print_header(std::cout);
+  S.print_line(std::cout);
 }

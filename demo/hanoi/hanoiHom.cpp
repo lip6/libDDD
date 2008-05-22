@@ -40,6 +40,18 @@ void initName()
     DDD::varName(i,buff);
   }
 }
+// int -> string
+std::string toString (int i) {
+  char buff [16];
+  sprintf (buff,"%d",i);
+  return buff;
+}
+// float -> string
+std::string toString (double i) {
+  char buff [16];
+  sprintf (buff,"%lf",i);
+  return buff;
+}
 
 
 // Removes any path such that one of the variables takes value i or value j

@@ -24,7 +24,7 @@
  * v8 : This variant exhibits the use IntDataSet based SDD, emphasizing the differences with DDD.
 */
 
-
+#include <cmath>
 #include <cstring>
 #include <string>
 #include <iostream>
@@ -34,6 +34,14 @@ using namespace std;
 #include "DDD.h"
 #include "DED.h"
 #include "MemoryManager.h"
+#include "statistic.hpp"
+
+// int -> string
+std::string toString (int i) {
+  char buff [16];
+  sprintf (buff,"%d",i);
+  return buff;
+}
 
 // we use one DDD variable per ring, ring 0 is the topmost, 
 // and is stored at the bottom of the DDD
@@ -195,7 +203,7 @@ int main(int argc, char **argv){
   // User program variables should be DDD not GDDD, to prevent their garbage collection
   SDD M0 = SDD(VAR_STATES, s);
 
-  for (int i=1; i<NB_RINGS ; i++ ) {
+  for (int i=0; i<NB_RINGS ; i++ ) {
     // tricky, recursive embedding
     M0 = SDD(VAR_HIER ,M0, SDD(VAR_HIER ,M0) );
   }
@@ -205,11 +213,8 @@ int main(int argc, char **argv){
   // Saturate topmost node <=> reach fixpoint over transition relation
   SDD ss =  saturate() (M0) ;
 
-//  cout << ss << endl ;
-  // stats
-  cout << "Number of states : " << ss.nbStates() << endl ;
-  cout << "DDD Final/Peak nodes : " << ss.node_size().second << "/" << DDD::peak() << endl;
-  cout << "SDD Final/Peak nodes : " << ss.node_size().first << "/" << SDD::peak() << endl;
-  cout << "Cache entries DDD/SDD : " << MemoryManager::nbDED() <<  "/" <<  MemoryManager::nbSDED() << endl ;
-//  MemoryManager::pstats();
+ // stats
+  Statistic S = Statistic(ss,"hanoiv9." + toString(pow((double)2,(double)NB_RINGS)) + "." + toString(NB_POLES),CSV);  
+  S.print_header(std::cout);
+  S.print_line(std::cout);
 }
