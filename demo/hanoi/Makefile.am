@@ -30,15 +30,17 @@ if REENTRANT
     AM_LDFLAGS = -ltbb $(TBBBIN_FLAGS)
 endif
 
-hanoi_v1_SOURCES = hanoi_v1.cpp
-hanoi_v1_bis_SOURCES = hanoi_v1_bis.cpp
-hanoi_v1_ter_SOURCES = hanoi_v1_ter.cpp
-hanoi_v2_SOURCES = hanoi_v2.cpp
-hanoi_v3_SOURCES = hanoi_v3.cpp
-hanoi_v4_SOURCES = hanoi_v4.cpp
-hanoi_v5_SOURCES = hanoi_v5.cpp
-hanoi_v6_SOURCES = hanoi_v6.cpp
-hanoi_v7_SOURCES = hanoi_v7.cpp
-hanoi_v8_SOURCES = hanoi_v8.cpp
-hanoi_v9_SOURCES = hanoi_v9.cpp
+HOMFILE = hanoiHom.hh hanoiHom.cpp
+
+hanoi_v1_SOURCES = hanoi_v1.cpp $(HOMFILE)
+hanoi_v1_bis_SOURCES = hanoi_v1_bis.cpp $(HOMFILE)
+hanoi_v1_ter_SOURCES = hanoi_v1_ter.cpp $(HOMFILE)
+hanoi_v2_SOURCES = hanoi_v2.cpp $(HOMFILE)
+hanoi_v3_SOURCES = hanoi_v3.cpp $(HOMFILE)
+hanoi_v4_SOURCES = hanoi_v4.cpp $(HOMFILE)
+hanoi_v5_SOURCES = hanoi_v5.cpp $(HOMFILE)
+hanoi_v6_SOURCES = hanoi_v6.cpp $(HOMFILE)
+hanoi_v7_SOURCES = hanoi_v7.cpp $(HOMFILE)
+hanoi_v8_SOURCES = hanoi_v8.cpp $(HOMFILE)
+hanoi_v9_SOURCES = hanoi_v9.cpp 
 

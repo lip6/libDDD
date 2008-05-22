@@ -34,112 +34,8 @@ using namespace std;
 #include "DDD.h"
 #include "DED.h"
 #include "MemoryManager.h"
+#include "hanoiHom.hh"
 
-// we use one DDD variable per ring, ring 0 is the topmost, 
-// and is stored at the bottom of the DDD
-static int NB_RINGS= 5;
-// Each variable domain is {0,1,2} expressing the pole the variable is on
-static int NB_POLES= 3;
-
-void initName() {
-  char buff [12];
-  for (int i=0; i< NB_RINGS; i++) {
-    sprintf(buff,"ring %d",i);
-    DDD::varName(i,buff);
-  }
-}
-
-
-// Removes any path such that one of the variables takes value i or value j
-// Not test on variable number means this operation should be used from "mid-height"
-class _no_ring_above : public StrongHom {
-  // the 2 poles that have to be clear
-  int i_,j_;
-public :
-  _no_ring_above (int i, int j) { 
-    /// force to have ii < jj since the operation is commutable,  
-    // _no_ring_above(i,j) = _no_ring_above(j,i)
-    // hence we have a canonical form
-    if (i < j) 
-      {
-	i_ = i; 
-	j_ = j; 
-      }
-    else
-      {
-	i_ = j ;
-	j_ = i ;
-      }
-  }
-
-  GDDD phiOne() const {
-    return GDDD::one;
-  }     
-  
-  // reject any path with ANY ring that is on pole i or pole j
-  GHom phi(int vr, int vl) const {
-    if ( vl == i_ || vl == j_ )
-      // cut this branch and exploration
-      return GDDD::null;
-    else
-      // propagate this test
-      return GHom(vr,vl,GHom(this));
-  }
-
-  size_t hash() const {
-    return (i_ &  j_<<16)  *  9749;
-  }
-
-  bool operator==(const StrongHom &s) const {
-    	_no_ring_above* ps = (_no_ring_above*)&s;
-	return i_ == ps->i_ && j_ == ps->j_ ;
-  }
-  _GHom * clone () const {  return new _no_ring_above(*this); }  
-};
-
-// generic version no ring specified, just apply to current ring
-class _move_ring : public StrongHom {
-  
-public :
-  
-  GDDD phiOne() const {
-    return GDDD::one;
-  }                   
-  
-  GHom phi(int vr, int vl) const {
-    // ring reached 
-    // try to move to all new positions
-    // Initialize res with Id
-    GHom res = GHom(vr,vl) ;
-    for (int i=0 ; i <NB_POLES ; i++) {
-      // test all possible moves from current position = vl
-      if (i != vl) {
-	// update ring position and test no ring above
-	// no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met 
-	// or a DDD with only paths where the move is legal
-	res = (res + ( GHom (vr , i) & new _no_ring_above(i , vl) )) & fixpoint (new _move_ring());
-      }
-    }
-    return res ;
-  }
-  
-  
-  size_t hash() const {
-    return 6961;
-  }
-  
-  bool operator==(const StrongHom&) const {
-    return true;
-  }
-  
-  _GHom * clone () const {  return new _move_ring(*this); }
-};
-
-// to be more pleasant for users  
-GHom move_ring ( ) {
-  return new _move_ring ();
-}
-  
   
 int main(int argc, char **argv){
   if (argc == 2) {
@@ -164,7 +60,7 @@ int main(int argc, char **argv){
   // To store the set of events
   vector<Hom> events;
   // Consider one single event that recursively fires all events 
-  events.push_back(move_ring());
+  events.push_back(move_ring_sat_gen());
 
   // Fixpoint over events + to saturate topmost node
   DDD ss, tmp = M0;
