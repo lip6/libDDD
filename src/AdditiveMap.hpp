@@ -14,11 +14,14 @@ class AdditiveMap  {
 public :
   typedef typename mapType::value_type value_type;
   typedef typename mapType::const_iterator const_iterator;
+  typedef typename mapType::iterator iterator;
   AdditiveMap(){};
 
   // delegate iterator operations to map
   const_iterator end() const { return map.end(); }
   const_iterator begin() const { return map.begin();}
+
+  iterator find (const K & key) { return map.find(key) ;}
 
   int addAll (const AdditiveMap<K,V> & other) {
     return addAll(other.begin(),other.end());
@@ -38,7 +41,7 @@ public :
 
   // adds value to the value mapped to key
   // returns true if sum was actually used, false if normal insertion performed
-  bool add (K key, V value) {
+  bool add (const K & key, const V & value) {
     typename mapType::iterator it = map.find(key);
     if ( it != map.end() ) {
       // found it
@@ -51,7 +54,7 @@ public :
   }
   // removes value to the value mapped to key
   // returns true if difference - was actually used, false if nothing performed
-  bool remove (K key,V value) {
+  bool remove (const K & key, const V & value) {
     typename mapType::iterator it = map.find(key);
     if ( it != map.end() ) {
       // found it
