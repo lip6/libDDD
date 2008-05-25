@@ -31,6 +31,7 @@
 #include "SDD.h"
 #include "SDED.h"
 #include "UniqueTable.h"
+#include "AdditiveMap.hpp"
 #include "DataSet.h"
 #include "MemoryManager.h"
 #include "util/configuration.hh"
@@ -603,7 +604,8 @@ public:
 
 /************************** Compose */
 class Compose:public _GShom{
-private:
+public:
+  // Exposed for optimizations in FixPoint
   GShom left;
   GShom right;
 public:
@@ -828,27 +830,81 @@ public:
 		} else {
 		  L_part = GShom::id ;
 		}
-				
+		
+		// for the general case
+		std::vector<GShom> G_general;		
+		// terms of the form g = l & f 
+		std::vector<std::pair<GShom,GShom> > G_part;
+		G_part.reserve(partition.G.size());
+		for( 	std::set<GShom>::const_iterator G_it = partition.G.begin();
+			G_it != partition.G.end();
+			++G_it) {
+		  const _GShom * pg =_GShom::get_concret(*G_it);
+		  if (const Compose * comp = dynamic_cast<const Compose*> (pg)) { 
+		    if (const LocalApply * loc = dynamic_cast<const LocalApply*> ( _GShom::get_concret(comp->left))) {
+		      if ( loc->target == d.variable() ) {
+			if ( _GShom::get_concret(comp->right)->skip_variable(d.variable())) {
+			  // We are in the case where g = l & f, with l=local(d.var,h) and f.skip(var) = true
+			  // rewrite into (L&l) & (F&f)
+			  std::cout  << "rew : local case " << std::endl ; //comp->left << " & " << comp->right << std::endl;
+			  G_part.push_back( std::make_pair((L_part & comp->left) , (F_part & comp->right)));
+			  continue;
+			}
+		      }
+		    } else if (const SLocalApply * loc = dynamic_cast<const SLocalApply*> ( _GShom::get_concret(comp->left))) {
+		      if ( loc->target == d.variable() ) {
+			if ( _GShom::get_concret(comp->right)->skip_variable(d.variable())) {
+			  std::cout  << "rewrite : Slocal case. " << std::endl;
+			  G_part.push_back( std::make_pair((L_part & comp->left) , (F_part & comp->right)));
+			  continue;
+			}
+		      }
+		    }
+		  }
+		  // default case 
+		  G_general.push_back(L_part & (*G_it));
+		}
+		
+
+		
 		do
 		  {
 		    d1 = d2;
 
 		    d2 = F_part(d2);
 		    d2 = L_part(d2);
-
-		    for( 	std::set<GShom>::const_iterator G_it = partition.G.begin();
-				G_it != partition.G.end();
-				++G_it) 
+		    // general case
+		    for(std::vector<GShom>::const_iterator G_it = G_general.begin();
+			G_it != G_general.end();
+			++G_it) 
 		      {
-
-			// d2 = F_part(d2);
-			// 						d2 = L_part(d2);
-
-			// apply local part
-			// d2 = L_part(d2);
 			// chain application of Shom of this level
-			d2 =  ( (L_part &  (*G_it))(d2)) + d2;
+			// note that G_it already applies L_part
+			d2 =  (*G_it)(d2) + d2;
 		      }
+		    // resaturate successors if needed
+		    d2 = F_part(d2);
+		    // g = l & f case
+		    AdditiveMap<GSDD, GShom> addMap;
+		    for(std::vector<std::pair<GShom,GShom> >::const_iterator G_it = G_part.begin();
+			G_it != G_part.end();
+			++G_it) 
+		      {
+			// note that G_it->second contains F_part application
+			if (addMap.add( G_it->second (d2), G_it->first)) 
+			  std::cerr << "Applied add" << std::endl;
+		      }
+		    AdditiveMap<GSDD, GShom>::iterator found = addMap.find(d2);
+		    if (found != addMap.end()) {
+		       std::cerr << "Dynamic fixpoint !" << std::endl;
+		       found->second = fixpoint(found->second);
+		    }
+		    for (AdditiveMap<GSDD, GShom>::const_iterator it=addMap.begin();
+			 it != addMap.end();
+			 ++it) {
+		      d2 = d2 + it->second (it->first);
+		    }
+
 		  }
 		while (d1 != d2);
 		return d1;
