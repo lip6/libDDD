@@ -784,87 +784,87 @@ public:
 
 
   /* Eval */
-	GSDD 
-	eval(const GSDD &d) const
-	{
-	if( d == GSDD::null )
-	{
-		return GSDD::null;
-	}
-	else if( d == GSDD::one or d == GSDD::top )
-	{
-		return arg(d);
-	}
-	else
-	{
-		int variable = d.variable();
+  GSDD 
+  eval(const GSDD &d) const
+  {
+    if( d == GSDD::null )
+      {
+	return GSDD::null;
+      }
+    else if( d == GSDD::one or d == GSDD::top )
+      {
+	return arg(d);
+      }
+    else
+      {
+	int variable = d.variable();
 
-		GSDD d1 = d;
-		GSDD d2 = d;
+	GSDD d1 = d;
+	GSDD d2 = d;
 
-		// is it the fixpoint of an union ?
-		if (const Add * add = dynamic_cast<const Add*> ( get_concret(arg) ) )
-		{
-			// Check if we have ( Id + F + G )* where F can be forwarded to the next variable
+	// is it the fixpoint of an union ?
+	if (const Add * add = dynamic_cast<const Add*> ( get_concret(arg) ) )
+	  {
+	    // Check if we have ( Id + F + G )* where F can be forwarded to the next variable
 		
-			// Rewrite ( Id + F + G )*
-			// into ( O(Gn + Id) o (O(Fn + Id)*)* )* 
-			if( add->get_have_id() )
-			{                           
-				Add::partition partition = add->get_partition(variable);
+	    // Rewrite ( Id + F + G )*
+	    // into ( O(Gn + Id) o (O(Fn + Id)*)* )* 
+	    if( add->get_have_id() )
+	      {                           
+		Add::partition partition = add->get_partition(variable);
 
-				// operations that can be forwarded to the next variable
-				GShom F_part = fixpoint(partition.F);
+		// operations that can be forwarded to the next variable
+		GShom F_part = fixpoint(partition.F);
 
 				
-				GShom L_part ;
-				if (partition.has_local) {
-				  if (const LocalApply * loc = dynamic_cast<const LocalApply*> (partition.L)) {
-				    // Hom/DDD case
-				    L_part =  localApply(fixpoint(GHom(loc->h)),variable);
-				  } else {				    
-				    L_part =  localApply(fixpoint(GShom( ((const SLocalApply*)partition.L) ->h)),variable);
-				  }
-				} else {
-				  L_part = GShom::id ;
-				}
-				
-				do
-				{
-					d1 = d2;
-
-					d2 = F_part(d2);
-					d2 = L_part(d2);
-
-					for( 	std::set<GShom>::const_iterator G_it = partition.G.begin();
-							G_it != partition.G.end();
-							++G_it) 
-					{
-
-						// d2 = F_part(d2);
-// 						d2 = L_part(d2);
-
-						// apply local part
-						// d2 = L_part(d2);
-					  // chain application of Shom of this level
-					  d2 =  ( (L_part &  (*G_it))(d2)) + d2;
-					}
-				}
-				while (d1 != d2);
-				return d1;
-			}
-		}                                                                                               
-
-		do
-		{
-			d1 = d2;
-			d2 = arg(d2);
+		GShom L_part ;
+		if (partition.has_local) {
+		  if (const LocalApply * loc = dynamic_cast<const LocalApply*> (partition.L)) {
+		    // Hom/DDD case
+		    L_part =  localApply(fixpoint(GHom(loc->h)),variable);
+		  } else {				    
+		    L_part =  localApply(fixpoint(GShom( ((const SLocalApply*)partition.L) ->h)),variable);
+		  }
+		} else {
+		  L_part = GShom::id ;
 		}
-		while (d1 != d2);
+				
+		do
+		  {
+		    d1 = d2;
 
+		    d2 = F_part(d2);
+		    d2 = L_part(d2);
+
+		    for( 	std::set<GShom>::const_iterator G_it = partition.G.begin();
+				G_it != partition.G.end();
+				++G_it) 
+		      {
+
+			// d2 = F_part(d2);
+			// 						d2 = L_part(d2);
+
+			// apply local part
+			// d2 = L_part(d2);
+			// chain application of Shom of this level
+			d2 =  ( (L_part &  (*G_it))(d2)) + d2;
+		      }
+		  }
+		while (d1 != d2);
 		return d1;
-	}
-	}
+	      }
+	  }                                                                                               
+
+	do
+	  {
+	    d1 = d2;
+	    d2 = arg(d2);
+	  }
+	while (d1 != d2);
+
+	return d1;
+      }
+  }
 
   /* Memory Manager */
   void mark() const{
