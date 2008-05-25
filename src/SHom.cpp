@@ -514,7 +514,7 @@ public:
 	}
 
     partition
-    get_partition(int var)
+    get_partition(int var) const
     {
         this->skip_variable(var);
 	partition_cache_type::const_accessor caccess;  
@@ -803,13 +803,12 @@ public:
 		GSDD d2 = d;
 
 		// is it the fixpoint of an union ?
-		if( typeid( *get_concret(arg) ) == typeid(Add) )
+		if (const Add * add = dynamic_cast<const Add*> ( get_concret(arg) ) )
 		{
 			// Check if we have ( Id + F + G )* where F can be forwarded to the next variable
 		
 			// Rewrite ( Id + F + G )*
 			// into ( O(Gn + Id) o (O(Fn + Id)*)* )* 
-			Add* add = ((Add*)get_concret(arg));
 			if( add->get_have_id() )
 			{                           
 				Add::partition partition = add->get_partition(variable);
