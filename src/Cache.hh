@@ -40,6 +40,11 @@ private:
     
 public:
     
+  /** clear the cache, discarding all values. */
+  void clear (bool keepstats = false) {
+    cache_.clear();
+  }
+
 
     std::pair<bool,NodeType>
     insert(const HomType& hom, const NodeType& node)
@@ -83,6 +88,7 @@ public:
 #endif
         return std::make_pair(insertion,result->node_);
     }
+
     
 };
 
