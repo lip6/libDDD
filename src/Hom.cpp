@@ -849,6 +849,8 @@ void GHom::mark()const{
 };
 
 void GHom::garbage(){
+  cache.clear();
+
   // mark phase
   for(UniqueTable<_GHom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
     if((*di)->refCounter!=0){
