@@ -31,7 +31,6 @@
 #include "SDD.h"
 #include "SDED.h"
 #include "UniqueTable.h"
-#include "AdditiveMap.hpp"
 #include "DataSet.h"
 #include "MemoryManager.h"
 #include "util/configuration.hh"
@@ -585,7 +584,7 @@ public:
 		{
 			gi->mark();
 		}
-		// clear the cache as we have garbage coming up
+		// ready for garbage collect
 		partition_cache.clear();
     }
 
@@ -605,8 +604,7 @@ public:
 
 /************************** Compose */
 class Compose:public _GShom{
-public:
-  // Exposed for optimizations in FixPoint
+private:
   GShom left;
   GShom right;
 public:
@@ -819,6 +817,7 @@ public:
 		// operations that can be forwarded to the next variable
 		GShom F_part = fixpoint(partition.F);
 
+				
 		GShom L_part ;
 		if (partition.has_local) {
 		  if (const LocalApply * loc = dynamic_cast<const LocalApply*> (partition.L)) {
@@ -830,73 +829,27 @@ public:
 		} else {
 		  L_part = GShom::id ;
 		}
-		
-		// terms of the form g = l & f 
-		std::vector<std::pair<GShom,GShom> > G_part;
-		G_part.reserve(partition.G.size());
-		for( 	std::set<GShom>::const_iterator G_it = partition.G.begin();
-			G_it != partition.G.end();
-			++G_it) {
-		  const _GShom * pg =_GShom::get_concret(*G_it);
-		  if (const Compose * comp = dynamic_cast<const Compose*> (pg)) { 
-		    if (const LocalApply * loc = dynamic_cast<const LocalApply*> ( _GShom::get_concret(comp->left))) {
-		      if ( loc->target == d.variable() ) {
-			if ( _GShom::get_concret(comp->right)->skip_variable(d.variable())) {
-			  // We are in the case where g = l & f, with l=local(d.var,h) and f.skip(var) = true
-			  // rewrite into (L&l) & (F&f)
-//			  std::cout  << "rew : local case " << std::endl ; //comp->left << " & " << comp->right << std::endl;
-			  G_part.push_back( std::make_pair( (L_part & comp->left) , (F_part & comp->right)));
-			  continue;
-			}
-		      }
-		    } else if (const SLocalApply * loc = dynamic_cast<const SLocalApply*> ( _GShom::get_concret(comp->left))) {
-		      if ( loc->target == d.variable() ) {
-			if ( _GShom::get_concret(comp->right)->skip_variable(d.variable())) {
-//			  std::cout  << "rewrite : Slocal case. " << std::endl;
-			  G_part.push_back( std::make_pair( (L_part & comp->left) , (F_part & comp->right)));
-			  continue;
-			}
-		      }
-		    }
-		  }
-		  // default case 
-		  G_part.push_back(std::make_pair(L_part, (*G_it)));
-		}
-		
-
-		
+				
 		do
 		  {
 		    d1 = d2;
 
 		    d2 = F_part(d2);
 		    d2 = L_part(d2);
-		    for(std::vector<std::pair<GShom,GShom> >::const_iterator G_it = G_part.begin();
-			G_it != G_part.end();
-			++G_it) 
+
+		    for( 	std::set<GShom>::const_iterator G_it = partition.G.begin();
+				G_it != partition.G.end();
+				++G_it) 
 		      {
-			d2 = (G_it->first & G_it->second) (d2) + d2;
+
+			// d2 = F_part(d2);
+			// 						d2 = L_part(d2);
+
+			// apply local part
+			// d2 = L_part(d2);
+			// chain application of Shom of this level
+			d2 =  ( (L_part &  (*G_it))(d2)) + d2;
 		      }
-// 		    AdditiveMap<GSDD, GShom>::iterator found = addMap.find(d2);
-// 		    if (found != addMap.end()) {
-// 		       std::cerr << "Dynamic fixpoint !" << std::endl;
-// 		       found->second = fixpoint(found->second);
-// 		    }
-// 		    GSDD d3 = d2;
-// 		    for (AdditiveMap<GSDD, GShom>::const_iterator it=addMap.begin();
-// 			 it != addMap.end();
-// 			 ++it) {
-// 		      if (it->first == d3) {
-// 			// Dynamic fixpoint push 
-// 			std::cerr << "Dynamic fixpoint !" << std::endl;
-// 			if (partition.has_local)
-// 			  d2 = d2 + fixpoint (it->second + partition.L) (it->first);
-// 			else
-// 			  d2 = d2 + fixpoint (it->second) (it->first);
-// 		      } else {
-// 			d2 = d2 + (L_part & it->second) (it->first);
-// 		      }
-// 		    }
 		  }
 		while (d1 != d2);
 		return d1;
@@ -1261,7 +1214,12 @@ void GShom::mark()const{
   }
 }
 
+// used to reduce Shom::add creation complexity in recursive cases
+static hash_map<std::set<GShom>,GShom>::type addCache;
 void GShom::garbage(){
+  addCache.clear();
+  S_Homomorphism::cache.clear();
+
   // mark phase
   for(UniqueTable<_GShom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
     if((*di)->refCounter!=0){
@@ -1283,8 +1241,6 @@ void GShom::garbage(){
       di++;
     }
   }
-  // clear homomoprhisms cache
-  S_Homomorphism::cache.clear();
 }
 
 /*************************************************************************/
@@ -1359,7 +1315,8 @@ localApply(const GShom & h, int target)
 	return S_Homomorphism::SLocalApply(h,target);
 }
 
-static hash_map<std::set<GShom>,GShom>::type addCache;
+// addcache declaration is just above function garbageCollect
+// static hash_map<std::set<GShom>,GShom>::type addCache;
 GShom GShom::add(const std::set<GShom>& s)
 {
   if (s.empty() ) 
