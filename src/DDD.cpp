@@ -41,7 +41,6 @@
 #ifdef REENTRANT
 #include "tbb/atomic.h"
 #include "tbb/mutex.h"
-#include "util/tbb_atomic_bool.hh"
 #endif
 
 
