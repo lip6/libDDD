@@ -111,6 +111,8 @@ public:
     if (height == -1) {
       for (GSDD::const_iterator it= valuation.begin(); it != valuation.end() ; ++it) {
 	short sonheight = it->second.concret->getHeight();
+	if (typeid(*it->first) == typeid(SDD) ) 
+	  sonheight += ((const SDD *) it->first)->concret->getHeight();
 	height = (height < sonheight) ? sonheight : height;	
       }
       ++height;
