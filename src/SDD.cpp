@@ -55,11 +55,22 @@ public:
   const int variable;
   GSDD::Valuation valuation;
   mutable unsigned long int refCounter;
+#ifdef HEIGHTSDD
+  mutable short int height;
+#endif
   mutable bool marking;
 
   /* Constructor */
-  _GSDD(int var,int cpt=0):variable(var),refCounter(cpt),marking(false){}; 
-  _GSDD(int var,GSDD::Valuation val,int cpt=0):variable(var),valuation(val),refCounter(cpt),marking(false){}; 
+  _GSDD(int var,int cpt=0):variable(var),refCounter(cpt),
+#ifdef HEIGHTSDD
+			   height(-1),
+#endif 
+			   marking(false){}; 
+  _GSDD(int var,GSDD::Valuation val,int cpt=0):variable(var),valuation(val),refCounter(cpt),
+#ifdef HEIGHTSDD
+			   height(-1),
+#endif 
+			   marking(false){}; 
 
   virtual ~_GSDD () {
     for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; ++it) {
@@ -68,7 +79,13 @@ public:
   }
 
 
-  _GSDD (const _GSDD &g):variable(g.variable),valuation(g.valuation),refCounter(g.refCounter),marking(g.marking) {
+  
+
+  _GSDD (const _GSDD &g):variable(g.variable),valuation(g.valuation),refCounter(g.refCounter),
+#ifdef HEIGHTSDD
+			   height(g.height),
+#endif 
+			 marking(g.marking) {
     for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; ++it) {
       it->first = it->first->newcopy();
     }
@@ -82,12 +99,25 @@ public:
     if (variable!=g.variable || valuation.size()!= g.valuation.size()) 
       return false;  
    
-    for (GSDD::Valuation::const_iterator it = valuation.begin(),jt=g.valuation.begin(); it != valuation.end() && jt != g.valuation.end() ; it++,jt++ )
+    for (GSDD::const_iterator it = valuation.begin(),jt=g.valuation.begin(); it != valuation.end() && jt != g.valuation.end() ; it++,jt++ )
       if (!(it->first->set_equal(*jt->first) && it->second == jt->second))
 	return false;
     return true;
   }
-
+  
+  
+#ifdef HEIGHTSDD
+  short int getHeight () const {
+    if (height == -1) {
+      for (GSDD::const_iterator it= valuation.begin(); it != valuation.end() ; ++it) {
+	short sonheight = it->second.concret->getHeight();
+	height = (height < sonheight) ? sonheight : height;	
+      }
+      ++height;
+    }
+    return height;
+  }
+#endif // HEIGHTSDD
 
   /* Memory Manager */
   void mark()const;
@@ -261,6 +291,12 @@ int GSDD::variable() const{
 size_t GSDD::nbsons () const { 
   return concret->valuation.size();
 }
+
+#ifdef HEIGHTSDD
+short GSDD::getHeight () const {
+  return concret->getHeight();
+}
+#endif
 
 GSDD::const_iterator GSDD::begin() const{
   return concret->valuation.begin();

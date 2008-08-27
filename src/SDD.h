@@ -32,6 +32,9 @@
 #include "util/hash_support.hh"
 #include "hashfunc.hh"
 
+
+#define HEIGHTSDD
+
 /// pre-declaration of concrete (private) class implemented in .cpp file
 class _GSDD;
 
@@ -174,6 +177,12 @@ public:
   size_t nbsons () const;
   /// Returns the number of states or paths represented by a given node.
   long double nbStates() const;
+#ifdef HEIGHTSDD
+  /// Returns the height of the SDD node = max(son.height()) + 1
+  /// Terminals 0,1,T have height 0 by definition
+  short int getHeight () const;
+#endif
+
 #ifdef EVDDD
   /// returns the minimum value of the function encoded by a node
   int getMinDistance () const;
