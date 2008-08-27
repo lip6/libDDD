@@ -74,11 +74,6 @@ static int Hits=0;
 static int Misses=0;
 static size_t Max_SDED=0;
 
-#ifdef OTF_GARBAGE
-static int recentHits=0;
-static int recentMisses=0;
-static size_t Max_Recent_SDED=0;
-#endif
 
 #endif
 
@@ -95,9 +90,6 @@ public:
     return (parameter==((_SDED_GSDD*)&e)->parameter);
   };
   _SDED * clone () const { return new _SDED_GSDD(*this); }
-#ifdef OTF_GARBAGE
-  bool shouldCache () { return false; }
-#endif  
   GSDD eval() const{return parameter;};
 };
 
@@ -162,14 +154,6 @@ public:
   size_t hash() const;
   bool operator==(const _SDED &e)const;
   _SDED * clone () const { return new _SDED_Add(*this); }
-#ifdef OTF_GARBAGE
-  bool shouldCache () {
-    for(std::set<GSDD>::const_iterator si=parameters.begin();si!=parameters.end();++si)
-      if (! si->isSon()) 
-	return false;
-    return true;
-  }
-#endif
 
   /* Transform */
   GSDD eval() const;
@@ -399,11 +383,6 @@ public:
   size_t hash() const;
   bool operator==(const _SDED &e)const;
   _SDED * clone () const { return new _SDED_Mult(*this); }
-#ifdef OTF_GARBAGE
-  bool shouldCache () {
-    return  ( parameter1.isSon() &&  parameter2.isSon());
-  }
-#endif
 
   /* Transform */
   GSDD eval() const;
@@ -491,11 +470,6 @@ public:
   size_t hash() const;
   bool operator==(const _SDED &e)const;
   _SDED * clone () const { return new _SDED_Minus(*this); }
-#ifdef OTF_GARBAGE
-  bool shouldCache () {
-    return  ( parameter1.isSon() &&  parameter2.isSon());
-  }
-#endif
   /* Transform */
   GSDD eval() const;
 
@@ -600,11 +574,6 @@ public:
   size_t hash() const;
   bool operator==(const _SDED &e)const;
   _SDED * clone () const { return new _SDED_Concat(*this); }
-#ifdef OTF_GARBAGE
-  bool shouldCache () {
-    return  ( parameter1.isSon() &&  parameter2.isSon()) ;
-  }
-#endif
   /* Transform */
   GSDD eval() const;
 
@@ -671,9 +640,6 @@ private:
 public: 
   static _SDED *create(const GShom &h,const GSDD &d);
 
-#ifdef OTF_GARBAGE
-  virtual bool shouldCache() { return parameter.isSon()  ; }
-#endif
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
@@ -724,56 +690,15 @@ void SDED::pstats(bool reinit)
   std::cout << "*\nCache Stats : size=" << statistics() << "   --- Peak size=" <<  namespace_SDED::Max_SDED << std::endl;
   
 
-#ifdef OTF_GARBAGE
-  std::cout << "\nRecent cache hit ratio : " << double (namespace_SDED::recentHits*100) / double(namespace_SDED::recentMisses+1+namespace_SDED::recentHits) << "%" << std::endl;  
-#endif
   std::cout << "\nCache hit ratio : " << double (namespace_SDED::Hits*100) / double(namespace_SDED::Misses+1+namespace_SDED::Hits) << "%" << std::endl;
   // long hitr=(Hits*100) / (Misses+1+Hits) ;
   if (reinit){
     namespace_SDED::Hits =0;
     namespace_SDED::Misses =0;  
-#ifdef OTF_GARBAGE
-    namespace_SDED::recentMisses =0;
-    namespace_SDED::recentHits =0;  
-#endif
   }  
 
 }
 
-#ifdef OTF_GARBAGE
-static unsigned int  recentLimit = 1024 ;
-void SDED::recentGarbage(bool force){
-  size_t rcSize=namespace_SDED::recentCache.size();
-  int longTerm = 0;
-  int flSize ;
-  if ( (rcSize > recentLimit && rcSize > 2*namespace_SDED::cache.size()) || force ) {
-    flSize = namespace_SDED::cache.size();
-    if (namespace_SDED::recentCache.size() > namespace_SDED::Max_Recent_SDED) 
-      namespace_SDED::Max_Recent_SDED=namespace_SDED::recentCache.size();  
-    for(namespace_SDED::Cache::iterator di=namespace_SDED::recentCache.begin();di!=namespace_SDED::recentCache.end();){
-      namespace_SDED::Cache::iterator ci=di;
-      di++;
-      _SDED *d=ci->first.concret;
-      if (d->shouldCache() && ci->second.isSon()) {
-	namespace_SDED::cache.insert(*ci);
-	namespace_SDED::recentCache.erase(ci);
-	longTerm++;
-      }      else {
-	namespace_SDED::recentCache.erase(ci);
-	delete d;
-      }
-    }
-    if ( longTerm < (flSize / 20) )
-      recentLimit*=2;
-    std::cerr << " Recent SDED cache size was " << rcSize << "/"<< recentLimit<<" Full : "<< namespace_SDED::cache.size() << "  comitted " << longTerm << " results to storage "<<std::endl;
-    std::cerr << "Recent cache hit ratio : " << double (namespace_SDED::recentHits*100) / double(namespace_SDED::recentMisses+1+namespace_SDED::recentHits) << "%" << std::endl;  
-    std::cerr << "Cache hit ratio : " << double (namespace_SDED::Hits*100) / double(namespace_SDED::Misses+1+namespace_SDED::Hits) << "%" << std::endl;
-    std::cerr << "Any Cache hit ratio : " << double ( (namespace_SDED::recentHits+ namespace_SDED::Hits)*100) / double(namespace_SDED::recentMisses+1+(namespace_SDED::recentHits+ namespace_SDED::Hits)) << "%" << std::endl;
-    namespace_SDED::recentHits =namespace_SDED::recentMisses = 0;
-    SDDutil::recentGarbage();
-  }
-};
-#endif
 
 size_t SDED::peak() {
   if (namespace_SDED::cache.size() > namespace_SDED::Max_SDED)
@@ -782,9 +707,6 @@ size_t SDED::peak() {
 }
 
 void SDED::garbage(){
-#ifdef OTF_GARBAGE
-  recentGarbage();
-#endif
 
 	if (namespace_SDED::cache.size() > namespace_SDED::Max_SDED)
 	{
@@ -799,15 +721,6 @@ void SDED::garbage(){
 		delete d;
 	} 
 
-#ifdef OTF_GARBAGE
-  for(namespace_SDED::Cache::iterator di=namespace_SDED::recentCache.begin();di!=namespace_SDED::recentCache.end();){
-      namespace_SDED::Cache::iterator ci=di;
-      di++;
-      _SDED *d=ci->first.concret;
-      namespace_SDED::recentCache.erase(ci);
-      delete d;
-  } 
-#endif
 //  cache.clear();
 
 }; 
@@ -822,28 +735,18 @@ bool SDED::operator==(const SDED& e) const{
 // eval and std::set to NULL the DED
 GSDD SDED::eval(){
 
-#ifndef OTF_GARBAGE
+
    if(typeid(*concret)==typeid(_SDED_GSDD)){
      GSDD res=concret->eval();
      delete concret;
      return res;
    }  else {
-#endif
 
-#ifdef OTF_GARBAGE
-    namespace_SDED::Cache::const_iterator ci=namespace_SDED::recentCache.find(*this); // search e in the recent storage cache
 
-    if (ci==namespace_SDED::recentCache.end()){ // *this is not in the recent storage cache
-      ++namespace_SDED::recentMisses;
-      // test if parameters potentially allow long term storage
-      if ( concret->shouldCache() ){
-#endif // OTF_GARBAGE
 
 	// search in long term cache
-#ifndef OTF_GARBAGE
 	// namespace_SDED::Cache::const_iterator
 	namespace_SDED::Cache::accessor access;
-#endif
 	
 	// ci=namespace_SDED::cache.find(*this); // search e in the long term storage cache
 	namespace_SDED::cache.find(access,*this);
@@ -858,13 +761,6 @@ GSDD SDED::eval(){
         GSDD res = concret->eval();
 
 
-#ifdef OTF_GARBAGE
-	  // test if result is eligible for long term storage status
- 	  if ( ! res.isSon() ) {
-	    // Not eligible
-	    namespace_SDED::recentCache[*this]=res;
- 	  } else {
-#endif
  	    // eligible
  	    // namespace_SDED::cache[*this]=res;
 
@@ -875,41 +771,16 @@ GSDD SDED::eval(){
           }
 
 
-#ifdef OTF_GARBAGE
-	    // Should we quick Garbage HERE ???
-	    recentGarbage();
- 	  }
-#endif
 	  concret=NULL;
 	  return res;
 	} else {
 	  // found in long term cache
 	  namespace_SDED::Hits++;
 	  delete concret;
-#ifdef OTF_GARBAGE
-	  recentGarbage();
-#endif
 
           return access->second;
 	}
-#ifdef OTF_GARBAGE
-      } else { // parameters make Shom ineligible for long term storage	
-	
-	// this constitutes a cache miss (simple) !!
-	GSDD res=concret->eval(); // compute the result
-	namespace_SDED::recentCache[*this]=res;	
-	concret=NULL;
-	return res;
-     }
-  } else {// *this is in the cache
-    namespace_SDED::recentHits++;
-    delete concret;
-    return ci->second;
-  }
-#endif
-#ifndef OTF_GARBAGE
    } // end else : not a constant GSDD
-#endif
 };
 
 
