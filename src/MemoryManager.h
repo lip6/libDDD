@@ -60,8 +60,7 @@ public:
 
   /// Garbage collection function. 
   /// Call this to reclaim intermediate nodes, unused operations and related cache.
-  /// Note that this function is quite costly, and it totally destroys the cache unless OTF 
-  /// garbage collection is activated.
+  /// Note that this function is quite costly, and it totally destroys the cache
   static void garbage(){
     // FIXME : if you dont use SDD suppress the following
     SDED::garbage();

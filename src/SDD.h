@@ -123,14 +123,6 @@ public:
   GSDD(_GSDD *_g); 
   /// \param _g The pointer provided should point into the unicity table
   GSDD(const _GSDD *_g); 
-#ifdef OTF_GARBAGE
-  /// In OTF garbage context, reference count maintaining is necessary for GSDD.
-  /// Copy constructor with refcount.
-  GSDD(const GSDD &);
-  /// In OTF garbage context, reference count maintaining is necessary for GSDD.
-  /// Assignment constructor with refcount.
-  GSDD & operator=(const GSDD &);
-#endif
  //@}
 
   /* Constants */
@@ -148,10 +140,6 @@ public:
   //@}
 
 
-#ifdef OTF_GARBAGE
-  /// In OTF garbage context, reference count must be maintained for GSDD.
-  virtual ~GSDD () ;
-#endif
   /* Compare */
  /// \name Comparisons for hash and map storage
   //@{
@@ -219,16 +207,6 @@ public:
   /// Returns the peak size of the DDD unicity table. This value is maintained up to date upon GarbageCollection.
   static size_t peak();
 
-#ifdef OTF_GARBAGE
-  /// To check out useless intermediate nodes : on the fly garbage collection.
-  /// WARNING : this is not const at all in fact it deletes "concret" and is quite dangerous,
-  /// only for expert use not a basic library functionality
-  void clearNode() const;
-  /// During on the fly garbage collection, nodes marked as son are preserved.
-  void markAsSon() const;
-  /// During on the fly garbage collection, nodes marked as son are preserved.
-  bool isSon() const;
-#endif // OTF_GARBAGE
   //@}
 
 
@@ -336,10 +314,6 @@ public:
 #include "UniqueTable.h"
 
 namespace SDDutil {
-#ifdef OTF_GARBAGE
-  /// The function used in OTF garbage context to clear up part of the intermediate nodes.
-  void recentGarbage();
-#endif // OTF_GARBAGE
   /// accessor to UniqueTable instance declared in cpp file, (hem, please don't touch it). 
   /// \todo implement nice generic dot export and eliminate this.
   UniqueTable<_GSDD> * getTable ();

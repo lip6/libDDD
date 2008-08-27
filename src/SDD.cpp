@@ -55,27 +55,11 @@ public:
   const int variable;
   GSDD::Valuation valuation;
   mutable unsigned long int refCounter;
-#ifdef OTF_GARBAGE
-  mutable unsigned long int tempCounter;
-#endif // OTF_GARBAGE
   mutable bool marking;
-#ifdef OTF_GARBAGE
-  mutable bool isSon;
-#endif // OTF_GARBAGE
 
   /* Constructor */
-#ifdef OTF_GARBAGE
-  _GSDD(int var,int cpt=0):variable(var),refCounter(cpt),tempCounter(0),marking(false),isSon(false){}; 
-  _GSDD(int var,GSDD::Valuation val,int cpt=0):variable(var),valuation(val),refCounter(cpt),tempCounter(0),marking(false),isSon(false){}; 
-
-  void UpdateSons () const {
-    for (GSDD::Valuation::const_iterator it= valuation.begin(); it != valuation.end() ; ++it) 
-      it->second.concret->isSon = true;
-  }
-#else
   _GSDD(int var,int cpt=0):variable(var),refCounter(cpt),marking(false){}; 
   _GSDD(int var,GSDD::Valuation val,int cpt=0):variable(var),valuation(val),refCounter(cpt),marking(false){}; 
-#endif // OTF_GARBAGE
 
   virtual ~_GSDD () {
     for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; ++it) {
@@ -84,11 +68,7 @@ public:
   }
 
 
-#ifdef OTF_GARBAGE
-  _GSDD (const _GSDD &g):variable(g.variable),valuation(g.valuation),refCounter(g.refCounter),tempCounter(g.tempCounter),marking(g.marking),isSon(g.isSon) {
-#else
   _GSDD (const _GSDD &g):variable(g.variable),valuation(g.valuation),refCounter(g.refCounter),marking(g.marking) {
-#endif // OTF_GARBAGE
     for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; ++it) {
       it->first = it->first->newcopy();
     }
@@ -143,80 +123,9 @@ static SDD_parallel_init SDD_init;
 static size_t Max_SDD=0;
 #endif
 
-#ifdef OTF_GARBAGE
-static  __gnu_cxx::hash_set<_GSDD*> recent;
-
-template<>
-_GSDD* UniqueTable<_GSDD>::operator()(_GSDD *_g){
-  std::pair<__gnu_cxx::hash_set<_GSDD*>::iterator, bool> ref=table.insert(_g); 
-  __gnu_cxx::hash_set<_GSDD*>::iterator ti=ref.first;
-  if (!ref.second){
-    delete _g;
-  } else {
-    (*ti)->UpdateSons();
-  }
-  return *ti;
-}
-#endif
-
 static UniqueTable<_GSDD> canonical;
 
 namespace SDDutil {
-#ifdef OTF_GARBAGE
-  static int lastAvg = 10;
-  void recentGarbage() {
-    size_t rcSize = recent.size();
-    size_t flSize = canonical.table.size();
-    int cleared=0,inuse=0,isson=0,toSon=0,totalRefs=0,min=255,max=0;
-    for (__gnu_cxx::hash_set<_GSDD*>::iterator it =  recent.begin(); it != recent.end() ; ) {
-      if ( ! (*it)->isSon  ) {
-	// not eligible for long term
-	if ( ! (*it)->tempCounter ) {
-	  // AND not in use
-          __gnu_cxx::hash_set<_GSDD*>::iterator jt= it;
-	  it++;
-	  
-	  _GSDD *g=*jt;
-	  // Kill from main unicity table
-	  canonical.table.erase(g);
-	  // kill from recent entries
-	  recent.erase(jt);
-	  delete g;
-	  ++cleared;
-	} else {
-	  // NOT ELIGIBLE for long term but still in use : skip entry
-	  register int cc = (*it)->tempCounter;
-	  totalRefs += cc;
-	  min =  cc < min ? cc : min ;
-	  max =  cc > max ? cc : max ;
-	  if (cc > (2*(lastAvg+1)) ) {
-            __gnu_cxx::hash_set<_GSDD*>::iterator jt= it;
-	    it++;
-	    (*jt)->isSon=true;
-	    recent.erase(jt);
-	    ++toSon;
-	    continue;
-	  }
-	  it++;
-	  ++inuse;
-	}
-	
-      } else {
-	// eligible (newly) for long term
-	// kill from recent entries
-        __gnu_cxx::hash_set<_GSDD*>::iterator jt= it;
-	it++;
-	recent.erase(jt);
-	++isson;
-      }
-    } // end foreach entry in recent nodes table
-    lastAvg = inuse ? totalRefs / inuse : 1;
-    std::cerr << "Reduced recent from :" << rcSize << " to " << recent.size() << std::endl;
-    std::cerr << "Reduced canonical from :" << flSize << " to " << canonical.table.size() << std::endl;
-    std::cerr << "Destroyed : " << cleared << "  inuse : " << inuse << " average use(min/max) :" << lastAvg <<"("<<min<<","<<max<<")"<< " elevated to long term " << toSon << " natural new long term " << isson << std::endl <<std::endl; 
-
-  }
-#endif // OTF_GARBAGE
   
   UniqueTable<_GSDD>  * getTable () {return &canonical;}
   
@@ -296,45 +205,15 @@ std::ostream& operator<<(std::ostream &os,const GSDD &g){
   return(os);
 }
 
-#ifdef OTF_GARBAGE
-GSDD::GSDD(const GSDD & g) :concret(g.concret) {
-  if ( ! concret->isSon  ) {
-    if (!concret->tempCounter)
-      recent.insert(concret);
-    ++ concret->tempCounter;
-  }
-}
-#endif
 
 GSDD::GSDD(const _GSDD *_g):concret(_g){
- // handle OTF GARBAGE ?
 } 
 
 GSDD::GSDD(const _GSDD &_g):concret(canonical(_g)){ 
-#ifdef OTF_GARBAGE
-  if ( ! concret->isSon  ) {
-    if (!concret->tempCounter)
-      recent.insert(concret);
-    ++ concret->tempCounter;
-  }
-#endif
 }
 
 GSDD::GSDD(int variable,Valuation value){
-#ifndef OTF_GARBAGE
   concret= value.size() != 0 ?  canonical(_GSDD(variable,value)) : null.concret;
-#else
-  if ( ! value.size() ) 
-    concret = null.concret;
-  else {
-    concret = canonical(_GSDD(variable,value));
-    if ( ! concret->isSon  ) {
-      if (!concret->tempCounter)
-	recent.insert(concret);
-      ++ concret->tempCounter;
-    }
-  }
-#endif
 }
 
 
@@ -345,13 +224,6 @@ GSDD::GSDD(int var,const DataSet &val,const GSDD &d):concret(null.concret){ //va
     std::pair<DataSet *, GSDD> x( val.newcopy(),d);
     _g.valuation.push_back(x);
     concret=canonical(_g);    
-#ifdef OTF_GARBAGE
-    if ( ! concret->isSon  ) {
-      if (!concret->tempCounter)
-	recent.insert(concret);
-      ++ concret->tempCounter;
-    }
-#endif
   }
   //  concret->refCounter++;
 }
@@ -364,13 +236,6 @@ GSDD::GSDD(int var,const GSDD &va,const GSDD &d):concret(null.concret){ //var-va
     std::pair<DataSet *, GSDD> x( val.newcopy(),d);
     _g.valuation.push_back(x);
     concret=canonical(_g);    
-#ifdef OTF_GARBAGE
-    if ( ! concret->isSon  ) {
-      if (!concret->tempCounter)
-	recent.insert(concret);
-      ++ concret->tempCounter;
-    }
-#endif
   }
   //  concret->refCounter++;
 }
@@ -382,13 +247,6 @@ GSDD::GSDD(int var,const SDD &val,const GSDD &d):concret(null.concret){ //var-va
     std::pair<DataSet *, GSDD> x( val.newcopy(),d);
     _g.valuation.push_back(x);
     concret=canonical(_g);    
-#ifdef OTF_GARBAGE
-    if ( ! concret->isSon  ) {
-      if (!concret->tempCounter)
-	recent.insert(concret);
-      ++ concret->tempCounter;
-    }
-#endif
   }
   //  concret->refCounter++;
 }
@@ -403,11 +261,6 @@ int GSDD::variable() const{
 size_t GSDD::nbsons () const { 
   return concret->valuation.size();
 }
-#ifdef OTF_GARBAGE
-bool GSDD::isSon () const {
-  return concret->isSon;
-}
-#endif
 
 GSDD::const_iterator GSDD::begin() const{
   return concret->valuation.begin();
@@ -579,31 +432,12 @@ long double GSDD::nbStates() const{
   return myNbStates(*this);
 }
 
-#ifdef OTF_GARBAGE
-void GSDD::clearNode() const {
-  canonical.table.erase(concret);
-}
-
-void GSDD::markAsSon() const {
-  concret->isSon = true;
-}
-#endif
 
 void GSDD::garbage(){
-#ifdef OTF_GARBAGE
-  SDDutil::recentGarbage();
-#endif
   if (canonical.size() > Max_SDD) 
     Max_SDD=canonical.size();  
 
   MySDDNbStates::clear();
-#ifdef OTF_GARBAGE
-  for (__gnu_cxx::hash_set<_GSDD*>::iterator it =  recent.begin(); it != recent.end() ; ) {
-    __gnu_cxx::hash_set<_GSDD*>::iterator jt= it;
-    it++;
-    recent.erase(jt);
-  }
-#endif
   // mark phase
   for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
     if((*di)->refCounter!=0)
@@ -653,40 +487,19 @@ SDD::SDD(const SDD &g)
 
 SDD::SDD(const GSDD &g):GSDD(g.concret){
   (concret->refCounter)++;
-#ifdef OTF_GARBAGE
-  concret->isSon = true;
-#endif
 }
 
-
-#ifdef OTF_GARBAGE
-GSDD::~GSDD(){
-  if (! concret->isSon ) {
-    assert(concret->tempCounter >0);
-    -- concret->tempCounter ;
-  }
-}
-#endif
 
 SDD::SDD(int var,const DataSet& val,const GSDD &d):GSDD(var,val,d){
   concret->refCounter++;
-#ifdef OTF_GARBAGE
-  concret->isSon = true;
-#endif
 }
 
 SDD::SDD(int var,const GSDD& val,const GSDD &d):GSDD(var,val,d){
   concret->refCounter++;
-#ifdef OTF_GARBAGE
-  concret->isSon = true;
-#endif
 }
 
 SDD::SDD(int var,const SDD& val,const GSDD &d):GSDD(var, val,d){
   concret->refCounter++;
-#ifdef OTF_GARBAGE
-  concret->isSon = true;
-#endif
 }
 
 
@@ -695,33 +508,10 @@ SDD::~SDD(){
   concret->refCounter--;
 }
 
-#ifdef OTF_GARBAGE
-GSDD &GSDD::operator=(const GSDD &g){
-  if (g != *this) {
-    // decrement usage for current value
-    if (! concret->isSon ) {
-      assert(concret->tempCounter >0);
-      -- concret->tempCounter ;
-    }  
-    // copy
-    concret=g.concret;
-    // increment recent usage
-    if ( ! concret->isSon  ) {
-      if (!concret->tempCounter)
-	recent.insert(concret);
-      ++ concret->tempCounter;
-    }
-  }
-  return *this;
-}
-#endif
 
 SDD &SDD::operator=(const GSDD &g){
   concret->refCounter--;
   concret=g.concret;
-#ifdef OTF_GARBAGE
-  concret->isSon = true;
-#endif
   concret->refCounter++;
   return *this;
 }
@@ -729,9 +519,6 @@ SDD &SDD::operator=(const GSDD &g){
 SDD &SDD::operator=(const SDD &g){
   concret->refCounter--;
   concret=g.concret;
-#ifdef OTF_GARBAGE
-  concret->isSon = true;
-#endif
   concret->refCounter++;
   return *this;
 }
