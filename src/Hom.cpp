@@ -182,10 +182,6 @@ public:
             }
             else
             {
-                if( typeid(*get_concret(*it)) == typeid(Identity) )
-                {
-                    have_id = true;
-                }
                 parameters.insert(*it);
             }
         }
@@ -194,7 +190,7 @@ public:
     bool
     get_have_id() const
     {
-        return have_id;
+      return parameters.find(GHom::id) != parameters.end();
     }
    
     std::set<GHom>&
@@ -609,7 +605,7 @@ public:
 
 			// Apply ( Id + F )* on all sons
 			d2 = F_part(d2);
-                                            
+                          
                         // Apply ( G + Id )
                         for (std::set<GHom>::const_iterator it = partition.second.begin() ; it != partition.second.end() ; ++it ) {
 			  d2 = (*it) (d2) + d2;
