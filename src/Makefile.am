@@ -1,5 +1,5 @@
 lib_LIBRARIES = libDDD.a \
-                libDDD_d.a
+                libDDD_d.a 
 
 ddddir      =   $(pkgincludedir)
 ddd_hdrs    =   DataSet.h \
