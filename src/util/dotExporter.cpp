@@ -222,8 +222,8 @@ typedef  hash_set<GSDD,d3::util::hash<GSDD>, d3::util::equal<GSDD> > gsdd_hash_s
 
     out = new ofstream ( string(path+".dot").c_str() );
     D3out = new ofstream ( string("d3"+path+".dot").c_str());
-    *out << "digraph "<<path<<" {\n    size=\"20,20\";\n"; 
-    *D3out << "digraph  d3"<<path<<" {\n    size=\"20,20\";\n"; 
+    *out << "digraph \""<<path<<"\" {\n    size=\"20,20\";\n"; 
+    *D3out << "digraph  \"d3"<<path<<"\" {\n    size=\"20,20\";\n"; 
 
   }
 
