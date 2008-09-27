@@ -294,7 +294,7 @@ public:
   }  
   
   size_t hash() const {
-    return  h.hash() ^ target * 21727; 
+    return  h.hash() ^ target * 2177; 
   }
 
   bool operator==(const _GShom &s) const {
@@ -822,9 +822,11 @@ public:
 		if (partition.has_local) {
 		  if (const LocalApply * loc = dynamic_cast<const LocalApply*> (partition.L)) {
 		    // Hom/DDD case
-		    L_part =  localApply(fixpoint(GHom(loc->h)),variable);
-		  } else {				    
-		    L_part =  localApply(fixpoint(GShom( ((const SLocalApply*)partition.L) ->h)),variable);
+		    GHom hh = fixpoint(GHom(loc->h));
+		    L_part =  localApply( hh ,variable);
+		  } else {	
+		    GShom hh = fixpoint(GShom( ((const SLocalApply*)partition.L) ->h));
+		    L_part =  localApply( hh ,variable);
 		  }
 		} else {
 		  L_part = GShom::id ;
@@ -1288,7 +1290,9 @@ Shom &Shom::operator=(const GShom &h){
 
 /* Operations */
 GShom fixpoint (const GShom &h) {
-  if( typeid( *_GShom::get_concret(h) ) == typeid(S_Homomorphism::Fixpoint))
+  if( typeid( *_GShom::get_concret(h) ) == typeid(S_Homomorphism::Fixpoint)
+      || typeid( *_GShom::get_concret(h) ) == typeid(S_Homomorphism::Identity)
+      )
       return h;
   return S_Homomorphism::Fixpoint(h);
 }
@@ -1317,14 +1321,18 @@ localApply(const GShom & h, int target)
 
 // addcache declaration is just above function garbageCollect
 // static hash_map<std::set<GShom>,GShom>::type addCache;
-GShom GShom::add(const std::set<GShom>& s)
-{
-  if (s.empty() ) 
+GShom GShom::add(const std::set<GShom>& set)
+{  
+  if (set.empty() ) 
     return GSDD::null;
   
-  if( s.size() == 1 )
-    return *(s.begin());
+  if( set.size() == 1 )
+    return *(set.begin());
   else {
+    std::set<GShom> s = set;
+    s.erase(GShom(GSDD::null));
+    if( s.size() == 1 )
+      return *(s.begin());
     hash_map<std::set<GShom>,GShom>::type::accessor acc;
     if (addCache.insert(acc,s)) {
       GShom added =  S_Homomorphism::Add(s);
