@@ -24,57 +24,61 @@
 using namespace std;
 
 #include "DDD.h"
-#include "DED.h"
-#include "Hom.h"
 #include "MemoryManager.h"
 #include "SetVar.hh"
+#include "statistic.hpp"
+
 
 typedef enum {A, B, C, D,E, F, G} var;
 var variables;
 const char* vn[]= {"A", "B", "C", "D", "E", "F", "G"};
 
 void initName() {
-  for (int i=A; i<=G; i++)
-    DDD::varName(i,vn[i]);
+	for (int i=A; i<=G; i++)
+		DDD::varName(i,vn[i]);
 }
 
 int main(){
-  initName();
+	initName();
 
-  cout <<"****************"<<endl;
-  cout <<"* Define DDD u *"<<endl;
-  cout <<"****************"<<endl;
+	cout <<"****************"<<endl;
+	cout <<"* Define DDD u *"<<endl;
+	cout <<"****************"<<endl;
 
-  DDD a=DDD(A,1,DDD(B,3))+DDD(A,4,DDD(B,4));
-  DDD b=DDD(C,6,DDD(D,1))+DDD(C,2,DDD(D,2));
-  DDD u=a^b;
-  cout <<"u="<< endl<<u<<endl;
+	DDD a=DDD(A,1,DDD(B,3))+DDD(A,4,DDD(B,4));
+	DDD b=DDD(C,6,DDD(D,1))+DDD(C,2,DDD(D,2));
+	DDD u=a^b;
+	cout <<"u="<< endl<<u<<endl;
 
-  cout <<"****************************************************"<<endl;
-  cout <<"* Strong Hom <X=c> : set the first value of X to d *"<<endl;
-  cout <<"****************************************************"<<endl;
+	cout <<"****************************************************"<<endl;
+	cout <<"* Strong Hom <X=c> : set the first value of X to d *"<<endl;
+	cout <<"****************************************************"<<endl;
 
-  Hom setC_5 = setCst(C,5);
-  cout <<"<C=5>(u)="<< endl<<setC_5(u)<<endl;
+	Hom setC_5 = setCst(C,5);
+	cout <<"<C=5>(u)="<< endl<<setC_5(u)<<endl;
 
-  cout <<"***********************************************************************"<<endl;
-  cout <<"* Strong Hom <X=Y> : set the first value of Y to the first value of Y *"<<endl;
-  cout <<"***********************************************************************"<<endl;
+	cout <<"***********************************************************************"<<endl;
+	cout <<"* Strong Hom <X=Y> : set the first value of Y to the first value of Y *"<<endl;
+	cout <<"***********************************************************************"<<endl;
 
-  Hom setC_A = setVar(C,A);
-  cout <<"<C=A>(u)="<< endl<<setC_A(u)<<endl;
+	Hom setC_A = setVar(C,A);
+	cout <<"<C=A>(u)="<< endl<<setC_A(u)<<endl;
 
-  Hom setA_C = setVar(A,C);
-  cout <<"<A=C>(u)="<< endl<<setA_C(u)<<endl;
+	Hom setA_C = setVar(A,C);
+	cout <<"<A=C>(u)="<< endl<<setA_C(u)<<endl;
 
-  Hom setB_D = setVar(B,D);
-  cout <<"<B=D>(u)="<< endl<<setB_D(u)<<endl;
+	Hom setB_D = setVar(B,D);
+	cout <<"<B=D>(u)="<< endl<<setB_D(u)<<endl;
 
-  cout <<"<C=5><A=C><B=D>(u)="<< endl<<(setC_5&setA_C&setB_D)(u)<<endl;
+	DDD v = (setC_5&setA_C&setB_D)(u);
+	cout <<"<C=5><A=C><B=D>(u)="<< endl<<v <<endl;
 
-  MemoryManager::pstats();
-  
-  return 1;
+	Statistic s(v,"tst5",CSV);
+
+	s.print_header(cout);
+	s.print_line(cout);
+
+	return 1;
 }
 
 

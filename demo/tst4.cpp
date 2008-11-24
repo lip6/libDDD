@@ -24,48 +24,52 @@
 using namespace std;
 
 #include "DDD.h"
-#include "DED.h"
-#include "Hom.h"
 #include "MemoryManager.h"
 #include "PlusPlus.hh"
+#include "statistic.hpp"
+
 
 typedef enum {A, B, C, D,E, F, G} var;
 var variables;
 const char* vn[]= {"A", "B", "C", "D", "E", "F", "G"};
 
 void initName() {
-  for (int i=A; i<=G; i++)
-    DDD::varName(i,vn[i]);
+	for (int i=A; i<=G; i++)
+		DDD::varName(i,vn[i]);
 }
 
 int main(){
-  initName();
+	initName();
 
-  cout <<"****************"<<endl;
-  cout <<"* Define DDD u *"<<endl;
-  cout <<"****************"<<endl;
+	cout <<"****************"<<endl;
+	cout <<"* Define DDD u *"<<endl;
+	cout <<"****************"<<endl;
 
-  DDD a=DDD(A,1,DDD(A,1));
-  DDD b=DDD(C,1,DDD(A,1))+DDD(C,2,DDD(B,3));
-  DDD u=a^b;
+	DDD a=DDD(A,1,DDD(A,1));
+	DDD b=DDD(C,1,DDD(A,1))+DDD(C,2,DDD(B,3));
+	DDD u=a^b;
 
-  cout <<"u="<< endl<<u<<endl;
+	cout <<"u="<< endl<<u<<endl;
 
-  cout <<"**************************************************"<<endl;
-  cout <<"* Strong Hom <!X++> : incremente all values of X *"<<endl;
-  cout <<"**************************************************"<<endl;
+	cout <<"**************************************************"<<endl;
+	cout <<"* Strong Hom <!X++> : incremente all values of X *"<<endl;
+	cout <<"**************************************************"<<endl;
 
-  Hom fa = plusplusAll(A);
-  Hom fb = plusplusAll(B);
-  Hom fc = plusplusAll(C);
-  Hom fd = plusplusAll(D);
+	Hom fa = plusplusAll(A);
+	Hom fb = plusplusAll(B);
+	Hom fc = plusplusAll(C);
+	Hom fd = plusplusAll(D);
 
-  cout <<"<!A++>(u)="<< endl<<fa(u)<<endl;
-  cout <<"<!B++>(u)="<< endl<<fb(u)<<endl;
-  cout <<"<!C++>(u)="<< endl<<fc(u)<<endl;
-  cout <<"<!D++>(u)="<< endl<<fd(u)<<endl;
+	cout <<"<!A++>(u)="<< endl<<fa(u)<<endl;
+	cout <<"<!B++>(u)="<< endl<<fb(u)<<endl;
+	cout <<"<!C++>(u)="<< endl<<fc(u)<<endl;
+	cout <<"<!D++>(u)="<< endl<<fd(u)<<endl;
 
-  MemoryManager::pstats();
+	Statistic s(u,"tst4",CSV);
 
-  return 1;
+	s.print_header(cout);
+	s.print_line(cout);
+	MemoryManager::pstats();
+
+	return 1;
 }
