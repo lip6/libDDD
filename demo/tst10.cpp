@@ -29,6 +29,7 @@ using namespace std;
 #include "Hom.h"
 #include "MemoryManager.h"
 #include "PlusPlus.hh"
+#include "statistic.hpp"
 
 typedef enum {A, B, C, D,E, F, G} var;
 var variables;
@@ -55,13 +56,13 @@ public :
 
   GDDD phiOne() const {
     return GDDD::one;
-  }                   
+  }
 
   GHom phi(int vr, int vl) const {
     if (vr == var)
       return h & GHom(vr,vl);
-    else 
-      return GHom(vr,vl,this); 
+    else
+      return GHom(vr,vl,this);
   }
 
   size_t hash() const {
@@ -73,7 +74,7 @@ public :
     return var == ps->var && h==ps->h;
   }
   _GHom * clone () const {  return new _seek(*this); }
-};  
+};
 
 
 /// selects only paths such that first occurrence of path has value < x.
@@ -87,7 +88,7 @@ public:
 
   GDDD phiOne() const {
     return GDDD::one;
-  }                   
+  }
 
   GHom phi(int vr, int vl) const {
       if (vl <= lim)
@@ -116,24 +117,24 @@ GHom selectVarLim(int lim){return _selectVarLim(lim);};
 /// It also gives a simple saturation example.
 int main(){
   initName();
-  
-  
-  
+
+
+
   cout <<"****************"<<endl;
   cout <<"* Define DDD u *"<<endl;
   cout <<"****************"<<endl;
-  
-  // This segment is a few variables long, it just increases the depth of the variable we want to work on (the last one).   
+
+  // This segment is a few variables long, it just increases the depth of the variable we want to work on (the last one).
   DDD longSegment = DDD(A,1,DDD(A,1,DDD(A,1,DDD(A,1,DDD(A,1,DDD(A,1,DDD(A,1,DDD(A,1))))))));
   // an element in the example construct
-  DDD a=DDD(A,1,DDD(A,1));  
+  DDD a=DDD(A,1,DDD(A,1));
   // an element in the example construct
   DDD b=DDD(B,1,DDD(C,1))+DDD(B,2,DDD(C,3));
   // an element in the example construct
   DDD c=DDD(A,1,DDD(A,2))^DDD(B,2,DDD(C,2)) ;
   // the value we work on
   DDD u=longSegment^( (a^b) + c );
-	  
+
   cout <<"u="<< endl<<u<<endl;
 
   /// instantiate a plusplus hom
@@ -173,13 +174,18 @@ int main(){
     v = u;
     u = u + full (u);
   }  while (u!=v) ;
-  
+
   cerr <<"<!C++<=6>(u)="<< endl<<u.nbStates()<<endl;
   }
+
+
+  Statistic S = Statistic(u,"tst10",CSV);
+
+  S.print_header(std::cout);
+  S.print_line(std::cout);
+
   /// show stats
-  DDD::pstats(true);
-  DED::pstats(true);
-  MemoryManager::garbage();
+   MemoryManager::garbage();
 
   return 1;
 

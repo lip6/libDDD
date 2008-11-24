@@ -26,6 +26,7 @@ using namespace std;
 #include "DDD.h"
 #include "DED.h"
 #include "MemoryManager.h"
+#include "statistic.hpp"
 
 typedef enum {A, B, C, D,E, F, G} var;
 var variables;
@@ -51,7 +52,10 @@ int main(){
   cout<<"d2="<<d2<<endl;
   cout<<"d1-d2="<<d<<endl;
 
-  MemoryManager::pstats();
+  Statistic S = Statistic(d,"tst9",CSV);
+
+  S.print_header(std::cout);
+  S.print_line(std::cout);
 
 
   return 1;
