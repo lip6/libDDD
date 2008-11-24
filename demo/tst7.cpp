@@ -26,25 +26,35 @@ using namespace std;
 #include "DDD.h"
 #include "DED.h"
 #include "MemoryManager.h"
+#include "statistic.hpp"
 
 typedef enum {A, B, C, D,E, F, G} var;
 var variables;
 const char* vn[]= {"A", "B", "C", "D", "E", "F", "G"};
 
 void initName() {
-  for (int i=A; i<=G; i++)
-    DDD::varName(i,vn[i]);
+	for (int i=A; i<=G; i++)
+		DDD::varName(i,vn[i]);
 }
 
 int main(){
-  // Define a name for each variable
-  initName();
+	// Define a name for each variable
+	initName();
 
-  DDD d1(A,1);
-  DDD d2(B,2);
-  d2=d1;
-  cout<<"nbDDD="<<MemoryManager::nbDDD()<<endl;
-  MemoryManager::garbage();
-  cout<<"nbDDD="<<MemoryManager::nbDDD()<<endl;
-  return 0;
+
+	DDD d1(A,1);
+	DDD d2(B,2);
+	d2=d1;
+
+
+	Statistic s(d1,"before garbage",CSV);
+
+	MemoryManager::garbage();
+	Statistic s2(d2,"after garbage",CSV);
+
+	s.print_header(cout);
+	s.print_line(cout);
+	s2.print_line(cout);
+
+	return 0;
 }

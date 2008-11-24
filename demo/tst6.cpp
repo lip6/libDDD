@@ -24,44 +24,48 @@
 using namespace std;
 
 #include "DDD.h"
-#include "DED.h"
-#include "Hom.h"
 #include "MemoryManager.h"
 #include "PermuteVar.hh"
+#include "statistic.hpp"
 
 typedef enum {A, B, C, D,E, F, G} var;
 var variables;
 const char* vn[]= {"A", "B", "C", "D", "E", "F", "G"};
 
 void initName() {
-  for (int i=A; i<=G; i++)
-    DDD::varName(i,vn[i]);
+	for (int i=A; i<=G; i++)
+		DDD::varName(i,vn[i]);
 }
 
 int main(){
-  initName();
+	initName();
 
-  cout <<"****************"<<endl;
-  cout <<"* Define DDD u *"<<endl;
-  cout <<"****************"<<endl;
-  {
-  DDD a=DDD(A,1,DDD(B,3))+DDD(A,4,DDD(B,4));
-  DDD b=DDD(C,6,DDD(D,1))+DDD(C,2,DDD(D,2));
-  DDD u=a^b;
-  cout <<"u="<< endl<<u<<endl;
+	cout <<"****************"<<endl;
+	cout <<"* Define DDD u *"<<endl;
+	cout <<"****************"<<endl;
+	{
+		DDD a=DDD(A,1,DDD(B,3))+DDD(A,4,DDD(B,4));
+		DDD b=DDD(C,6,DDD(D,1))+DDD(C,2,DDD(D,2));
+		DDD u=a^b;
+		cout <<"u="<< endl<<u<<endl;
 
-  cout <<"**************************************************************"<<endl;
-  cout <<"* Strong Hom <X,Y=Y,X> : permute the first value of X and Y *"<<endl;
-  cout <<"**************************************************************"<<endl;
+		cout <<"**************************************************************"<<endl;
+		cout <<"* Strong Hom <X,Y=Y,X> : permute the first value of X and Y *"<<endl;
+		cout <<"**************************************************************"<<endl;
 
-  Hom permuteA_C = permute(A,C);
-  DDD v=permuteA_C(u);
-  
-  cout <<"<A,C=C,A>(u)="<< endl<<v<<endl;
-  }
-  MemoryManager::pstats();
-  MemoryManager::garbage();
-  return 1;
+		Hom permuteA_C = permute(A,C);
+		DDD v=permuteA_C(u);
+
+		cout <<"<A,C=C,A>(u)="<< endl<<v<<endl;
+
+
+		Statistic s(v,"tst6",CSV);
+
+		s.print_header(cout);
+		s.print_line(cout);
+	}
+	MemoryManager::garbage();
+	return 1;
 }
 
 
