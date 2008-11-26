@@ -27,6 +27,10 @@
 <tool id="com.redhat.eclipse.cdt.autotools.toolchain.tool.autogen.1682069041" name="autogen.sh" superClass="com.redhat.eclipse.cdt.autotools.toolchain.tool.autogen"/>
 </toolChain>
 </folderInfo>
+<sourceEntries>
+<entry excluding="src" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="src"/>
+</sourceEntries>
 </configuration>
 </storageModule>
 <storageModule moduleId="scannerConfiguration">
