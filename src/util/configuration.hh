@@ -37,11 +37,7 @@ template
 >
 struct allocator
 {
-#ifdef PARALLEL_DD
-	typedef typename __gnu_cxx::malloc_allocator<T> type;
-#else
 	typedef typename std::allocator<T> type;
-#endif
 };
 
 } // conf
