@@ -827,6 +827,8 @@ int GHom::refCounter() const{return concret->refCounter;}
 GHom GHom::add(const std::set<GHom>& s){
     if( s.empty() )
         return GDDD::null;
+    if( s.size() == 1 )
+      return *(s.begin());
     return(canonical( Add(s)));
 }
 
