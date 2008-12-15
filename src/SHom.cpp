@@ -1335,7 +1335,7 @@ GShom GShom::add(const std::set<GShom>& set)
       return *(s.begin());
     hash_map<std::set<GShom>,GShom>::type::accessor acc;
     if (addCache.insert(acc,s)) {
-      GShom added =  S_Homomorphism::Add(s);
+      GShom added = canonical(S_Homomorphism::Add(s));
       acc->second = added;
       return added;
     } else {
