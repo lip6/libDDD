@@ -824,12 +824,18 @@ int GHom::refCounter() const{return concret->refCounter;}
 
 /* Sum */
 
-GHom GHom::add(const std::set<GHom>& s){
-    if( s.empty() )
+GHom GHom::add(const std::set<GHom>& set){
+    if( set.empty() )
         return GDDD::null;
-    if( s.size() == 1 )
-      return *(s.begin());
-    return(canonical( Add(s)));
+    if( set.size() == 1 )
+      return *(set.begin());
+    else {
+      std::set<GHom> s = set;
+      s.erase(GHom(GDDD::null));
+      if( s.size() == 1 )
+	return *(s.begin());
+      return(canonical( Add(s)));
+    }
 }
 
 
@@ -941,7 +947,7 @@ GHom operator+(const GHom &h1,const GHom &h2){
   s.insert(h1);
   s.insert(h2);
 //  return(new Add(s));
-  return GHom(canonical( Add(s)));
+  return GHom::add(s);
 }
 
 GHom operator*(const GDDD &d,const GHom &h){
