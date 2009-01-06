@@ -5,9 +5,8 @@
 
 #include "util/configuration.hh"
 
-namespace d3 { namespace util
-{
-    
+namespace d3 {
+
 template
     <
       typename Key
@@ -19,6 +18,6 @@ struct set
     typedef typename std::set<Key,Compare,Allocator> type;
 };
     
-}} // namespace d3::util
+} // namespace d3
 
 #endif /* _SET_HH_ */
