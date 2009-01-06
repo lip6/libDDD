@@ -24,7 +24,7 @@
 #ifndef SDED_H
 #define SDED_H
 
-#include <set>
+#include "util/set.hh"
 
 #include "DataSet.h"
 #include "util/hash_support.hh"
@@ -44,7 +44,7 @@ public:
   SDED(_SDED *c):concret(c){};
   bool operator==(const SDED&) const; 
   
-  static GSDD add(const std::set<GSDD> &);
+  static GSDD add(const d3::set<GSDD>::type &);
   static GSDD Shom(const GShom &,const GSDD&);
 
   /* Memory Manager */

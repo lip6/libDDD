@@ -145,11 +145,11 @@ GShom pushEVSDD(int v){return new _pushEVSDD(v);};
 /******************************************************************************/
 class _SDED_Add:public _SDED{
 private:
-  std::set<GSDD> parameters;
-  _SDED_Add(const std::set<GSDD> &d):parameters(d){};
+  d3::set<GSDD>::type parameters;
+  _SDED_Add(const d3::set<GSDD>::type &d):parameters(d){};
 public:
   static  _SDED *create(const GSDD &g1,const GSDD &g2);
-  static  _SDED *create(const std::set<GSDD> &d);
+  static  _SDED *create(const d3::set<GSDD>::type &d);
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
@@ -166,7 +166,7 @@ public:
 /* Compare */
 size_t _SDED_Add::hash() const{
   size_t res=0;
-  for(std::set<GSDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
+  for(d3::set<GSDD>::type::const_iterator si=parameters.begin();si!=parameters.end();++si){
     res+= si->hash();
   }
   return res;
@@ -189,7 +189,7 @@ GSDD _SDED_Add::eval() const{
   DataSet * tofree;
 
   // The current operand
-  std::set<GSDD>::const_iterator opit =  parameters.begin();
+  d3::set<GSDD>::type::const_iterator opit =  parameters.begin();
 
   // Initialize with copy of first operand
   for (GSDD::Valuation::const_iterator it = opit->begin();it != opit->end() ; ++it) 
@@ -312,7 +312,7 @@ GSDD _SDED_Add::eval() const{
 
 //   int id=0;
 //   std::cerr << "operating over parameters : " <<std::endl ;
-//   for (std::set<GSDD>::const_iterator it = parameters.begin() ; it != parameters.end() ; it++ ) {
+//   for (d3::set<GSDD>::type::const_iterator it = parameters.begin() ; it != parameters.end() ; it++ ) {
 //     std::cerr << "PARAM "<< id++ << "  "<< *it << std::endl ;
 //   }
   // GSDD ret(variable,value);
@@ -336,16 +336,16 @@ _SDED *_SDED_Add::create(const GSDD &g1,const GSDD &g2){
   if (g1 == GSDD::one || g2 == GSDD::one || g1 == GSDD::top || g2 == GSDD::top || g1.variable() != g2.variable() ) 
     return new _SDED_GSDD(GSDD::top);
 
-  std::set<GSDD> parameters;
+  d3::set<GSDD>::type parameters;
   parameters.insert(g1);
   parameters.insert(g2);
 
   return new _SDED_Add(parameters);
 }
 /* constructor*/
-_SDED *_SDED_Add::create(const std::set<GSDD> &s){
+_SDED *_SDED_Add::create(const d3::set<GSDD>::type &s){
   assert(s.size()!=0); // s is not empty
-  std::set<GSDD> parameters=s;
+  d3::set<GSDD>::type parameters=s;
   parameters.erase(GSDD::null);
   if(parameters.size()==1)
     return new _SDED_GSDD(*parameters.begin());  
@@ -356,7 +356,7 @@ _SDED *_SDED_Add::create(const std::set<GSDD> &s){
       return new _SDED_GSDD(GSDD::top);
     }
     else{ 
-      std::set<GSDD>::const_iterator si=parameters.begin();
+      d3::set<GSDD>::type::const_iterator si=parameters.begin();
       int variable = si->variable();
       for(;(si!=parameters.end())?(variable == si->variable()):false;++si){}
       if(si!=parameters.end())// s contains at least 2 GDDDs with different variables
@@ -797,7 +797,7 @@ GSDD SDED::Shom(const GShom &h,const GSDD&g){
 };
 
 
-GSDD SDED::add(const std::set<GSDD> &s){
+GSDD SDED::add(const d3::set<GSDD>::type &s){
    SDED e(_SDED_Add::create(s));
    return e.eval();
 };
