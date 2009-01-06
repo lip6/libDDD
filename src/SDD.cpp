@@ -24,7 +24,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include <set>
+#include "util/set.hh"
 #include <ext/hash_map>
 #include <map>
 #include <sstream>
@@ -317,13 +317,13 @@ class SddSize{
 private:
 
   bool firstError;
-  std::set<GSDD> s;
+  d3::set<GSDD>::type s;
   // Was used to compute number of nodes in referenced datasets as well
   // but dataset doesn't define what we need as it is not necessarily 
   // a decision diagram implementation => number of nodes = ??
 //   set<DataSet &> sd3;
   // trying to repair it : consider we reference only SDD or DDD for now, corresponds to current usage patterns
-  std::set<GDDD> sd3;
+  d3::set<GDDD>::type sd3;
 
 
 

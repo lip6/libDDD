@@ -195,7 +195,7 @@ public:
     if (d == GSDD::one || d == GSDD::null || d == GSDD::top )
       return d;
     // for square union
-    std::set<GSDD> sum;
+    d3::set<GSDD>::type sum;
 
    // add application of h(arcval)
    for( GSDD::const_iterator it = d.begin();
@@ -269,7 +269,7 @@ public:
    if (d == GSDD::one || d == GSDD::null || d == GSDD::top )
       return d;
     // for square union
-   std::set<GSDD> sum;
+   d3::set<GSDD>::type sum;
 
    // add application of h(arcval)
    for( GSDD::const_iterator it = d.begin();
@@ -325,7 +325,7 @@ public:
 	struct
 	{
 		GShom F; 
-		std::set<GShom> G;
+	  d3::set<GShom>::type G;
 		const _GShom* L;
 		bool has_local;
 		
@@ -335,7 +335,7 @@ public:
 
 private:
         
-    std::set<GShom> parameters;
+    d3::set<GShom>::type parameters;
 	mutable partition_cache_type partition_cache;
 	bool have_id;
 
@@ -344,8 +344,8 @@ private:
     const std::type_info & t = typeid( *h );
     if( t == typeid(Add) )
       {
-	const std::set<GShom>& local_param = ((const Add*) h)->parameters;
-	for (std::set<GShom>::const_iterator it = local_param.begin() ; it != local_param.end() ; ++it ){
+	const d3::set<GShom>::type& local_param = ((const Add*) h)->parameters;
+	for (d3::set<GShom>::type::const_iterator it = local_param.begin() ; it != local_param.end() ; ++it ){
 	  addParameter( get_concret(*it), local_homs,local_shoms  );
 	}
       }
@@ -393,7 +393,7 @@ private:
 public:
         
 
-    Add(const std::set<GShom>& p, int ref=0)
+    Add(const d3::set<GShom>::type& p, int ref=0)
     	:
         _GShom(ref,true),
         parameters(),
@@ -402,7 +402,7 @@ public:
 		std::map<int, GHom> local_homs;
 		std::map<int, GShom> local_shoms;
 	
-        for( std::set<GShom>::const_iterator it = p.begin(); it != p.end(); ++it)
+        for( d3::set<GShom>::type::const_iterator it = p.begin(); it != p.end(); ++it)
         {
 	  addParameter( *it , local_homs, local_shoms);
         }
@@ -456,7 +456,7 @@ public:
     hash() const
     {
 	    size_t res = 0;
-	    for(std::set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+	    for(d3::set<GShom>::type::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
 	      res^=gi->hash();
 	    return res;
 
@@ -475,9 +475,9 @@ public:
 	    partition& part = access->second;
 	    part.has_local = false;
 	    part.L  = NULL;
-	    std::set<GShom> F;
+	    d3::set<GShom>::type F;
 			
-	    for(	std::set<GShom>::const_iterator gi = parameters.begin();
+	    for(	d3::set<GShom>::type::const_iterator gi = parameters.begin();
 			gi != parameters.end();
 			++gi )
 	      {
@@ -533,9 +533,9 @@ public:
 		}
 		else if( d == GSDD::one || d == GSDD::top )
 		{
-			std::set<GSDD> s;
+			d3::set<GSDD>::type s;
 		
-			for(std::set<GShom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+			for(d3::set<GShom>::type::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
 			{
 				s.insert((*gi)(d));
 			}
@@ -543,7 +543,7 @@ public:
 		}
 		else
 		{
-			std::set<GSDD> s;
+			d3::set<GSDD>::type s;
 			int var = d.variable();
 
 			partition_cache_type::const_accessor part_it;
@@ -560,9 +560,9 @@ public:
 			
 			s.insert( part_it->second.F(d) );
 	
-			const std::set<GShom>& G = part_it->second.G;
+			const d3::set<GShom>::type& G = part_it->second.G;
 
-			for( 	std::set<GShom>::const_iterator it = G.begin(); 
+			for( 	d3::set<GShom>::type::const_iterator it = G.begin(); 
 					it != G.end();
 					++it )
 			{
@@ -578,7 +578,7 @@ public:
     void
     mark() const
     {
-		for( std::set<GShom>::const_iterator gi=parameters.begin();
+		for( d3::set<GShom>::type::const_iterator gi=parameters.begin();
 			 gi!=parameters.end();
 			 ++gi)
 		{
@@ -590,7 +590,7 @@ public:
 
   void print (std::ostream & os) const {
     os << "(SAdd:" ;
-    std::set<GShom>::const_iterator gi=parameters.begin();
+    d3::set<GShom>::type::const_iterator gi=parameters.begin();
     os << *gi ;
     for( ++gi;
 	 gi!=parameters.end();
@@ -839,7 +839,7 @@ public:
 		    d2 = F_part(d2);
 		    d2 = L_part(d2);
 
-		    for( 	std::set<GShom>::const_iterator G_it = partition.G.begin();
+		    for( 	d3::set<GShom>::type::const_iterator G_it = partition.G.begin();
 				G_it != partition.G.end();
 				++G_it) 
 		      {
@@ -1123,7 +1123,7 @@ StrongShom::eval(const GSDD &d) const
   	else
 	{
     	int variable=d.variable();
-    	std::set<GSDD> s;
+    	d3::set<GSDD>::type s;
 
     	for(GSDD::const_iterator vi=d.begin();vi!=d.end();++vi)
 	{
@@ -1217,7 +1217,7 @@ void GShom::mark()const{
 }
 
 // used to reduce Shom::add creation complexity in recursive cases
-static hash_map<std::set<GShom>,GShom>::type addCache;
+static hash_map<d3::set<GShom>::type,GShom>::type addCache;
 void GShom::garbage(){
   addCache.clear();
   S_Homomorphism::cache.clear();
@@ -1320,8 +1320,8 @@ localApply(const GShom & h, int target)
 }
 
 // addcache declaration is just above function garbageCollect
-// static hash_map<std::set<GShom>,GShom>::type addCache;
-GShom GShom::add(const std::set<GShom>& set)
+// static hash_map<d3::set<GShom>::type,GShom>::type addCache;
+GShom GShom::add(const d3::set<GShom>::type& set)
 {  
   if (set.empty() ) 
     return GSDD::null;
@@ -1329,11 +1329,11 @@ GShom GShom::add(const std::set<GShom>& set)
   if( set.size() == 1 )
     return *(set.begin());
   else {
-    std::set<GShom> s = set;
+    d3::set<GShom>::type s = set;
     s.erase(GShom(GSDD::null));
     if( s.size() == 1 )
       return *(s.begin());
-    hash_map<std::set<GShom>,GShom>::type::accessor acc;
+    hash_map<d3::set<GShom>::type,GShom>::type::accessor acc;
     if (addCache.insert(acc,s)) {
       GShom added = canonical(S_Homomorphism::Add(s));
       acc->second = added;
@@ -1385,7 +1385,7 @@ GShom operator+(const GShom &h1,const GShom &h2){
   // else
  //   return GShom(canonical( S_Homomorphism::Add(h2,h1)));
 
-  std::set<GShom> s;
+  d3::set<GShom>::type s;
   s.insert(h1);
   s.insert(h2);
 

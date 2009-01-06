@@ -31,8 +31,8 @@
 
 #include <string>
 #include <map>
-#include <set>
 
+#include "util/set.hh"
 #include "util/hash_support.hh"
 
 /**********************************************************************/
@@ -69,7 +69,7 @@ private:
   friend GShom fixpoint(const GShom &);
   friend GShom localApply(const GHom &,int target);
   friend GShom localApply(const GShom &,int target);
-  friend GShom add(const std::set<GShom>&);
+  friend GShom add(const d3::set<GShom>::type &);
   friend GShom operator+(const GShom &,const GShom &); 
   friend GShom operator&(const GShom &,const GShom &); 
   friend GShom operator*(const GSDD &,const GShom &); 
@@ -149,7 +149,7 @@ public:
   /// Compute an n-ary sum between homomorphisms. This should be slightly more efficient 
   /// in evaluation than a composition of binary sums constructed using the friend operator+.
   /// \todo : move this to friend status not static member for more homogeneity with other operators.
-  static GShom add(const std::set<GShom>& s);
+    static GShom add(const d3::set<GShom>::type & s);
 
   // pretty print of homomorphisms
   friend std::ostream & operator << (std::ostream & os, const GShom & h);
