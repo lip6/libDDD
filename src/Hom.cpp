@@ -932,7 +932,10 @@ GHom fixpoint (const GHom &h) {
 
 
 GHom operator&(const GHom &h1,const GHom &h2){
-	
+  GHom nullHom = GDDD::null;
+  if (h1 == nullHom || h2 == nullHom)
+    return nullHom;
+
 	if( h1 == GHom::id )
 		return h2;
 
