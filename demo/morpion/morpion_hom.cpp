@@ -79,6 +79,14 @@ class _TakeCell:public StrongHom {
 
 
 /**
+ * Fonction publique qui permet de créer des instances de l'homomorphisme décrit ci-dessus
+ */
+GHom take_cell ( int c1, int player)  {
+  return _TakeCell(c1,player);
+}
+
+
+/**
  * Modélisation d'un homomorphisme
  */
 class _SelectWin:public StrongHom {
@@ -96,7 +104,7 @@ class _SelectWin:public StrongHom {
     /**
    * Le constructeur avec initialisation de l'homomorphisme
      */
-    _TakeCell ( int c1, int c2, int c3, int nb, int p) : case1(c1),case2(c2),case3(c3),nbCheck(nb), player(p) {}
+    _SelectWin ( int c1, int c2, int c3, int nb, int p) : case1(c1),case2(c2),case3(c3),nbCheck(nb), player(p) {}
 
     /**
      * Saturation sur la variable XX
@@ -112,7 +120,7 @@ class _SelectWin:public StrongHom {
      * PHI [1] : Si on rencontre la fin du DDD
      */
     GDDD phiOne() const {
-      return GHom::id;
+      return GDDD::one;
     }
 
     /**
@@ -123,11 +131,10 @@ class _SelectWin:public StrongHom {
     GHom phi(int vr, int vl) const {
       if(nbCheck>0)
       {
-	if(vr == c1 || vr == c2 || vr == c3)
+	if(vr == case1 || vr == case2 || vr == case3)
 	{
 	  if(vl==player){
-	    nbCheck--;
-	    return GHom (vr, vl, GHom(this) ); // On se propage sans rien toucher
+	    return GHom (vr, vl, SelectWin ( case1, case2, case3, nbCheck-1, player) ); // On se propage sans rien toucher
 	  }
 	  else{
 	    return GHom (vr, vl, GHom::id );     // e-(x)-> ID
@@ -162,7 +169,7 @@ class _SelectWin:public StrongHom {
      * Surcharge de l'opérateur == utilisé pour comparer 2 homomorphismes du même type, utilisé par la table de cache
      */
     bool operator==(const StrongHom &s) const {
-      _T* ps = (_SelectWin*)&s;
+      _SelectWin* ps = (_SelectWin*)&s;
       return case1 == ps->case1 && player == ps->player && case2 == ps->case2 && case3 == ps->case3 ;
     }
     
@@ -176,7 +183,7 @@ class _SelectWin:public StrongHom {
 /**
 * Fonction publique qui permet de créer des instances de l'homomorphisme décrit ci-dessus
 */
-GHom _SelectWin (int c1, int c2, int c3, int player)  {
-  return _TakeCell(c1,c2,c3,3 , player);
+GHom SelectWin ( int c1, int c2, int c3,int nb, int player)  {
+  return _SelectWin(c1,c2,c3,nb,player);
 }
 
