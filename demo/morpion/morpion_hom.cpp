@@ -101,6 +101,10 @@ GHom take_cell ( int c1, int player)  {
 }
 
 
+
+/** Ok donc là la grosse question c'est que doit faire cet homomorphisme ?
+ * A priori il doit ne selectionner que les chemins ou la combinaison choisie gagne ; les autres on rends NULL à un moment pour couper la branche. 
+ */
 /**
  * ModÃ©lisation d'un homomorphisme
  */
@@ -135,6 +139,8 @@ class _SelectWin:public StrongHom {
      * PHI [1] : Si on rencontre la fin du DDD
      */
     GDDD phiOne() const {
+      // Ce cas peut-il se produire ? 
+      // si oui est-ce une erreur (T) ou une partie gagnante (1) ou une partie perdue (0)?
       return GDDD::one;
     }
 
@@ -149,19 +155,23 @@ class _SelectWin:public StrongHom {
 	if(vr == case1 || vr == case2 || vr == case3)
 	{
 	  if(vl==player){
+	    // une case de moins à tester
 	    return GHom (vr, vl, SelectWin ( case1, case2, case3, nbCheck-1, player) ); // On se propage sans rien toucher
 	  }
 	  else{
+	    // ID... donc on garde les chemins ou on a perdu ?
 	    return GHom (vr, vl, GHom::id );     // e-(x)-> ID
 	  }
 	}
 	else 
 	{
+	    // c'est le cas à capturer dans le skip_variable : on ignore la cellule
 	  return GHom (vr, vl, GHom(this) ); // On se propage sans rien toucher
 	}
       }
       else
       {
+	// on coupe le chemin si on a gagné ???
 	return GHom(DDD::null); //  Couper le chenmin 0
       }
     }
@@ -170,6 +180,7 @@ class _SelectWin:public StrongHom {
      * Fonction de hash utilisÃ© pour identifier l'unicitÃ© de l'homomorphisme. TrÃ©s utile pour le calcul de la table de cache
      */
     size_t hash() const {
+      // il manque le nbcheck
       return 7817*(case1+2)^player + (case2+2)^case3;
     }
   
@@ -185,6 +196,7 @@ class _SelectWin:public StrongHom {
      */
     bool operator==(const StrongHom &s) const {
       _SelectWin* ps = (_SelectWin*)&s;
+      // OOOOPS il manque le nbcheck
       return case1 == ps->case1 && player == ps->player && case2 == ps->case2 && case3 == ps->case3 ;
     }
     
