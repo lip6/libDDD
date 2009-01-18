@@ -1,36 +1,31 @@
+// author : S. Hong,Y.Thierry-Mieg
+// date : Jan 2009
 #include "morpion_hom.hpp"
 
 // SDD utilities to output stats and dot graphs
 #include "util/dotExporter.h"
 #include "statistic.hpp"
 
-
+// option set to true limits verbosity
 static bool beQuiet = false;
+// path prefix to output dot files
 static string pathdotff = "final";
+// true if user asked for dot export
 static bool dodotexport=false;
+// used as first column label of statistics
 static std::string modelName = "";
 
-
+// The number of cells in the game, i.e. 9
 static const int NBCASE = 9;
-
-
 
 
 void usage() {
   cerr << "Morpion; package " << PACKAGE_STRING <<endl;
-  cerr << "This tool performs state-space generation of extended timed Petri Nets allowing \n"
-      << "inhibitor,pre,post (hyper)arcs. " <<endl
+  cerr << "This tool performs state-space analysis of the tic-tac-toe a.k.a. morpion game.\n"
       << " The reachability set is computed using SDD/DDD, the Hierarchical Set Decision Diagram library, \n"
       << " Please see README file enclosed \n"
-      << "in the distribution for more details. Input is a ROMEO xml model file, or one of the hard coded demo examples\n"
-      << "(see Samples dir for documentation and examples). \n \nOptions :" << endl;
-  cerr<<  "    -i path : specifies the path to input Romeo model " <<endl;
-  cerr<<  "    -e exampleid : use a hard coded example. exampleid is an int, see HARDEXAMPLES.txt for details on this option.\n" ;
-  cerr << "    --order : in conjunction with -e, use a custom order for some examples. \n" ;
-  cerr << "    --dump-order : dump the currently used variable order to stdout and exit. \n" ;
+      << "in the distribution for more details. \n \nOptions :" << endl;
   cerr<<  "    -d path : specifies the path prefix to construct dot state-space graph" <<endl;
-  cerr<<  "    --sdd : privilege SDD storage." <<endl;
-  cerr<<  "    --ddd : privilege DDD (no hierarchy) encoding." <<endl;
   cerr<<  "    --texhead : print tex header"  << endl;
   cerr<<  "    --texline : print tex line " <<endl ;
   cerr<<  "    --textail : print tex tail"  << endl;
