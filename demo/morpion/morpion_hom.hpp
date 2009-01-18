@@ -1,3 +1,5 @@
+// author : S. Hong,Y.Thierry-Mieg
+// date : Jan 2009
 #ifndef __MORPION__HOM__
 #define __MORPION__HOM__
 
