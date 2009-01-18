@@ -1,28 +1,32 @@
-
-
+// author : S. Hong,Y.Thierry-Mieg
+// date : Jan 2009
 #include "morpion_hom.hpp"
 
+// the cell value indicating it is empty
 const int EMPTY = -1;
 
 /**
-* Modélisation d'un homomorphisme
+* An inductive homomorphism TakeCell to play a move of a given player in a given cell.
 */
 class _TakeCell:public StrongHom {
 
   /**
-  * Liste des variables d'entrées (domaine d'entrée) de l'homomorphisme
+  * Liste of member variables = homomorphism parameters
   */
-  int cell;     // La cellule à choisir
-  int player;   // Le joueur qui veut jouer
+  int cell;     // The cell to play in� : 0 <= cell < 9
+  int player;   // The player taking the cell : 0 or 1
   public:
     
     /**
-    * Le constructeur avec initialisation de l'homomorphisme
+    * The constructor binds the homomorphism parameters cell and player
     */
     _TakeCell ( int c, int p) : cell(c), player(p) {}
 
     /**
-    * Saturation sur la variable XX
+    * Define the target variable = cell. It is the only variable that is not skipped (=ignored).
+    * This means the behavior of Phi(vr,vl) for any node of variable "vr" starts with :
+    * if ( skip_variable(vr)==true )
+    *    return GHom (vr, vl, GHom(this) ); // Self propagation without any modification of node or self.
     */
     bool
 	skip_variable(int vr) const
@@ -31,48 +35,59 @@ class _TakeCell:public StrongHom {
     }
   
     /**
-    * PHI [1] : Si on rencontre la fin du DDD
+    * PHI [1] : called if the terminal 1 is encountered, returns a constant DDD.
+    * If the cell was correct 0 <= cell < 9 and the state ok this should not happen :
+    * return TOP to indicate an error.
     */
     GDDD phiOne() const {
       return DDD::top;
     }
 
     /**
-    * PHI [vr,vl] : représente le noeud courant auquel on applique l'homomorphisme
-    *  vr ==> Variable ou Noeud courant
-    *  vl ==> Valeur de l'arc du successeur pour le Noeud courant
+    * PHI [vr,vl] : called on each arc labeled with "vl" when the homomorphism is applied to a node
+    * of variable "vr" such that vr is NOT skipped. 
+    * When the hom is applied to a node this function is called for each arc, and the result
+    * (a homomorphism) is applied to the successor node pointed by the arc. 
+    *  vr ==> Variable of current node 
+    *  vl ==> arc label (an integer) of current arc
     */
     GHom phi(int vr, int vl) const {
       if (vl == EMPTY) 
+	// the cell is empty ! We can play here and set the cell value to "player".
 	return GHom (vr, player, GHom::id );// e-(joueur)-> ID
       else
+	// the cell is not empty, move is illegal, abort this move.
 	return GHom(DDD::null); //  Couper le chenmin 0
     }
      
     /**
-    * Fonction de hash utilisé pour identifier l'unicité de l'homomorphisme. Trés utile pour le calcul de la table de cache
+    * Hash function used for unique table storage.
     */
     size_t hash() const {
+      // hash function should exhibit reasonable spread and involve as many parameters as possible.
       return 10091*(cell+2)^player ;
     }
   
     /**
-    * Surcharge de l'opérateur << de std::cout pour imprimer le type de la classe en cours selon un formatage personalisé
+    * Overloading StrongHom default print with a customized pretty-print
     */
     void print (std::ostream & os) const {
       os << "takeCell( cell:" << cell << ", player:" << player << " )";
     }
 
     /**
-    * Surcharge de l'opérateur == utilisé pour comparer 2 homomorphismes du même type, utilisé par la table de cache
-    */
+    * Overload of operator== necessary for unique table storage
+    * argument is typed StrongHom as == is part of StrongHom contract, simlarly to java's bool equals(Object) 
+   */
     bool operator==(const StrongHom &s) const {
+       // direct "hard" cast to own type is ok, type checks already made in library
       _TakeCell* ps = (_TakeCell*)&s;
+      // basic comparator behavior, just make sure you put all attributes there.
       return cell == ps->cell && player == ps->player ;
     }
     
     /**
-    * Clonage de l'objet en cours utilisée par la table de cache
+    * Clone current homomorphism, used for unique storage.
     */
     _GHom * clone () const {  return new _TakeCell(*this); }
 };
