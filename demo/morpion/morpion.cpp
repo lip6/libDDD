@@ -1,5 +1,6 @@
 // author : S. Hong,Y.Thierry-Mieg
 // date : Jan 2009
+#include <sstream>
 #include "morpion_hom.hpp"
 
 // SDD utilities to output stats and dot graphs
@@ -7,16 +8,19 @@
 #include "statistic.hpp"
 
 // option set to true limits verbosity
-static bool beQuiet = false;
+//static bool beQuiet = false;
 // path prefix to output dot files
 static string pathdotff = "final";
+//static bool dodotexport=false;
 // true if user asked for dot export
 static bool dodotexport=false;
 // used as first column label of statistics
 static std::string modelName = "";
 
 // The number of cells in the game, i.e. 9
-static const int NBCASE = 9;
+
+
+
 
 
 void usage() {
@@ -52,18 +56,21 @@ DDD createInitial () {
     // on ajoute une variable = case 
     // sa valeur = vide
     M0 = GDDD(i, EMPTY) ^  M0 ;
+    std::stringstream cas;
+    cas << "cell_" << i;
+    DDD::varName(i,cas.str());
   }
   return M0;
 }
 
-int main (int argc, char **argv) {
+int main (int /*argc*/, char ** /*argv*/) {
   
   // Creation de l'état initial
   DDD initial = createInitial ();
   
   // Insertion des homomorphismes pour tirer le joueur 1
   std::set<GHom> nextAset;
-  for (int i=0; i< NBCASE ; ++i) {
+  for (int i=0; i< NBCASE; ++i) {
     nextAset.insert( take_cell (i, 0) );
   }
   // Creation d'un ensemble d'homomorphisme pour le joueur 1
@@ -83,28 +90,56 @@ int main (int argc, char **argv) {
   }
   // Creation d'un ensemble d'homomorphisme pour le joueur 2
   Hom nextB = GHom::add(nextBset);
-      
+  
+  
+  // Insertion des homomorphismes pour couper les chemins que l'on ne veut pas
+  std::set<GHom> nextCut1set;
+  int tab[3][3];
+  for(int i = 0; i< LINE ; ++i)
+  {
+    for(int j=0; j<COLUMN ; ++j)
+    {
+      tab[i][j]=-1;
+    }
+  }
+  nextCut1set.insert( checkWinner (tab));
+  Hom nextCut1 = GHom::add(nextCut1set);
+  
+  // Insertion des homomorphismes pour couper les chemins que l'on ne veut pas
+  std::set<GHom> nextCut2set;
+  nextCut2set.insert( SelectWin (0,1,2,3,1));
+  nextCut2set.insert( SelectWin (3,4,5,3,1));
+  nextCut2set.insert( SelectWin (6,7,8,3,1));
+  
+  nextCut2set.insert( SelectWin (0,3,6,3,1));
+  nextCut2set.insert( SelectWin (1,4,7,3,1));
+  nextCut2set.insert( SelectWin (2,5,8,3,1));
+  
+  nextCut2set.insert( SelectWin (0,4,8,3,1));
+  nextCut2set.insert( SelectWin (2,4,6,3,1));
+  
+  Hom nextCut2 = GHom::add(nextCut2set);
+  
+  
   std::cout << "Initial state : " << initial << std::endl ;
   exportDot(GSDD(0,initial),"init");
-  
-  std::cout << "Player A move : " << nextA << std::endl ;
-  
-  DDD reachable = nextA (initial) ;
-  std::cout << "Player A moves once : " << reachable << std::endl ;
-  
-   
-  // Print some stats : memory size, number of states ....
-  Statistic S = Statistic(reachable, "onemoveA" , CSV); // can also use LATEX instead of CSV
-  S.print_table(std::cout);
 
-  GHom fullT = fixpoint(  (nextB & nextA) + GHom::id );
-  reachable = fullT (initial) ;
-   // Export the SDD of final states to dot : generates files final.dot and d3final.dot
-  exportDot(GSDD(0,reachable),"reach");
+  std::cout << "Make the fix point : \n\n\n" << std::endl ;
   
+  // Build all possibility
+  GHom fullT1 = fixpoint(  nextCut1 & (nextB & nextA) + GHom::id );
+  DDD reachable1 = fullT1 (initial) ;
+  exportDot(GSDD(0,reachable1),"reach1");
+  Statistic S1 = Statistic(reachable1, "reach1" , CSV); // can also use LATEX instead of CSV
+  S1.print_table(std::cout);
   
-  Statistic S2 = Statistic(reachable, "reach" , CSV); // can also use LATEX instead of CSV
+  GHom fullT2 = fixpoint(  (  (nextB & nextCut2 & nextA)  + GHom::id) );
+  DDD reachable2 = fullT2 (initial) ;
+  exportDot(GSDD(0,reachable2),"reach2");
+  Statistic S2 = Statistic(reachable2, "reach2" , CSV); // can also use LATEX instead of CSV
   S2.print_table(std::cout);
+  
+  
   
   return 0;
   
@@ -136,7 +171,7 @@ int main (int argc, char **argv) {
 } else if (! strcmp(argv[i],"--texhead")   ) {
       Statistic s = Statistic(SDD::one,"");
       s.print_header(cout);
-      exit(0);
+      exit(0); 
 } else if (! strcmp(argv[i],"--textail")   ) {
       Statistic s = Statistic(SDD::one,"");
       s.print_trailer(cout);
@@ -163,5 +198,4 @@ int main (int argc, char **argv) {
 }
 }
   */
-  
-  
+

@@ -1,9 +1,13 @@
 // author : S. Hong,Y.Thierry-Mieg
 // date : Jan 2009
+
 #include "morpion_hom.hpp"
 
 // the cell value indicating it is empty
 const int EMPTY = -1;
+const int NBCASE = 9;
+const int LINE = 3;
+const int COLUMN = 3;
 
 /**
 * An inductive homomorphism TakeCell to play a move of a given player in a given cell.
@@ -13,7 +17,7 @@ class _TakeCell:public StrongHom {
   /**
   * Liste of member variables = homomorphism parameters
   */
-  int cell;     // The cell to play in� : 0 <= cell < 9
+  int cell;     // The cell to play in� : 0 <= cell < 9
   int player;   // The player taking the cell : 0 or 1
   public:
     
@@ -102,8 +106,8 @@ GHom take_cell ( int c1, int player)  {
 
 
 
-/** Ok donc l� la grosse question c'est que doit faire cet homomorphisme ?
- * A priori il doit ne selectionner que les chemins ou la combinaison choisie gagne ; les autres on rends NULL � un moment pour couper la branche. 
+/** Ok donc l� la grosse question c'est que doit faire cet homomorphisme ?
+ * A priori il doit ne selectionner que les chemins ou la combinaison choisie gagne ; les autres on rends NULL � un moment pour couper la branche. 
  */
 /**
  * Modélisation d'un homomorphisme
@@ -116,8 +120,8 @@ class _SelectWin:public StrongHom {
   int case1;     // La cellule à vérifier
   int case2;     // La cellule à vérifier
   int case3;     // La cellule à vérifier
-  int nbCheck;        // Nombre de cellule vérifier
-  int player;   // Le joueur qui veut jouer
+  int nbCheck;   // Nombre de cellule vérifier
+  int player;    // Le joueur à vérifier
   public:
     
     /**
@@ -127,13 +131,13 @@ class _SelectWin:public StrongHom {
 
     /**
      * Saturation sur la variable XX
-     
+    */ 
     bool
 	skip_variable(int vr) const
     {
-      return vr != cell;
+      return (vr != case1) && (vr != case2) && (vr != case3);
     }
-    */
+    
   
     /**
      * PHI [1] : Si on rencontre la fin du DDD
@@ -150,60 +154,61 @@ class _SelectWin:public StrongHom {
      *  vl ==> Valeur de l'arc du successeur pour le Noeud courant
      */
     GHom phi(int vr, int vl) const {
-      if(nbCheck>0)
-      {
-	if(vr == case1 || vr == case2 || vr == case3)
+	if(vl== player)
 	{
-	  if(vl==player){
-	    // une case de moins � tester
-	    return GHom (vr, vl, SelectWin ( case1, case2, case3, nbCheck-1, player) ); // On se propage sans rien toucher
+          if(nbCheck-1>0)
+	  {
+	      return GHom (vr, vl, SelectWin ( case1, case2, case3, nbCheck-1, player) ); // Propagation n-1
 	  }
-	  else{
-	    // ID... donc on garde les chemins ou on a perdu ?
-	    return GHom (vr, vl, GHom::id );     // e-(x)-> ID
-	  }
+	  else
+	    {
+	      //return GHom(DDD::null); //  Couper le chenmin 0
+	      std::cout << "Working on node " << vr << " : One line Winner found " << nbCheck << std::endl;
+	      //return GHom (vr, vl, SelectWin ( case1, case2, case3, nbCheck-1, player,true) );
+	      return GHom(DDD::null); //  Couper le chenmin 1 : plus d'évolution possible
+	    }
 	}
-	else 
+	else
 	{
-	    // c'est le cas � capturer dans le skip_variable : on ignore la cellule
-	  return GHom (vr, vl, GHom(this) ); // On se propage sans rien toucher
+	  std::cout << "Working on node " << vr << " : No way winner : ID " << nbCheck << std::endl;
+	  //return GHom (vr, vl, GHom::id ); // e-(x)-> ID
+	  //return GHom (vr, vl, GHom::id );
+	  return GHom (vr, vl, GHom::id );
 	}
-      }
-      else
-      {
-	// on coupe le chemin si on a gagn� ???
-	return GHom(DDD::null); //  Couper le chenmin 0
-      }
     }
      
     /**
      * Fonction de hash utilisé pour identifier l'unicité de l'homomorphisme. Trés utile pour le calcul de la table de cache
      */
-    size_t hash() const {
-      // il manque le nbcheck
-      return 7817*(case1+2)^player + (case2+2)^case3;
+    size_t hash() const 
+    {
+      return 7817*(case1+2)^player * (case2+2)^case3;
     }
   
     /**
      * Surcharge de l'opérateur << de std::cout pour imprimer le type de la classe en cours selon un formatage personalisé
      */
-    void print (std::ostream & os) const {
+    void print (std::ostream & os) const
+    {
       os << "winnerCheckOn( case: [" << case1 << case2 << case3 << "]" << " for player:" << player << " )";
     }
 
     /**
      * Surcharge de l'opérateur == utilisé pour comparer 2 homomorphismes du même type, utilisé par la table de cache
      */
-    bool operator==(const StrongHom &s) const {
-      _SelectWin* ps = (_SelectWin*)&s;
-      // OOOOPS il manque le nbcheck
-      return case1 == ps->case1 && player == ps->player && case2 == ps->case2 && case3 == ps->case3 ;
+    bool operator==(const StrongHom &s) const
+    {
+      const _SelectWin& ps = dynamic_cast<const _SelectWin&>(s);
+      return case1 == ps.case1 && player == ps.player && case2 == ps.case2 && case3 == ps.case3 && nbCheck == ps.nbCheck;
     }
     
     /**
      * Clonage de l'objet en cours utilisée par la table de cache
      */
-    _GHom * clone () const {  return new _SelectWin(*this); }
+    _GHom * clone () const
+    {
+      return new _SelectWin(*this);
+    }
 };
 
 
@@ -213,4 +218,240 @@ class _SelectWin:public StrongHom {
 GHom SelectWin ( int c1, int c2, int c3,int nb, int player)  {
   return _SelectWin(c1,c2,c3,nb,player);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Modélisation d'un homomorphisme
+ */
+class _checkWinner:public StrongHom {
+
+  /**
+   * Liste des variables d'entrées (domaine d'entrée) de l'homomorphisme
+   */
+  
+  int cc[LINE][COLUMN];
+  public:
+    
+    /**
+   * Le constructeur avec initialisation de l'homomorphisme
+     */
+    _checkWinner (int t[LINE][COLUMN])
+    {
+      memcpy(cc,t,LINE*COLUMN*sizeof(int));
+    }
+
+    /**
+     * Saturation sur la variable XX
+     
+    bool
+	skip_variable(int vr) const
+    {
+      return (vr != 9);
+    }
+     */ 
+    
+  
+    /**
+     * PHI [1] : Si on rencontre la fin du DDD
+     */
+    GDDD phiOne() const {
+      
+      /* Check if there more that one winner in the configuration */
+      
+      // Check the impossible line
+      if((cc[0][0]==cc[0][1] && cc[0][0]==cc[0][2] && cc[0][0]!=EMPTY) &&
+	  ((  cc[1][0]==cc[1][1] && cc[1][0]==cc[1][2] && cc[1][0]!=EMPTY) || (cc[2][0]==cc[2][1] && cc[2][0]==cc[2][2] && cc[2][0]!=EMPTY)))
+      {
+	std::cout << "Cutting one configuration :" << std::endl;
+	std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
+	std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
+	std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	return DDD::null; // Way forbidden, two different winner
+      }
+      if((cc[1][0]==cc[1][1] && cc[1][0]==cc[1][2] && cc[1][0]!=EMPTY) && ((cc[0][0]==cc[0][1] && cc[0][0]==cc[0][2] && cc[0][0]!=EMPTY) || (cc[2][0]==cc[2][1] && cc[2][0]==cc[2][2] && cc[2][0]!=EMPTY)))
+      {
+	std::cout << "Cutting one configuration :" << std::endl;
+	std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
+	std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
+	std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	return DDD::null; // Way forbidden, two different winner
+      }
+      if((cc[2][0]==cc[2][1] && cc[2][0]==cc[2][2] && cc[2][0]!=EMPTY) && ((cc[0][0]==cc[0][1] && cc[0][0]==cc[0][2] && cc[0][0]!=EMPTY) || (cc[1][0]==cc[1][1] && cc[1][0]==cc[1][2] && cc[1][0]!=EMPTY)))
+      {
+	std::cout << "Cutting one configuration :" << std::endl;
+	std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
+	std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
+	std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	return DDD::null; // Way forbidden, two different winner
+      }
+      
+      // Check the impossible Column
+      if((cc[0][0]==cc[1][0] && cc[0][0]==cc[2][0] && cc[0][0]!=EMPTY) && ((cc[0][1]==cc[1][1] && cc[0][1]==cc[2][1] && cc[0][1]!=EMPTY) || (cc[0][2]==cc[1][2] && cc[0][2]==cc[2][2] && cc[0][2]!=EMPTY)))
+      {
+	std::cout << "Cutting one configuration :" << std::endl;
+	std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
+	std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
+	std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	return DDD::null; // Way forbidden, two different winner
+      }
+      if((cc[0][1]==cc[1][1] && cc[0][1]==cc[2][1] && cc[0][1]!=EMPTY) && ( (cc[0][0]==cc[1][0] && cc[0][0]==cc[2][0] && cc[0][0]!=EMPTY) || (cc[0][2]==cc[1][2] && cc[0][2]==cc[2][2] && cc[0][2]!=EMPTY)))
+      {
+	std::cout << "Cutting one configuration :" << std::endl;
+	std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
+	std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
+	std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	return DDD::null; // Way forbidden, two different winner
+      }
+      if((cc[0][2]==cc[1][2] && cc[0][2]==cc[2][2] && cc[0][2]!=EMPTY) && ( (cc[0][0]==cc[1][0] && cc[0][0]==cc[2][0] && cc[0][0]!=EMPTY) || (cc[0][1]==cc[1][1] && cc[0][1]==cc[2][1] && cc[0][1]!=EMPTY)))
+      {
+	std::cout << "Cutting one configuration :" << std::endl;
+	std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
+	std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
+	std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	return DDD::null; // Way forbidden, two different winner
+      }
+      
+      // Check the double winner on the same player, for exemple this way is impossible
+      // XXX
+      // OOX
+      //  OX
+      if((cc[0][0]==cc[0][1] && cc[0][0]==cc[0][2] && cc[0][0]!=EMPTY) && ((cc[0][0]==cc[1][0] && cc[0][0]==cc[2][0] && cc[0][0]!=EMPTY) || (cc[0][2]==cc[1][2] && cc[0][2]==cc[2][2] && cc[0][2]!=EMPTY) || (cc[0][1]==cc[1][1] && cc[0][1]==cc[2][1] && cc[0][1]!=EMPTY)))
+      {
+	std::cout << "Cutting one configuration :" << std::endl;
+	std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
+	std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
+	std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	return DDD::null; // Way forbidden
+      }
+      if((cc[2][0]==cc[2][1] && cc[2][0]==cc[2][2] && cc[2][0]!=EMPTY) && ((cc[0][0]==cc[1][0] && cc[0][0]==cc[2][0] && cc[0][0]!=EMPTY) || (cc[0][2]==cc[1][2] && cc[0][2]==cc[2][2] && cc[0][2]!=EMPTY) || (cc[0][1]==cc[1][1] && cc[0][1]==cc[2][1] && cc[0][1]!=EMPTY)))
+      {
+	std::cout << "Cutting one configuration :" << std::endl;
+	std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
+	std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
+	std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	return DDD::null; // Way forbidden
+      }
+      
+      if((cc[0][0]==cc[1][0] && cc[0][0]==cc[2][0] && cc[0][0]!=EMPTY) && ((cc[0][0]==cc[0][1] && cc[0][0]==cc[0][2] && cc[0][0]!=EMPTY) || (cc[1][0]==cc[1][1] && cc[1][0]==cc[1][2] && cc[1][0]!=EMPTY) || (cc[2][0]==cc[2][1] && cc[2][0]==cc[2][2] && cc[2][0]!=EMPTY)))
+      {
+	std::cout << "Cutting one configuration :" << std::endl;
+	std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
+	std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
+	std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	return DDD::null; // Way forbidden
+      }
+      if((cc[0][2]==cc[1][2] && cc[0][2]==cc[2][2] && cc[0][2]!=EMPTY) && ((cc[0][0]==cc[0][1] && cc[0][0]==cc[0][2] && cc[0][0]!=EMPTY) || (cc[1][0]==cc[1][1] && cc[1][0]==cc[1][2] && cc[1][0]!=EMPTY) || (cc[2][0]==cc[2][1] && cc[2][0]==cc[2][2] && cc[2][0]!=EMPTY)))
+      {
+	std::cout << "Cutting one configuration :" << std::endl;
+	std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
+	std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
+	std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	return DDD::null; // Way forbidden
+      }
+      
+      
+      
+      //std::cout<< "POSSIBLE WAY" << " Configuration Game : [" << cc1 << "," << cc2 << "," << cc[0][2] << "," << cc[1][0] << "," << ccc[1][1] << "," << cc6 << "," << cc7 << "," << cc8 << "," << cc9 << "]" << std::endl;
+      return DDD::one;
+    }
+
+    /**
+     * PHI [vr,vl] : représente le noeud courant auquel on applique l'homomorphisme
+     *  vr ==> Variable ou Noeud courant
+     *  vl ==> Valeur de l'arc du successeur pour le Noeud courant
+     */
+    GHom phi(int vr, int vl) const {
+        /* Create new Homo with the current configuration */
+      int tab[LINE][COLUMN];
+      int i=vr/LINE; // Conversion sur la ligne
+      int j=vr%COLUMN; // Conversion sur la colonne
+      
+      if(cc[i][j]!=vl)
+      {
+        memcpy(tab,cc,LINE*COLUMN*sizeof(int));
+        tab[i][j] = vl;
+	return GHom (vr,vl,_checkWinner(tab));
+      }
+      else
+      {
+	return GHom (vr,vl,GHom(this));
+      }
+      
+    }
+     
+    /**
+     * Fonction de hash utilisé pour identifier l'unicité de l'homomorphisme. Trés utile pour le calcul de la table de cache
+     */
+    size_t hash() const {
+      size_t res = 0;
+      for(int i = 0; i< LINE ; ++i)
+      {
+	for(int j=0; j<COLUMN ; ++j)
+	{
+	  res *=4729 * (cc[i][j]);
+	}
+      }
+      return res ;
+    }
+  
+    /**
+     * Surcharge de l'opérateur << de std::cout pour imprimer le type de la classe en cours selon un formatage personalisé
+     */
+    void print (std::ostream & os) const {
+      os << "Configuration Game : [";
+      for(int i = 0; i< LINE ; ++i)
+      {
+	for(int j=0; j<COLUMN ; ++j)
+	{
+           os << " " << cc[i][j];
+	}
+	os << "\n";
+      }
+    }
+
+    /**
+     * Surcharge de l'opérateur == utilisé pour comparer 2 homomorphismes du même type, utilisé par la table de cache
+     */
+    bool operator==(const StrongHom &s) const {
+      const _checkWinner& ps = dynamic_cast<const _checkWinner&>(s);
+      for(int i = 0; i< LINE ; ++i)
+      {
+	for(int j=0; j<COLUMN ; ++j)
+	{
+	  if(cc[i][j] != ps.cc[i][j])
+	  {
+	    return false;
+	  }
+	}
+      }
+      return true;
+    }
+    
+    /**
+     * Clonage de l'objet en cours utilisée par la table de cache
+     */
+    _GHom * clone () const {  return new _checkWinner(*this); }
+};
+
+
+/**
+ * Fonction publique qui permet de créer des instances de l'homomorphisme décrit ci-dessus
+ */
+GHom checkWinner (int t[LINE][COLUMN])  {
+  return _checkWinner(t);
+}
+
+
+
 
