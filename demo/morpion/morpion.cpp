@@ -94,12 +94,12 @@ int main (int /*argc*/, char ** /*argv*/) {
   
   // Insertion des homomorphismes pour couper les chemins que l'on ne veut pas
   std::set<GHom> nextCut1set;
-  int tab[3][3];
+  array_type tab(boost::extents[LINE][COLUMN]);
   for(int i = 0; i< LINE ; ++i)
   {
     for(int j=0; j<COLUMN ; ++j)
     {
-      tab[i][j]=-1;
+      tab[i][j]=Vide;
     }
   }
   nextCut1set.insert( checkWinner (tab));
