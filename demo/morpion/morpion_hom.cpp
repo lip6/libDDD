@@ -249,15 +249,15 @@ class _checkWinner:public StrongHom {
    * Liste des variables d'entrées (domaine d'entrée) de l'homomorphisme
    */
   
-  int cc[LINE][COLUMN];
+  array_type cc;
   public:
     
     /**
    * Le constructeur avec initialisation de l'homomorphisme
      */
-    _checkWinner (int t[LINE][COLUMN])
+    _checkWinner (const array_type& c)
+   : cc(c)
     {
-      memcpy(cc,t,LINE*COLUMN*sizeof(int));
     }
 
     /**
@@ -382,14 +382,13 @@ class _checkWinner:public StrongHom {
      */
     GHom phi(int vr, int vl) const {
         /* Create new Homo with the current configuration */
-      int tab[LINE][COLUMN];
       int i=vr/LINE; // Conversion sur la ligne
       int j=vr%COLUMN; // Conversion sur la colonne
       
       if(cc[i][j]!=vl)
       {
-        memcpy(tab,cc,LINE*COLUMN*sizeof(int));
-        tab[i][j] = vl;
+	array_type tab(cc);
+        tab[i][j] = static_cast<content_type>(vl);
 	return GHom (vr,vl,_checkWinner(tab));
       }
       else
@@ -404,7 +403,6 @@ class _checkWinner:public StrongHom {
      */
     size_t hash() const {
       std::size_t seed = 0;
-      
       for(int i = 0; i< LINE ; ++i)
       {
 	for(int j=0; j<COLUMN ; ++j)
@@ -412,6 +410,7 @@ class _checkWinner:public StrongHom {
 	  boost::hash_combine(seed, cc[i][j]);
 	}
       }
+      
       return seed ;
     }
   
@@ -458,7 +457,8 @@ class _checkWinner:public StrongHom {
 /**
  * Fonction publique qui permet de créer des instances de l'homomorphisme décrit ci-dessus
  */
-GHom checkWinner (int t[LINE][COLUMN])  {
+GHom checkWinner (const array_type& t)
+{
   return _checkWinner(t);
 }
 
