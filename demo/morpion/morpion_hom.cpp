@@ -2,6 +2,7 @@
 // date : Jan 2009
 
 #include "morpion_hom.hpp"
+#include <boost/functional/hash.hpp>
 
 // the cell value indicating it is empty
 const int EMPTY = -1;
@@ -69,7 +70,10 @@ class _TakeCell:public StrongHom {
     */
     size_t hash() const {
       // hash function should exhibit reasonable spread and involve as many parameters as possible.
-      return 10091*(cell+2)^player ;
+      std::size_t seed = 0;
+      boost::hash_combine(seed, cell);
+      boost::hash_combine(seed, player);
+      return seed ;
     }
   
     /**
@@ -182,7 +186,12 @@ class _SelectWin:public StrongHom {
      */
     size_t hash() const 
     {
-      return 7817*(case1+2)^player * (case2+2)^case3;
+      std::size_t seed = 0;
+      boost::hash_combine(seed, case1);
+      boost::hash_combine(seed, case2);
+      boost::hash_combine(seed, case3);
+      boost::hash_combine(seed, player);
+      return seed ;
     }
   
     /**
@@ -394,15 +403,16 @@ class _checkWinner:public StrongHom {
      * Fonction de hash utilisé pour identifier l'unicité de l'homomorphisme. Trés utile pour le calcul de la table de cache
      */
     size_t hash() const {
-      size_t res = 0;
+      std::size_t seed = 0;
+      
       for(int i = 0; i< LINE ; ++i)
       {
 	for(int j=0; j<COLUMN ; ++j)
 	{
-	  res *=4729 * (cc[i][j]);
+	  boost::hash_combine(seed, cc[i][j]);
 	}
       }
-      return res ;
+      return seed ;
     }
   
     /**

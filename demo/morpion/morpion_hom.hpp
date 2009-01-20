@@ -13,6 +13,7 @@
 
 
 
+
 extern const int EMPTY;
 extern const int NBCASE;
 extern const int LINE;

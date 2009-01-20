@@ -13,7 +13,7 @@
 static string pathdotff = "final";
 //static bool dodotexport=false;
 // true if user asked for dot export
-static bool dodotexport=false;
+// static bool dodotexport=false;
 // used as first column label of statistics
 static std::string modelName = "";
 
