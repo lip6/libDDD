@@ -29,7 +29,11 @@ typedef boost::multi_array<content_type, 2> array_type;
 // play a move
 GHom take_cell (int cell, int player) ;
 
+GHom TakeCellWithCheckWinner ( int c1, int player);
+
 GHom SelectWin (int c1, int c2, int c3, int nb, int player);
 
 GHom checkWinner (const array_type& t);
+
+GHom checkImpossible (const array_type& t);
 #endif 
