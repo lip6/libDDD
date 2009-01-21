@@ -395,7 +395,7 @@ public:
 
     Add(const d3::set<GShom>::type& p, int ref=0)
     	:
-        _GShom(ref,true),
+        _GShom(ref,false),
         parameters(),
 		have_id(false)
     {
@@ -609,7 +609,7 @@ private:
   GShom right;
 public:
   /* Constructor */
-  Compose(const GShom &l,const GShom &r,int ref=0):_GShom(ref,true),left(l),right(r){}
+  Compose(const GShom &l,const GShom &r,int ref=0):_GShom(ref,false),left(l),right(r){}
   /* Compare */
   bool operator==(const _GShom &h) const{
     return left==((Compose*)&h )->left && right==((Compose*)&h )->right;
@@ -651,7 +651,7 @@ private:
   GShom right;
 public:
   /* Constructor */
-  LeftConcat(const GSDD &l,const GShom &r,int ref=0):_GShom(ref,true),left(l),right(r){}
+  LeftConcat(const GSDD &l,const GShom &r,int ref=0):_GShom(ref,false),left(l),right(r){}
   /* Compare */
   bool operator==(const _GShom &h) const{
     return left==((LeftConcat*)&h )->left && right==((LeftConcat*)&h )->right;
@@ -685,7 +685,7 @@ private:
   GSDD right;
 public:
   /* Constructor */
-  RightConcat(const GShom &l,const GSDD &r,int ref=0):_GShom(ref,true),left(l),right(r){}
+  RightConcat(const GShom &l,const GSDD &r,int ref=0):_GShom(ref,false),left(l),right(r){}
   /* Compare */
   bool operator==(const _GShom &h) const{
     return left==((RightConcat*)&h )->left && right==((RightConcat*)&h )->right;
