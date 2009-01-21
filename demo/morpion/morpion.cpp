@@ -49,7 +49,7 @@ void bugreport () {
 
 
 
-DDD createInitial () {
+DDD createInitial1 () {
   
   GDDD M0 = GDDD::one;
   for (int i = 0; i < NBCASE; ++i) {
@@ -63,34 +63,53 @@ DDD createInitial () {
   return M0;
 }
 
+
+DDD createInitial2 () {
+  
+  GDDD M0 = GDDD::one;
+  
+  M0 = GDDD(0, EMPTY) ^  M0 ;
+  DDD::varName(0,"gagnant");
+  
+  for (int i = 1; i < NBCASE+1; ++i) {
+    // on ajoute une variable = case 
+    // sa valeur = vide
+    M0 = GDDD(i, EMPTY) ^  M0 ;
+    std::stringstream cas;
+    cas << "cell_" << i;
+    DDD::varName(i,cas.str());
+  }
+  return M0;
+}
+
 int main (int /*argc*/, char ** /*argv*/) {
   
   // Creation de l'état initial
-  DDD initial = createInitial ();
+  DDD initial1 = createInitial1 ();
+  DDD initial2 = createInitial2 ();
   
   // Insertion des homomorphismes pour tirer le joueur 1
   std::set<GHom> nextAset;
+  std::set<GHom> nextBset;
   for (int i=0; i< NBCASE; ++i) {
     nextAset.insert( take_cell (i, 0) );
+    nextBset.insert( take_cell (i, 1) );
   }
   // Creation d'un ensemble d'homomorphisme pour le joueur 1
   Hom nextA = GHom::add(nextAset);
-  
- /* // moins efficace mais ok conceptuellement
-   Hom nextA = GDDD::null;
-  for (int i=0; i< NBCASE ; ++i) {
-    nextA = nextA +  take_cell (i, 1) ;
-  }
-  */
-  
-  // Insertion des homomorphismes pour tirer le joueur 2
-  std::set<GHom> nextBset;
-  for (int i=0; i< NBCASE ; ++i) {
-    nextBset.insert( take_cell (i, 1) );
-  }
-  // Creation d'un ensemble d'homomorphisme pour le joueur 2
   Hom nextB = GHom::add(nextBset);
   
+  
+  // Insertion des homomorphismes pour tirer le joueur 1
+  std::set<GHom> nextAAset;
+  std::set<GHom> nextBBset;
+  for (int i=1; i< NBCASE+1; ++i) {
+    nextAAset.insert( TakeCellWithCheckWinner (i, 0) );
+    nextBBset.insert( TakeCellWithCheckWinner (i, 1) );
+  }
+  // Creation d'un ensemble d'homomorphisme pour le joueur 1
+  Hom nextAA = GHom::add(nextAAset);
+  Hom nextBB = GHom::add(nextBBset);
   
   // Insertion des homomorphismes pour couper les chemins que l'on ne veut pas
   std::set<GHom> nextCut1set;
@@ -105,36 +124,54 @@ int main (int /*argc*/, char ** /*argv*/) {
   nextCut1set.insert( checkWinner (tab));
   Hom nextCut1 = GHom::add(nextCut1set);
   
+  std::set<GHom> nextCut3set;
+  nextCut3set.insert( checkImpossible (tab));
+  Hom checked = GHom::add(nextCut3set);
+  
   // Insertion des homomorphismes pour couper les chemins que l'on ne veut pas
-  std::set<GHom> nextCut2set;
-  nextCut2set.insert( SelectWin (0,1,2,3,1));
-  nextCut2set.insert( SelectWin (3,4,5,3,1));
-  nextCut2set.insert( SelectWin (6,7,8,3,1));
-  
-  nextCut2set.insert( SelectWin (0,3,6,3,1));
-  nextCut2set.insert( SelectWin (1,4,7,3,1));
-  nextCut2set.insert( SelectWin (2,5,8,3,1));
-  
-  nextCut2set.insert( SelectWin (0,4,8,3,1));
-  nextCut2set.insert( SelectWin (2,4,6,3,1));
-  
-  Hom nextCut2 = GHom::add(nextCut2set);
+  std::set<GHom> nextCut21set;
+  nextCut21set.insert( SelectWin (1,2,3,3,1) & SelectWin (4,5,6,3,1) & SelectWin (7,8,9,3,1) & SelectWin (1,4,7,3,1) & SelectWin (2,5,8,3,1) & SelectWin (3,6,9,3,1) & SelectWin (1,5,9,3,1) & SelectWin (3,5,7,3,1));
+//   nextCut21set.insert( );
+//   nextCut21set.insert( );
+//   nextCut21set.insert( );
+//   nextCut21set.insert( );
+//   nextCut21set.insert( );
+//   nextCut21set.insert( );
+//   nextCut21set.insert( );
+  Hom nextCut21 = GHom::add(nextCut21set);
   
   
-  std::cout << "Initial state : " << initial << std::endl ;
-  exportDot(GSDD(0,initial),"init");
-
+  std::set<GHom> nextCut20set;
+  nextCut20set.insert( SelectWin (1,2,3,3,0) & SelectWin (4,5,6,3,0) & SelectWin (7,8,9,3,0) & SelectWin (1,4,7,3,0) & SelectWin (2,5,8,3,0) & SelectWin (3,6,9,3,0) & SelectWin (1,5,9,3,0) & SelectWin (3,5,7,3,0));
+//   nextCut20set.insert( );
+//   nextCut20set.insert( );
+//   nextCut20set.insert( );
+//   nextCut20set.insert( );
+//   nextCut20set.insert( );
+//   nextCut20set.insert( );
+//   nextCut20set.insert( );
+  Hom nextCut20 = GHom::add(nextCut20set);
+  
   std::cout << "Make the fix point : \n\n\n" << std::endl ;
   
+  
   // Build all possibility
+  /*
   GHom fullT1 = fixpoint(  nextCut1 & (nextB & nextA) + GHom::id );
-  DDD reachable1 = fullT1 (initial) ;
+  DDD reachable1 = fullT1 (initial1) ;
   exportDot(GSDD(0,reachable1),"reach1");
   Statistic S1 = Statistic(reachable1, "reach1" , CSV); // can also use LATEX instead of CSV
   S1.print_table(std::cout);
+  */
   
-  GHom fullT2 = fixpoint(  (  (nextB & nextCut2 & nextA)  + GHom::id) );
-  DDD reachable2 = fullT2 (initial) ;
+  //GHom fullT2 = checked & fixpoint( ( nextCut21 & (nextBB & (nextCut20 & nextAA) )) + GHom::id );
+  //GHom fullT2 = checked &  fixpoint(  (nextCut21 & ( nextBB & (nextCut20 & nextAA)) ) + GHom::id );
+  GHom fullT2 = checked &  fixpoint(  (nextCut20 & ( nextAA & (nextCut21 & nextBB)) ) + GHom::id );
+  /* Check if OK */ 
+  
+  
+  DDD reachable2 = fullT2 (initial2) ;
+  //DDD reachable3 = fullT3 (initial2);
   exportDot(GSDD(0,reachable2),"reach2");
   Statistic S2 = Statistic(reachable2, "reach2" , CSV); // can also use LATEX instead of CSV
   S2.print_table(std::cout);
