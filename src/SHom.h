@@ -193,6 +193,13 @@ GShom fixpoint(const GShom &);
  GShom localApply(const GHom &,int target);
  GShom localApply(const GShom &,int target);
 
+/// An IF-THEN-ELSE construct.
+/// The behavior of the condition **must** be a selection, as indicated by its isSelector() flag.
+/// Otherwise an assertion violation will be raised (with an explicit stderr message)
+///
+/// Semantics : ITE ( cond, iftrue, iffalse) (d) =  iftrue & cond(d) + iffalse ( d - cond(d) )
+GShom ITE (const GShom & cond, const GShom & iftrue, const GShom & iffalse);
+
 /// Composition by union of two homomorphisms. 
 /// See also GShom::add(). This commutative operation computes a homomorphism 
 /// that evaluates as the sum of two homomorphism.
@@ -306,16 +313,28 @@ private:
   /// If immediat==true,  eval is called without attempting a cache hit. 
   /// Currently only the constant homomorphism has this attribute set to true.
   mutable bool immediat;
-  
+  /// The procedure responsible for propagating efficiently across "skipped" variable nodes.
     GSDD eval_skip(const GSDD &) const;
   
 public:
 
+    /// The skip_variable predicate indicates which variables are "don't care" with respect to this SHom.
+    /// This is defined as a StrongHom with :
+    ///  phi(var,val) { if ( skip_variable(var) ) return GShom( var, val, this ); else { real behavior } }
     virtual bool
     skip_variable(int) const
     {
         return false;
     }
+
+    /// The isSelector predicate indicates a homomorphism that only selects paths in the SDD (no modifications, no additions)
+    /// Tagging with isSelector() allows to enable optimizations and makes the homomorphism eligible as "condition" in ITE construct.
+    virtual bool
+    is_selector() const
+    {
+        return false;
+    }
+
 
   /// Constructor. Note this class is abstract, so this is only used in initialization
   /// list of derived classes constructors (hard coded operations and StrongShom).
@@ -350,6 +369,8 @@ public:
 public:
     
     // Enable access to the concrete GSHom for _GSHom homorphisms
+  /// TODO : this is a dirty trick to allow us to do terms rewriting in Add, Fixpoint etc...
+  /// A more elegant architecture would be nice.
     static
 	const _GShom*
     get_concret(const GShom& gshom)
