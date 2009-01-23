@@ -18,7 +18,11 @@ static string pathdotff = "final";
 static std::string modelName = "";
 
 // The number of cells in the game, i.e. 9
-
+// the cell value indicating it is empty
+const int EMPTY = -1;
+const int NBCASE = 9;
+const int LINE = 3;
+const int COLUMN = 3;
 
 
 
@@ -70,6 +74,8 @@ int main (int /*argc*/, char ** /*argv*/) {
   
   // Creation de l'état initial
   DDD initial2 = createInitial2 ();
+
+  //std::cout<<"here"<< std::endl;
   
   // Insertion des homomorphismes pour tirer le joueur 1
   std::set<GHom> nextAAset;

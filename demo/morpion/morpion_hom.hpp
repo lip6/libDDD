@@ -32,5 +32,9 @@ GHom NoteWinner (int c1, int c2, int c3, int nb, int player);
 
 GHom Full ();
 
+GHom Full (int nti);
+
 GHom checkImpossible (const array_type& t);
+
+GHom checkImpossible (const array_type& t, int fi,int nti);
 #endif 
