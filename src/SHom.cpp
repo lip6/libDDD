@@ -79,6 +79,10 @@ public:
   size_t hash() const{return 17;}
   _GShom * clone () const {  return new Identity(*this); }
 
+  bool is_selector () const {
+    return true; 
+  }
+
   bool
   skip_variable(int) const 
   {
@@ -150,6 +154,11 @@ public:
     return left(d)*right;
   }
 
+  bool is_selector () const {
+    // intersection is a natural selector (if we forget about TOP)
+    return left.is_selector() ;
+  }
+
   /* Memory Manager */
   void mark() const{
     left.mark();
@@ -189,6 +198,11 @@ public:
   bool skip_variable (int var) const {
 	  return var != target;
   }
+
+  bool is_selector () const {
+    return h.is_selector();
+  }
+
   
   GSDD eval(const GSDD &d)const{
     GSDD_DataSet_map res;
@@ -233,6 +247,7 @@ public:
   void print (std::ostream & os) const {
     os << "(Local:" << h << "," << target << ")";
   }
+
 
 
 };
@@ -334,7 +349,7 @@ public :
   }
 
   bool is_selector () const {
-    return get_concret(iftrue_)->is_selector() && get_concret(iffalse_)->is_selector();
+    return iftrue_.is_selector() && iffalse_.is_selector();
   }
   
   GSDD eval(const GSDD &d) const {
@@ -1356,6 +1371,11 @@ Shom &Shom::operator=(const GShom &h){
   concret=h.concret;
   concret->refCounter++;
   return *this;
+}
+
+/// This predicate is true if the homomorphism global behavior is only to prune some paths.
+bool GShom::is_selector() const {
+  return concret->is_selector();
 }
 
 /* Operations */
