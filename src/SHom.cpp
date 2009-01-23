@@ -308,6 +308,10 @@ public:
     h.mark();
   }  
   
+  bool is_selector () const {
+    return h.is_selector();
+  }
+
   size_t hash() const {
     return  h.hash() ^ target * 2177; 
   }
@@ -538,6 +542,14 @@ public:
 
   _GShom * clone () const {  return new Add(*this); }
 
+  bool is_selector () const {
+    for (d3::set<GShom>::type::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+      if (! gi->is_selector() )
+	return false;
+    return true;
+  }
+
+
 	bool
 	skip_variable( int var ) const
 	{
@@ -693,6 +705,10 @@ public:
   }
   _GShom * clone () const {  return new Compose(*this); }
 
+  bool is_selector () const {
+    return left.is_selector() && right.is_selector();
+  }
+
 	bool
     skip_variable(int var) const 
     {
@@ -815,6 +831,10 @@ public:
     return left(d)-right;
   }
 
+  bool is_selector () const {
+    // set difference is a natural selector
+    return left.is_selector() ;
+  }
   /* Memory Manager */
   void mark() const{
     left.mark();
@@ -856,7 +876,10 @@ public:
   {
       return get_concret(arg)->skip_variable(var);
   }
-
+  bool is_selector () const {
+    // wow ! why build a fixpoint of a selector ??
+    return arg.is_selector();
+  }
 
   /* Eval */
   GSDD 
