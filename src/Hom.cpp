@@ -71,7 +71,9 @@ public:
     {
         return true;
     }
-
+  bool is_selector () const {
+    return true; 
+  }
   void print (std::ostream & os) const {
     os << "Id";
   }
@@ -134,6 +136,12 @@ public:
   GDDD eval(const GDDD &d)const{
     return left(d)*right;
   }
+
+  bool is_selector () const {
+    // intersection is a natural selector (if we forget about TOP)
+    return left.is_selector() ;
+  }
+
 
   /* Memory Manager */
   void mark() const{
@@ -224,6 +232,14 @@ public:
         }
         return res;
     }
+
+  bool is_selector () const {
+    for (std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+      if (! gi->is_selector() )
+	return false;
+    return true;
+  }
+
   _GHom * clone () const {  return new Add(*this); }
   
     bool
@@ -364,9 +380,12 @@ public:
     bool
     skip_variable(int var) const
     {
-        return get_concret(left)->skip_variable(var) and get_concret(right)->skip_variable(var);
+        return get_concret(left)->skip_variable(var) && get_concret(right)->skip_variable(var);
     }
-    
+
+  bool is_selector () const {
+    return left.is_selector() && right.is_selector();
+  }
     /* Eval */
     GDDD
     eval(const GDDD &d) const
@@ -515,6 +534,11 @@ public:
     right.mark();
   }
 
+ bool is_selector () const {
+    // set difference is a natural selector
+    return left.is_selector() ;
+  }
+
   void print (std::ostream & os) const {
     os << "(Minus:" << left << " - " << right << ")";
   }
@@ -560,7 +584,13 @@ public:
     {
         return get_concret(arg)->skip_variable(var);
     }
-    
+   
+  bool is_selector () const {
+    // wow ! why build a fixpoint of a selector ??
+    return arg.is_selector();
+  }
+
+ 
     /* Eval */
     GDDD
     eval(const GDDD &d) const
