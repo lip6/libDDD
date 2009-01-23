@@ -130,6 +130,8 @@ public:
   bool operator==(const GShom &h) const{return concret==h.concret;};
   bool operator!=(const GShom &h) const{return concret!=h.concret;};
   bool operator<(const GShom &h) const{return concret<h.concret;};
+  /// This predicate is true if the homomorphism global behavior is only to prune some paths.
+  bool is_selector() const;
   //@}
 
   /// \name Evaluation mechanism for homomorphisms.
