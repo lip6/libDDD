@@ -921,6 +921,12 @@ Hom &Hom::operator=(const GHom &h){
   return *this;
 }
 
+/// This predicate is true if the homomorphism global behavior is only to prune some paths.
+bool GHom::is_selector() const {
+  return concret->is_selector();
+}
+
+
 /* Operations */
 GHom fixpoint (const GHom &h) {
   if (h != GHom::id)

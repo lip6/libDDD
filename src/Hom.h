@@ -155,6 +155,8 @@ public:
   /// \param h the node to compare to
   /// \return true if argument h is greater than "this".
   bool operator<(const GHom &h) const{return concret<h.concret;};
+  /// This predicate is true if the homomorphism global behavior is only to prune some paths.
+  bool is_selector() const;
   //@}
 
   ///  Evaluation operator. Homomorphisms overload operator(), so they can be directly applied to DDD nodes.
@@ -343,12 +345,22 @@ private:
   
 public:
 
-    virtual bool
+
+    /// The skip_variable predicate indicates which variables are "don't care" with respect to this SHom.
+    /// This is defined as a StrongHom with :
+    ///  phi(var,val) { if ( skip_variable(var) ) return GShom( var, val, this ); else { real behavior } }
+     virtual bool
     skip_variable(int) const
     {
         return false;
     }
-
+    /// The isSelector predicate indicates a homomorphism that only selects paths in the SDD (no modifications, no additions)
+    /// Tagging with isSelector() allows to enable optimizations and makes the homomorphism eligible as "condition" in ITE construct.
+    virtual bool
+    is_selector() const
+    {
+        return false;
+    }
   /// Constructor. Note this class is abstract, so this is only used in initialization
   /// list of derived classes constructors (hard coded operations and StrongShom).
   _GHom(int ref=0,bool im=false):refCounter(ref),marking(false),immediat(im){};
