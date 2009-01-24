@@ -197,10 +197,15 @@ GShom fixpoint(const GShom &);
 
 /// An IF-THEN-ELSE construct.
 /// The behavior of the condition **must** be a selection, as indicated by its isSelector() flag.
-/// Otherwise an assertion violation will be raised (with an explicit stderr message)
+/// PITFALL : Otherwise an assertion violation will be raised (with an explicit stderr message)
 ///
-/// Semantics : ITE ( cond, iftrue, iffalse) (d) =  iftrue & cond(d) + iffalse ( d - cond(d) )
+/// Semantics : ITE ( cond, iftrue, iffalse) (d) =  (iftrue & cond(d)) + (iffalse & !cond(d)) 
 GShom ITE (const GShom & cond, const GShom & iftrue, const GShom & iffalse);
+
+/// A negation/complement constructor for **selector** homomophisms.
+/// Let cond be a selector, !cond(d) = d - cond(d)
+/// PITFALL : Raises an assert violation if is_selector() returns false !
+GShom operator! (const GShom & cond);
 
 /// Composition by union of two homomorphisms. 
 /// See also GShom::add(). This commutative operation computes a homomorphism 
