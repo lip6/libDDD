@@ -361,7 +361,10 @@ public :
       return d;
    
    GSDD condtrue = cond_ (d);
-   return iftrue_(condtrue) + iffalse_(d - condtrue);
+   return 
+     ( ( iftrue_  &  cond_ ) (d) ) 
+     + 
+     ( ( iffalse_ & !cond_ ) (d) );
   }
 
   void mark() const {
@@ -386,6 +389,54 @@ public :
   }
 
 
+};
+
+// negator for a selector
+
+class NotCond
+	:
+	public _GShom
+{
+  // selector hom
+  GShom cond_;
+public :
+  NotCond (const GShom & cond): cond_(cond) {};
+
+  // skip if every argument skips.
+  bool skip_variable (int var) const {
+    return get_concret(cond_)->skip_variable(var);
+  }
+
+  bool is_selector () const {
+    return true;
+  }
+  
+  GSDD eval(const GSDD &d) const {
+   if (d == GSDD::one || d == GSDD::null || d == GSDD::top )
+      return d;
+   
+   GSDD condtrue = cond_ (d);
+   return (d - condtrue);
+  }
+
+  void mark() const {
+    cond_.mark();
+  }  
+  
+  size_t hash() const {
+    return  cond_.hash() * 6353; 
+  }
+
+  bool operator==(const _GShom &s) const {
+    const NotCond* ps = (const NotCond *)&s;
+    return cond_ == ps->cond_ ;
+  }  
+
+  _GShom * clone () const {  return new NotCond(*this); }
+
+  void print (std::ostream & os) const {
+    os << "(NOT: ! " << cond_  << ")";
+  }
 };
 
 
@@ -1526,6 +1577,37 @@ GShom operator-(const GShom &h,const GSDD &d){
   return S_Homomorphism::Minus(h,d);
 }
 
+/// An IF-THEN-ELSE construct.
+/// The behavior of the condition **must** be a selection, as indicated by its isSelector() flag.
+/// PITFALL : Otherwise an assertion violation will be raised (with an explicit stderr message)
+///
+/// Semantics : ITE ( cond, iftrue, iffalse) (d) =  (iftrue & cond(d)) + (iffalse & !cond(d)) 
+void printCondError (const GShom & cond) {
+
+  std::cerr << " but the homomorphism passed :" << std::endl;
+  std::cerr << cond << std::endl ;
+  std::cerr << "Does not have selector flag set to true. If your logic is correct, check that"
+	    << " you implement : bool is_selector() const { return true; }\n"
+	    << " in all selector inductive homomorphisms." << std::endl ;
+}
+
+GShom ITE (const GShom & cond, const GShom & iftrue, const GShom & iffalse) {
+  if (! cond.is_selector() ) {
+    std::cerr << "Creating a complement condition with operator! :  ! cond" << std::endl;
+    printCondError(cond);
+    assert(false);
+  }  
+  return S_Homomorphism::SITE(cond, iftrue, iffalse);
+}
+
+GShom operator! (const GShom & cond) {
+  if (! cond.is_selector() ) {
+    std::cerr << "Creating a complement condition with operator! :  ! cond" << std::endl;
+    printCondError(cond);
+    assert(false);
+  }  
+  return S_Homomorphism::NotCond(cond);
+}
 
 void GShom::pstats(bool)
 {
