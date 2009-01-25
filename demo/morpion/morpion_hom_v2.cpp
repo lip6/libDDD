@@ -5,8 +5,37 @@
 #include <boost/functional/hash.hpp>
 
 
-// the cell value indicating it is empty
+// The player designated plays in a free cell, if any are available. 
+GHom 
+PlayAnyFreeCell (int player) {
+  std::set<GHom> nextAAset;
+  for (int i=0; i< NBCASE; ++i)
+  {
+    nextAAset.insert( Play (i, player) );
+  }
+  return GHom::add(nextAAset);
+}
 
+
+// check if a player has won
+// Select any path where the designated player has won : i.e has three aligned cross or circle.
+GHom 
+CheckIsWinner (int player) {
+    std::set<GHom> winAAset;
+    
+  winAAset.insert ( CheckCellWinner (player, 0) & CheckCellWinner (player, 1) & CheckCellWinner (player, 2) ) ;
+  winAAset.insert( CheckCellWinner (player, 3) & CheckCellWinner (player, 4) & CheckCellWinner (player, 5) ) ;
+  winAAset.insert( CheckCellWinner (player, 6) & CheckCellWinner (player, 7) & CheckCellWinner (player, 8) ) ;
+
+  winAAset.insert( CheckCellWinner (player, 0) & CheckCellWinner (player, 3) & CheckCellWinner (player, 6) ) ;
+  winAAset.insert( CheckCellWinner (player, 1) & CheckCellWinner (player, 4) & CheckCellWinner (player, 7) ) ;
+  winAAset.insert( CheckCellWinner (player, 2) & CheckCellWinner (player, 5) & CheckCellWinner (player, 8) ) ;
+
+  winAAset.insert( CheckCellWinner (player, 0) & CheckCellWinner (player, 4) & CheckCellWinner (player, 8) ) ;
+  winAAset.insert( CheckCellWinner (player, 2) & CheckCellWinner (player, 4) & CheckCellWinner (player, 6) ) ;
+
+  return GHom::add(winAAset);
+}
 
 
 
