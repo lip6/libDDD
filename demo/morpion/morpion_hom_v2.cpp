@@ -4,8 +4,20 @@
 #include "morpion_hom_v2.hpp"
 #include <boost/functional/hash.hpp>
 
+#include "Hom_Basic.hh"
 
-// The player designated plays in a free cell, if any are available. 
+
+// update the variable representing game status to "gs"
+GHom updateGameStatus (GAMESTATUS gs) {
+  return setVarConst(NBCASE ,gs);
+}
+// check the variable representing game status is set to "gs"
+GHom testGameStatus (GAMESTATUS gs) {
+  return varEqState(NBCASE,gs);
+}
+
+
+// The player designated plays in a free cll, if any are available. 
 GHom 
 PlayAnyFreeCell (int player) {
   std::set<GHom> nextAAset;
@@ -48,7 +60,7 @@ GHom
 CheckNoWinner () {
   if (NOWINNER_STRAT == 0) {
     // NEW !! use a negation : no winner = not ( A wins or B wins )
-    return ! ( CheckIsWinner (0) + CheckIsWinner(1) );
+    return ! GHom( CheckIsWinner (0) + CheckIsWinner(1) );
   } else {
     // copy paste from main
     GHom noWinner;
@@ -102,7 +114,7 @@ class _Play:public StrongHom
     bool
         skip_variable(int vr) const
     {
-      return vr != cell && vr!=9;
+      return vr != cell ;
     }
   
     /**
@@ -435,7 +447,7 @@ class _CheckCellWinner:public StrongHom
     void
         print (std::ostream & os) const
     {
-      os << "Note Winner(player:" << player << " )";
+      os << "checkCellWin(player:" << player << ", cell:" << cell <<  ")";
     }
 
     /**
@@ -468,7 +480,8 @@ class _CheckCellWinner:public StrongHom
 GHom 
     CheckCellWinner (int player , int cell)
 {
-  return _CheckCellWinner(player,cell);
+  //  return _CheckCellWinner(player,cell);
+  return varEqState(cell,player);
 }
 
 
