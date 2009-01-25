@@ -155,6 +155,55 @@ public:
   
 };
 
+// negator for a selector
+
+class NotCond
+	:
+	public _GHom
+{
+  // selector hom
+  GHom cond_;
+public :
+  NotCond (const GHom & cond): cond_(cond) {};
+
+  // skip if every argument skips.
+  bool skip_variable (int var) const {
+    return get_concret(cond_)->skip_variable(var);
+  }
+
+  bool is_selector () const {
+    return true;
+  }
+  
+  GDDD eval(const GDDD &d) const {
+   if (d == GDDD::one || d == GDDD::null || d == GDDD::top )
+      return d;
+   
+   GDDD condtrue = cond_ (d);
+   return (d - condtrue);
+  }
+
+  void mark() const {
+    cond_.mark();
+  }  
+  
+  size_t hash() const {
+    return  cond_.hash() * 6353; 
+  }
+
+  bool operator==(const _GHom &s) const {
+    const NotCond* ps = (const NotCond *)&s;
+    return cond_ == ps->cond_ ;
+  }  
+
+  _GHom * clone () const {  return new NotCond(*this); }
+
+  void print (std::ostream & os) const {
+    os << "(NOT: ! " << cond_  << ")";
+  }
+};
+
+
 /************************** Add */
 class Add
 	:
@@ -964,8 +1013,23 @@ GHom fixpoint (const GHom &h) {
   else
     return GHom::id;
 }
+static void printCondError (const GHom & cond) {
 
+  std::cerr << " but the homomorphism passed :" << std::endl;
+  std::cerr << cond << std::endl ;
+  std::cerr << "Does not have selector flag set to true. If your logic is correct, check that"
+	    << " you implement : bool is_selector() const { return true; }\n"
+	    << " in all selector inductive homomorphisms." << std::endl ;
+}
 
+GHom operator! (const GHom & cond) {
+  if (! cond.is_selector() ) {
+    std::cerr << "Creating a complement condition with operator! :  ! cond" << std::endl;
+    printCondError(cond);
+    assert(false);
+  }  
+  return NotCond(cond);
+}
 
 GHom operator&(const GHom &h1,const GHom &h2){
   GHom nullHom = GDDD::null;
@@ -980,6 +1044,7 @@ GHom operator&(const GHom &h1,const GHom &h2){
 
 	return GHom(canonical( Compose(h1,h2)));
 }
+
 
 GHom operator+(const GHom &h1,const GHom &h2){
   std::set<GHom> s;

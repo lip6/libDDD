@@ -228,6 +228,10 @@ public:
 /// fixpoint ( h + GShom::id )
 ///
 GHom fixpoint(const GHom &);
+/// A negation/complement constructor for **selector** homomophisms.
+/// Let cond be a selector, !cond(d) = d - cond(d)
+/// PITFALL : Raises an assert violation if is_selector() returns false !
+GHom operator! (const GHom & cond);
 /// Composition by union of two homomorphisms. 
 /// See also GShom::add(). This commutative operation computes a homomorphism 
 /// that evaluates as the sum of two homomorphism.
