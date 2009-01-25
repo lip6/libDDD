@@ -393,14 +393,14 @@ public :
 
 // negator for a selector
 
-class NotCond
+class SNotCond
 	:
 	public _GShom
 {
   // selector hom
   GShom cond_;
 public :
-  NotCond (const GShom & cond): cond_(cond) {};
+  SNotCond (const GShom & cond): cond_(cond) {};
 
   // skip if every argument skips.
   bool skip_variable (int var) const {
@@ -428,11 +428,11 @@ public :
   }
 
   bool operator==(const _GShom &s) const {
-    const NotCond* ps = (const NotCond *)&s;
+    const SNotCond* ps = (const SNotCond *)&s;
     return cond_ == ps->cond_ ;
   }  
 
-  _GShom * clone () const {  return new NotCond(*this); }
+  _GShom * clone () const {  return new SNotCond(*this); }
 
   void print (std::ostream & os) const {
     os << "(NOT: ! " << cond_  << ")";
@@ -1582,7 +1582,7 @@ GShom operator-(const GShom &h,const GSDD &d){
 /// PITFALL : Otherwise an assertion violation will be raised (with an explicit stderr message)
 ///
 /// Semantics : ITE ( cond, iftrue, iffalse) (d) =  (iftrue & cond(d)) + (iffalse & !cond(d)) 
-void printCondError (const GShom & cond) {
+static void printCondError (const GShom & cond) {
 
   std::cerr << " but the homomorphism passed :" << std::endl;
   std::cerr << cond << std::endl ;
@@ -1606,7 +1606,7 @@ GShom operator! (const GShom & cond) {
     printCondError(cond);
     assert(false);
   }  
-  return S_Homomorphism::NotCond(cond);
+  return S_Homomorphism::SNotCond(cond);
 }
 
 void GShom::pstats(bool)
