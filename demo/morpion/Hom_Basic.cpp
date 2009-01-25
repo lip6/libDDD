@@ -32,6 +32,12 @@ class _VarCompState:public StrongHom {
 public:
   _VarCompState(int vr, comparator c, int vl) : var(vr), val(vl), comp(c) {}
   
+  
+  bool is_selector () const {
+    return true;
+  }
+
+
   bool
   skip_variable(int vr) const
   {
@@ -133,6 +139,10 @@ public:
     return 6619*(var+13)^val;
   }
   
+  void print (std::ostream & os) const {
+    os << "[ " << DDD::getvarName(var) << " = "  << val << " ]";
+  }
+
   bool operator==(const StrongHom &s) const {
     _setVarConst* ps = (_setVarConst*)&s;
     return var == ps->var && val == ps->val;
