@@ -458,9 +458,30 @@ GHom
 }
 
 
+// pretty print of a cell state
+static const char * printCell (int cellState) {
+  static const char * PA_str = "O";
+  static const char * PB_str = "X";
+  static const char * E_str =  ".";
+  switch (cellState) {
+  case 0 :
+    return PA_str;
+  case 1 :
+    return PB_str;
+  default :
+    return E_str;
+  }
+}
 
-
-
+// pretty print of a game state stored in an array
+static void printState (array_type cc) {
+  for (int lig = 0; lig < 3 ; ++lig) {
+    for (int col = 0; col < 3 ; ++col) {
+      std::cout << printCell(cc[lig][col]);
+    }
+    std::cout << std::endl;
+  }
+}
 
 
 
@@ -528,26 +549,20 @@ class _checkImpossible:public StrongHom {
       {
         /* Check if there is some winner on first line */
         std::cout << "Find one configuration completed :" << std::endl;
-        std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
-        std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
-        std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	printState(cc);
       }
       
       if((cc[0][0]==cc[0][1] && cc[0][0]==cc[0][2] && cc[0][0]!=EMPTY && cc[0][0]==cc[1][0] && cc[0][0]==cc[2][0])){
         /* Check if there is some winner on first line */
         std::cout << "One configuration Winner OK on line 0 :" << std::endl;
-        std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
-        std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
-        std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	printState(cc);
       }
 
       
       if((cc[0][0]==cc[1][1] && cc[0][0]==cc[2][2] && cc[0][0]!=EMPTY)){
         /* Check if there is some winner on first line */
         std::cout << "One configuration Winner OK on diagonnal :" << std::endl;
-        std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
-        std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
-        std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	printState(cc);
       }
       
       // Check the impossible line
@@ -555,25 +570,19 @@ class _checkImpossible:public StrongHom {
           ((  cc[1][0]==cc[1][1] && cc[1][0]==cc[1][2] && cc[1][0]!=EMPTY) || (cc[2][0]==cc[2][1] && cc[2][0]==cc[2][2] && cc[2][0]!=EMPTY)))
       {
         std::cout << "Impossible configuration detected 1 :" << std::endl;
-        std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
-        std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
-        std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	printState(cc);
 	//return DDD::null; // Way forbidden, two different winner
       }
       if((cc[1][0]==cc[1][1] && cc[1][0]==cc[1][2] && cc[1][0]!=EMPTY) && ((cc[0][0]==cc[0][1] && cc[0][0]==cc[0][2] && cc[0][0]!=EMPTY) || (cc[2][0]==cc[2][1] && cc[2][0]==cc[2][2] && cc[2][0]!=EMPTY)))
       {
         std::cout << "Impossible configuration detected 2 :" << std::endl;
-        std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
-        std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
-        std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	printState(cc);
 	//return DDD::null; // Way forbidden, two different winner
       }
       if((cc[2][0]==cc[2][1] && cc[2][0]==cc[2][2] && cc[2][0]!=EMPTY) && ((cc[0][0]==cc[0][1] && cc[0][0]==cc[0][2] && cc[0][0]!=EMPTY) || (cc[1][0]==cc[1][1] && cc[1][0]==cc[1][2] && cc[1][0]!=EMPTY)))
       {
         std::cout << "Impossible configuration detected 3 :" << std::endl;
-        std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
-        std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
-        std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	printState(cc);
 	//return DDD::null; // Way forbidden, two different winner
       }
       
@@ -581,25 +590,19 @@ class _checkImpossible:public StrongHom {
       if((cc[0][0]==cc[1][0] && cc[0][0]==cc[2][0] && cc[0][0]!=EMPTY) && ((cc[0][1]==cc[1][1] && cc[0][1]==cc[2][1] && cc[0][1]!=EMPTY) || (cc[0][2]==cc[1][2] && cc[0][2]==cc[2][2] && cc[0][2]!=EMPTY)))
       {
         std::cout << "Impossible configuration detected 4 :" << std::endl;
-        std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
-        std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
-        std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	printState(cc);
 	//return DDD::null; // Way forbidden, two different winner
       }
       if((cc[0][1]==cc[1][1] && cc[0][1]==cc[2][1] && cc[0][1]!=EMPTY) && ( (cc[0][0]==cc[1][0] && cc[0][0]==cc[2][0] && cc[0][0]!=EMPTY) || (cc[0][2]==cc[1][2] && cc[0][2]==cc[2][2] && cc[0][2]!=EMPTY)))
       {
         std::cout << "Impossible configuration detected 5 :" << std::endl;
-        std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
-        std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
-        std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	printState(cc);
 	//return DDD::null; // Way forbidden, two different winner
       }
       if((cc[0][2]==cc[1][2] && cc[0][2]==cc[2][2] && cc[0][2]!=EMPTY) && ( (cc[0][0]==cc[1][0] && cc[0][0]==cc[2][0] && cc[0][0]!=EMPTY) || (cc[0][1]==cc[1][1] && cc[0][1]==cc[2][1] && cc[0][1]!=EMPTY)))
       {
         std::cout << "Impossible configuration detected 6 :" << std::endl;
-        std::cout << ((cc[0][0]==EMPTY) ? 9:cc[0][0]) << ((cc[0][1]==EMPTY) ? 9:cc[0][1]) << ((cc[0][2]==EMPTY) ? 9:cc[0][2]) << std::endl;
-        std::cout << ((cc[1][0]==EMPTY)  ? 9:cc[1][0]) << ((cc[1][1]==EMPTY) ?   9:cc[1][1]) << (cc[1][2]==EMPTY ?     9:cc[1][2]) << std::endl;
-        std::cout << ((cc[2][0]==EMPTY) ? 9:cc[2][0]) << ((cc[2][1]==EMPTY) ? 9:cc[2][1]) << ((cc[2][2]==EMPTY) ? 9:cc[2][2]) << std::endl;
+	printState(cc);
 	//return DDD::null; // Way forbidden, two different winner
       }
 
