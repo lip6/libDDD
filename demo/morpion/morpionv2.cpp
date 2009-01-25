@@ -27,6 +27,10 @@ const int NBCASE = 9;
 const int LINE = 3;
 const int COLUMN = 3;
 
+// players
+const int PA = 0;
+const int PB = 1;
+
 
 void usage() {
   cerr << "Morpion V2; package " << PACKAGE_STRING <<endl;
@@ -77,44 +81,14 @@ int main (int /*argc*/, char ** /*argv*/) {
   // Creation de l'état initial
   DDD initial = createInitial ();
   
-  // Insertion des homomorphismes pour tirer le joueur 1
-  std::set<GHom> nextAAset;
-  std::set<GHom> nextBBset;
-  for (int i=0; i< NBCASE; ++i)
-  {
-    nextAAset.insert( Play (i, 0) );
-    nextBBset.insert( Play (i, 1) );
-  }
   // Creation d'un ensemble d'homomorphisme pour le joueur 1
-  Hom nextAA = GHom::add(nextAAset);
-  Hom nextBB = GHom::add(nextBBset);
+  Hom nextAA = PlayAnyFreeCell(PA);
+  Hom nextBB = PlayAnyFreeCell(PB);
   
   // Initialisation des combinaisons gagnantes
-  GHom winnerA;
-  GHom winnerB;
-  
-  winnerA = ( CheckCellWinner (0, 0) & CheckCellWinner (0, 1) & CheckCellWinner (0, 2) ) ;
-  winnerA = winnerA + ( CheckCellWinner (0, 3) & CheckCellWinner (0, 4) & CheckCellWinner (0, 5) ) ;
-  winnerA = winnerA + ( CheckCellWinner (0, 6) & CheckCellWinner (0, 7) & CheckCellWinner (0, 8) ) ;
-
-  winnerA = winnerA + ( CheckCellWinner (0, 0) & CheckCellWinner (0, 3) & CheckCellWinner (0, 6) ) ;
-  winnerA = winnerA + ( CheckCellWinner (0, 1) & CheckCellWinner (0, 4) & CheckCellWinner (0, 7) ) ;
-  winnerA = winnerA + ( CheckCellWinner (0, 2) & CheckCellWinner (0, 5) & CheckCellWinner (0, 8) ) ;
-
-  winnerA = winnerA + ( CheckCellWinner (0, 0) & CheckCellWinner (0, 4) & CheckCellWinner (0, 8) ) ;
-  winnerA = winnerA + ( CheckCellWinner (0, 2) & CheckCellWinner (0, 4) & CheckCellWinner (0, 6) ) ;
-  
-  winnerB = ( CheckCellWinner (1, 0) & CheckCellWinner (1, 1) & CheckCellWinner (1, 2) ) ;
-  winnerB = winnerB + ( CheckCellWinner (1, 3) & CheckCellWinner (1, 4) & CheckCellWinner (1, 5) ) ;
-  winnerB = winnerB + ( CheckCellWinner (1, 6) & CheckCellWinner (1, 7) & CheckCellWinner (1, 8) ) ;
-  
-  winnerB = winnerB + ( CheckCellWinner (1, 0) & CheckCellWinner (1, 3) & CheckCellWinner (1, 6) ) ;
-  winnerB = winnerB + ( CheckCellWinner (1, 1) & CheckCellWinner (1, 4) & CheckCellWinner (1, 7) ) ;
-  winnerB = winnerB + ( CheckCellWinner (1, 2) & CheckCellWinner (1, 5) & CheckCellWinner (1, 8) ) ;
-  
-  winnerB = winnerB + ( CheckCellWinner (1, 0) & CheckCellWinner (1, 4) & CheckCellWinner (1, 8) ) ;
-  winnerB = winnerB + ( CheckCellWinner (1, 2) & CheckCellWinner (1, 4) & CheckCellWinner (1, 6) ) ;
-  
+  GHom winnerA = CheckIsWinner (PA);
+  GHom winnerB = CheckIsWinner (PB);
+ 
   // Initialisation des combinaisons non gagnantes
   GHom noWinner;
     for(int i=EMPTY;i<2;++i)
