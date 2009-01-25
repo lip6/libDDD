@@ -343,6 +343,13 @@ class _CheckCellWinner:public StrongHom
     {
       return vr!=cell;
     }
+
+  // tag this homomorphism as only making selections
+  bool
+        is_selector () const
+    {
+      return true;
+    }
   
     /**
      * PHI [1] : called if the terminal 1 is encountered, returns a constant DDD
