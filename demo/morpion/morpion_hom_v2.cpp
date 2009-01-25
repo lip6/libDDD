@@ -22,15 +22,18 @@ PlayAnyFreeCell (int player) {
 GHom 
 CheckIsWinner (int player) {
     std::set<GHom> winAAset;
-    
+   
+    // lines 
   winAAset.insert ( CheckCellWinner (player, 0) & CheckCellWinner (player, 1) & CheckCellWinner (player, 2) ) ;
   winAAset.insert( CheckCellWinner (player, 3) & CheckCellWinner (player, 4) & CheckCellWinner (player, 5) ) ;
   winAAset.insert( CheckCellWinner (player, 6) & CheckCellWinner (player, 7) & CheckCellWinner (player, 8) ) ;
-
+  
+  // cols
   winAAset.insert( CheckCellWinner (player, 0) & CheckCellWinner (player, 3) & CheckCellWinner (player, 6) ) ;
   winAAset.insert( CheckCellWinner (player, 1) & CheckCellWinner (player, 4) & CheckCellWinner (player, 7) ) ;
   winAAset.insert( CheckCellWinner (player, 2) & CheckCellWinner (player, 5) & CheckCellWinner (player, 8) ) ;
 
+  // diagonals
   winAAset.insert( CheckCellWinner (player, 0) & CheckCellWinner (player, 4) & CheckCellWinner (player, 8) ) ;
   winAAset.insert( CheckCellWinner (player, 2) & CheckCellWinner (player, 4) & CheckCellWinner (player, 6) ) ;
 
