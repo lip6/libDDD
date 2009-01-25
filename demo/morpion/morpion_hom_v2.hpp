@@ -19,6 +19,18 @@ extern const int COLUMN;
 extern const int PA ;
 extern const int PB ;
 
+
+enum GAMESTATUS {
+  P1TURN, P2TURN, P1WIN, P2WIN
+};
+
+// update the variable representing game status to "gs"
+GHom updateGameStatus (GAMESTATUS gs);
+// check the variable representing game status is set to "gs"
+GHom testGameStatus (GAMESTATUS gs);
+
+
+
 // update the variable representing game status to "player" wins
 GHom
     NoteWinner (int player);
