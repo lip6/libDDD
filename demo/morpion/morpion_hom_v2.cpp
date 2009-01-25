@@ -60,7 +60,7 @@ GHom
 CheckNoWinner () {
   if (NOWINNER_STRAT == 0) {
     // NEW !! use a negation : no winner = not ( A wins or B wins )
-    return ! GHom( CheckIsWinner (0) + CheckIsWinner(1) );
+    return ! ( CheckIsWinner (0) + CheckIsWinner(1) );
   } else {
     // copy paste from main
     GHom noWinner;
@@ -114,7 +114,7 @@ class _Play:public StrongHom
     bool
         skip_variable(int vr) const
     {
-      return vr != cell ;
+      return vr != cell && vr!=9;
     }
   
     /**
@@ -480,8 +480,7 @@ class _CheckCellWinner:public StrongHom
 GHom 
     CheckCellWinner (int player , int cell)
 {
-  //  return _CheckCellWinner(player,cell);
-  return varEqState(cell,player);
+  return _CheckCellWinner(player,cell);
 }
 
 
