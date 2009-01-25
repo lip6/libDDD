@@ -41,7 +41,40 @@ CheckIsWinner (int player) {
 }
 
 
+// Strategy marker
+const int NOWINNER_STRAT = 0;
 
+GHom 
+CheckNoWinner () {
+  if (NOWINNER_STRAT == 0) {
+    // NEW !! use a negation : no winner = not ( A wins or B wins )
+    return ! ( CheckIsWinner (0) + CheckIsWinner(1) );
+  } else {
+    // copy paste from main
+    GHom noWinner;
+    for(int i=EMPTY;i<2;++i)
+      {
+	if(i == 0)
+	  {
+	    noWinner = ( CheckCellNoWinner (i, 0) + CheckCellNoWinner (i, 1) + CheckCellNoWinner (i, 2) ) ;
+	  }
+	else
+	  {
+	    noWinner = noWinner & ( CheckCellNoWinner (i, 0) + CheckCellNoWinner (i, 1) + CheckCellNoWinner (i, 2) ) ;
+	  }
+	noWinner = noWinner & ( CheckCellNoWinner (i, 3) + CheckCellNoWinner (i, 4) + CheckCellNoWinner (i, 5) ) ;
+	noWinner = noWinner & ( CheckCellNoWinner (i, 6) + CheckCellNoWinner (i, 7) + CheckCellNoWinner (i, 8) ) ;
+	
+	noWinner = noWinner & ( CheckCellNoWinner (i, 0) + CheckCellNoWinner (i, 3) + CheckCellNoWinner (i, 6) ) ;
+	noWinner = noWinner & ( CheckCellNoWinner (i, 1) + CheckCellNoWinner (i, 4) + CheckCellNoWinner (i, 7) ) ;
+	noWinner = noWinner & ( CheckCellNoWinner (i, 2) + CheckCellNoWinner (i, 5) + CheckCellNoWinner (i, 8) ) ;
+	
+	noWinner = noWinner & ( CheckCellNoWinner (i, 0) + CheckCellNoWinner (i, 4) + CheckCellNoWinner (i, 8) ) ;
+	noWinner = noWinner & ( CheckCellNoWinner (i, 2) + CheckCellNoWinner (i, 4) + CheckCellNoWinner (i, 6) ) ;
+      }
+    return noWinner;
+  }
+}
 /**
  * An inductive homomorphism to play a move of a given player in a given cell.
  */
