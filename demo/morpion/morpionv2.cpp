@@ -90,29 +90,8 @@ int main (int /*argc*/, char ** /*argv*/) {
   GHom winnerB = CheckIsWinner (PB);
  
   // Initialisation des combinaisons non gagnantes
-  GHom noWinner = ! (winnerA + winnerB);
-  /*
-    for(int i=EMPTY;i<2;++i)
-    {
-      if(i == 0)
-      {
-        noWinner = ( CheckCellNoWinner (i, 0) + CheckCellNoWinner (i, 1) + CheckCellNoWinner (i, 2) ) ;
-      }
-      else
-      {
-        noWinner = noWinner & ( CheckCellNoWinner (i, 0) + CheckCellNoWinner (i, 1) + CheckCellNoWinner (i, 2) ) ;
-      }
-      noWinner = noWinner & ( CheckCellNoWinner (i, 3) + CheckCellNoWinner (i, 4) + CheckCellNoWinner (i, 5) ) ;
-      noWinner = noWinner & ( CheckCellNoWinner (i, 6) + CheckCellNoWinner (i, 7) + CheckCellNoWinner (i, 8) ) ;
-      
-      noWinner = noWinner & ( CheckCellNoWinner (i, 0) + CheckCellNoWinner (i, 3) + CheckCellNoWinner (i, 6) ) ;
-      noWinner = noWinner & ( CheckCellNoWinner (i, 1) + CheckCellNoWinner (i, 4) + CheckCellNoWinner (i, 7) ) ;
-      noWinner = noWinner & ( CheckCellNoWinner (i, 2) + CheckCellNoWinner (i, 5) + CheckCellNoWinner (i, 8) ) ;
-      
-      noWinner = noWinner & ( CheckCellNoWinner (i, 0) + CheckCellNoWinner (i, 4) + CheckCellNoWinner (i, 8) ) ;
-      noWinner = noWinner & ( CheckCellNoWinner (i, 2) + CheckCellNoWinner (i, 4) + CheckCellNoWinner (i, 6) ) ;
-    }
-  */
+  GHom noWinner = CheckNoWinner();
+
     // Insertion des homomorphismes pour couper les chemins que l'on ne veut pas
     array_type tab(boost::extents[LINE][COLUMN]);
     for(int i = 0; i< LINE ; ++i)
@@ -141,9 +120,7 @@ int main (int /*argc*/, char ** /*argv*/) {
                               
 			  + GHom::id ) ;
   */
-  
- 
-  
+    
   GHom fullT2 = checkImpossible(tab,0,9) & fixpoint( ( ( (Full(9) + nextAA) & nextBB) ) + GHom::id);
   
   std::cout << "here" << std::endl;
