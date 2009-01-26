@@ -232,6 +232,13 @@ GHom fixpoint(const GHom &);
 /// Let cond be a selector, !cond(d) = d - cond(d)
 /// PITFALL : Raises an assert violation if is_selector() returns false !
 GHom operator! (const GHom & cond);
+/// An IF-THEN-ELSE construct.
+/// The behavior of the condition **must** be a selection, as indicated by its isSelector() flag.
+/// PITFALL : Otherwise an assertion violation will be raised (with an explicit stderr message)
+///
+/// Semantics : ITE ( cond, iftrue, iffalse) (d) =  (iftrue & cond(d)) + (iffalse & !cond(d)) 
+GHom ITE (const GHom & cond, const GHom & iftrue, const GHom & iffalse);
+
 /// Composition by union of two homomorphisms. 
 /// See also GShom::add(). This commutative operation computes a homomorphism 
 /// that evaluates as the sum of two homomorphism.

@@ -1022,6 +1022,16 @@ static void printCondError (const GHom & cond) {
 	    << " in all selector inductive homomorphisms." << std::endl ;
 }
 
+GHom ITE (const GHom & cond, const GHom & iftrue, const GHom & iffalse) {
+  if (! cond.is_selector() ) {
+    std::cerr << "Creating a complement condition in an ITE construct : " << std::endl;
+    printCondError(cond);
+    assert(false);
+  }  
+  // let optimizations and rewritings do their job.
+  return (iftrue & cond) + (iffalse & (!cond));
+}
+
 GHom operator! (const GHom & cond) {
   if (! cond.is_selector() ) {
     std::cerr << "Creating a complement condition with operator! :  ! cond" << std::endl;
