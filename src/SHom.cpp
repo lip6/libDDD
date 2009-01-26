@@ -330,67 +330,6 @@ public:
 
 };
 
-/******* ITE construct  */
-
-class SITE
-	:
-	public _GShom
-{
-  // selector hom
-  GShom cond_;
-  // if true body hom
-  GShom iftrue_;
-  // if false body hom
-  GShom iffalse_;
-public :
-  SITE (const GShom & cond, const GShom & iftrue, const GShom & iffalse): cond_(cond),iftrue_(iftrue),iffalse_(iffalse) {};
-
-  // skip if every argument skips.
-  bool skip_variable (int var) const {
-    return get_concret(cond_)->skip_variable(var) 
-      && get_concret(iftrue_)->skip_variable(var) 
-      && get_concret(iffalse_)->skip_variable(var) ;
-  }
-
-  bool is_selector () const {
-    return iftrue_.is_selector() && iffalse_.is_selector();
-  }
-  
-  GSDD eval(const GSDD &d) const {
-   if (d == GSDD::one || d == GSDD::null || d == GSDD::top )
-      return d;
-   
-   GSDD condtrue = cond_ (d);
-   return 
-     ( ( iftrue_  &  cond_ ) (d) ) 
-     + 
-     ( ( iffalse_ & !cond_ ) (d) );
-  }
-
-  void mark() const {
-    cond_.mark();
-    iftrue_.mark();
-    iffalse_.mark();
-  }  
-  
-  size_t hash() const {
-    return  cond_.hash() ^ iftrue_.hash() ^ iffalse_.hash() * 8999; 
-  }
-
-  bool operator==(const _GShom &s) const {
-    const SITE* ps = (const SITE *)&s;
-    return cond_ == ps->cond_ && iftrue_ ==  ps->iftrue_ && iffalse_ == ps->iffalse_;
-  }  
-
-  _GShom * clone () const {  return new SITE(*this); }
-
-  void print (std::ostream & os) const {
-    os << "(SITE:" << cond_ << "?" << iftrue_ << ":" << iffalse_  << ")";
-  }
-
-
-};
-
 // negator for a selector
 
 class SNotCond
@@ -1593,11 +1532,12 @@ static void printCondError (const GShom & cond) {
 
 GShom ITE (const GShom & cond, const GShom & iftrue, const GShom & iffalse) {
   if (! cond.is_selector() ) {
-    std::cerr << "Creating a complement condition with operator! :  ! cond" << std::endl;
+    std::cerr << "Creating a complement condition in an ITE construct : " << std::endl;
     printCondError(cond);
     assert(false);
   }  
-  return S_Homomorphism::SITE(cond, iftrue, iffalse);
+  // let optimizations and rewritings do their job.
+  return (iftrue & cond) + (iffalse & (!cond));
 }
 
 GShom operator! (const GShom & cond) {
