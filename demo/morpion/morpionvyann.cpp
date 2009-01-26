@@ -98,7 +98,7 @@ int main (int /*argc*/, char ** /*argv*/) {
     {
       for(int j=0; j<COLUMN ; ++j)
       {
-        tab[i][j]=Vide;
+        tab[i][j]=-1;
       }
     }
 
@@ -150,7 +150,7 @@ int main (int /*argc*/, char ** /*argv*/) {
     // P2 turn
     & testGameStatus(P2TURN)
     ;
-  GHom fullT2 =  checkImpossible(tab,0,9) & fixpoint (
+  GHom fullT2 =  /*checkImpossible(tab,0,9) &*/ fixpoint (
 		// Move by P1 :
 		P1play
 		+
@@ -166,6 +166,10 @@ int main (int /*argc*/, char ** /*argv*/) {
 
   std::cout << "here" << std::endl;
   DDD reachable = fullT2 (initial);
+  exportDot(GSDD(0,reachable),"reach2");
+  Statistic S2 = Statistic(reachable, "reach2" , CSV); // can also use LATEX instead of CSV
+  S2.print_table(std::cout);
+  
   bool interactive = true;
   if (interactive) {
     reachable = initial;
@@ -177,9 +181,7 @@ int main (int /*argc*/, char ** /*argv*/) {
       reachable = (P1play + P2play) (reachable);
     }
   }
-  exportDot(GSDD(0,reachable),"reach2");
-  Statistic S2 = Statistic(reachable, "reach2" , CSV); // can also use LATEX instead of CSV
-  S2.print_table(std::cout);
+
   
   
   return EXIT_SUCCESS;

@@ -37,6 +37,10 @@ GHom
 
 // The player designated plays in a free cell, if any are available. 
 GHom 
+    PlayAnyFreeCell ();
+
+// The player designated plays in a free cell, if any are available.
+GHom 
     PlayAnyFreeCell (int player);
 
 // Select any path where the designated player has won : i.e has three aligned cross or circle.
@@ -52,6 +56,9 @@ GHom
 
 GHom 
     Play ( int c1, int player);
+
+GHom
+    Play ( int c1);
 
 
 GHom 

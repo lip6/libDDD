@@ -78,29 +78,28 @@ DDD createInitial () {
 
 int main (int /*argc*/, char ** /*argv*/) {
   
-  // Creation de l'état initial
+  // Create the initial state
   DDD initial = createInitial ();
-  
-  // Creation d'un ensemble d'homomorphisme pour le joueur 1
-  Hom nextAA = PlayAnyFreeCell(PA);
-  Hom nextBB = PlayAnyFreeCell(PB);
-  
-  // Initialisation des combinaisons gagnantes
+
+  // Initialisation of the possible hit of players
+  Hom nextAA = PlayAnyFreeCell();
+
+  // Initialisation of winner configuration
   GHom winnerA = CheckIsWinner (PA);
   GHom winnerB = CheckIsWinner (PB);
  
-  // Initialisation des combinaisons non gagnantes
+  // Initialisation of no winner configuration
   GHom noWinner = CheckNoWinner();
 
-    // Insertion des homomorphismes pour couper les chemins que l'on ne veut pas
-    array_type tab(boost::extents[LINE][COLUMN]);
-    for(int i = 0; i< LINE ; ++i)
+  // Insertion des homomorphismes pour couper les chemins que l'on ne veut pas
+  array_type tab(boost::extents[LINE][COLUMN]);
+  for(int i = 0; i< LINE ; ++i)
+  {
+    for(int j=0; j<COLUMN ; ++j)
     {
-      for(int j=0; j<COLUMN ; ++j)
-      {
-        tab[i][j]=Vide;
-      }
+      tab[i][j]=-1;
     }
+  }
 
   std::cout << "Make the fix point : \n\n\n" << std::endl ;
   /* ALGO :
@@ -121,7 +120,10 @@ int main (int /*argc*/, char ** /*argv*/) {
 			  + GHom::id ) ;
   */
     
-  GHom fullT2 = checkImpossible(tab,0,9) & fixpoint( ( ( (Full(9) + nextAA) & nextBB) ) + GHom::id);
+  //GHom fullT2 = checkImpossible(tab,0,9) & fixpoint( ( ( (Full(9) + nextAA) & nextBB) ) + GHom::id);
+  GHom fullT2 = checkImpossible(tab,0,9) & fixpoint( ( ( ( (NoteWinner(PA) & winnerA) + (NoteWinner(PB) & winnerB) + noWinner ) & nextAA)) + GHom::id);
+
+  //GHom fullT2 = checkImpossible(tab,0,9) & fixpoint( nextAA + GHom::id);
   
   std::cout << "here" << std::endl;
   DDD reachable = fullT2 (initial);
