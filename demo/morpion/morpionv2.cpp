@@ -121,7 +121,7 @@ int main (int /*argc*/, char ** /*argv*/) {
   */
     
   //GHom fullT2 = checkImpossible(tab,0,9) & fixpoint( ( ( (Full(9) + nextAA) & nextBB) ) + GHom::id);
-  GHom fullT2 = checkImpossible(tab,0,9) & fixpoint( ( ( ( (NoteWinner(PA) & winnerA) + (NoteWinner(PB) & winnerB) + noWinner ) & nextAA)) + GHom::id);
+  GHom fullT2 = /*checkImpossible(tab,0,9) & */ fixpoint( ( ( ( (NoteWinner(PA) & winnerA) + (NoteWinner(PB) & winnerB) + noWinner ) & nextAA)) + GHom::id);
 
   //GHom fullT2 = checkImpossible(tab,0,9) & fixpoint( nextAA + GHom::id);
   

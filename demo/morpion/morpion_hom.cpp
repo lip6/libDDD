@@ -503,7 +503,8 @@ class _checkImpossible:public StrongHom {
     /**
    * Constructor with initialisation
      */
-    _checkImpossible (const array_type& c)
+    explicit
+        _checkImpossible (const array_type& c)
   : cc(c),first_index(1),node_to_ignore(0)
     {
     }
@@ -530,7 +531,9 @@ class _checkImpossible:public StrongHom {
     /**
      * PHI [1] : We have all state of the system and we can check if there are any impossible state
      */
-    GDDD phiOne() const {
+    GDDD
+        phiOne() const
+    {
 
       bool cond = true;
       
@@ -551,11 +554,12 @@ class _checkImpossible:public StrongHom {
 	      printState(cc);
       }
       
-//       if((cc[0][0]==cc[0][1] && cc[0][0]==cc[0][2] && cc[0][0]!=EMPTY && cc[0][0]==cc[1][0] && cc[0][0]==cc[2][0])){
-//         /* Check if there is some winner on first line */
-//         std::cout << "One configuration Winner OK on line 0 :" << std::endl;
-// 	printState(cc);
-//       }
+      if((cc[0][0]==cc[0][1] && cc[0][0]==cc[0][2] && cc[0][0]!=EMPTY && cc[0][0]==cc[1][0] && cc[0][0]==cc[2][0]))
+      {
+        /* Check if there is some winner on first line */
+        std::cout << "One configuration Winner OK on line 0 and Column 0 :" << std::endl;
+	      printState(cc);
+      }
 // 
 //       
 //       if((cc[0][0]==cc[1][1] && cc[0][0]==cc[2][2] && cc[0][0]!=EMPTY)){
@@ -628,6 +632,7 @@ class _checkImpossible:public StrongHom {
         array_type tab(cc);
         tab[i][j] = vl;
         return GHom (vr,vl,_checkImpossible(tab,first_index,node_to_ignore));
+        //return GHom (vr,vl,_checkImpossible(tab));
       }
       else
       {
