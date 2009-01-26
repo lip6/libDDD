@@ -95,7 +95,7 @@ int main (int /*argc*/, char ** /*argv*/) {
   {
     for(int j=0; j<COLUMN ; ++j)
     {
-      tab[i][j]=Vide;
+      tab[i][j]=EMPTY;
     }
   }
   

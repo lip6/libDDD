@@ -538,32 +538,31 @@ class _checkImpossible:public StrongHom {
       {
         for(int j=0;j<COLUMN;++j)
         {
-          if(cc[i][j]==EMPTY)
+          if(cc[i][j]==-1)
           {
             cond =false;
           }
         }
       }
-      
       if(cond)
       {
         /* Check if there is some winner on first line */
         std::cout << "Find one configuration completed :" << std::endl;
-	printState(cc);
+	      printState(cc);
       }
       
-      if((cc[0][0]==cc[0][1] && cc[0][0]==cc[0][2] && cc[0][0]!=EMPTY && cc[0][0]==cc[1][0] && cc[0][0]==cc[2][0])){
-        /* Check if there is some winner on first line */
-        std::cout << "One configuration Winner OK on line 0 :" << std::endl;
-	printState(cc);
-      }
-
-      
-      if((cc[0][0]==cc[1][1] && cc[0][0]==cc[2][2] && cc[0][0]!=EMPTY)){
-        /* Check if there is some winner on first line */
-        std::cout << "One configuration Winner OK on diagonnal :" << std::endl;
-	printState(cc);
-      }
+//       if((cc[0][0]==cc[0][1] && cc[0][0]==cc[0][2] && cc[0][0]!=EMPTY && cc[0][0]==cc[1][0] && cc[0][0]==cc[2][0])){
+//         /* Check if there is some winner on first line */
+//         std::cout << "One configuration Winner OK on line 0 :" << std::endl;
+// 	printState(cc);
+//       }
+// 
+//       
+//       if((cc[0][0]==cc[1][1] && cc[0][0]==cc[2][2] && cc[0][0]!=EMPTY)){
+//         /* Check if there is some winner on first line */
+//         std::cout << "One configuration Winner OK on diagonnal :" << std::endl;
+// 	printState(cc);
+//       }
       
       // Check the impossible line
       if((cc[0][0]==cc[0][1] && cc[0][0]==cc[0][2] && cc[0][0]!=EMPTY) &&
@@ -623,12 +622,12 @@ class _checkImpossible:public StrongHom {
       int i=(vr-first_index)/LINE; // Conversion sur la ligne
       int j=(vr-first_index)%COLUMN; // Conversion sur la colonne
 	
-	//std::cout << "Node [" << vr << "," << vl << "] Conversion on Grid [" << i << "," << j <<"] = " << vl << std::endl;
+	    //std::cout << "Node [" << vr << "," << vl << "] Conversion on Grid [" << i << "," << j <<"] = " << vl << std::endl;
       if(cc[i][j]!=vl)
       {
         array_type tab(cc);
-        tab[i][j] = static_cast<content_type>(vl);
-        return GHom (vr,vl,_checkImpossible(tab));
+        tab[i][j] = vl;
+        return GHom (vr,vl,_checkImpossible(tab,first_index,node_to_ignore));
       }
       else
       {
@@ -684,7 +683,9 @@ class _checkImpossible:public StrongHom {
           }
         }
       }
-      return true;
+
+      
+      return node_to_ignore == ps.node_to_ignore;
     }
     
     /**

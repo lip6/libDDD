@@ -22,9 +22,8 @@ extern const int NBCASE;
 extern const int LINE;
 extern const int COLUMN;
 
-enum content_type{ Vide = -1, JoueurA = 0, JoueurB = 1 } ;
 
-typedef boost::multi_array<content_type, 2> array_type;
+typedef boost::multi_array<int, 2> array_type;
 
 GHom TakeCellWithCheckWinner ( int c1, int player);
 
