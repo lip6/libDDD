@@ -1,8 +1,7 @@
 // author : S. Hong,Y.Thierry-Mieg // date : Jan 2009
 #include <sstream>
 #include <cstdlib>
-#include "morpion_hom_v2.hpp"
-#include "morpion_hom.hpp"
+#include "hom/morpion_hom_vyann.hpp"
 
 // SDD utilities to output stats and dot graphs
 #include "util/dotExporter.h"
@@ -19,17 +18,6 @@ static string pathdotff = "final";
 static std::string modelName = "";
 
 // The number of cells in the game, i.e. 9
-
-
-// the cell value indicating it is empty
-const int EMPTY = -1;
-const int NBCASE = 9;
-const int LINE = 3;
-const int COLUMN = 3;
-
-// players
-const int PA = 0;
-const int PB = 1;
 
 
 void usage() {
@@ -63,7 +51,7 @@ DDD createInitial () {
   
   GDDD M0 = GDDD::one;
 
-  for (int i = 0; i < NBCASE; ++i) {
+  for (size_t i = 0; i < NBCASE; ++i) {
     M0 = GDDD(i, EMPTY) ^  M0 ;
     std::stringstream cas;
     cas << "cell_" << i;
@@ -91,16 +79,6 @@ int main (int /*argc*/, char ** /*argv*/) {
  
   // Initialisation des combinaisons non gagnantes
   GHom noWinner = CheckNoWinner();
-
-    // Insertion des homomorphismes pour couper les chemins que l'on ne veut pas
-    array_type tab(boost::extents[LINE][COLUMN]);
-    for(int i = 0; i< LINE ; ++i)
-    {
-      for(int j=0; j<COLUMN ; ++j)
-      {
-        tab[i][j]=-1;
-      }
-    }
 
   std::cout << "Make the fix point : \n\n\n" << std::endl ;
   /* ALGO :
@@ -186,57 +164,3 @@ int main (int /*argc*/, char ** /*argv*/) {
   
   return EXIT_SUCCESS;
 }
-
-
-
-
-  /*
-  for (int i=1;i < argc; i++) {
-    if ( ! strcmp(argv[i],"-i") ) {
-      if (++i > argc) 
-{ cerr << "give argument value for romeo xml file name please after " << argv[i-1]<<endl; usage() ;exit(1);;}
-      pathromeoff = argv[i];
-      doromeoparse = true;
-} else if (! strcmp(argv[i],"-d") ) {
-      if (++i > argc) 
-{ cerr << "give argument value for .dot file name please after " << argv[i-1]<<endl; usage() ; exit(1);;}
-      pathdotff = argv[i];
-      dodotexport = true;
-} else if (! strcmp(argv[i],"-e") ) {
-      if (++i > argc) 
-{ cerr << "give integer argument value for example file name please after " << argv[i-1]<<endl; usage() ; exit(1);;}
-      numexample = atoi(argv[i]);
-      dosimpleexample = true;
-} else if (! strcmp(argv[i],"--help") || ! strcmp(argv[i],"-h")  ) {
-      usage(); exit(0);
-} else if (! strcmp(argv[i],"--texhead")   ) {
-      Statistic s = Statistic(SDD::one,"");
-      s.print_header(cout);
-      exit(0); 
-} else if (! strcmp(argv[i],"--textail")   ) {
-      Statistic s = Statistic(SDD::one,"");
-      s.print_trailer(cout);
-      exit(0);
-} else if (! strcmp(argv[i],"--tex")   ) {
-      doFullTex = true;
-} else if (! strcmp(argv[i],"--texline")   ) {
-      doTexLine = true;
-} else if (! strcmp(argv[i],"--quiet")   ) {
-      beQuiet = true;
-} else if (! strcmp(argv[i],"--ddd")   ) {
-      method = ddd_solution ;
-      modelName = "d3:";
-      model.setStorage(ITSModel::ddd_storage);
-} else if (! strcmp(argv[i],"--order")   ) {
-      usecustomorder = true;
-} else if (! strcmp(argv[i],"--sdd")   ) {
-      method = sdd_solution ;
-      model.setStorage(ITSModel::sdd_storage);
-}else if (! strcmp(argv[i],"--dump-order")   ) {
-      dodumporder = true;
-} else {
-      cerr << "Error : incorrect Argument : "<<argv[i] <<endl ; usage(); exit(0);
-}
-}
-  */
-

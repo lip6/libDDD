@@ -1,29 +1,29 @@
 // author : S. Hong,Y.Thierry-Mieg
 // date : Jan 2009
 
-#include "morpion_hom_v2.hpp"
+#include "hom/morpion_hom_vyann.hpp"
 #include <boost/functional/hash.hpp>
 
 #include "Hom_Basic.hh"
 
 
 // update the variable representing game status to "gs"
-GHom updateGameStatus (GAMESTATUS gs) {
+Hom updateGameStatus (GAMESTATUS gs) {
   return setVarConst(NBCASE ,gs);
 }
 // check the variable representing game status is set to "gs"
-GHom testGameStatus (GAMESTATUS gs) {
+Hom testGameStatus (GAMESTATUS gs) {
   return varEqState(NBCASE,gs);
 }
 
 
 // The player designated plays in a free cll, if any are available. 
-GHom 
+Hom
 PlayAnyFreeCell (int player) {
   std::set<GHom> nextAAset;
-  for (int i=0; i< NBCASE; ++i)
+  for (size_t i=0; i< NBCASE; ++i)
   {
-    nextAAset.insert( Play (i, player) );
+    nextAAset.insert( setVarConst(i,player) & varEqState(i,EMPTY) );
   }
   return GHom::add(nextAAset);
 }
@@ -31,11 +31,27 @@ PlayAnyFreeCell (int player) {
 
 // check if a player has won
 // Select any path where the designated player has won : i.e has three aligned cross or circle.
-GHom 
+Hom
 CheckIsWinner (int player) {
     std::set<GHom> winAAset;
    
     // lines 
+    for (int lig = 0; lig < 3 ; ++lig) {
+      winAAset.insert ( varEqState(COLUMN*lig,player) 
+			& varEqState(COLUMN*lig+1,player)
+			& varEqState(COLUMN*lig+2,player));
+    }
+
+    for (int col = 0; col < 3 ; ++col) {
+      winAAset.insert ( varEqState(col,player) 
+			& varEqState(LINE+col,player)
+			& varEqState(2*LINE+col,player));
+    }
+    
+    winAAset.insert( varEqState(0,player)& varEqState(LINE+1,player)& varEqState(2*LINE+2,player));
+    winAAset.insert( varEqState(2,player)& varEqState(LINE+1,player)& varEqState(2*LINE+0,player));
+
+    /*
   winAAset.insert ( CheckCellWinner (player, 0) & CheckCellWinner (player, 1) & CheckCellWinner (player, 2) ) ;
   winAAset.insert( CheckCellWinner (player, 3) & CheckCellWinner (player, 4) & CheckCellWinner (player, 5) ) ;
   winAAset.insert( CheckCellWinner (player, 6) & CheckCellWinner (player, 7) & CheckCellWinner (player, 8) ) ;
@@ -48,7 +64,7 @@ CheckIsWinner (int player) {
   // diagonals
   winAAset.insert( CheckCellWinner (player, 0) & CheckCellWinner (player, 4) & CheckCellWinner (player, 8) ) ;
   winAAset.insert( CheckCellWinner (player, 2) & CheckCellWinner (player, 4) & CheckCellWinner (player, 6) ) ;
-
+    */
   return GHom::add(winAAset);
 }
 
@@ -56,14 +72,14 @@ CheckIsWinner (int player) {
 // Strategy marker
 const int NOWINNER_STRAT = 0;
 
-GHom 
+Hom
 CheckNoWinner () {
   if (NOWINNER_STRAT == 0) {
     // NEW !! use a negation : no winner = not ( A wins or B wins )
     return ! ( CheckIsWinner (0) + CheckIsWinner(1) );
   } else {
     // copy paste from main
-    GHom noWinner;
+    Hom noWinner;
     for(int i=EMPTY;i<2;++i)
       {
 	if(i == 0)
@@ -213,10 +229,10 @@ class _Play:public StrongHom
 /**
  * Factory of _TakeCellWithCheckWinner Instance
  */
-GHom 
+Hom
     Play ( int c1, int player)
 {
-  return _Play(c1,player);
+  return GHom(_Play(c1,player));
 }
 
 
@@ -340,10 +356,10 @@ class _NoteWinner:public StrongHom
 /**
  * Factory of _TakeCellWithCheckWinner Instance
  */
-GHom 
+Hom
     NoteWinner (int player)
 {
-  return _NoteWinner(player);
+  return GHom(_NoteWinner(player));
 }
 
 
@@ -477,10 +493,10 @@ class _CheckCellWinner:public StrongHom
 /**
  * Factory of _TakeCellWithCheckWinner Instance
  */
-GHom 
+Hom
     CheckCellWinner (int player , int cell)
 {
-  return _CheckCellWinner(player,cell);
+  return GHom(_CheckCellWinner(player,cell));
 }
 
 
@@ -603,10 +619,10 @@ class _CheckCellNoWinner:public StrongHom
 /**
  * Factory of _TakeCellWithCheckWinner Instance
  */
-GHom 
+Hom
     CheckCellNoWinner (int player,int cell)
 {
-  return _CheckCellNoWinner(player,cell);
+  return GHom(_CheckCellNoWinner(player,cell));
 }
 
 
