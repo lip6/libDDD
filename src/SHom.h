@@ -82,6 +82,7 @@ private:
   /// Pointer to the data instance in the unicity table.
   const _GShom* concret;
 public:
+  typedef GSDD NodeType;
   /// \name Public Constructors 
   //@{
   /// Default constructor builds identity homomorphism.

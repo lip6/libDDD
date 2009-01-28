@@ -95,6 +95,7 @@ private:
   /// Construction/destruction take care of ensuring concret is only instantiated once in memory.  
   const _GHom* concret;
 public:
+  typedef GDDD NodeType;
   /// A uncontrolled constructor used in internals. 
   /// Made public for calls like return GHom(this) in StrongHom::phi definitions.
   /// \param _h The pointer provided should point into the unicity table
