@@ -1,12 +1,13 @@
-noinst_PROGRAMS = morpionv2 morpionvy
-
+noinst_PROGRAMS =
+if HAVE_BOOST
+  noinst_PROGRAMS += morpionv2 morpionvy
+endif
 
 DDD_SRCDIR = $(top_srcdir)/src ./
 DDD_BUILDDIR = $(top_builddir)/src
 
 BASE = hom
-
-AM_CPPFLAGS =  -I $(DDD_SRCDIR) -I . -g -Wall $(TBBINC_FLAGS)
+AM_CPPFLAGS =  -I $(DDD_SRCDIR) -I $(BOOST_CPPFLAGS) -I . -g -Wall $(TBBINC_FLAGS)
 LDADD = $(DDD_BUILDDIR)/libDDD_d.a
 
 #morpionv1_SOURCES = Hom_Basic.cpp Hom_Basic.hh hom_check_imp.cpp \
@@ -26,7 +27,7 @@ morpionvy_SOURCES = morpionvyann.cpp \
 	hom/morpion_hom_vyann.cpp \
 	Hom_Basic.hh Hom_Basic.cpp
 
-	
+
 noinst_HEADERS = 	$(BASE)/check_imp.hpp \
 			$(BASE)/notew.hpp \
 			$(BASE)/nowinner.hpp \
