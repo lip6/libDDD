@@ -1,4 +1,4 @@
-SUBDIRS = hanoi expr
+SUBDIRS = hanoi expr morpion
 
 noinst_PROGRAMS = tst1 tst2 tst3 tst4 tst5 tst6 tst7 tst8 tst9 tst10 tst11 tst12 #tst13
 
@@ -35,11 +35,11 @@ tst8_SOURCES = tst8.cpp
 tst9_SOURCES = tst9.cpp
 tst10_SOURCES = tst10.cpp $(PLUSPLUS)
 tst11_SOURCES = tst11.cpp
-tst12_SOURCES = tst12.cpp 
-#tst13_SOURCES = tst13.cpp 
+tst12_SOURCES = tst12.cpp
+#tst13_SOURCES = tst13.cpp
 #tst13_LDADD =  $(DDD_BUILDDIR)/libDDD_ev.a
 #tst13_CPPFLAGS = -I $(DDD_SRCDIR) -g -Wall -D EVDDD
-# tst2_CPPFLAGS = 
+# tst2_CPPFLAGS =
 
 
 
