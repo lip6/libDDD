@@ -1,7 +1,7 @@
 //
 // C++ Implementation: hom/notew
 //
-// Description: 
+// Description:
 //
 //
 // Author: Yann Thierry-Mieg <LIP6, Yann.Thierry-Mieg@lip6fr > (2003-), Jean-Michel Couvreur <LaBRi > (2001), and Denis Poitrenaud (2001) <LIP6>, (C) 2009
@@ -40,7 +40,7 @@ class _NoteWinner: public StrongHom
     bool
         skip_variable ( int vr ) const
     {
-      return vr != 9;
+      return vr != STATE_SYSTEM_CELL;
     }
 
     /**

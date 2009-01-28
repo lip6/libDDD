@@ -1,7 +1,7 @@
 //
 // C++ Implementation: home_check_imp
 //
-// Description: 
+// Description:
 //
 //
 // Author: Yann Thierry-Mieg <LIP6, Yann.Thierry-Mieg@lip6fr > (2003-), Jean-Michel Couvreur <LaBRi > (2001), and Denis Poitrenaud (2001) <LIP6>, (C) 2009
@@ -16,8 +16,8 @@
 #include <boost/foreach.hpp>
 #include <iostream>
 
-#include "hom/check_imp.hpp"
-#include "hom/check_impossible.hpp"
+#include "check_imp.hpp"
+#include "check_impossible.hpp"
 
 // pretty print of a cell state
 const char *
@@ -54,7 +54,7 @@ bool
 {
   bool res = true;
   int ref = cc[line][0];
-  
+
   for(size_t j=1;j<COLUMN;++j)
   {
     res = res and (cc[line][j] != EMPTY)
@@ -71,7 +71,7 @@ bool
 {
   bool res = true;
   int ref = cc[0][column];
-  
+
   for(size_t j=1;j<LINE;++j)
   {
     res = res and (cc[j][column] != EMPTY)
@@ -118,17 +118,17 @@ class _checkImpossible
 
 protected:
  /**
-   * Constructor with initialisation
+   * Constructor with initialization
    */
   _checkImpossible (const array_type& c,int fi,int nti,const ref_tests& tts)
   : cc(c),first_index(fi),node_to_ignore(nti),tests(tts)
     {
     }
-    
+
 public:
 
   /**
-  * Constructor with initialisation
+  * Constructor with initialization
   */
   _checkImpossible (int fi,int nti,const ref_tests& tts)
   : cc(boost::extents[LINE][COLUMN]) , first_index(fi),node_to_ignore(nti),tests(tts)
@@ -140,6 +140,7 @@ public:
           cc[i][j]=-1;
         }
       }
+
     }
 
     /**
@@ -150,9 +151,9 @@ public:
     {
       return (vr == node_to_ignore);
     }
-    
-    
-  
+
+
+
     /**
      * PHI [1] : We have all state of the system and we can check if there are any impossible state
      */
@@ -171,79 +172,6 @@ public:
       (*e)(cc);
     }
     */
-      
-#if 0
-      /* Check if the grid is full */
-      bool is_full = true;
-      for(size_t i=0;i<LINE and is_full;++i)
-      {
-        for(size_t j=0;j<COLUMN and is_full;++j)
-        {
-          if(cc[i][j]==-1)
-          {
-            is_full =false;
-          }
-        }
-      }
-      if(is_full)
-      { /* Check if there is some winner on first line */
-        std::clog << "Find one configuration completed :" << std::endl;
-        printState(cc);
-      }
-      else
-      {
-        ; // There is no full grid
-      }
-
-
-      
-      if(check_line(cc,0) and check_column(cc,0) )
-      {
-        /* Check if there is some winner on first line
-         *  XXX
-         *  XOO
-         *  XOO
-         */
-        std::clog << "One configuration Winner OK on line 0 and Column 0 :" << std::endl;
-        printState(cc);
-      }
-
-      
-
-      // Check the impossible line
-      if(check_line(cc,0) and ( check_line(cc,1) or check_line(cc,2) ) )
-      {
-        std::clog << "Impossible configuration detected 1 :" << std::endl;
-        printState(cc);
-      }
-      if(check_line(cc,1) and ( check_line(cc,0) or check_line(cc,2) ) )
-      {
-        std::clog << "Impossible configuration detected 2 :" << std::endl;
-        printState(cc);
-      }
-      if(check_line(cc,2) and ( check_line(cc,0) or check_line(cc,1) ) )
-      {
-        std::clog << "Impossible configuration detected 3 :" << std::endl;
-        printState(cc);
-      }
-      
-      // Check the impossible Column
-      if(check_column(cc,0) && (check_column(cc,1) || check_column(cc,2)))
-      {
-        std::clog << "Impossible configuration detected 4 :" << std::endl;
-        printState(cc);
-      }
-      if(check_column(cc,1) && (check_column(cc,0) || check_column(cc,2)))
-      {
-        std::clog << "Impossible configuration detected 5 :" << std::endl;
-        printState(cc);
-      }
-      if(check_column(cc,2) && (check_column(cc,0) || check_column(cc,1)))
-      {
-        std::clog << "Impossible configuration detected 6 :" << std::endl;
-        printState(cc);
-      }
-#endif
       return GDDD::one;
     }
 
@@ -258,11 +186,11 @@ public:
      */
     GHom
         phi(int vr, int vl) const {
-      
+
       /* Create new Homo with the current configuration */
       int i=(vr-first_index)/LINE; // Conversion sur la ligne
       int j=(vr-first_index)%COLUMN; // Conversion sur la colonne
-  
+
       //std::clog << "Node [" << vr << "," << vl << "] Conversion on Grid [" << i << "," << j <<"] = " << vl << std::endl;
       if(cc[i][j]!=vl)
       {
@@ -276,7 +204,7 @@ public:
         return GHom (vr,vl,GHom(this));
       }
     }
-    
+
     /**
      * Hash function used for unique table storage.
      */
@@ -290,10 +218,10 @@ public:
           boost::hash_combine(seed, cc[i][j]);
         }
       }
-      
+
       return seed ;
     }
-  
+
     /**
      * Overloading StrongHom default print with a customized pretty-print
      */
@@ -329,10 +257,10 @@ public:
         }
       }
 
-      
+
       return node_to_ignore == ps.node_to_ignore;
     }
-    
+
     /**
      * Clone current homomorphism, used for unique storage.
      */

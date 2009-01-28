@@ -48,35 +48,35 @@ void bugreport () {
 * Create the default configuration struture of DDD
 */
 DDD createInitial () {
-  
+
   GDDD M0 = GDDD::one;
 
-  for (size_t i = 0; i < NBCASE; ++i) {
+  for (size_t i = 0; i < NBCELL; ++i) {
     M0 = GDDD(i, EMPTY) ^  M0 ;
     std::stringstream cas;
     cas << "cell_" << i;
     DDD::varName(i,cas.str());
   }
   // initially P1TURN
-  M0 = GDDD(NBCASE,P1TURN) ^  M0 ;
-  DDD::varName(NBCASE,"State");
+  M0 = GDDD(STATE_SYSTEM_CELL,P1TURN) ^  M0 ;
+  DDD::varName(STATE_SYSTEM_CELL,"State");
   return M0;
 }
 
 
 int main (int /*argc*/, char ** /*argv*/) {
-  
+
   // Creation de l'état initial
   DDD initial = createInitial ();
-  
+
   // Creation d'un ensemble d'homomorphisme pour le joueur 1
   Hom nextAA = PlayAnyFreeCell(PA);
   Hom nextBB = PlayAnyFreeCell(PB);
-  
+
   // Initialisation des combinaisons gagnantes
   GHom winnerA = CheckIsWinner (PA);
   GHom winnerB = CheckIsWinner (PB);
- 
+
   // Initialisation des combinaisons non gagnantes
   GHom noWinner = CheckNoWinner();
 
@@ -95,14 +95,14 @@ int main (int /*argc*/, char ** /*argv*/) {
                           ( NoteWinner(1) & (winnerB & ( (Full(9) + nextAA)  & nextBB ) ) )
                            +
                           ( noWinner & ( (Full(9) + nextAA)  & nextBB ) )
-                              
+
 			  + GHom::id ) ;
   */
-  /*  
+  /*
   GHom fullT2 = checkImpossible(tab,0,9) & fixpoint( ( ( (Full(9) + nextAA) & nextBB) ) + GHom::id);
   */
   GHom P1play =  // update game status
-		 (  
+		 (
 		  // P2 turn
 		  (updateGameStatus(P2TURN) & (!winnerA))
 		  +
@@ -110,13 +110,13 @@ int main (int /*argc*/, char ** /*argv*/) {
 		  (updateGameStatus(P1WIN) & winnerA )
 		  )
 		 // P1 plays
-		 & nextAA 
+		 & nextAA
 		 // P1 turn
 		 & testGameStatus(P1TURN)
     ;
   GHom P2play =
     // update game status
-    (  
+    (
      // P1 turn
      (updateGameStatus(P1TURN) & !winnerB)
      +
@@ -124,7 +124,7 @@ int main (int /*argc*/, char ** /*argv*/) {
      (updateGameStatus(P2WIN) & winnerB )
      )
     // P2 plays
-    & nextBB 
+    & nextBB
     // P2 turn
     & testGameStatus(P2TURN)
     ;
@@ -136,10 +136,10 @@ int main (int /*argc*/, char ** /*argv*/) {
 		P2play
 		+
 		// accumulate
-		GHom::id );  
+		GHom::id );
   std::cout << fullT2  << std::endl;
   std::cout << initial << std::endl;
- 
+
   std::cout << P1play (initial) << std::endl;
 
   std::cout << "here" << std::endl;
@@ -147,20 +147,20 @@ int main (int /*argc*/, char ** /*argv*/) {
   exportDot(GSDD(0,reachable),"reach2");
   Statistic S2 = Statistic(reachable, "reach2" , CSV); // can also use LATEX instead of CSV
   S2.print_table(std::cout);
-  
-  bool interactive = true;
+
+  bool interactive = false;
   if (interactive) {
     reachable = initial;
     for (int i=0 ; i<10 ; ++i) {
       std::cout << "Move " << i << std::endl;
       exportDot(GSDD(0,reachable),"reach");
       std::string s;
-      std::cin >> s;    
+      std::cin >> s;
       reachable = (P1play + P2play) (reachable);
     }
   }
 
-  
-  
+
+
   return EXIT_SUCCESS;
 }

@@ -9,23 +9,85 @@
 
 // update the variable representing game status to "gs"
 Hom updateGameStatus (GAMESTATUS gs) {
-  return setVarConst(NBCASE ,gs);
+  return setVarConst(STATE_SYSTEM_CELL ,gs);
 }
 // check the variable representing game status is set to "gs"
 Hom testGameStatus (GAMESTATUS gs) {
-  return varEqState(NBCASE,gs);
+  return varEqState(STATE_SYSTEM_CELL,gs);
 }
 
 
-// The player designated plays in a free cll, if any are available. 
+// The player designated plays in a free cll, if any are available.
 Hom
 PlayAnyFreeCell (int player) {
   std::set<GHom> nextAAset;
-  for (size_t i=0; i< NBCASE; ++i)
+  for (size_t i=0; i< NBCELL; ++i)
   {
     nextAAset.insert( setVarConst(i,player) & varEqState(i,EMPTY) );
   }
   return GHom::add(nextAAset);
+}
+
+Hom
+generateLineWinner(size_t max, int player)
+{
+	std::set<GHom> winAAset;
+
+	/* For each line configuration of the grid game, where i is the line number and j the column number */
+	for(size_t i=0;i<max;++i)
+	{
+		size_t j=0;
+		Hom cells = varEqState ( (j + (i*max)) , player);;
+		for(j=1;j<max;++j)
+		{
+			cells = cells & varEqState ( (j + (i*max)) , player );
+		}
+		winAAset.insert (cells);
+	}
+
+	return GHom::add ( winAAset );
+}
+
+
+Hom
+generateColumnWinner(size_t max, int player)
+{
+	std::set<GHom> winAAset;
+
+	/* For each column configuration of the grid game, where j is the line number and i the column */
+	for(size_t i=0;i<max;++i)
+	{
+		size_t j=0;
+		Hom cells = varEqState ( (i + (j*max)) ,player );;
+		for(j=1;j<max;++j)
+		{
+			cells = cells & varEqState ( (i + (j*max)),player );
+		}
+		winAAset.insert (cells);
+	}
+
+	return GHom::add ( winAAset );
+}
+
+Hom
+generateCrossWinner(size_t max, int player)
+{
+	std::set<GHom> winAAset;
+
+
+	/* First Cross configuration */
+	size_t i=0;
+	Hom cell_1 = varEqState ( (i + (i*max)) ,player);
+	Hom cell_2 = varEqState ( (((max - 1 - i) + (i*max) ) ) ,player);
+	for(i=1;i<max;++i)
+	{
+		cell_1 = cell_1 & varEqState ( (i + (i*max)) ,player);
+		cell_2 = cell_2 & varEqState ( (((max - 1 - i) + (i*max) ) ) ,player);
+	}
+	winAAset.insert (cell_1);
+	winAAset.insert (cell_2);
+
+	return GHom::add ( winAAset );
 }
 
 
@@ -34,28 +96,16 @@ PlayAnyFreeCell (int player) {
 Hom
 CheckIsWinner (int player) {
     std::set<GHom> winAAset;
-   
-    // lines 
-    for (int lig = 0; lig < 3 ; ++lig) {
-      winAAset.insert ( varEqState(COLUMN*lig,player) 
-			& varEqState(COLUMN*lig+1,player)
-			& varEqState(COLUMN*lig+2,player));
-    }
 
-    for (int col = 0; col < 3 ; ++col) {
-      winAAset.insert ( varEqState(col,player) 
-			& varEqState(LINE+col,player)
-			& varEqState(2*LINE+col,player));
-    }
-    
-    winAAset.insert( varEqState(0,player)& varEqState(LINE+1,player)& varEqState(2*LINE+2,player));
-    winAAset.insert( varEqState(2,player)& varEqState(LINE+1,player)& varEqState(2*LINE+0,player));
+    Hom winners = generateLineWinner(LINE, player) +
+    	generateColumnWinner(LINE, player) +
+    	generateCrossWinner(LINE, player);
 
     /*
   winAAset.insert ( CheckCellWinner (player, 0) & CheckCellWinner (player, 1) & CheckCellWinner (player, 2) ) ;
   winAAset.insert( CheckCellWinner (player, 3) & CheckCellWinner (player, 4) & CheckCellWinner (player, 5) ) ;
   winAAset.insert( CheckCellWinner (player, 6) & CheckCellWinner (player, 7) & CheckCellWinner (player, 8) ) ;
-  
+
   // cols
   winAAset.insert( CheckCellWinner (player, 0) & CheckCellWinner (player, 3) & CheckCellWinner (player, 6) ) ;
   winAAset.insert( CheckCellWinner (player, 1) & CheckCellWinner (player, 4) & CheckCellWinner (player, 7) ) ;
@@ -65,7 +115,7 @@ CheckIsWinner (int player) {
   winAAset.insert( CheckCellWinner (player, 0) & CheckCellWinner (player, 4) & CheckCellWinner (player, 8) ) ;
   winAAset.insert( CheckCellWinner (player, 2) & CheckCellWinner (player, 4) & CheckCellWinner (player, 6) ) ;
     */
-  return GHom::add(winAAset);
+  return winners;
 }
 
 
@@ -92,11 +142,11 @@ CheckNoWinner () {
 	  }
 	noWinner = noWinner & ( CheckCellNoWinner (i, 3) + CheckCellNoWinner (i, 4) + CheckCellNoWinner (i, 5) ) ;
 	noWinner = noWinner & ( CheckCellNoWinner (i, 6) + CheckCellNoWinner (i, 7) + CheckCellNoWinner (i, 8) ) ;
-	
+
 	noWinner = noWinner & ( CheckCellNoWinner (i, 0) + CheckCellNoWinner (i, 3) + CheckCellNoWinner (i, 6) ) ;
 	noWinner = noWinner & ( CheckCellNoWinner (i, 1) + CheckCellNoWinner (i, 4) + CheckCellNoWinner (i, 7) ) ;
 	noWinner = noWinner & ( CheckCellNoWinner (i, 2) + CheckCellNoWinner (i, 5) + CheckCellNoWinner (i, 8) ) ;
-	
+
 	noWinner = noWinner & ( CheckCellNoWinner (i, 0) + CheckCellNoWinner (i, 4) + CheckCellNoWinner (i, 8) ) ;
 	noWinner = noWinner & ( CheckCellNoWinner (i, 2) + CheckCellNoWinner (i, 4) + CheckCellNoWinner (i, 6) ) ;
       }
@@ -115,7 +165,7 @@ class _Play:public StrongHom
     int cell;     // The cell to play : 0 <= cell < 9
     int player;   // The player taking the cell : 0 or 1
   public:
-    
+
     /**
    * The constructor binds the homomorphism parameters cell and player
      */
@@ -130,9 +180,9 @@ class _Play:public StrongHom
     bool
         skip_variable(int vr) const
     {
-      return vr != cell && vr!=9;
+      return vr != cell && vr!=STATE_SYSTEM_CELL;
     }
-  
+
     /**
      * PHI [1] : called if the terminal 1 is encountered, returns a constant DDD
      */
@@ -153,7 +203,7 @@ class _Play:public StrongHom
     GHom
         phi(int vr, int vl) const
     {
-      if(vr!=9)
+      if(vr!=STATE_SYSTEM_CELL)
       {
         /* Configuration 1 : We can take a cell only if nobody get it*/
         if (vl == EMPTY)
@@ -179,7 +229,7 @@ class _Play:public StrongHom
         }
       }
     }
-    
+
     /**
      * Hash function used for unique table storage.
      */
@@ -192,7 +242,7 @@ class _Play:public StrongHom
       boost::hash_combine(seed, player);
       return seed ;
     }
-  
+
     /**
      * Overloading StrongHom default print with a customized pretty-print
      */
@@ -214,7 +264,7 @@ class _Play:public StrongHom
       // basic comparator behavior, just make sure you put all attributes there.
       return cell == ps.cell && player == ps.player ;
     }
-    
+
     /**
      * Clone current homomorphism, used for unique storage.
      */
@@ -256,7 +306,7 @@ class _NoteWinner:public StrongHom
    */
     int player;   // The player taking the cell : 0 or 1
   public:
-    
+
     /**
    * The constructor binds the homomorphism parameters
      */
@@ -271,9 +321,9 @@ class _NoteWinner:public StrongHom
     bool
         skip_variable(int vr) const
     {
-      return vr!=9;
+      return vr!=STATE_SYSTEM_CELL;
     }
-  
+
     /**
      * PHI [1] : called if the terminal 1 is encountered, returns a constant DDD
      */
@@ -307,7 +357,7 @@ class _NoteWinner:public StrongHom
         return GHom(DDD::null); // Cut the way (0)
       }
     }
-    
+
     /**
      * Hash function used for unique table storage.
      */
@@ -319,7 +369,7 @@ class _NoteWinner:public StrongHom
       boost::hash_combine(seed, player);
       return seed ;
     }
-  
+
     /**
      * Overloading StrongHom default print with a customized pretty-print
      */
@@ -341,7 +391,7 @@ class _NoteWinner:public StrongHom
       // basic comparator behavior, just make sure you put all attributes there.
       return player == ps.player ;
     }
-    
+
     /**
      * Clone current homomorphism, used for unique storage.
      */
@@ -390,7 +440,7 @@ class _CheckCellWinner:public StrongHom
     int cell;     // The cell game
     int player;   // The player taking the cell : 0 or 1
   public:
-    
+
     /**
    * The constructor binds the homomorphism parameters
      */
@@ -414,7 +464,7 @@ class _CheckCellWinner:public StrongHom
     {
       return true;
     }
-  
+
     /**
      * PHI [1] : called if the terminal 1 is encountered, returns a constant DDD
      */
@@ -444,7 +494,7 @@ class _CheckCellWinner:public StrongHom
         return GHom(DDD::null); // Cut the way (0)
       }
     }
-    
+
     /**
      * Hash function used for unique table storage.
      */
@@ -456,7 +506,7 @@ class _CheckCellWinner:public StrongHom
       boost::hash_combine(seed, player);
       return seed ;
     }
-  
+
     /**
      * Overloading StrongHom default print with a customized pretty-print
      */
@@ -478,7 +528,7 @@ class _CheckCellWinner:public StrongHom
       // basic comparator behavior, just make sure you put all attributes there.
       return player == ps.player && cell == ps.cell ;
     }
-    
+
     /**
      * Clone current homomorphism, used for unique storage.
      */
@@ -524,7 +574,7 @@ class _CheckCellNoWinner:public StrongHom
     int cell;     // The cell game
     int player;   // The player taking the cell : 0 or 1
   public:
-    
+
     /**
    * The constructor binds the homomorphism parameters
      */
@@ -541,7 +591,7 @@ class _CheckCellNoWinner:public StrongHom
     {
       return vr!=cell;
     }
-  
+
     /**
      * PHI [1] : called if the terminal 1 is encountered, returns a constant DDD
      */
@@ -571,7 +621,7 @@ class _CheckCellNoWinner:public StrongHom
         return GHom(DDD::null); // Cut the way (0)
       }
     }
-    
+
     /**
      * Hash function used for unique table storage.
      */
@@ -583,7 +633,7 @@ class _CheckCellNoWinner:public StrongHom
       boost::hash_combine(seed, player);
       return seed ;
     }
-  
+
     /**
      * Overloading StrongHom default print with a customized pretty-print
      */
@@ -605,7 +655,7 @@ class _CheckCellNoWinner:public StrongHom
       // basic comparator behavior, just make sure you put all attributes there.
       return player == ps.player && cell == ps.cell ;
     }
-    
+
     /**
      * Clone current homomorphism, used for unique storage.
      */
