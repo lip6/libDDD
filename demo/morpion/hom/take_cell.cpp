@@ -1,7 +1,7 @@
 //
 // C++ Implementation: hom/take_cell
 //
-// Description: 
+// Description:
 //
 //
 // Author: Yann Thierry-Mieg <LIP6, Yann.Thierry-Mieg@lip6fr > (2003-), Jean-Michel Couvreur <LaBRi > (2001), and Denis Poitrenaud (2001) <LIP6>, (C) 2009
@@ -10,7 +10,7 @@
 //
 //
 
-#include "hom/take_cell.hpp"
+#include "take_cell.hpp"
 #include <boost/functional/hash.hpp>
 
 
@@ -27,7 +27,7 @@ class _TakeCellWithCheckWinner:public StrongHom
     int cell;     // The cell to play : 0 <= cell < 9
     int player;   // The player taking the cell : 0 or 1
   public:
-    
+
     /**
    * The constructor binds the homomorphism parameters cell and player
      */
@@ -46,7 +46,7 @@ class _TakeCellWithCheckWinner:public StrongHom
     {
       return vr != cell && vr != 0;
     }
-  
+
     /**
      * PHI [1] : called if the terminal 1 is encountered, returns a constant DDD.
     * If the cell was correct 0 <= cell < 9 and the state ok this should not happen :
@@ -98,7 +98,7 @@ class _TakeCellWithCheckWinner:public StrongHom
         }
       }
     }
-    
+
     /**
      * Hash function used for unique table storage.
      */
@@ -111,7 +111,7 @@ class _TakeCellWithCheckWinner:public StrongHom
       boost::hash_combine(seed, player);
       return seed ;
     }
-  
+
     /**
      * Overloading StrongHom default print with a customized pretty-print
      */
@@ -133,7 +133,7 @@ class _TakeCellWithCheckWinner:public StrongHom
       // basic comparator behavior, just make sure you put all attributes there.
       return cell == ps.cell && player == ps.player ;
     }
-    
+
     /**
      * Clone current homomorphism, used for unique storage.
      */
@@ -148,7 +148,7 @@ class _TakeCellWithCheckWinner:public StrongHom
 /**
  * Factory of _TakeCellWithCheckWinner Instance
  */
-GHom 
+GHom
     TakeCellWithCheckWinner ( int c1, int player)
 {
   return _TakeCellWithCheckWinner(c1,player);

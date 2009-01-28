@@ -40,13 +40,13 @@ void bugreport () {
 }
 
 /**
- * 
- * @param  
- * @param  
- * @return 
+ *
+ * @param
+ * @param
+ * @return
  */
 int main (int /*argc*/, char ** /*argv*/) {
-  
+
   // Create the initial state
   DDD initial = createInitial ();
 
@@ -60,22 +60,11 @@ int main (int /*argc*/, char ** /*argv*/) {
   //winners.insert( std::pair<game_status_type,Hom>(PB,CheckIsWinner (PB)));
   //winners.insert(std::make_pair(PB,CheckIsWinner (PB)));
   winners[PB] = CheckIsWinner (PB);
-  
+
   // Initialisation of no winner configuration
   Hom noWinner = CheckNoWinner();
 
-  // Insertion des homomorphismes pour couper les chemins que l'on ne veut pas
-  array_type grid(boost::extents[LINE][COLUMN]);
-  for(size_t i = 0; i< LINE ; ++i)
-  {
-    for(size_t j=0; j<COLUMN ; ++j)
-    {
-      grid[i][j]=-1;
-    }
-  }
-  
-
-  std::clog << "Make the fix point : \n\n\n" << std::endl ;
+  std::clog << "Make the fix point for Grid Tic Tac Toe ["<< LINE << "," << COLUMN <<"] : \n\n\n" << std::endl ;
   /* ALGO :
   * 1) First we play BB, only if there is no winner in the current configuration
   * 2) Next we try to play AA (only if there is no winner in the current configuration), there is two possibility in union
@@ -90,7 +79,7 @@ int main (int /*argc*/, char ** /*argv*/) {
                           ( NoteWinner(1) & (winnerB & ( (Full(9) + nextAA)  & nextBB ) ) )
                            +
                           ( noWinner & ( (Full(9) + nextAA)  & nextBB ) )
-                              
+
 			  + GHom::id ) ;
   */
 
@@ -99,8 +88,8 @@ int main (int /*argc*/, char ** /*argv*/) {
   tests.push_back(ref_validate_base_type(new check_lines()));
 
 
-  
-  Hom fullT2 = checkImpossible(0,9,tests) &
+
+  Hom fullT2 = /*checkImpossible(0,STATE_SYSTEM_CELL,tests) & */
       fixpoint
       ( ( ( ( (NoteWinner(PA) & winners[PA])
             + (NoteWinner(PB) & winners[PB])
@@ -115,7 +104,7 @@ int main (int /*argc*/, char ** /*argv*/) {
   exportDot(SDD(0,reachable),"reach2");
   Statistic S2 = Statistic(reachable, "reach2" , CSV); // can also use LaTeX instead of CSV
   S2.print_table(std::cout);
-  
-  
+
+
   return EXIT_SUCCESS;
 }

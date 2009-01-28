@@ -1,7 +1,7 @@
 //
 // C++ Implementation: hom/play
 //
-// Description: 
+// Description:
 //
 //
 // Author: Yann Thierry-Mieg <LIP6, Yann.Thierry-Mieg@lip6fr > (2003-), Jean-Michel Couvreur <LaBRi > (2001), and Denis Poitrenaud (2001) <LIP6>, (C) 2009
@@ -10,7 +10,7 @@
 //
 //
 
-#include "hom/play.hpp"
+#include "play.hpp"
 #include <boost/functional/hash.hpp>
 #include <cassert>
 
@@ -45,7 +45,7 @@ class _Play: public StrongHom
     bool
         skip_variable ( int vr ) const
     {
-      return vr != cell && vr != 9;
+      return vr != cell && vr != STATE_SYSTEM_CELL;
     }
 
     /**
@@ -68,7 +68,7 @@ class _Play: public StrongHom
     GHom
         phi ( int vr, int vl ) const
     {
-      if ( vr != 9 )
+      if ( vr != STATE_SYSTEM_CELL )
       {
         /* Configuration 1 : We can take a cell only if nobody get it */
         if ( vl == EMPTY )

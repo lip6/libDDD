@@ -3,15 +3,17 @@
 #pragma once
 
 #include <boost/multi_array.hpp>
+#include <cmath>
 
 // Const variable
-static const size_t NBCASE = 9;
-static const size_t LINE = 3;
-static const size_t COLUMN = 3;
+static const size_t NBCELL = 16;
+static const size_t STATE_SYSTEM_CELL = NBCELL;
+static const size_t LINE = sqrt(NBCELL);
+static const size_t COLUMN = sqrt(NBCELL);
 
 // players
 /**
- * 
+ *
  */
 enum game_status_type
 { EMPTY = -1 /// Ligne Vide
