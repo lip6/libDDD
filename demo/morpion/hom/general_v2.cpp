@@ -3,8 +3,11 @@
 #include "general_v2.hpp"
 
 #include <iostream>
+#include <sstream>
 #include <boost/functional/hash.hpp>
 #include <vector>
+
+
 
 #include "notew.hpp"
 #include "nowinner.hpp"
