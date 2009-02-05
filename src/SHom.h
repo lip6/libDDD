@@ -224,6 +224,10 @@ GShom operator*(const GSDD &,const GShom &);
 /// Intersection with a constant SDD.
 /// Semantics : (d1 * h) (d) = d1 * h(d)
 GShom operator*(const GShom &,const GSDD &); 
+/// Intersection with a selector Hom.
+/// Semantics : (d1 * sel) (d) = d1 (d) * sel (d)
+/// WARNING : assert failure if 2nd argument is not a selector.
+GShom operator*(const GShom &,const GShom &); 
 /// Left Concatenation of a constant SDD.
 /// Note that this is inherently inefficient, the nodes of d1 are constructed, 
 /// but the result a priori will not contain them, unless h(d) == GSDD::one.
