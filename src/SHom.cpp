@@ -126,6 +126,12 @@ public:
     value.mark();
   }
 
+
+  bool is_selector () const {
+    // the empty set is a kind of "false" selector
+    return value == SDD::null ; 
+  }
+
   void print (std::ostream & os) const {
     os << "(SConstant:" << value << ")";
   }
@@ -1455,7 +1461,10 @@ localApply(const GHom & h, int target)
 	if( h == GHom::id )
 	{
 		return GShom::id;
+	} else if ( h == GHom(DDD::null) ) {
+	  return SDD::null;
 	}
+	  
 	return S_Homomorphism::LocalApply(h,target);
 }
 
@@ -1463,9 +1472,9 @@ GShom
 // localApply(int target,const GHom & h)
 localApply(const GShom & h, int target)
 {
-	if( h == GShom::id )
+	if( h == GShom::id ||  h == GShom(SDD::null) )
 	{
-	  return GShom::id;
+	  return h;
 	}
 	return S_Homomorphism::SLocalApply(h,target);
 }
