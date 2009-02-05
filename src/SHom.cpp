@@ -199,6 +199,14 @@ public:
     return left.is_selector() ;
   }
 
+  bool
+  skip_variable(int var) const 
+  {
+    return get_concret(left)->skip_variable(var)
+           && get_concret(right)->skip_variable(var);
+  }
+
+
   /* Memory Manager */
   void mark() const{
     left.mark();
@@ -743,7 +751,7 @@ public:
     skip_variable(int var) const 
     {
         return get_concret(left)->skip_variable(var)
-			and get_concret(right)->skip_variable(var);
+	       && get_concret(right)->skip_variable(var);
     }
 
   /* Eval */
@@ -919,7 +927,7 @@ public:
       {
 	return GSDD::null;
       }
-    else if( d == GSDD::one or d == GSDD::top )
+    else if( d == GSDD::one || d == GSDD::top )
       {
 	return arg(d);
       }
