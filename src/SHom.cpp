@@ -172,6 +172,46 @@ public:
 };
 
 
+
+class Inter:public _GShom{
+private:
+  GShom left;
+  GShom right;
+public:
+  /* Constructor */
+  Inter(const GShom &l,const GShom &r,int ref=0):_GShom(ref),left(l),right(r){}
+  /* Compare */
+  bool operator==(const _GShom &h) const{
+    return left==((Inter*)&h )->left && right==((Inter*)&h )->right;
+  }
+  size_t hash() const{
+    return 83*left.hash()+ 153*right.hash();
+  }
+
+  _GShom * clone () const {  return new Inter(*this); }
+  /* Eval */
+  GSDD eval(const GSDD &d)const{
+    return left(d) * right(d);
+  }
+
+  bool is_selector () const {
+    // intersection is a natural selector (if we forget about TOP)
+    return left.is_selector() ;
+  }
+
+  /* Memory Manager */
+  void mark() const{
+    left.mark();
+    right.mark();
+  }
+
+  void print (std::ostream & os) const {
+    os << "(SInter:" << left << "*" << right << ")";
+  }
+
+};
+
+
 /*************************************************************************/
 /*                         Class LocalApply : Hom version                */
 /*************************************************************************/
@@ -1548,6 +1588,16 @@ GShom operator! (const GShom & cond) {
   }  
   return S_Homomorphism::SNotCond(cond);
 }
+
+GShom operator*(const GShom & h,const GShom & cond) {
+  if (! cond.is_selector() ) {
+    std::cerr << "Creating a * intersection between homomorphisms, but second argument is not a selector. " << std::endl;
+    printCondError(cond);
+    assert(false);
+  }  
+  return S_Homomorphism::Inter(h,cond);
+}
+
 
 void GShom::pstats(bool)
 {
