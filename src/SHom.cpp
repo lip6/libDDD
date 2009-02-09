@@ -1512,6 +1512,9 @@ GShom operator&(const GShom &h1,const GShom &h2){
 	if( h2 == GShom::id )
 		return h1;
 
+	if (h1 == GShom(GSDD::null) || h2 == GShom(GSDD::null))
+	  return GShom(GSDD::null);
+
 	if( typeid( *_GShom::get_concret(h1) ) == typeid(S_Homomorphism::LocalApply) 
 		&& typeid( *_GShom::get_concret(h2) ) == typeid(S_Homomorphism::LocalApply) )
 	{
@@ -1602,8 +1605,13 @@ GShom operator! (const GShom & cond) {
     std::cerr << "Creating a complement condition with operator! :  ! cond" << std::endl;
     printCondError(cond);
     assert(false);
-  }  
-  return S_Homomorphism::SNotCond(cond);
+  } else if (cond == GShom::id) {
+    return GSDD::null;
+  } else if (cond == GShom(GSDD::null) ) {
+    return GShom::id;
+  } else {
+    return S_Homomorphism::SNotCond(cond);
+  }
 }
 
 GShom operator*(const GShom & h,const GShom & cond) {
