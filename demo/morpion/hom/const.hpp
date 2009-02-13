@@ -6,7 +6,7 @@
 #include <cmath>
 
 // Const variable
-static const size_t NBCELL = 16;
+static const size_t NBCELL = 9;
 static const size_t STATE_SYSTEM_CELL = NBCELL;
 static const size_t LINE = sqrt(NBCELL);
 static const size_t COLUMN = sqrt(NBCELL);
@@ -16,7 +16,10 @@ static const size_t COLUMN = sqrt(NBCELL);
  *
  */
 enum game_status_type
-{ EMPTY = -1 /// Ligne Vide
+{ 
+  TO_PA = -1 /// Player A to play
+, TO_PB = -2 /// Player B to play
+, EMPTY = -1 /// Ligne Vide
 , PA    =  0 /// Joueur A
 , PB    =  1 /// Joueur B
 };
