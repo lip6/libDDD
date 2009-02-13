@@ -14,6 +14,7 @@
 #include "hom/notew.hpp"
 #include "hom/check_impossible.hpp"
 #include "hom/validate_base.hpp"
+#include "hom/previous.hpp"
 
 
 
@@ -105,6 +106,15 @@ int main (int /*argc*/, char ** /*argv*/) {
   Statistic S2 = Statistic(reachable, "reach2" , CSV); // can also use LaTeX instead of CSV
   S2.print_table(std::cout);
 
+  
+  
+  /* Search the predecessor */
+  	Hom pred =  previous_all();
+  
+  	DDD pred_reachable = pred (reachable);
+	exportDot(SDD(0,pred_reachable),"pred1");
+	S2 = Statistic(pred_reachable, "pred1" , CSV); // can also use LaTeX instead of CSV
+	S2.print_table(std::cout);
 
   return EXIT_SUCCESS;
 }

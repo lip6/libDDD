@@ -30,6 +30,7 @@ protected:
 
   validate_base(const validate_base& rhs);
   
+  virtual
   ~validate_base();
 
   validate_base&

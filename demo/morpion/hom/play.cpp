@@ -45,7 +45,7 @@ class _Play: public StrongHom
     bool
         skip_variable ( int vr ) const
     {
-      return vr != cell && vr != STATE_SYSTEM_CELL;
+      return vr != cell && vr != static_cast<int>(STATE_SYSTEM_CELL);
     }
 
     /**
@@ -68,7 +68,7 @@ class _Play: public StrongHom
     GHom
         phi ( int vr, int vl ) const
     {
-      if ( vr != STATE_SYSTEM_CELL )
+      if ( vr != static_cast<int>(STATE_SYSTEM_CELL) )
       {
         /* Configuration 1 : We can take a cell only if nobody get it */
         if ( vl == EMPTY )
@@ -87,15 +87,15 @@ class _Play: public StrongHom
         if ( vl < 0 )
         {
           /* It stays some hit to play */
-          if ( vl == -1 )
+          if ( vl == TO_PA )
           {
             /* Pair number : Player A must play : Decrement the number by one */
-            return GHom ( vr, -2, _Play ( cell, PA ) ); // Say player A to play
+            return GHom ( vr, TO_PB, _Play ( cell, PA ) ); // Say player A to play
           }
-          else if ( vl == -2 )  // If number is impair, player B must play
+          else if ( vl == TO_PB )  // If number is impair, player B must play
           {
             /* Impair Number : Player B must play :  Decrement the number by one */
-            return GHom ( vr, -1, _Play ( cell, PB ) ); // Say player B to play
+            return GHom ( vr, TO_PA, _Play ( cell, PB ) ); // Say player B to play
           }
           else
           {

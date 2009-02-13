@@ -21,6 +21,7 @@ morpionv2_SOURCES = 	$(BASE)/notew.cpp \
 			$(BASE)/general_v2.cpp \
 			$(BASE)/check_impossible.cpp \
 			$(BASE)/validate_base.cpp \
+			$(BASE)/previous.cpp \
 			morpionv2.cpp
 
 morpionvy_SOURCES = morpionvyann.cpp \
@@ -34,6 +35,7 @@ noinst_HEADERS = 	$(BASE)/check_imp.hpp \
 			$(BASE)/play.hpp \
 			$(BASE)/take_cell.hpp \
 			$(BASE)/winner.hpp \
+			$(BASE)/previous.hpp \
 			$(BASE)/check_impossible.hpp \
 			$(BASE)/validate_base.hpp \
 			$(BASE)/const.hpp
