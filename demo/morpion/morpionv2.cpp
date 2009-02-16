@@ -108,13 +108,24 @@ int main (int /*argc*/, char ** /*argv*/) {
 
   
   
-  /* Search the predecessor */
-  	Hom pred =  previous_all();
-  
-  	DDD pred_reachable = pred (reachable);
-	exportDot(SDD(0,pred_reachable),"pred1");
-	S2 = Statistic(pred_reachable, "pred1" , CSV); // can also use LaTeX instead of CSV
-	S2.print_table(std::cout);
+  	/* Search the predecessor */
+  	DDD succ_reachable = reachable;
+  	int i = 0;
+  	do
+  	{
+  		Hom pred = previous( i,TO_PA ) + previous( i,TO_PB ) + previous( i,PA ) + previous( i,PB );
+  		previous(succ_reachable,pred);
+	  	std::cout << "-------------------------- PREDECESSOR WITH " << i+1 << " REMOVING HIT --------------------------" << std::endl;
+	  	S2 = Statistic(succ_reachable, "pred1" , CSV); // can also use LaTeX instead of CSV
+	  	S2.print_table(std::cout);
+	  	++i;
+  	}while(i<9);
+  	
+  	
+	exportDot(SDD(0,succ_reachable),"pred1");
+
+	
+	
 
   return EXIT_SUCCESS;
 }

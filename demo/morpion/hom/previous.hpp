@@ -9,5 +9,6 @@
 
 GHom
 	previous(int cell,game_status_type status);
-GHom
-	previous_all();
+
+DDD
+	previous(DDD& succ, Hom pred);
