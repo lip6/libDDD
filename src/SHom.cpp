@@ -1634,6 +1634,9 @@ GShom GShom::add(const d3::set<GShom>::type& set)
 
 
 static bool commutative (const GShom & h1, const GShom & h2) {
+  if ( h1.is_selector() && h2.is_selector() ) 
+    return true;
+
   GShom::range_t h1r = h1.get_range();
   // ALL variables range
   if ( h1r.empty() )
