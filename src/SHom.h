@@ -141,7 +141,7 @@ public:
   typedef d3::set<int>::type range_t;
   typedef range_t::const_iterator range_it;
   /// Returns the range for this homomorphism, i.e. the dual of skip_variable
-  const range_t & get_range () const;  
+  const range_t  get_range () const;  
   /// The full_range : that targets everyone
   static const range_t full_range;
   //@}
@@ -359,7 +359,7 @@ public:
     }
 
     /// The range returns the dual of skip_variable, default implem considers that all variables are affected by this homomorphism.
-      virtual const GShom::range_t & get_range () const 
+      virtual const GShom::range_t get_range () const 
     {
       return GShom::full_range;
     }
