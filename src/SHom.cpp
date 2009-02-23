@@ -432,13 +432,121 @@ namespace S_Homomorphism {
     }
   };
 
-
-  /************************** Add */
-  /************************** Add */
-  class Add
+  /************************** And */
+  /** A commutative composition of n homomorphisms */
+  class And
     :
     public _GShom
   {
+  public :
+    typedef std::vector<GShom> parameters_t;
+    typedef parameters_t::const_iterator parameters_it;
+    /// PLEASE DONT HURT ME !!
+    parameters_t parameters;
+
+  public :
+    And(const parameters_t & p, int ref=0)
+      :
+      _GShom(ref,false),
+      parameters() {
+      parameters = p ;
+    }
+      
+    /* Compare */
+    bool
+    operator==(const _GShom &h) const
+    {
+      return parameters == ((And*)&h )->parameters;	
+    }
+
+    size_t
+    hash() const
+    {
+      size_t res = 40693 ;
+      for(parameters_it gi=parameters.begin();gi!=parameters.end();++gi)
+	res^=gi->hash();
+      return res;
+    }
+
+    _GShom * clone () const {  return new And(*this); }
+
+    bool is_selector () const {
+      for (parameters_it gi=parameters.begin();gi!=parameters.end();++gi)
+	if (! gi->is_selector() )
+	  return false;
+      return true;
+    }
+    
+    bool
+    skip_variable( int var ) const
+    {
+      for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+	if( ! get_concret(*gi)->skip_variable(var) )
+	  {
+	    return false;
+	  }
+      }
+      return true;
+    }
+
+    /* Eval */
+    GSDD
+    eval(const GSDD& d)const {
+      if( d == GSDD::null ) {
+	  return GSDD::null;
+
+      } else if (  d == GSDD::one || d == GSDD::top ) {
+	GSDD res = d;
+	// simply apply composition semantics
+	for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+	  res = (*gi) (res);
+	}
+	return res;
+      } else {
+	parameters_t F;
+	GShom G = GShom::id ;
+	int var = d.variable() ;
+	for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+	  if ( gi->skip_variable(var) ) {
+	    F.push_back(*gi);
+	  } else {
+	    G = *gi & G;
+	  }
+	}
+	GShom nextSel = And (F);
+	
+	return G (  nextSel (d) ) ;	
+      }
+    }
+ 
+       /* Memory Manager */
+    void
+    mark() const
+    {
+      for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+	gi->mark();
+      }
+    }
+    
+    void print (std::ostream & os) const {
+      os << "(SAnd:" ;
+      parameters_it gi=parameters.begin();
+      os << *gi ;
+      
+      for( ++gi;
+	   gi!=parameters.end();
+	   ++gi)
+	{
+	  os << " && " << *gi ;
+	}
+      os << ")";
+    }
+
+  };
+
+  class Add
+    :
+    public _GShom {
 
     // types
   public:
@@ -577,7 +685,7 @@ namespace S_Homomorphism {
     size_t
     hash() const
     {
-      size_t res = 0;
+      size_t res = 3821;
       for(d3::set<GShom>::type::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
 	res^=gi->hash();
       return res;
@@ -1446,6 +1554,20 @@ bool GShom::is_selector() const {
   return concret->is_selector();
 }
 
+bool GShom::skip_variable(int var) const {
+  return concret->skip_variable(var);
+}
+
+
+const GShom::range_t GShom::full_range = GShom::range_t() ; 
+
+const GShom::range_t & GShom::get_range() const {
+ return concret->get_range();
+}
+
+
+
+
 /* Operations */
 GShom fixpoint (const GShom &h) {
   if( typeid( *_GShom::get_concret(h) ) == typeid(S_Homomorphism::Fixpoint)
@@ -1505,17 +1627,69 @@ GShom GShom::add(const d3::set<GShom>::type& set)
   }
 }
 
+
+static bool commutative (const GShom & h1, const GShom & h2) {
+  GShom::range_t h1r = h1.get_range();
+  // ALL variables range
+  if ( h1r.empty() )
+    return false;
+
+  GShom::range_t h2r = h2.get_range();
+  // ALL variables range
+  if ( h2r.empty() )
+    return false;
+
+  // Test empty intersection relying on sorted property of sets.
+  GShom::range_it h1it = h1r.begin();
+  GShom::range_it h2it = h2r.begin();
+  while ( h1it != h1r.end() && h2it != h2r.end() ) {
+    if ( *h1it == *h2it ) 
+      return false;
+    else if ( *h1it < *h2it ) 
+      ++h1it;
+    else
+      ++h2it;
+  }
+
+  return true;
+}
+
+// add an operand to a commutative composition of hom
+static void addCompositionParameter (const GShom & h, S_Homomorphism::And::parameters_t & args) {
+  if ( const S_Homomorphism::And * hAnd = dynamic_cast<const S_Homomorphism::And*> ( _GShom::get_concret(h) ) ) {
+    // recursively add each parameter
+     for (S_Homomorphism::And::parameters_it it = hAnd->parameters.begin() ; it != hAnd->parameters.end() ; ++it ) {
+       addCompositionParameter (*it, args) ;
+     }
+  } else {
+    // partition args into elements that commute with h or not
+    S_Homomorphism::And::parameters_t argsC, argsNOTC;
+    for (S_Homomorphism::And::parameters_it it = args.begin() ; it != args.end() ; ++it ) {
+      if ( commutative (*it, h) )
+	argsC.push_back(*it);
+      else 
+	argsNOTC.push_back(*it);
+    }
+    args = argsC;
+    args.push_back ( S_Homomorphism::Compose ( S_Homomorphism::And (argsNOTC), h) );    
+  }
+}
+
+
 GShom operator&(const GShom &h1,const GShom &h2){
 	
+  // Id is neutral to composition :forall h,  h & id = id & h = h 
   if( h1 == GShom::id )
     return h2;
-
   if( h2 == GShom::id )
     return h1;
 
+  // Null is absorbing to composition : forall h,  h & 0 = 0 & h = 0
   if (h1 == Shom::null || h2 == Shom::null)
     return Shom::null;
 
+  // Locals on the same variable may be "fused"
+  // GHom local version
   if( typeid( *_GShom::get_concret(h1) ) == typeid(S_Homomorphism::LocalApply) 
       && typeid( *_GShom::get_concret(h2) ) == typeid(S_Homomorphism::LocalApply) )
     {
@@ -1528,6 +1702,8 @@ GShom operator&(const GShom &h1,const GShom &h2){
 	}
     }
 
+  // Locals on the same variable may be "fused"
+  // GShom local version
   if( typeid( *_GShom::get_concret(h1) ) == typeid(S_Homomorphism::SLocalApply) 
       && typeid( *_GShom::get_concret(h2) ) == typeid(S_Homomorphism::SLocalApply) )
     {
@@ -1539,8 +1715,19 @@ GShom operator&(const GShom &h1,const GShom &h2){
 	  return localApply(  lh1->h & lh2->h, lh1->target );
 	}
     }
-	
-  return S_Homomorphism::Compose(h1,h2);
+
+  return S_Homomorphism::Compose (h1,h2);
+
+  // Test commutativity of h1 and h2
+  S_Homomorphism::And::parameters_t args;
+  addCompositionParameter (h1, args);
+  addCompositionParameter (h2, args);
+  if ( args.size() == 1 ) {
+    return *args.begin();
+  } else {
+    return S_Homomorphism::And (args);
+  }
+
 }
 
 GShom operator+(const GShom &h1,const GShom &h2){
