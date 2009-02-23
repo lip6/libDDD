@@ -278,7 +278,7 @@ public:
 	 }
      }
    if (sum.empty())
-     return GSDD::null;
+     return SDD::null;
    else
      return SDED::add(sum);
   }
@@ -353,7 +353,7 @@ public:
 	 }
      }
    if (sum.empty())
-     return GSDD::null;
+     return SDD::null;
    else
      return SDED::add(sum);
   }
@@ -1298,6 +1298,7 @@ void StrongShom::print (std::ostream & os) const {
 
 // constant Id
 const GShom GShom::id(S_Homomorphism::Identity(1));
+const GShom GShom::null(S_Homomorphism::Constant(GSDD::null,1));
 
 /* Constructor */
 GShom::GShom(const _GShom *h):concret(h){}
@@ -1310,7 +1311,7 @@ GShom::GShom(int var,const DataSet & val, const GShom &h) {
   if ( ! val.empty() ) {
     concret=  canonical ( S_Homomorphism::LeftConcat(GSDD(var,val),h));
   } else {
-    concret = canonical( S_Homomorphism::Constant(GSDD::null));
+    concret = _GShom::get_concret(Shom::null) ;
   }
 }
 
@@ -1472,7 +1473,7 @@ GShom
 // localApply(int target,const GHom & h)
 localApply(const GShom & h, int target)
 {
-	if( h == GShom::id ||  h == GShom(SDD::null) )
+	if( h == GShom::id ||  h == Shom::null )
 	{
 	  return h;
 	}
@@ -1484,13 +1485,13 @@ localApply(const GShom & h, int target)
 GShom GShom::add(const d3::set<GShom>::type& set)
 {  
   if (set.empty() ) 
-    return GSDD::null;
+    return Shom::null;
   
   if( set.size() == 1 )
     return *(set.begin());
   else {
     d3::set<GShom>::type s = set;
-    s.erase(GShom(GSDD::null));
+    s.erase(Shom::null);
     if( s.size() == 1 )
       return *(s.begin());
     hash_map<d3::set<GShom>::type,GShom>::type::accessor acc;
@@ -1512,8 +1513,8 @@ GShom operator&(const GShom &h1,const GShom &h2){
 	if( h2 == GShom::id )
 		return h1;
 
-	if (h1 == GShom(GSDD::null) || h2 == GShom(GSDD::null))
-	  return GShom(GSDD::null);
+	if (h1 == Shom::null || h2 == Shom::null)
+	  return Shom::null;
 
 	if( typeid( *_GShom::get_concret(h1) ) == typeid(S_Homomorphism::LocalApply) 
 		&& typeid( *_GShom::get_concret(h2) ) == typeid(S_Homomorphism::LocalApply) )
@@ -1606,8 +1607,8 @@ GShom operator! (const GShom & cond) {
     printCondError(cond);
     assert(false);
   } else if (cond == GShom::id) {
-    return GSDD::null;
-  } else if (cond == GShom(GSDD::null) ) {
+    return Shom::null;
+  } else if (cond == Shom::null ) {
     return GShom::id;
   } else {
     return S_Homomorphism::SNotCond(cond);
