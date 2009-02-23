@@ -123,6 +123,8 @@ public:
 
   /// Elementary SDD homomorphism identity. Applied to any SDD d, it returns d. 
   static const GShom id;
+  // Elementary emptyset homomorphism
+  static const GShom null;
 
   /// \name Comparisons between GShom.
   /// Comparisons between GShom for unicity table. Both equality comparison and
