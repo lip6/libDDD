@@ -135,6 +135,15 @@ public:
   bool operator<(const GShom &h) const{return concret<h.concret;};
   /// This predicate is true if the homomorphism global behavior is only to prune some paths.
   bool is_selector() const;
+  /// This predicate is true if the homomorphism "skips" this variable.
+  bool skip_variable(int) const;
+  
+  typedef d3::set<int>::type range_t;
+  typedef range_t::const_iterator range_it;
+  /// Returns the range for this homomorphism, i.e. the dual of skip_variable
+  const range_t & get_range () const;  
+  /// The full_range : that targets everyone
+  static const range_t full_range;
   //@}
 
   /// \name Evaluation mechanism for homomorphisms.
@@ -349,6 +358,11 @@ public:
         return false;
     }
 
+    /// The range returns the dual of skip_variable, default implem considers that all variables are affected by this homomorphism.
+      virtual const GShom::range_t & get_range () const 
+    {
+      return GShom::full_range;
+    }
 
   /// Constructor. Note this class is abstract, so this is only used in initialization
   /// list of derived classes constructors (hard coded operations and StrongShom).
