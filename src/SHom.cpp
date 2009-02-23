@@ -514,12 +514,6 @@ namespace S_Homomorphism {
 	}
 	return res;
       } else {
-	GSDD res = d;
-	for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
-	  res = (*gi) (res);
-	}
-	return res;
-
 	parameters_t F;
 	GShom G = GShom::id ;
 	int var = d.variable() ;
@@ -530,7 +524,9 @@ namespace S_Homomorphism {
 	    G = *gi & G;
 	  }
 	}
-	GShom nextSel = And (F);
+	GShom nextSel = GShom::id ;
+	if ( ! F.empty() ) 
+	  nextSel = And (F);
 	
 	return G (  nextSel (d) ) ;	
       }
