@@ -257,6 +257,11 @@ namespace S_Homomorphism {
       return h.is_selector();
     }
 
+    const GShom::range_t  get_range () const {
+      GShom::range_t range;
+      range.insert(target);
+      return range;
+    }
   
     GSDD eval(const GSDD &d)const{
       GSDD_DataSet_map res;
@@ -332,6 +337,11 @@ namespace S_Homomorphism {
       return var != target;
     }
   
+    const GShom::range_t  get_range () const {
+      GShom::range_t range;
+      range.insert(target);
+      return range;
+    }
   
 
     GSDD eval(const GSDD &d) const {
@@ -1561,7 +1571,7 @@ bool GShom::skip_variable(int var) const {
 
 const GShom::range_t GShom::full_range = GShom::range_t() ; 
 
-const GShom::range_t & GShom::get_range() const {
+const GShom::range_t  GShom::get_range() const {
  return concret->get_range();
 }
 
@@ -1671,7 +1681,10 @@ static void addCompositionParameter (const GShom & h, S_Homomorphism::And::param
 	argsNOTC.push_back(*it);
     }
     args = argsC;
-    args.push_back ( S_Homomorphism::Compose ( S_Homomorphism::And (argsNOTC), h) );    
+    if ( argsNOTC.empty() )
+      args.push_back ( h );
+    else 
+      args.push_back ( S_Homomorphism::Compose ( S_Homomorphism::And (argsNOTC), h) );    
   }
 }
 
@@ -1716,13 +1729,16 @@ GShom operator&(const GShom &h1,const GShom &h2){
 	}
     }
 
-  return S_Homomorphism::Compose (h1,h2);
+//  return S_Homomorphism::Compose (h1,h2);
 
   // Test commutativity of h1 and h2
   S_Homomorphism::And::parameters_t args;
   addCompositionParameter (h1, args);
   addCompositionParameter (h2, args);
-  if ( args.size() == 1 ) {
+  if ( args.empty() ) {
+    std::cerr << " WTF ?? (SHOM.cpp in operator&)" << std::endl;
+    return GShom::null;
+  } else if ( args.size() == 1 ) {
     return *args.begin();
   } else {
     return S_Homomorphism::And (args);
