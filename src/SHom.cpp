@@ -409,8 +409,13 @@ namespace S_Homomorphism {
 
     // skip if every argument skips.
     bool skip_variable (int var) const {
-      return get_concret(cond_)->skip_variable(var);
+      return cond_.skip_variable(var);
     }
+
+    const GShom::range_t  get_range () const {
+      return cond_.get_range() ;
+    }
+
 
     bool is_selector () const {
       return true;
@@ -500,6 +505,18 @@ namespace S_Homomorphism {
       return true;
     }
 
+    const GShom::range_t  get_range () const {
+      GShom::range_t ret;
+      for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+	GShom::range_t pret = gi->get_range();
+	if ( pret.empty() )
+	  return pret;
+	ret.insert(pret.begin() , pret.end()) ;
+      }
+      return ret;
+    }
+
+
     /* Eval */
     GSDD
     eval(const GSDD& d)const {
@@ -577,8 +594,9 @@ namespace S_Homomorphism {
     typedef hash_map<int,partition >::type partition_cache_type;
 
   private:
-        
-    d3::set<GShom>::type parameters;
+    typedef d3::set<GShom>::type parameters_t ;
+    typedef parameters_t::const_iterator parameters_it;
+    parameters_t parameters;
     mutable partition_cache_type partition_cache;
     bool have_id;
 
@@ -764,6 +782,18 @@ namespace S_Homomorphism {
       return caccess->second.G.empty() && !caccess->second.has_local;
     }
 
+    const GShom::range_t  get_range () const {
+      GShom::range_t ret;
+      for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+	GShom::range_t pret = gi->get_range();
+	if ( pret.empty() )
+	  return pret;
+	ret.insert(pret.begin() , pret.end()) ;
+      }
+      return ret;
+    }
+
+
     partition
     get_partition(int var) const
     {
@@ -877,9 +907,22 @@ namespace S_Homomorphism {
     bool
     skip_variable(int var) const 
     {
-      return get_concret(left)->skip_variable(var)
-	&& get_concret(right)->skip_variable(var);
+      return left.skip_variable(var)
+	&& right.skip_variable(var);
     }
+
+    const GShom::range_t  get_range () const {
+      GShom::range_t ret = left.get_range();
+      if ( ret.empty() )
+	return ret;
+      GShom::range_t pret = right.get_range();
+      if ( pret.empty() )
+	return pret;
+      
+      ret.insert(pret.begin() , pret.end()) ;
+      return ret;
+    }
+
 
     /* Eval */
     GSDD eval(const GSDD &d)const{
@@ -1039,8 +1082,13 @@ namespace S_Homomorphism {
     bool
     skip_variable(int var) const
     {
-      return get_concret(arg)->skip_variable(var);
+      return arg.skip_variable(var);
     }
+
+    const GShom::range_t  get_range () const {
+      return arg.get_range();
+    }
+
     bool is_selector () const {
       // wow ! why build a fixpoint of a selector ??
       return arg.is_selector();
@@ -1581,7 +1629,7 @@ const GShom::range_t  GShom::get_range() const {
 /* Operations */
 GShom fixpoint (const GShom &h) {
   if( typeid( *_GShom::get_concret(h) ) == typeid(S_Homomorphism::Fixpoint)
-      || h == GShom::id  )
+      || h == GShom::id  || h.is_selector() )
     return h;
   return S_Homomorphism::Fixpoint(h);
 }
