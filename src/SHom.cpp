@@ -1673,19 +1673,49 @@ static void addCompositionParameter (const GShom & h, S_Homomorphism::And::param
        addCompositionParameter (*it, args) ;
      }
   } else {
+    // first test for possible nesting of locals
+    if ( const S_Homomorphism::LocalApply* lh2 = dynamic_cast<const S_Homomorphism::LocalApply* > ( _GShom::get_concret(h) ) ) {
+      // test for local that can be nested
+      for (S_Homomorphism::And::parameters_t::iterator it = args.begin() ; it != args.end() ; ++it ) {
+	if ( const S_Homomorphism::LocalApply* lh1 = dynamic_cast<const S_Homomorphism::LocalApply* > ( _GShom::get_concret(*it) ) ) {
+	  if( lh1->target == lh2->target ) {
+	    *it = ( localApply(  lh1->h & lh2->h, lh1->target ) );
+	    return;
+	  }	
+	}
+      }
+    } else if ( const S_Homomorphism::SLocalApply* lh2 = dynamic_cast<const S_Homomorphism::SLocalApply* > ( _GShom::get_concret(h) ) ) {
+      // test for local that can be nested
+      for (S_Homomorphism::And::parameters_t::iterator it = args.begin() ; it != args.end() ; ++it ) {
+	if ( const S_Homomorphism::SLocalApply* lh1 = dynamic_cast<const S_Homomorphism::SLocalApply* > ( _GShom::get_concret(*it) ) ) {
+	  if( lh1->target == lh2->target ) {
+	    *it = ( localApply(  lh1->h & lh2->h, lh1->target ) );
+	    return;
+	  }	
+	}
+      }
+    }
+    // Local nesting tests have failed, proceed to deeper commutativity tests
+
     // partition args into elements that commute with h or not
     S_Homomorphism::And::parameters_t argsC, argsNOTC;
     for (S_Homomorphism::And::parameters_it it = args.begin() ; it != args.end() ; ++it ) {
-      if ( commutative (*it, h) )
+      if ( commutative (*it, h) ) {
 	argsC.push_back(*it);
-      else 
+      } else {
 	argsNOTC.push_back(*it);
+      }
     }
     args = argsC;
-    if ( argsNOTC.empty() )
+
+    if ( argsNOTC.empty() ) {
       args.push_back ( h );
-    else 
+    } else if ( argsNOTC.size() == 1 ) {
+      GShom h1 = *argsNOTC.begin();
+      args.push_back ( S_Homomorphism::Compose ( h1,  h ) );
+    } else {
       args.push_back ( S_Homomorphism::Compose ( S_Homomorphism::And (argsNOTC), h) );    
+    }
   }
 }
 
@@ -1702,29 +1732,6 @@ GShom operator&(const GShom &h1,const GShom &h2){
   if (h1 == Shom::null || h2 == Shom::null)
     return Shom::null;
 
-  // Locals on the same variable may be "fused"
-  // GHom local version
-  if ( const S_Homomorphism::LocalApply* lh1 = dynamic_cast<const S_Homomorphism::LocalApply* > ( _GShom::get_concret(h1) ) )
-    // AND if , written this way to allow declaration of variable inside if condition
-    if ( const S_Homomorphism::LocalApply* lh2 = dynamic_cast<const S_Homomorphism::LocalApply* > ( _GShom::get_concret(h2) ) )      
-    {
-      if( lh1->target == lh2->target )
-	{
-	  return localApply(  lh1->h & lh2->h, lh1->target );
-	}
-    }
-
-  // Locals on the same variable may be "fused"
-  // GShom local version
-  if( const S_Homomorphism::SLocalApply* lh1 = dynamic_cast<const S_Homomorphism::SLocalApply* > ( _GShom::get_concret(h1) ) ) 
-    // AND if , written this way to allow declaration of variable inside if condition
-    if ( const S_Homomorphism::SLocalApply* lh2 = dynamic_cast<const S_Homomorphism::SLocalApply* > ( _GShom::get_concret(h2) ) )      
-      {
-	if( lh1->target == lh2->target )
-	  {
-	    return localApply(  lh1->h & lh2->h, lh1->target );
-	  }
-      }
 
 //  return S_Homomorphism::Compose(h1,h2);
 
