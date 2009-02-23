@@ -1578,8 +1578,7 @@ const GShom::range_t  GShom::get_range() const {
 /* Operations */
 GShom fixpoint (const GShom &h) {
   if( typeid( *_GShom::get_concret(h) ) == typeid(S_Homomorphism::Fixpoint)
-      || typeid( *_GShom::get_concret(h) ) == typeid(S_Homomorphism::Identity)
-      )
+      || h == GShom::id  )
     return h;
   return S_Homomorphism::Fixpoint(h);
 }
@@ -1699,12 +1698,10 @@ GShom operator&(const GShom &h1,const GShom &h2){
 
   // Locals on the same variable may be "fused"
   // GHom local version
-  if( typeid( *_GShom::get_concret(h1) ) == typeid(S_Homomorphism::LocalApply) 
-      && typeid( *_GShom::get_concret(h2) ) == typeid(S_Homomorphism::LocalApply) )
+  if ( const S_Homomorphism::LocalApply* lh1 = dynamic_cast<const S_Homomorphism::LocalApply* > ( _GShom::get_concret(h1) ) )
+    // AND if , written this way to allow declaration of variable inside if condition
+    if ( const S_Homomorphism::LocalApply* lh2 = dynamic_cast<const S_Homomorphism::LocalApply* > ( _GShom::get_concret(h2) ) )      
     {
-      const S_Homomorphism::LocalApply* lh1 = (const S_Homomorphism::LocalApply*)(_GShom::get_concret(h1));
-      const S_Homomorphism::LocalApply* lh2 = (const S_Homomorphism::LocalApply*)(_GShom::get_concret(h2));
-
       if( lh1->target == lh2->target )
 	{
 	  return localApply(  lh1->h & lh2->h, lh1->target );
@@ -1713,19 +1710,15 @@ GShom operator&(const GShom &h1,const GShom &h2){
 
   // Locals on the same variable may be "fused"
   // GShom local version
-  if( typeid( *_GShom::get_concret(h1) ) == typeid(S_Homomorphism::SLocalApply) 
-      && typeid( *_GShom::get_concret(h2) ) == typeid(S_Homomorphism::SLocalApply) )
-    {
-      const S_Homomorphism::SLocalApply* lh1 = (const S_Homomorphism::SLocalApply*)(_GShom::get_concret(h1));
-      const S_Homomorphism::SLocalApply* lh2 = (const S_Homomorphism::SLocalApply*)(_GShom::get_concret(h2));
-
-      if( lh1->target == lh2->target )
-	{
-	  return localApply(  lh1->h & lh2->h, lh1->target );
-	}
-    }
-
-//  return S_Homomorphism::Compose (h1,h2);
+  if( const S_Homomorphism::SLocalApply* lh1 = dynamic_cast<const S_Homomorphism::SLocalApply* > ( _GShom::get_concret(h1) ) ) 
+    // AND if , written this way to allow declaration of variable inside if condition
+    if ( const S_Homomorphism::SLocalApply* lh2 = dynamic_cast<const S_Homomorphism::SLocalApply* > ( _GShom::get_concret(h2) ) )      
+      {
+	if( lh1->target == lh2->target )
+	  {
+	    return localApply(  lh1->h & lh2->h, lh1->target );
+	  }
+      }
 
   // Test commutativity of h1 and h2
   S_Homomorphism::And::parameters_t args;
