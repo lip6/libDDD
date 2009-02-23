@@ -593,10 +593,12 @@ namespace S_Homomorphism {
 
     typedef hash_map<int,partition >::type partition_cache_type;
 
-  private:
+  public :
     typedef d3::set<GShom>::type parameters_t ;
     typedef parameters_t::const_iterator parameters_it;
+    // for direct manipulation in Fixpoint eval
     parameters_t parameters;
+  private :
     mutable partition_cache_type partition_cache;
     bool have_id;
 
@@ -885,7 +887,8 @@ namespace S_Homomorphism {
 
   /************************** Compose */
   class Compose:public _GShom{
-  private:
+  public:
+    // made public for direct manipulation in Fixpoint::eval()
     GShom left;
     GShom right;
   public:
@@ -1057,6 +1060,30 @@ namespace S_Homomorphism {
 
   /************************** Fixpoint */
 
+  // a test used in commutativity assesment
+  static bool notInRange (const GShom::range_t & h1r, const GShom & h2) {
+    GShom::range_t h2r = h2.get_range();
+    // ALL variables range
+    if ( h2r.empty() )
+      return false;
+    
+    // Test empty intersection relying on sorted property of sets.
+    GShom::range_it h1it = h1r.begin();
+    GShom::range_it h2it = h2r.begin();
+    while ( h1it != h1r.end() && h2it != h2r.end() ) {
+      if ( *h1it == *h2it ) 
+	return false;
+      else if ( *h1it < *h2it ) 
+	++h1it;
+      else
+	++h2it;
+    }
+    
+    return true;
+  }
+
+
+
   class Fixpoint
     : public _GShom
   {
@@ -1116,6 +1143,49 @@ namespace S_Homomorphism {
 	  // is it the fixpoint of an union ?
 	  if (const Add * add = dynamic_cast<const Add*> ( get_concret(arg) ) )
 	    {
+	      // Check if we have (sel & F + id ) where sel is a selector and F is a sum
+	      if (add->parameters.size() == 2) {
+		GShom other ;
+		bool haveId = false;
+		for ( Add::parameters_it it = add->parameters.begin() ; it != add->parameters.end() ; ++it ) {
+		  if ( *it == GShom::id )
+		    haveId = true;
+		  else
+		    other = *it;
+		}
+		if (haveId) {
+		  // This looks good, we have the form : fixpoint ( other + Id )
+		  // Check if : other = sel & F
+		  if (const Compose * comp = dynamic_cast<const Compose*> ( get_concret(other) ) ) {
+		    // hit : we have a composition
+		    if ( comp->left.is_selector() )
+		      if (const Add * subadd = dynamic_cast<const Add*> ( get_concret(comp->right) ) ) {
+			// This is it !! apply rewriting strategy
+			std::cerr << "Hit ! "; comp->print(std::cerr) ; std::cerr << std::endl;
+			GShom::range_t selr = comp->left.get_range();
+			if (! selr.empty() ) {
+			  // selector concerns a subset of variables, probably we can commute with at least some of the terms in subadd
+			  d3::set<GShom>::type doC, notC;
+			  for (Add::parameters_it it =  subadd->parameters.begin() ; it != subadd->parameters.end() ; ++it ) {
+			    if ( notInRange (selr, *it) ) {
+			      doC.insert(*it);
+			    } else {
+			      notC.insert(*it);
+			    }
+			  }
+			  
+			  if (! doC.empty() ) {
+			    // Great ! successful application of the rule is possible
+			    std::cerr << "Hit Full !" << std::endl;
+			    
+			  }
+
+			}
+		      }		    
+		  }
+		}
+	      }
+
 	      // Check if we have ( Id + F + G )* where F can be forwarded to the next variable
 		
 	      // Rewrite ( Id + F + G )*
@@ -1693,24 +1763,7 @@ static bool commutative (const GShom & h1, const GShom & h2) {
   if ( h1r.empty() )
     return false;
 
-  GShom::range_t h2r = h2.get_range();
-  // ALL variables range
-  if ( h2r.empty() )
-    return false;
-
-  // Test empty intersection relying on sorted property of sets.
-  GShom::range_it h1it = h1r.begin();
-  GShom::range_it h2it = h2r.begin();
-  while ( h1it != h1r.end() && h2it != h2r.end() ) {
-    if ( *h1it == *h2it ) 
-      return false;
-    else if ( *h1it < *h2it ) 
-      ++h1it;
-    else
-      ++h2it;
-  }
-
-  return true;
+  return S_Homomorphism::notInRange (h1r , h2);
 }
 
 // add an operand to a commutative composition of hom
