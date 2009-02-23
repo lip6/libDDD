@@ -1413,10 +1413,9 @@ void StrongShom::print (std::ostream & os) const {
 /*                         Class GShom                                    */
 /*************************************************************************/
 
-
 // constant Id
 const GShom GShom::id(S_Homomorphism::Identity(1));
-const GShom GShom::null(S_Homomorphism::Constant(GSDD::null,1));
+// Note: Shom::null is defined in SDD.cpp for static initialization stupid C++ freaking semantics.
 
 /* Constructor */
 GShom::GShom(const _GShom *h):concret(h){}
@@ -1576,8 +1575,6 @@ const GShom::range_t  GShom::get_range() const {
 }
 
 
-
-
 /* Operations */
 GShom fixpoint (const GShom &h) {
   if( typeid( *_GShom::get_concret(h) ) == typeid(S_Homomorphism::Fixpoint)
@@ -1591,11 +1588,10 @@ GShom
 // localApply(int target,const GHom & h)
 localApply(const GHom & h, int target)
 {
-  if( h == GHom::id )
-    {
-      return GShom::id;
-    } else if ( h == GHom(DDD::null) ) {
-    return SDD::null;
+  if( h == GHom::id ) {
+    return GShom::id;
+  } else if ( h == GHom(DDD::null) ) {
+    return Shom::null;
   }
 	  
   return S_Homomorphism::LocalApply(h,target);
@@ -1628,7 +1624,7 @@ GShom GShom::add(const d3::set<GShom>::type& set)
       return *(s.begin());
     hash_map<d3::set<GShom>::type,GShom>::type::accessor acc;
     if (addCache.insert(acc,s)) {
-      GShom added = canonical(S_Homomorphism::Add(s));
+      GShom added = S_Homomorphism::Add(s);
       acc->second = added;
       return added;
     } else {
