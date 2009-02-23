@@ -45,6 +45,10 @@
 #include "tbb/atomic.h"
 #include "tbb/queuing_rw_mutex.h"
 #endif
+
+
+
+
 /******************************************************************************/
 /*                             class _GSDD                                     */
 /******************************************************************************/
@@ -135,6 +139,7 @@ public:
 
 };
 
+
 // map<int,string> mapVarName;
 #ifdef REENTRANT
 
@@ -170,6 +175,16 @@ namespace SDDutil {
   }
 
 }
+
+
+/* Constants */
+const GSDD GSDD::one(canonical( _GSDD(1,1)));
+const GSDD GSDD::null(canonical( _GSDD(0,1)));
+const GSDD GSDD::top(canonical( _GSDD(-1,1)));
+
+// declared here to ensure correct static init order
+const GShom GShom::null = GSDD::null ;
+
 /******************************************************************************/
 /*                             class GSDD                                     */
 /******************************************************************************/
@@ -507,10 +522,6 @@ void GSDD::garbage(){
 //   return myNbStates(*this);
 // }
 
-/* Constants */
-const GSDD GSDD::one(canonical( _GSDD(1,1)));
-const GSDD GSDD::null(canonical( _GSDD(0,1)));
-const GSDD GSDD::top(canonical( _GSDD(-1,1)));
 
 /******************************************************************************/
 /*                   class SDD:public GSDD                                    */
