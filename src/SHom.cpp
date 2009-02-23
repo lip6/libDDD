@@ -400,9 +400,11 @@ namespace S_Homomorphism {
     :
     public _GShom
   {
+  public :
     // selector hom
     GShom cond_;
-  public :
+
+
     SNotCond (const GShom & cond): cond_(cond) {};
 
     // skip if every argument skips.
@@ -458,8 +460,7 @@ namespace S_Homomorphism {
     And(const parameters_t & p, int ref=0)
       :
       _GShom(ref,false),
-      parameters() {
-      parameters = p ;
+      parameters(p) {
     }
       
     /* Compare */
@@ -491,7 +492,7 @@ namespace S_Homomorphism {
     skip_variable( int var ) const
     {
       for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
-	if( ! get_concret(*gi)->skip_variable(var) )
+	if( ! gi->skip_variable(var) )
 	  {
 	    return false;
 	  }
@@ -513,6 +514,12 @@ namespace S_Homomorphism {
 	}
 	return res;
       } else {
+	GSDD res = d;
+	for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+	  res = (*gi) (res);
+	}
+	return res;
+
 	parameters_t F;
 	GShom G = GShom::id ;
 	int var = d.variable() ;
@@ -1723,6 +1730,8 @@ GShom operator&(const GShom &h1,const GShom &h2){
 	  }
       }
 
+//  return S_Homomorphism::Compose(h1,h2);
+
   // Test commutativity of h1 and h2
   S_Homomorphism::And::parameters_t args;
   addCompositionParameter (h1, args);
@@ -1805,6 +1814,12 @@ GShom operator! (const GShom & cond) {
     return Shom::null;
   } else if (cond == Shom::null ) {
     return GShom::id;
+  } else if ( const S_Homomorphism::SLocalApply* lh1 = dynamic_cast<const S_Homomorphism::SLocalApply* > ( _GShom::get_concret(cond) ) )  {
+    return localApply ( ! lh1->h , lh1->target ); 
+  } else if ( const S_Homomorphism::LocalApply* lh1 = dynamic_cast<const S_Homomorphism::LocalApply* > ( _GShom::get_concret(cond) ) )  {
+    return localApply ( ! lh1->h , lh1->target ); 
+  }  else if ( const S_Homomorphism::SNotCond* lh1 = dynamic_cast<const S_Homomorphism::SNotCond* > ( _GShom::get_concret(cond) ) )  {
+    return  lh1->cond_ ; 
   } else {
     return S_Homomorphism::SNotCond(cond);
   }
