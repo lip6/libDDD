@@ -172,6 +172,9 @@ public:
   //@{
   /// Return the current size of the unicity table for GShom.
   static  unsigned int statistics();
+  /// Return the current size of the cache for GShom.
+  static size_t cache_size();
+  
   /// Print some usage statistics on Shom. Mostly used for development and debug.
   /// \todo Allow output not in std::cout.
   static void pstats(bool reinit=true);
