@@ -976,30 +976,6 @@ namespace S_Homomorphism {
 
   /************************** Fixpoint */
 
-  // a test used in commutativity assesment
-  static bool notInRange (const GShom::range_t & h1r, const GShom & h2) {
-    GShom::range_t h2r = h2.get_range();
-    // ALL variables range
-    if ( h2r.empty() )
-      return false;
-    
-    // Test empty intersection relying on sorted property of sets.
-    GShom::range_it h1it = h1r.begin();
-    GShom::range_it h2it = h2r.begin();
-    while ( h1it != h1r.end() && h2it != h2r.end() ) {
-      if ( *h1it == *h2it ) 
-	return false;
-      else if ( *h1it < *h2it ) 
-	++h1it;
-      else
-	++h2it;
-    }
-    
-    return true;
-  }
-
-
-
   class Fixpoint
     : public _GShom
   {
@@ -1059,55 +1035,6 @@ namespace S_Homomorphism {
 	  // is it the fixpoint of an union ?
 	  if (const Add * add = dynamic_cast<const Add*> ( get_concret(arg) ) )
 	    {
-	      // Check if we have (sel & F + id ) where sel is a selector and F is a sum
-	      if (add->parameters.size() == 2) {
-		GShom other ;
-		bool haveId = false;
-		for ( Add::parameters_it it = add->parameters.begin() ; it != add->parameters.end() ; ++it ) {
-		  if ( *it == GShom::id )
-		    haveId = true;
-		  else
-		    other = *it;
-		}
-		if (haveId) {
-		  // This looks good, we have the form : fixpoint ( other + Id )
-		  // Check if : other = sel & F
-		  if (const Compose * comp = dynamic_cast<const Compose*> ( get_concret(other) ) ) {
-		    // hit : we have a composition
-		    std::cerr << "Hit a composition! "; comp->print(std::cerr) ; std::cerr << std::endl;
-		    if ( comp->left.is_selector() )
-		      if (const Add * subadd = dynamic_cast<const Add*> ( get_concret(comp->right) ) ) {
-			// This is it !! apply rewriting strategy
-			std::cerr << "Hit matches second criterion sel & Add ! " << std::endl;
-			GShom::range_t selr = comp->left.get_range();
-			if (! selr.empty() ) {
-			  // selector concerns a subset of variables, probably we can commute with at least some of the terms in subadd
-			  d3::set<GShom>::type doC, notC;
-			  for (Add::parameters_it it =  subadd->parameters.begin() ; it != subadd->parameters.end() ; ++it ) {
-			    if ( notInRange (selr, *it) ) {
-			      doC.insert(*it);
-			    } else {
-			      notC.insert(*it);
-			    }
-			  }
-			  
-			  if (! doC.empty() ) {
-			    // Great ! successful application of the rule is possible
-			    std::cerr << "Hit Full !" << std::endl;
-			    d3::set<GShom>::type finalU;
-			    finalU.insert(GShom::id);
-			    finalU.insert( fixpoint( (comp->left &  GShom::add(notC))  + GShom::id) );
-			    doC.insert(GShom::id);
-			    finalU.insert( comp->left & fixpoint ( GShom::add(doC) ) );
-			    return fixpoint( GShom::add(finalU) ) (d);
-			  }
-
-			}
-		      }		    
-		  }
-		}
-	      }
-
 	      // Check if we have ( Id + F + G )* where F can be forwarded to the next variable
 		
 	      // Rewrite ( Id + F + G )*
@@ -1521,6 +1448,10 @@ unsigned int GShom::statistics(){
   return canonical.size();
 }
 
+size_t GShom::cache_size() {
+  return S_Homomorphism::cache.size();
+}
+
 // Todo
 void GShom::mark()const{
   if(!concret->marking){
@@ -1618,11 +1549,92 @@ const GShom::range_t  GShom::get_range() const {
 }
 
 
+// a test used in commutativity assesment
+static bool notInRange (const GShom::range_t & h1r, const GShom & h2) {
+  GShom::range_t h2r = h2.get_range();
+  // ALL variables range
+  if ( h2r.empty() )
+    return false;
+  
+    // Test empty intersection relying on sorted property of sets.
+  GShom::range_it h1it = h1r.begin();
+  GShom::range_it h2it = h2r.begin();
+  while ( h1it != h1r.end() && h2it != h2r.end() ) {
+    if ( *h1it == *h2it ) 
+      return false;
+    else if ( *h1it < *h2it ) 
+      ++h1it;
+    else
+      ++h2it;
+    }
+  
+  return true;
+}
+
+
+
 /* Operations */
 GShom fixpoint (const GShom &h) {
   if( typeid( *_GShom::get_concret(h) ) == typeid(S_Homomorphism::Fixpoint)
       || h == GShom::id  || h.is_selector() )
     return h;
+
+  
+  // is it the fixpoint of an union ?
+  if (const S_Homomorphism::Add * add = dynamic_cast<const S_Homomorphism::Add*> ( _GShom::get_concret(h) ) )
+    {
+      // Check if we have (sel & F + id ) where sel is a selector and F is a sum
+      if (add->parameters.size() == 2) {
+	GShom other ;
+	bool haveId = false;
+	for ( S_Homomorphism::Add::parameters_it it = add->parameters.begin() ; it != add->parameters.end() ; ++it ) {
+	  if ( *it == GShom::id )
+	    haveId = true;
+	  else
+	    other = *it;
+	}
+	if (haveId) {
+	  // This looks good, we have the form : fixpoint ( other + Id )
+	  // Check if : other = sel & F
+	  if (const S_Homomorphism::Compose * comp = dynamic_cast<const S_Homomorphism::Compose*> ( _GShom::get_concret(other) ) ) {
+	    // hit : we have a composition
+//	    std::cerr << "Hit a composition! ";// comp->print(std::cerr) ; std::cerr << std::endl;
+	    if ( comp->left.is_selector() )
+	      if (const S_Homomorphism::Add * subadd = dynamic_cast<const S_Homomorphism::Add*> ( _GShom::get_concret(comp->right) ) ) {
+		// This is it !! apply rewriting strategy
+//		std::cerr << "Hit matches second criterion sel & Add ! " << std::endl;
+		GShom::range_t selr = comp->left.get_range();
+		if (! selr.empty() ) {
+		  // selector concerns a subset of variables, probably we can commute with at least some of the terms in subadd
+		  d3::set<GShom>::type doC, notC;
+		  for (S_Homomorphism::Add::parameters_it it =  subadd->parameters.begin() ; it != subadd->parameters.end() ; ++it ) {
+		    if ( notInRange (selr, *it) ) {
+		      // insert into commutative operations set
+		      doC.insert(*it);
+		    } else {
+		      // insert into non commutative set
+		      notC.insert(*it);
+		    }
+		  }
+		  
+		  if (! doC.empty() ) {
+		    // Great ! successful application of the rule is possible
+//		    std::cerr << "Hit Full ! " << doC.size() << "/" << notC.size() << std::endl;
+		    d3::set<GShom>::type finalU;
+		    finalU.insert(GShom::id);
+		    finalU.insert( S_Homomorphism::Fixpoint( (comp->left &  GShom::add(notC))  + GShom::id) );
+		    doC.insert(GShom::id);
+		    finalU.insert( comp->left & fixpoint ( GShom::add(doC) ) );
+		    return S_Homomorphism::Fixpoint( GShom::add(finalU) ) ;
+		  }
+		  
+		}
+	      }		    
+	  }
+	}
+      }
+    }
+  
   return S_Homomorphism::Fixpoint(h);
 }
 
@@ -1776,6 +1788,7 @@ GShom GShom::add(const d3::set<GShom>::type& set)
 }
 
 
+
 static bool commutative (const GShom & h1, const GShom & h2) {
   if ( h1.is_selector() && h2.is_selector() ) 
     return true;
@@ -1785,7 +1798,7 @@ static bool commutative (const GShom & h1, const GShom & h2) {
   if ( h1r.empty() )
     return false;
 
-  return S_Homomorphism::notInRange (h1r , h2);
+  return notInRange (h1r , h2);
 }
 
 // add an operand to a commutative composition of hom
