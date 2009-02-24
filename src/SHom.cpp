@@ -602,102 +602,18 @@ namespace S_Homomorphism {
     mutable partition_cache_type partition_cache;
     bool have_id;
 
-    void addParameter (const GShom & hh, 	std::map<int, GHom> & local_homs, std::map<int, GShom> & local_shoms) {
-      const _GShom * h = get_concret(hh);    
-      const std::type_info & t = typeid( *h );
-      if( t == typeid(Add) )
-	{
-	  const d3::set<GShom>::type& local_param = ((const Add*) h)->parameters;
-	  for (d3::set<GShom>::type::const_iterator it = local_param.begin() ; it != local_param.end() ; ++it ){
-	    addParameter( get_concret(*it), local_homs,local_shoms  );
-	  }
-	}
-      else if( t == typeid(LocalApply) )
-	{
-	  const LocalApply* local = (const LocalApply*)(h);
-	  std::map<int, GHom>::iterator f = local_homs.find( local->target );
-	
-	  if( f != local_homs.end() )
-	    {
-	      f->second = f->second + local->h;
-	    }
-	  else
-	    {
-	      local_homs.insert(std::make_pair(local->target,local->h));
-	    }
-	
-	}
-      else if( t == typeid(SLocalApply) )
-	{
-	  const SLocalApply* local = (const SLocalApply*)(h);
-	  std::map<int, GShom>::iterator f = local_shoms.find( local->target );
-	
-	  if( f != local_shoms.end() )
-	    {
-	      f->second = f->second + local->h;
-	    }
-	  else
-	    {
-	      local_shoms.insert(std::make_pair(local->target,local->h));
-	    }
-	
-	}
-      else { 
-	if( t == typeid(Identity) )
-	  {
-	    have_id = true;
-	  }
-	parameters.insert(hh);
-      }
-    }
     
 
 
   public:
         
 
-    Add(const d3::set<GShom>::type& p, int ref=0)
+    Add(const d3::set<GShom>::type& p, bool have_id)
       :
-      _GShom(ref,false),
-      parameters(),
-      have_id(false)
+      parameters(p),
+      have_id(have_id)
     {
-      std::map<int, GHom> local_homs;
-      std::map<int, GShom> local_shoms;
-	
-      for( d3::set<GShom>::type::const_iterator it = p.begin(); it != p.end(); ++it)
-        {
-	  addParameter( *it , local_homs, local_shoms);
-        }
-	
-      for( 	std::map<int, GHom>::iterator it = local_homs.begin();
-		it != local_homs.end();
-		++it)
-	{
-	  if ( have_id )
-	    {
-	      it->second = it->second + GHom::id;
-	    }	    
-	  parameters.insert(localApply(it->second,it->first));
-	}
-      for( 	std::map<int, GShom>::iterator it = local_shoms.begin();
-		it != local_shoms.end();
-		++it)
-	{
-	  if( have_id )
-	    {
-	      const std::type_info & t = typeid( *  _GShom::get_concret(it->second) );
-	      // avoid pushing id down if it was already done, i.e.
-	      // unless it->second is of the form id + h1 + h2 + ...
-	      if ( ! ( t == typeid(Add) &&
-		       ((Add*)  _GShom::get_concret(it->second))->get_have_id() ) )
-		// push id down
-		it->second = it->second + GShom::id;
-	      
-	    }
-	  parameters.insert(localApply(it->second,it->first));
-	}
-	
+ 	
     }
 
 
@@ -1728,6 +1644,96 @@ localApply(const GShom & h, int target)
   return S_Homomorphism::SLocalApply(h,target);
 }
 
+static  void addParameter (const GShom & hh, 	std::map<int, GHom> & local_homs, std::map<int, GShom> & local_shoms, d3::set<GShom>::type& parameters , bool & have_id) {
+  const _GShom * h = _GShom::get_concret(hh);    
+  const std::type_info & t = typeid( *h );
+  if( t == typeid(S_Homomorphism::Add) )
+    {
+      const d3::set<GShom>::type & local_param = ((const S_Homomorphism::Add*) h)->parameters;
+      for (d3::set<GShom>::type::const_iterator it = local_param.begin() ; it != local_param.end() ; ++it ){
+	addParameter( _GShom::get_concret(*it), local_homs,local_shoms ,parameters,have_id );
+      }
+    }
+  else if( t == typeid(S_Homomorphism::LocalApply) )
+    {
+      const S_Homomorphism::LocalApply* local = (const S_Homomorphism::LocalApply*)(h);
+      std::map<int, GHom>::iterator f = local_homs.find( local->target );
+      
+      if( f != local_homs.end() )
+	{
+	  f->second = f->second + local->h;
+	}
+      else
+	{
+	  local_homs.insert(std::make_pair(local->target,local->h));
+	}
+      
+    }
+  else if( t == typeid(S_Homomorphism::SLocalApply) )
+    {
+      const S_Homomorphism::SLocalApply* local = (const S_Homomorphism::SLocalApply*)(h);
+      std::map<int, GShom>::iterator f = local_shoms.find( local->target );
+      
+      if( f != local_shoms.end() )
+	{
+	  f->second = f->second + local->h;
+	}
+      else
+	{
+	  local_shoms.insert(std::make_pair(local->target,local->h));
+	}
+      
+    }
+  else { 
+    if( t == typeid(S_Homomorphism::Identity) )
+      {
+	have_id = true;
+      }
+    parameters.insert(hh);
+  }
+}
+
+
+
+static void buildUnionParameters(d3::set<GShom>::type& p, d3::set<GShom>::type& parameters, bool & have_id) {
+  std::map<int, GHom> local_homs;
+  std::map<int, GShom> local_shoms;
+  for( d3::set<GShom>::type::const_iterator it = p.begin(); it != p.end(); ++it)
+    {
+      addParameter( *it , local_homs, local_shoms,parameters,have_id);
+    }
+  
+  for( 	std::map<int, GHom>::iterator it = local_homs.begin();
+	it != local_homs.end();
+	++it)
+    {
+      if ( have_id )
+	{
+	  it->second = it->second + GHom::id;
+	}	    
+      parameters.insert(localApply(it->second,it->first));
+    }
+  for( 	std::map<int, GShom>::iterator it = local_shoms.begin();
+	it != local_shoms.end();
+	++it)
+    {
+      if( have_id )
+	{
+	  const std::type_info & t = typeid( *  _GShom::get_concret(it->second) );
+	  // avoid pushing id down if it was already done, i.e.
+	  // unless it->second is of the form id + h1 + h2 + ...
+	  if ( ! ( t == typeid(S_Homomorphism::Add) &&
+		   ((S_Homomorphism::Add*)  _GShom::get_concret(it->second))->get_have_id() ) )
+	    // push id down
+	    it->second = it->second + GShom::id;
+	  
+	}
+      parameters.insert(localApply(it->second,it->first));
+    }
+  
+}
+
+
 // addcache declaration is just above function garbageCollect
 // static hash_map<d3::set<GShom>::type,GShom>::type addCache;
 GShom GShom::add(const d3::set<GShom>::type& set)
@@ -1744,7 +1750,17 @@ GShom GShom::add(const d3::set<GShom>::type& set)
       return *(s.begin());
     hash_map<d3::set<GShom>::type,GShom>::type::accessor acc;
     if (addCache.insert(acc,s)) {
-      GShom added = S_Homomorphism::Add(s);
+      // build the union up
+      d3::set<GShom>::type parameters;
+      bool have_id = false;
+      buildUnionParameters(s,parameters, have_id);
+      
+      GShom added;
+      if( parameters.size() == 1 )
+	added = *(parameters.begin());
+      else
+        added = S_Homomorphism::Add(parameters, have_id);
+      
       acc->second = added;
       return added;
     } else {
