@@ -45,6 +45,9 @@ public:
     cache_.clear();
   }
 
+  size_t size () const {
+    return cache_.size();
+  }
 
     std::pair<bool,NodeType>
     insert(const HomType& hom, const NodeType& node)
