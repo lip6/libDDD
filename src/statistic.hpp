@@ -59,6 +59,9 @@ class Statistic {
   /// Name of this statistic
 	std::string stat_name;
 
+  /// Size of SHom cache
+	size_t shom_cache;
+
   /// load from a SDD
 	void load (const SDD & s);
   /// load from a DDD
