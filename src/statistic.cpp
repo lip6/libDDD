@@ -58,6 +58,7 @@ void Statistic::load (const SDD & s) {
   nbShom = GShom::statistics();
   ddd_cache = DED::peak();
   sdd_cache = SDED::peak();
+  shom_cache = GShom::cache_size();
 }
 
 void Statistic::load (const DDD & s) {
@@ -79,8 +80,8 @@ void Statistic::print_header (std::ostream & os) {
        << "\\usepackage{lscape,longtable}\n\n"
        << "\\begin{document} \n \\pagestyle{empty}\n"
        << "\\begin{landscape} \n";
-    if (! isPureDDD) os << "\\begin{longtable}{|c||c|c|c|c|c|c|c|c|c|c|c|} \n \\hline \n" ;
-    else os << "\\begin{longtable}{|c||c|c|c|c|c|c|c|} \n \\hline \n" ;
+    if (! isPureDDD) os << "\\begin{longtable}{|c||c|c|c|c|c|c|c|c|c|c|c|c|} \n \\hline \n" ;
+    else os << "\\begin{longtable}{|c||c|c|c|c|c|c|c|c|} \n \\hline \n" ;
   }
 
   os << "Model " << value_sep[style];
@@ -94,7 +95,8 @@ void Statistic::print_header (std::ostream & os) {
   if (! isPureDDD) os << "SDD Hom "<< value_sep[style];
   if (! isPureDDD) os << "SDD cache "<< value_sep[style];
   os << "DDD Hom "<< value_sep[style];
-  os << "DDD cache";
+  os << "DDD cache"<< value_sep[style];
+  os << "SHom cache";
   os << line_sep[style] ;
 }
 
@@ -112,6 +114,7 @@ void Statistic::print_line (std::ostream & os) {
   if (! isPureDDD) os << sdd_cache << value_sep[style];
   os << nbHom << value_sep[style] ;
   os << ddd_cache ;
+  if (! isPureDDD) os << value_sep[style] << shom_cache;
   os << line_sep[style] ;
 }
 
