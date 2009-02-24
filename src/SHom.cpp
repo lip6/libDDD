@@ -61,7 +61,8 @@ static UniqueTable<_GShom> canonical;
 
 typedef std::map<GSDD,DataSet*> GSDD_DataSet_map;
 
-namespace S_Homomorphism {
+// Shom NameSpace
+namespace sns {
 
   typedef Cache<GShom,GSDD> ShomCache;
 
@@ -1163,7 +1164,7 @@ public:
     for( int i = range.begin(); i != range.end(); ++i)
       {
 	// GSDD result = gshom_( val[to_solve[i]]) ;
-	// S_Homomorphism::cache.insert( gshom_, val[to_solve[i]], result);
+	// sns::cache.insert( gshom_, val[to_solve[i]], result);
 	// val[to_solve[i]] = result;
 	val[to_solve[i]] = gshom_( val[to_solve[i]]) ;
       }
@@ -1203,7 +1204,7 @@ _GShom::eval_skip(const GSDD& d) const
       
       // filter pathological single son case
       // fallback to default except if parallel conditions met
-      if (d.nbsons() > 1  && (typeid(*this) == typeid(const S_Homomorphism::Fixpoint))) 
+      if (d.nbsons() > 1  && (typeid(*this) == typeid(const sns::Fixpoint))) 
 	{
 
           // std::cout << "PARALLEL" << std::endl;
@@ -1240,7 +1241,7 @@ _GShom::eval_skip(const GSDD& d) const
               son_result.push_back(eval(it->second));
               assert(false);
 	    } else {
-	      //  std::pair<bool,GSDD> local_res = S_Homomorphism::cache.contains(gshom,it->second);
+	      //  std::pair<bool,GSDD> local_res = sns::cache.contains(gshom,it->second);
 	      //  if (local_res.first) {
 	      if (false) {
 		// cache hit
@@ -1266,7 +1267,7 @@ _GShom::eval_skip(const GSDD& d) const
 	  // {
 	  //     GSDD arg = son_result[to_solve[j]];
 	  //     GSDD result = gshom( arg) ;
-	  //     // S_Homomorphism::cache.insert( gshom, arg, result);
+	  //     // sns::cache.insert( gshom, arg, result);
 	  //     son_result[to_solve[j]] = result;
 	  // }
 
@@ -1384,7 +1385,7 @@ void StrongShom::print (std::ostream & os) const {
 /*************************************************************************/
 
 // constant Id
-const GShom GShom::id(S_Homomorphism::Identity(1));
+const GShom GShom::id(sns::Identity(1));
 // Note: Shom::null is defined in SDD.cpp for static initialization stupid C++ freaking semantics.
 
 /* Constructor */
@@ -1392,11 +1393,11 @@ GShom::GShom(const _GShom *h):concret(h){}
 
 GShom::GShom(const _GShom &h):concret(canonical(h)){}
 
-GShom::GShom(const GSDD& d):concret(canonical( S_Homomorphism::Constant(d))){}
+GShom::GShom(const GSDD& d):concret(canonical( sns::Constant(d))){}
 
 GShom::GShom(int var,const DataSet & val, const GShom &h) {
   if ( ! val.empty() ) {
-    concret=  canonical ( S_Homomorphism::LeftConcat(GSDD(var,val),h));
+    concret=  canonical ( sns::LeftConcat(GSDD(var,val),h));
   } else {
     concret = _GShom::get_concret(Shom::null) ;
   }
@@ -1420,7 +1421,7 @@ GShom::operator()(const GSDD &d) const
 	}
       else
 	{
-	  return (S_Homomorphism::cache.insert(*this,d)).second;
+	  return (sns::cache.insert(*this,d)).second;
 	}
 
     }
@@ -1449,7 +1450,7 @@ unsigned int GShom::statistics(){
 }
 
 size_t GShom::cache_size() {
-  return S_Homomorphism::cache.size();
+  return sns::cache.size();
 }
 
 // Todo
@@ -1464,7 +1465,7 @@ void GShom::mark()const{
 static hash_map<d3::set<GShom>::type,GShom>::type addCache;
 void GShom::garbage(){
   addCache.clear();
-  S_Homomorphism::cache.clear();
+  sns::cache.clear();
 
   // mark phase
   for(UniqueTable<_GShom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
@@ -1575,19 +1576,19 @@ static bool notInRange (const GShom::range_t & h1r, const GShom & h2) {
 
 /* Operations */
 GShom fixpoint (const GShom &h) {
-  if( typeid( *_GShom::get_concret(h) ) == typeid(S_Homomorphism::Fixpoint)
+  if( typeid( *_GShom::get_concret(h) ) == typeid(sns::Fixpoint)
       || h == GShom::id  || h.is_selector() )
     return h;
 
   
   // is it the fixpoint of an union ?
-  if (const S_Homomorphism::Add * add = dynamic_cast<const S_Homomorphism::Add*> ( _GShom::get_concret(h) ) )
+  if (const sns::Add * add = dynamic_cast<const sns::Add*> ( _GShom::get_concret(h) ) )
     {
       // Check if we have (sel & F + id ) where sel is a selector and F is a sum
       if (add->parameters.size() == 2) {
 	GShom other ;
 	bool haveId = false;
-	for ( S_Homomorphism::Add::parameters_it it = add->parameters.begin() ; it != add->parameters.end() ; ++it ) {
+	for ( sns::Add::parameters_it it = add->parameters.begin() ; it != add->parameters.end() ; ++it ) {
 	  if ( *it == GShom::id )
 	    haveId = true;
 	  else
@@ -1596,18 +1597,18 @@ GShom fixpoint (const GShom &h) {
 	if (haveId) {
 	  // This looks good, we have the form : fixpoint ( other + Id )
 	  // Check if : other = sel & F
-	  if (const S_Homomorphism::Compose * comp = dynamic_cast<const S_Homomorphism::Compose*> ( _GShom::get_concret(other) ) ) {
+	  if (const sns::Compose * comp = dynamic_cast<const sns::Compose*> ( _GShom::get_concret(other) ) ) {
 	    // hit : we have a composition
 //	    std::cerr << "Hit a composition! ";// comp->print(std::cerr) ; std::cerr << std::endl;
 	    if ( comp->left.is_selector() )
-	      if (const S_Homomorphism::Add * subadd = dynamic_cast<const S_Homomorphism::Add*> ( _GShom::get_concret(comp->right) ) ) {
+	      if (const sns::Add * subadd = dynamic_cast<const sns::Add*> ( _GShom::get_concret(comp->right) ) ) {
 		// This is it !! apply rewriting strategy
 //		std::cerr << "Hit matches second criterion sel & Add ! " << std::endl;
 		GShom::range_t selr = comp->left.get_range();
 		if (! selr.empty() ) {
 		  // selector concerns a subset of variables, probably we can commute with at least some of the terms in subadd
 		  d3::set<GShom>::type doC, notC;
-		  for (S_Homomorphism::Add::parameters_it it =  subadd->parameters.begin() ; it != subadd->parameters.end() ; ++it ) {
+		  for (sns::Add::parameters_it it =  subadd->parameters.begin() ; it != subadd->parameters.end() ; ++it ) {
 		    if ( notInRange (selr, *it) ) {
 		      // insert into commutative operations set
 		      doC.insert(*it);
@@ -1622,10 +1623,10 @@ GShom fixpoint (const GShom &h) {
 //		    std::cerr << "Hit Full ! " << doC.size() << "/" << notC.size() << std::endl;
 		    d3::set<GShom>::type finalU;
 		    finalU.insert(GShom::id);
-		    finalU.insert( S_Homomorphism::Fixpoint( (comp->left &  GShom::add(notC))  + GShom::id) );
+		    finalU.insert( sns::Fixpoint( (comp->left &  GShom::add(notC))  + GShom::id) );
 		    doC.insert(GShom::id);
 		    finalU.insert( comp->left & fixpoint ( GShom::add(doC) ) );
-		    return S_Homomorphism::Fixpoint( GShom::add(finalU) ) ;
+		    return sns::Fixpoint( GShom::add(finalU) ) ;
 		  }
 		  
 		}
@@ -1635,7 +1636,7 @@ GShom fixpoint (const GShom &h) {
       }
     }
   
-  return S_Homomorphism::Fixpoint(h);
+  return sns::Fixpoint(h);
 }
 
 GShom
@@ -1648,7 +1649,7 @@ localApply(const GHom & h, int target)
     return Shom::null;
   }
 	  
-  return S_Homomorphism::LocalApply(h,target);
+  return sns::LocalApply(h,target);
 }
 
 GShom
@@ -1659,22 +1660,22 @@ localApply(const GShom & h, int target)
     {
       return h;
     }
-  return S_Homomorphism::SLocalApply(h,target);
+  return sns::SLocalApply(h,target);
 }
 
 static  void addParameter (const GShom & hh, 	std::map<int, GHom> & local_homs, std::map<int, GShom> & local_shoms, d3::set<GShom>::type& parameters , bool & have_id) {
   const _GShom * h = _GShom::get_concret(hh);    
   const std::type_info & t = typeid( *h );
-  if( t == typeid(S_Homomorphism::Add) )
+  if( t == typeid(sns::Add) )
     {
-      const d3::set<GShom>::type & local_param = ((const S_Homomorphism::Add*) h)->parameters;
+      const d3::set<GShom>::type & local_param = ((const sns::Add*) h)->parameters;
       for (d3::set<GShom>::type::const_iterator it = local_param.begin() ; it != local_param.end() ; ++it ){
 	addParameter( _GShom::get_concret(*it), local_homs,local_shoms ,parameters,have_id );
       }
     }
-  else if( t == typeid(S_Homomorphism::LocalApply) )
+  else if( t == typeid(sns::LocalApply) )
     {
-      const S_Homomorphism::LocalApply* local = (const S_Homomorphism::LocalApply*)(h);
+      const sns::LocalApply* local = (const sns::LocalApply*)(h);
       std::map<int, GHom>::iterator f = local_homs.find( local->target );
       
       if( f != local_homs.end() )
@@ -1687,9 +1688,9 @@ static  void addParameter (const GShom & hh, 	std::map<int, GHom> & local_homs, 
 	}
       
     }
-  else if( t == typeid(S_Homomorphism::SLocalApply) )
+  else if( t == typeid(sns::SLocalApply) )
     {
-      const S_Homomorphism::SLocalApply* local = (const S_Homomorphism::SLocalApply*)(h);
+      const sns::SLocalApply* local = (const sns::SLocalApply*)(h);
       std::map<int, GShom>::iterator f = local_shoms.find( local->target );
       
       if( f != local_shoms.end() )
@@ -1703,7 +1704,7 @@ static  void addParameter (const GShom & hh, 	std::map<int, GHom> & local_homs, 
       
     }
   else { 
-    if( t == typeid(S_Homomorphism::Identity) )
+    if( t == typeid(sns::Identity) )
       {
 	have_id = true;
       }
@@ -1740,8 +1741,8 @@ static void buildUnionParameters(d3::set<GShom>::type& p, d3::set<GShom>::type& 
 	  const std::type_info & t = typeid( *  _GShom::get_concret(it->second) );
 	  // avoid pushing id down if it was already done, i.e.
 	  // unless it->second is of the form id + h1 + h2 + ...
-	  if ( ! ( t == typeid(S_Homomorphism::Add) &&
-		   ((S_Homomorphism::Add*)  _GShom::get_concret(it->second))->get_have_id() ) )
+	  if ( ! ( t == typeid(sns::Add) &&
+		   ((sns::Add*)  _GShom::get_concret(it->second))->get_have_id() ) )
 	    // push id down
 	    it->second = it->second + GShom::id;
 	  
@@ -1777,7 +1778,7 @@ GShom GShom::add(const d3::set<GShom>::type& set)
       if( parameters.size() == 1 )
 	added = *(parameters.begin());
       else
-        added = S_Homomorphism::Add(parameters, have_id);
+        added = sns::Add(parameters, have_id);
       
       acc->second = added;
       return added;
@@ -1802,28 +1803,28 @@ static bool commutative (const GShom & h1, const GShom & h2) {
 }
 
 // add an operand to a commutative composition of hom
-static void addCompositionParameter (const GShom & h, S_Homomorphism::And::parameters_t & args) {
-  if ( const S_Homomorphism::And * hAnd = dynamic_cast<const S_Homomorphism::And*> ( _GShom::get_concret(h) ) ) {
+static void addCompositionParameter (const GShom & h, sns::And::parameters_t & args) {
+  if ( const sns::And * hAnd = dynamic_cast<const sns::And*> ( _GShom::get_concret(h) ) ) {
     // recursively add each parameter
-     for (S_Homomorphism::And::parameters_it it = hAnd->parameters.begin() ; it != hAnd->parameters.end() ; ++it ) {
+     for (sns::And::parameters_it it = hAnd->parameters.begin() ; it != hAnd->parameters.end() ; ++it ) {
        addCompositionParameter (*it, args) ;
      }
   } else {
     // first test for possible nesting of locals
-    if ( const S_Homomorphism::LocalApply* lh2 = dynamic_cast<const S_Homomorphism::LocalApply* > ( _GShom::get_concret(h) ) ) {
+    if ( const sns::LocalApply* lh2 = dynamic_cast<const sns::LocalApply* > ( _GShom::get_concret(h) ) ) {
       // test for local that can be nested
-      for (S_Homomorphism::And::parameters_t::iterator it = args.begin() ; it != args.end() ; ++it ) {
-	if ( const S_Homomorphism::LocalApply* lh1 = dynamic_cast<const S_Homomorphism::LocalApply* > ( _GShom::get_concret(*it) ) ) {
+      for (sns::And::parameters_t::iterator it = args.begin() ; it != args.end() ; ++it ) {
+	if ( const sns::LocalApply* lh1 = dynamic_cast<const sns::LocalApply* > ( _GShom::get_concret(*it) ) ) {
 	  if( lh1->target == lh2->target ) {
 	    *it = ( localApply(  lh1->h & lh2->h, lh1->target ) );
 	    return;
 	  }	
 	}
       }
-    } else if ( const S_Homomorphism::SLocalApply* lh2 = dynamic_cast<const S_Homomorphism::SLocalApply* > ( _GShom::get_concret(h) ) ) {
+    } else if ( const sns::SLocalApply* lh2 = dynamic_cast<const sns::SLocalApply* > ( _GShom::get_concret(h) ) ) {
       // test for local that can be nested
-      for (S_Homomorphism::And::parameters_t::iterator it = args.begin() ; it != args.end() ; ++it ) {
-	if ( const S_Homomorphism::SLocalApply* lh1 = dynamic_cast<const S_Homomorphism::SLocalApply* > ( _GShom::get_concret(*it) ) ) {
+      for (sns::And::parameters_t::iterator it = args.begin() ; it != args.end() ; ++it ) {
+	if ( const sns::SLocalApply* lh1 = dynamic_cast<const sns::SLocalApply* > ( _GShom::get_concret(*it) ) ) {
 	  if( lh1->target == lh2->target ) {
 	    *it = ( localApply(  lh1->h & lh2->h, lh1->target ) );
 	    return;
@@ -1834,8 +1835,8 @@ static void addCompositionParameter (const GShom & h, S_Homomorphism::And::param
     // Local nesting tests have failed, proceed to deeper commutativity tests
 
     // partition args into elements that commute with h or not
-    S_Homomorphism::And::parameters_t argsC, argsNOTC;
-    for (S_Homomorphism::And::parameters_it it = args.begin() ; it != args.end() ; ++it ) {
+    sns::And::parameters_t argsC, argsNOTC;
+    for (sns::And::parameters_it it = args.begin() ; it != args.end() ; ++it ) {
       if ( commutative (*it, h) ) {
 	argsC.push_back(*it);
       } else {
@@ -1848,9 +1849,9 @@ static void addCompositionParameter (const GShom & h, S_Homomorphism::And::param
       args.push_back ( h );
     } else if ( argsNOTC.size() == 1 ) {
       GShom h1 = *argsNOTC.begin();
-      args.push_back ( S_Homomorphism::Compose ( h1,  h ) );
+      args.push_back ( sns::Compose ( h1,  h ) );
     } else {
-      args.push_back ( S_Homomorphism::Compose ( S_Homomorphism::And (argsNOTC), h) );    
+      args.push_back ( sns::Compose ( sns::And (argsNOTC), h) );    
     }
   }
 }
@@ -1869,10 +1870,10 @@ GShom operator&(const GShom &h1,const GShom &h2){
     return Shom::null;
 
 
-//  return S_Homomorphism::Compose(h1,h2);
+//  return sns::Compose(h1,h2);
 
   // Test commutativity of h1 and h2
-  S_Homomorphism::And::parameters_t args;
+  sns::And::parameters_t args;
   addCompositionParameter (h1, args);
   addCompositionParameter (h2, args);
   if ( args.empty() ) {
@@ -1881,16 +1882,16 @@ GShom operator&(const GShom &h1,const GShom &h2){
   } else if ( args.size() == 1 ) {
     return *args.begin();
   } else {
-    return S_Homomorphism::And (args);
+    return sns::And (args);
   }
 
 }
 
 GShom operator+(const GShom &h1,const GShom &h2){
   // if (h1 < h2) 
-  //   return GShom(canonical( S_Homomorphism::Add(h1,h2)));
+  //   return GShom(canonical( sns::Add(h1,h2)));
   // else
-  //   return GShom(canonical( S_Homomorphism::Add(h2,h1)));
+  //   return GShom(canonical( sns::Add(h2,h1)));
 
   d3::set<GShom>::type s;
   s.insert(h1);
@@ -1901,23 +1902,23 @@ GShom operator+(const GShom &h1,const GShom &h2){
 }
 
 GShom operator*(const GSDD &d,const GShom &h){
-  return S_Homomorphism::Mult(h,d);
+  return sns::Mult(h,d);
 }
 
 GShom operator*(const GShom &h,const GSDD &d){
-  return S_Homomorphism::Mult(h,d);
+  return sns::Mult(h,d);
 }
 
 GShom operator^(const GSDD &d,const GShom &h){
-  return S_Homomorphism::LeftConcat(d,h);
+  return sns::LeftConcat(d,h);
 }
 
 GShom operator^(const GShom &h,const GSDD &d){
-  return S_Homomorphism::RightConcat(h,d);
+  return sns::RightConcat(h,d);
 }
 
 GShom operator-(const GShom &h,const GSDD &d){
-  return S_Homomorphism::Minus(h,d);
+  return sns::Minus(h,d);
 }
 
 /// An IF-THEN-ELSE construct.
@@ -1953,14 +1954,14 @@ GShom operator! (const GShom & cond) {
     return Shom::null;
   } else if (cond == Shom::null ) {
     return GShom::id;
-  } else if ( const S_Homomorphism::SLocalApply* lh1 = dynamic_cast<const S_Homomorphism::SLocalApply* > ( _GShom::get_concret(cond) ) )  {
+  } else if ( const sns::SLocalApply* lh1 = dynamic_cast<const sns::SLocalApply* > ( _GShom::get_concret(cond) ) )  {
     return localApply ( ! lh1->h , lh1->target ); 
-  } else if ( const S_Homomorphism::LocalApply* lh1 = dynamic_cast<const S_Homomorphism::LocalApply* > ( _GShom::get_concret(cond) ) )  {
+  } else if ( const sns::LocalApply* lh1 = dynamic_cast<const sns::LocalApply* > ( _GShom::get_concret(cond) ) )  {
     return localApply ( ! lh1->h , lh1->target ); 
-  }  else if ( const S_Homomorphism::SNotCond* lh1 = dynamic_cast<const S_Homomorphism::SNotCond* > ( _GShom::get_concret(cond) ) )  {
+  }  else if ( const sns::SNotCond* lh1 = dynamic_cast<const sns::SNotCond* > ( _GShom::get_concret(cond) ) )  {
     return  lh1->cond_ ; 
   } else {
-    return S_Homomorphism::SNotCond(cond);
+    return sns::SNotCond(cond);
   }
 }
 
@@ -1970,7 +1971,7 @@ GShom operator*(const GShom & h,const GShom & cond) {
     printCondError(cond);
     assert(false);
   }  
-  return S_Homomorphism::Inter(h,cond);
+  return sns::Inter(h,cond);
 }
 
 
