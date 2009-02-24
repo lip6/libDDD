@@ -1074,10 +1074,11 @@ namespace S_Homomorphism {
 		  // Check if : other = sel & F
 		  if (const Compose * comp = dynamic_cast<const Compose*> ( get_concret(other) ) ) {
 		    // hit : we have a composition
+		    std::cerr << "Hit a composition! "; comp->print(std::cerr) ; std::cerr << std::endl;
 		    if ( comp->left.is_selector() )
 		      if (const Add * subadd = dynamic_cast<const Add*> ( get_concret(comp->right) ) ) {
 			// This is it !! apply rewriting strategy
-			std::cerr << "Hit ! "; comp->print(std::cerr) ; std::cerr << std::endl;
+			std::cerr << "Hit matches second criterion sel & Add ! " << std::endl;
 			GShom::range_t selr = comp->left.get_range();
 			if (! selr.empty() ) {
 			  // selector concerns a subset of variables, probably we can commute with at least some of the terms in subadd
@@ -1093,7 +1094,12 @@ namespace S_Homomorphism {
 			  if (! doC.empty() ) {
 			    // Great ! successful application of the rule is possible
 			    std::cerr << "Hit Full !" << std::endl;
-			    
+			    d3::set<GShom>::type finalU;
+			    finalU.insert(GShom::id);
+			    finalU.insert( fixpoint( (comp->left &  GShom::add(notC))  + GShom::id) );
+			    doC.insert(GShom::id);
+			    finalU.insert( comp->left & fixpoint ( GShom::add(doC) ) );
+			    return fixpoint( GShom::add(finalU) ) (d);
 			  }
 
 			}
