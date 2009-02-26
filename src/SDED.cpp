@@ -288,20 +288,6 @@ GSDD _SDED_Add::eval() const{
   } // end foreach operand
 
   GSDD::Valuation value;
-  std::map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
-  if (nullmap != res.end()) {
-    delete nullmap->second;
-    res.erase(nullmap);
-  }
-
-  for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end(); )
-    if (it->second->empty()) {
-      std::map<GSDD,DataSet *>::iterator tmp = it;
-      it ++;
-      delete tmp->second;
-      res.erase(tmp);
-    } else
-      it++;
 
 #ifdef EVDDD
   // foreach value already in result : e-b->B
@@ -328,12 +314,13 @@ GSDD _SDED_Add::eval() const{
 #endif
 
   value.reserve(res.size());  
-  for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();++it)
+  for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();++it) {
+    assert ( ! it->second->empty() && it->first != GSDD::null);
     if (! it->second->empty())
       value.push_back(std::make_pair(it->second,it->first));
     else
       delete  it->second;
-
+  }
 
 //   int id=0;
 //   std::cerr << "operating over parameters : " <<std::endl ;
