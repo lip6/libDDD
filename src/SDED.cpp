@@ -228,35 +228,46 @@ GSDD _SDED_Add::eval() const{
 	if (ainterb->empty()) {
 	  delete ainterb;
 	  resit++;
+	  // skip to next arc of res
 	  continue;
 	}
-	// update result : res[cur] -= ainterb :  e- b \ a -> B
-	tofree = resit->second;
-	resit->second = resit->second->set_minus(*ainterb);
-	delete tofree;
+	
+	// non empty intersection + non equality
 	// add intersection to sums : e- b * a -> A+B
 	sums.push_back( std::make_pair(resit->first + arc->second , ainterb) );
-	// update current iteration value
-	tofree = a ;
-	a = a->set_minus(*ainterb);
-	delete tofree;
-	if (a->empty()) {
-	  // we can stop
-	  break;
-	}
-	if (resit->second->empty()) {
+	
+	// Test containment case
+	if ( b->set_equal(*ainterb) ) {
+	  // a contains b (STRICTLY, equality tested above)
+	  // remove the b mapping from the test set
 	  std::map<GSDD,DataSet *>::iterator jt = resit;
 	  resit++;
 	  delete jt->second;
-	  res.erase(jt);
+	  res.erase(jt);	  
 	} else {
+	  // update result : res[cur] -= ainterb :  e- b \ a -> B
+	  tofree = resit->second;
+	  resit->second = resit->second->set_minus(*ainterb);
+	  delete tofree;
 	  resit++;
 	}
-	
+
+	// update a (sieve b values) 
+	tofree = a ;
+	a = a->set_minus(*ainterb);
+	delete tofree;
+
+	// test terminal containment case
+	if (a->empty()) {
+	  // we can stop, a is fully treated, break to next arc
+	  break;
+	}      
+
       } // end foreach resit in result
       
       // if there is a remainder, store it
       if (! a->empty()) {
+	// traversed sieve without emptying a
 	rems.push_back(std::make_pair(arc->second,a));
       } else 
 	delete a;
