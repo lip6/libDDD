@@ -182,8 +182,10 @@ bool _SDED_Add::operator==(const _SDED &e)const{
 GSDD _SDED_Add::eval() const{
   assert(parameters.size() > 1);
   int variable=parameters.begin()->variable();
-  // To compute the result 
-  std::map<GSDD,DataSet *> res;
+
+  typedef std::pair <d3::set<GSDD>::type,DataSet *> sdd_map_t;
+  typedef std::vector< sdd_map_t > map_set_t;
+  typedef map_set_t::iterator map_set_it;
 
   // for memory collection
   DataSet * tofree;
@@ -191,29 +193,35 @@ GSDD _SDED_Add::eval() const{
   // The current operand
   d3::set<GSDD>::type::const_iterator opit =  parameters.begin();
 
+  map_set_t res;
+
   // Initialize with copy of first operand
-  for (GSDD::Valuation::const_iterator it = opit->begin();it != opit->end() ; ++it) 
-    res[it->second]=it->first->newcopy();
+  for (GSDD::Valuation::const_iterator it = opit->begin();it != opit->end() ; ++it) {
+    res.push_back(sdd_map_t());
+    res.rbegin()->second = it->first->newcopy();
+    res.rbegin()->first.insert(it->second);
+  }
 
   // main loop
   // Foreach  opit in (operands)
   for (opit++ ; opit != parameters.end() ; ++opit) {
     // To store non empty intersection results and remainders;
-    std::vector< std::pair <GSDD,DataSet *> > sums;
-    std::vector< std::pair <GSDD,DataSet *> > rems;
+    map_set_t sums;
+
     
     // Foreach arc in current operand  : e-a->A
     for (GSDD::Valuation::const_iterator arc = opit->begin() ; arc != opit->end() ; arc++ ) {      
       DataSet * a = arc->first->newcopy();
       // foreach value already in result : e-b->B
-      for (std::map<GSDD,DataSet *>::iterator resit = res.begin() ; resit != res.end() ;  ) {
+      for (map_set_it resit = res.begin() ; resit != res.end() ;  ) {
 	DataSet *b = resit->second;
 	 // test for equality first, fastest test
 	if ( a->set_equal(*b) ) {
 	  // will be reinserted in the result for testing against the next operand of union
-	  sums.push_back( std::make_pair(resit->first + arc->second , a) );
+	  sums.push_back( sdd_map_t( resit->first , a) );
+	  sums.rbegin()->first.insert(arc->second);
 	  // no more need to test against this element
-	  std::map<GSDD,DataSet *>::iterator jt = resit;
+	  map_set_it jt = resit;
 	  resit++;
 	  delete jt->second;
 	  res.erase(jt);
@@ -234,13 +242,14 @@ GSDD _SDED_Add::eval() const{
 	
 	// non empty intersection + non equality
 	// add intersection to sums : e- b * a -> A+B
-	sums.push_back( std::make_pair(resit->first + arc->second , ainterb) );
+	sums.push_back( sdd_map_t( resit->first,  ainterb) );
+	sums.rbegin()->first.insert(arc->second);
 	
 	// Test containment case
 	if ( b->set_equal(*ainterb) ) {
 	  // a contains b (STRICTLY, equality tested above)
 	  // remove the b mapping from the test set
-	  std::map<GSDD,DataSet *>::iterator jt = resit;
+	  map_set_it jt = resit;
 	  resit++;
 	  delete jt->second;
 	  res.erase(jt);	  
@@ -268,24 +277,27 @@ GSDD _SDED_Add::eval() const{
       // if there is a remainder, store it
       if (! a->empty()) {
 	// traversed sieve without emptying a
-	rems.push_back(std::make_pair(arc->second,a));
+	sums.push_back( std::make_pair( std::set<GSDD>(), a) );
+	sums.rbegin()->first.insert(arc->second);
       } else 
 	delete a;
     } // end foreach arc in operand
-    
-    // Now process remainders and sums
-    for (std::vector< std::pair <GSDD,DataSet *> >::iterator it=sums.begin(); it != sums.end(); it++ ) {
-      square_union(res,it->first,it->second);
-      delete it->second;
-    }
-    for (std::vector< std::pair <GSDD,DataSet *> >::iterator it=rems.begin(); it != rems.end(); it++ ) {
-      square_union(res,it->first,it->second);
-      delete it->second;
-    }
+
+    res.insert(res.end(),sums.begin(),sums.end());
 
 //     if ( ! opit->isSon() && ! opit->refCounter() )
 //       opit->clearNode();
   } // end foreach operand
+
+  // To compute the result of square union
+  std::map<GSDD,DataSet *> res2;
+
+  // Now process remainders and sums
+  for (map_set_it it=res.begin(); it != res.end(); it++ ) {
+      square_union(res2,SDED::add(it->first),it->second);
+      delete it->second;
+  }
+
 
   GSDD::Valuation value;
 
@@ -313,8 +325,8 @@ GSDD _SDED_Add::eval() const{
   }
 #endif
 
-  value.reserve(res.size());  
-  for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();++it) {
+  value.reserve(res2.size());  
+  for (std::map<GSDD,DataSet *>::iterator it =res2.begin() ;it!= res2.end();++it) {
     assert ( ! it->second->empty() && it->first != GSDD::null);
       value.push_back(std::make_pair(it->second,it->first));
   }
