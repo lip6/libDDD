@@ -423,6 +423,12 @@ GSDD _SDED_Mult::eval() const{
   for (GSDD::Valuation::const_iterator it = parameter1.begin();it != parameter1.end() ; ++it) {
     // for each son of p2 :   v - b -> s2 
     for (GSDD::Valuation::const_iterator jt = parameter2.begin();jt != parameter2.end() ; ++jt) {
+      // test for equality first, fastest test
+      if ( it->first->set_equal(*jt->first) ) {
+	square_union(res,it->second * jt->second, it->first);
+	// break out of inner loop
+	break;
+      }
       // compute a*b
       DataSet *ainterb = it->first->set_intersect(*jt->first);
       // if a*b = 0, skip
