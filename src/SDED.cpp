@@ -438,6 +438,14 @@ GSDD _SDED_Mult::eval() const{
       }
       s1inters2 = it->second * jt->second;
       square_union(res,s1inters2,ainterb);
+
+      // b contains a
+      if ( it->first->set_equal(*ainterb) ) {
+	delete ainterb;
+	// we can stop exploring for this operand
+	break;
+      }
+
       delete ainterb;
     }
   }
