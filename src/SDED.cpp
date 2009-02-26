@@ -198,16 +198,30 @@ GSDD _SDED_Add::eval() const{
   // main loop
   // Foreach  opit in (operands)
   for (opit++ ; opit != parameters.end() ; ++opit) {
-    // To store non empty intersection results;
+    // To store non empty intersection results and remainders;
     std::vector< std::pair <GSDD,DataSet *> > sums;
-    // To store the remainders (empty intersection with all previous elements)
     std::vector< std::pair <GSDD,DataSet *> > rems;
     
     // Foreach arc in current operand  : e-a->A
-    for (GSDD::Valuation::const_iterator arc = opit->begin() ; arc != opit->end() ; arc++ ) {
+    for (GSDD::Valuation::const_iterator arc = opit->begin() ; arc != opit->end() ; arc++ ) {      
       DataSet * a = arc->first->newcopy();
       // foreach value already in result : e-b->B
       for (std::map<GSDD,DataSet *>::iterator resit = res.begin() ; resit != res.end() ;  ) {
+	DataSet *b = resit->second;
+	 // test for equality first, fastest test
+	if ( a->set_equal(*b) ) {
+	  // will be reinserted in the result for testing against the next operand of union
+	  sums.push_back( std::make_pair(resit->first + arc->second , a) );
+	  // no more need to test against this element
+	  std::map<GSDD,DataSet *>::iterator jt = resit;
+	  resit++;
+	  delete jt->second;
+	  res.erase(jt);
+	  //  break to next arc of this operand, a has been emptied
+	  a = a->empty_set();
+	  break;
+	}
+
 	// compute a*b
 	DataSet *ainterb = arc->first->set_intersect(*resit->second);
 	// if a*b = 0, skip
