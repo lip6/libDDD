@@ -532,21 +532,21 @@ namespace sns {
 	}
 	return res;
       } else {
+	GSDD res = d;
 	parameters_t F;
-	GShom G = GShom::id ;
 	int var = d.variable() ;
 	for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
 	  if ( gi->skip_variable(var) ) {
 	    F.push_back(*gi);
 	  } else {
-	    G = *gi & G;
+	    res = (*gi) (res);
 	  }
 	}
 	GShom nextSel = GShom::id ;
 	if ( ! F.empty() ) 
 	  nextSel = And (F);
 	
-	return G (  nextSel (d) ) ;	
+	return  nextSel (res)  ;	
       }
     }
  
