@@ -54,7 +54,6 @@ namespace d3 { namespace util {
   };
 }}
 
-static UniqueTable<_GShom> canonical;
 /*************************************************************************/
 /*                         Class _GShom                                   */
 /*************************************************************************/
@@ -63,6 +62,8 @@ typedef std::map<GSDD,DataSet*> GSDD_DataSet_map;
 
 // Shom NameSpace
 namespace sns {
+
+  extern UniqueTable<_GShom> canonical;
 
   typedef Cache<GShom,GSDD> ShomCache;
 
@@ -1383,6 +1384,7 @@ void StrongShom::print (std::ostream & os) const {
 /*************************************************************************/
 /*                         Class GShom                                    */
 /*************************************************************************/
+using sns::canonical;
 
 // constant Id
 const GShom GShom::id(sns::Identity(1));

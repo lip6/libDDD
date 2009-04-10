@@ -161,6 +161,9 @@ static size_t Max_SDD=0;
 #endif
 
 static UniqueTable<_GSDD> canonical;
+namespace sns{
+  UniqueTable<_GShom> canonical;
+}
 
 namespace SDDutil {
   
