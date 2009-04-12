@@ -99,6 +99,9 @@ namespace sns {
     }
   };
 
+  const _GShom * getIdentity() { return canonical(Identity(1)); }
+
+
   /************************** Constant */
   class Constant:public _GShom{
   private:
@@ -1386,8 +1389,6 @@ void StrongShom::print (std::ostream & os) const {
 /*************************************************************************/
 using sns::canonical;
 
-// constant Id
-const GShom GShom::id(sns::Identity(1));
 // Note: Shom::null is defined in SDD.cpp for static initialization stupid C++ freaking semantics.
 
 /* Constructor */
