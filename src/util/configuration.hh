@@ -7,6 +7,7 @@
 #endif
 #endif
 
+#include <malloc.h>
 #include <ext/malloc_allocator.h>
 
 #include "util/hash_support.hh"
