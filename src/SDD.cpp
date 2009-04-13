@@ -211,6 +211,9 @@ void _GSDD::mark()const{
   if(!marking){
     marking=true;
     for(GSDD::Valuation::const_iterator vi=valuation.begin();vi!=valuation.end();++vi){
+      if (const GSDD * arc = dynamic_cast<const GSDD*> ( vi->first ) ) {
+	arc->mark();
+      }
       vi->second.mark();
     }
   }
@@ -367,7 +370,7 @@ private:
   void sddsize(const DataSet* g)
 {
     // Used to work for referenced DDD
-    if (typeid(*g) == typeid(SDD) ) {
+    if (typeid(*g) == typeid(GSDD) ) {
       sddsize( GSDD ((SDD &) *g) );
     } else if (typeid(*g) == typeid(DDD)) {
       sddsize( GDDD ((DDD &) *g) );
@@ -537,7 +540,6 @@ void GSDD::garbage(){
 
 SDD::SDD(const SDD &g)
     : GSDD(g.concret)
-    , DataSet()
 {
     (concret->refCounter)++;
 }
@@ -601,31 +603,31 @@ GSDD GSDD::normalizeDistance(int n) const {
 
 // DataSet interface
 
-DataSet *SDD::set_intersect (const DataSet & b) const {
-  return new SDD((*this) * (SDD&)b );
+DataSet *GSDD::set_intersect (const DataSet & b) const {
+  return new GSDD((*this) * (GSDD&)b );
 }
-DataSet *SDD::set_union (const DataSet & b)  const {
-  return new SDD(*this + (SDD&)b);
+DataSet *GSDD::set_union (const DataSet & b)  const {
+  return new GSDD(*this + (GSDD&)b);
 }
-DataSet *SDD::set_minus (const DataSet & b) const {
-  return new SDD(*this - (SDD&)b);
+DataSet *GSDD::set_minus (const DataSet & b) const {
+  return new GSDD(*this - (GSDD&)b);
 }
 
-bool SDD::empty() const {
+bool GSDD::empty() const {
   return *this == GSDD::null;
 }
 
-DataSet * SDD::empty_set() const {
-  return new SDD();
+DataSet * GSDD::empty_set() const {
+  return new GSDD();
 }
 
-bool SDD::set_equal(const DataSet & b) const {
-  return *this == (SDD&) b;
+bool GSDD::set_equal(const DataSet & b) const {
+  return *this == (GSDD&) b;
 }
 
-long double SDD::set_size() const { return nbStates(); }
+long double GSDD::set_size() const { return nbStates(); }
 
-size_t SDD::set_hash() const {
+size_t GSDD::set_hash() const {
   return size_t (concret);
 }
 
