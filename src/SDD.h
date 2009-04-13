@@ -48,7 +48,7 @@ class _GSDD;
 /// Note that this class is in fact a kind of smart pointer : operations are delegated on "concret"
 /// the true implementation class (of private hidden type _GSDD) that contains the data and has a single 
 /// memory occurrence thanks to the unicity table.
-class GSDD {
+class GSDD :public DataSet {
 private:
   /// A textual output. 
   /// Don't use it with large number of paths as each element is printed on a different line
@@ -218,6 +218,37 @@ public:
 
   //@}
 
+  /// \name DataSet implementation interface 
+  /// This is the implementation of the DataSet class interface used in SDD context.
+  /// These functions allow to reference SDD from SDD arcs.
+  /// \e IMPORTANT Remember to delete returned values after use. 
+  ///
+  ///  Note these functions are not resistant to incompatible DataSet types. 
+  ///  When these functions have a parameter "b", it should be a reference to a SDD from proper behavior.
+  //@{  
+  // DataSet interface
+  /// Return a new copy of a SDD. 
+  DataSet *newcopy () const { return new GSDD(*this); }
+  /// Compute intersection of two SDD. 
+  DataSet *set_intersect (const DataSet & b) const ;
+  /// Compute union of two SDD. 
+  DataSet *set_union (const DataSet & b)  const;
+  /// Compute set difference of two SDD. 
+  DataSet *set_minus (const DataSet & b) const;
+  /// Return true if this is the empty set.
+  bool empty() const;
+  /// Returns a pointer to  GSDD::null.
+  DataSet *empty_set() const;
+  /// Compares to DataSet for equality.
+  bool set_equal(const DataSet & b) const;
+  /// Compares to DataSet for equality.
+  long double set_size() const;
+  /// Returns a hash key for the SDD.
+  size_t set_hash() const;
+  /// Textual (human readable) output of a SDD.
+  void set_print (std::ostream &os) const { os << *this; }
+
+  //@}
 
 };
 
@@ -245,7 +276,7 @@ GSDD operator-(const GSDD&,const GSDD&); // difference
 /// manipulate SDD, not GSDD.
 /// Reference counting is enabled for SDD, so they will not be destroyed if they 
 /// are still in use upon garbage collection.
-class SDD:public GSDD,public DataSet {
+class SDD:public GSDD {
 public:
   /* Constructeur */
   /// Copy constructor. Constructs a copy, actual data (concret) is not copied.
@@ -280,35 +311,6 @@ public:
   SDD &operator=(const SDD&);
  //@}
 
-  /// \name DataSet implementation interface 
-  /// This is the implementation of the DataSet class interface used in SDD context.
-  /// These functions allow to reference SDD from SDD arcs.
-  /// \e IMPORTANT Remember to delete returned values after use. 
-  ///
-  ///  Note these functions are not resistant to incompatible DataSet types. 
-  ///  When these functions have a parameter "b", it should be a reference to a SDD from proper behavior.
-  //@{  
-  // DataSet interface
-  /// Return a new copy of a SDD. 
-  virtual DataSet *newcopy () const { return new SDD(*this); }
-  /// Compute intersection of two SDD. 
-  virtual DataSet *set_intersect (const DataSet & b) const ;
-  /// Compute union of two SDD. 
-  virtual DataSet *set_union (const DataSet & b)  const;
-  /// Compute set difference of two SDD. 
-  virtual DataSet *set_minus (const DataSet & b) const;
-  /// Return true if this is the empty set.
-  virtual bool empty() const;
-  /// Returns a pointer to  GSDD::null.
-  virtual DataSet *empty_set() const;
-  /// Compares to DataSet for equality.
-  virtual bool set_equal(const DataSet & b) const;
-  /// Compares to DataSet for equality.
-  virtual long double set_size() const;
-  /// Returns a hash key for the SDD.
-  virtual size_t set_hash() const;
-  /// Textual (human readable) output of a SDD.
-  virtual void set_print (std::ostream &os) const { os << *this; }
 #ifdef EVDDD
   virtual DataSet *normalizeDistance(int n) const { return new SDD(GSDD::normalizeDistance(n)); }
   virtual int getMinDistance() const { return GSDD::getMinDistance();}
