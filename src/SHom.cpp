@@ -360,8 +360,8 @@ namespace sns {
 	   it != d.end();
 	   ++it)
 	{
-	  assert( typeid(*it->first) == typeid(const SDD&) );
-	  SDD v2 = h((const SDD &)*it->first);
+	  assert( typeid(*it->first) == typeid(const GSDD&) );
+	  GSDD v2 = h((const GSDD &)*it->first);
 	  if( ! (v2 == GSDD::null) )
 	    {
 	      sum.insert(GSDD(d.variable(), v2, it->second));
@@ -1953,6 +1953,7 @@ GShom operator! (const GShom & cond) {
     std::cerr << "Creating a complement condition with operator! :  ! cond" << std::endl;
     printCondError(cond);
     assert(false);
+    return Shom::null;
   } else if (cond == GShom::id) {
     return Shom::null;
   } else if (cond == Shom::null ) {
