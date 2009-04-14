@@ -589,16 +589,15 @@ namespace sns {
     typedef
     struct
     {
-      GShom F; 
+      GShom F;
       d3::set<GShom>::type G;
       const _GShom* L;
       bool has_local;
-		
     } partition;
 
     typedef hash_map<int,partition >::type partition_cache_type;
 
-  public :
+  public:
     typedef d3::set<GShom>::type parameters_t ;
     typedef parameters_t::const_iterator parameters_it;
     // for direct manipulation in Fixpoint eval
@@ -613,15 +612,8 @@ namespace sns {
   public:
         
 
-    Add(const d3::set<GShom>::type& p, bool have_id)
-      :
-      parameters(p),
-      have_id(have_id)
-    {
- 	
-    }
-
-
+    Add(const d3::set<GShom>::type& p, bool have_id): parameters(p), have_id(have_id)
+    {}
 
     bool
     get_have_id() const
@@ -643,7 +635,6 @@ namespace sns {
       for(d3::set<GShom>::type::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
 	res^=gi->hash();
       return res;
-
     }
 
     _GShom * clone () const {  return new Add(*this); }
@@ -987,18 +978,18 @@ namespace sns {
 
   private:
     GShom arg;
-
+    bool can_garbage;
   public:
 
     /* Constructor */
-    Fixpoint(const GShom &a,int ref=0):_GShom(ref),arg(a){}
+    Fixpoint(const GShom &a,int ref=0,bool can_garbage=false):_GShom(ref),arg(a),can_garbage(can_garbage){}
     /* Compare */
 
     bool operator==(const _GShom &h) const{
       return arg==((Fixpoint*)&h )->arg ;
     }
 
-    size_t hash() const{
+    size_t hash() const {
       return 17*arg.hash();
     }
     _GShom * clone () const {  return new Fixpoint(*this); }
@@ -1097,6 +1088,23 @@ namespace sns {
 			  // chain application of Shom of this level
 			  // d2 =  ( (L_part &  (*G_it))(d2)) + d2;
 			}
+		      if (can_garbage) {
+			std::cerr << "could trigger !!" << std::endl ;
+			if (MemoryManager::should_garbage()) {
+			  std::cerr << "triggered !!" << std::endl ;
+			  // ensure d1 and d2 are preserved
+			  SDD dd1 = d1;
+			  SDD dd2 = d2;
+			  // ensure current operands are preserved
+			  F_part.mark();
+			  L_part.mark();
+			  for( 	d3::set<GShom>::type::const_iterator G_it = partition.G.begin();
+				G_it != partition.G.end();
+				++G_it) 
+			    G_it->mark();
+			  MemoryManager::garbage();
+			}
+		      }
 		    }
 		  while (d1 != d2);
 		  return d1;
@@ -1107,6 +1115,18 @@ namespace sns {
 	    {
 	      d1 = d2;
 	      d2 = arg(d2);
+	      if (can_garbage) {
+		std::cerr << "could trigger 2!!" << std::endl ;
+		if (MemoryManager::should_garbage()) {
+		  std::cerr << "triggered !!" << std::endl ;
+		  // ensure d1 and d2 are preserved
+		  SDD dd1 = d1;
+		  SDD dd2 = d2;
+		  
+		  MemoryManager::garbage();
+		}
+	      }
+
 	    }
 	  while (d1 != d2);
 
@@ -1578,7 +1598,7 @@ static bool notInRange (const GShom::range_t & h1r, const GShom & h2) {
 
 
 /* Operations */
-GShom fixpoint (const GShom &h) {
+GShom fixpoint (const GShom &h, bool is_top_level) {
   if( typeid( *_GShom::get_concret(h) ) == typeid(sns::Fixpoint)
       || h == GShom::id  || h.is_selector() )
     return h;
@@ -1587,7 +1607,7 @@ GShom fixpoint (const GShom &h) {
   // is it the fixpoint of an union ?
   if (const sns::Add * add = dynamic_cast<const sns::Add*> ( _GShom::get_concret(h) ) )
     {
-      // Check if we have (sel & F + id ) where sel is a selector and F is a sum
+      // Check if we have (sel & F + id) where sel is a selector and F is a sum
       if (add->parameters.size() == 2) {
 	GShom other ;
 	bool haveId = false;
@@ -1631,19 +1651,17 @@ GShom fixpoint (const GShom &h) {
 		    finalU.insert( comp->left & fixpoint ( GShom::add(doC) ) );
 		    return sns::Fixpoint( GShom::add(finalU) ) ;
 		  }
-		  
 		}
-	      }		    
+	      }
 	  }
 	}
       }
     }
   
-  return sns::Fixpoint(h);
+  return sns::Fixpoint(h,0, is_top_level);
 }
 
 GShom
-// localApply(int target,const GHom & h)
 localApply(const GHom & h, int target)
 {
   if( h == GHom::id ) {
@@ -1655,8 +1673,8 @@ localApply(const GHom & h, int target)
   return sns::LocalApply(h,target);
 }
 
+
 GShom
-// localApply(int target,const GHom & h)
 localApply(const GShom & h, int target)
 {
   if( h == GShom::id ||  h == Shom::null )
