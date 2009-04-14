@@ -58,6 +58,13 @@ public:
   /// \todo : track usage and check whether this is useful, SDD version undefined.  
   static void mark(const GHom &h){h.mark();};
 
+  /// tester for memory management routine triggering in a top level fixpoint
+    static bool should_garbage() {
+      // trigger at rougly 5 million objects =1 Gig RAM
+      //return nbDED() + nbSDED() + nbShom() + nbSDD() > 3000000;
+      return true;
+    }
+
   /// Garbage collection function. 
   /// Call this to reclaim intermediate nodes, unused operations and related cache.
   /// Note that this function is quite costly, and it totally destroys the cache
