@@ -66,7 +66,7 @@ private:
   /// \name Friendly hard coded composition operators.
   /// Open full access for library implemented hard coded operations.    
   //@{
-  friend GShom fixpoint(const GShom &);
+  friend GShom fixpoint(const GShom &, bool is_top_level);
   friend GShom localApply(const GHom &,int target);
   friend GShom localApply(const GShom &,int target);
   friend GShom add(const d3::set<GShom>::type &);
@@ -204,7 +204,7 @@ public:
 ///
 /// fixpoint ( h + GShom::id )
 ///
-GShom fixpoint(const GShom &);
+GShom fixpoint(const GShom &, bool is_top_level=false);
 /// Apply a homomorphism on a target variable.
 /// This ensures that the operation is local to this variable, and is used to implement auto-saturation.
  GShom localApply(const GHom &,int target);
