@@ -46,7 +46,7 @@ size_t getResidentMemory() {
     return 0;
   }
 
-  fscanf(fd,"%s\n%ld",cmd,&m);
+  fscanf(fd,"%s\n%zu",cmd,&m);
   unlink(tmpff);    
   return m;
  }
