@@ -13,6 +13,7 @@ template
 class Cache
 {
 private:
+  mutable size_t peak_;
 
     struct result_type
     {
@@ -39,11 +40,21 @@ private:
     hash_map cache_;
     
 public:
+  Cache () : peak_ (0) {};
     
   /** clear the cache, discarding all values. */
   void clear (bool keepstats = false) {
+    peak();
     cache_.clear();
   }
+
+  size_t peak () const {
+    size_t s = size();
+    if ( peak_ < s )
+      peak_ = s;
+    return peak_;
+  }
+
 
   size_t size () const {
     return cache_.size();
