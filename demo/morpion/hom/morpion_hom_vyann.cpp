@@ -180,7 +180,7 @@ class _Play:public StrongHom
     bool
         skip_variable(int vr) const
     {
-      return vr != cell && vr!=STATE_SYSTEM_CELL;
+      return vr != cell && size_t(vr)!=STATE_SYSTEM_CELL;
     }
 
     /**
@@ -203,7 +203,7 @@ class _Play:public StrongHom
     GHom
         phi(int vr, int vl) const
     {
-      if(vr!=STATE_SYSTEM_CELL)
+      if(size_t(vr)!=STATE_SYSTEM_CELL)
       {
         /* Configuration 1 : We can take a cell only if nobody get it*/
         if (vl == EMPTY)
@@ -321,7 +321,7 @@ class _NoteWinner:public StrongHom
     bool
         skip_variable(int vr) const
     {
-      return vr!=STATE_SYSTEM_CELL;
+      return size_t(vr) !=STATE_SYSTEM_CELL;
     }
 
     /**
