@@ -97,6 +97,25 @@ public:
 
     _GSDD * clone () const { return new _GSDD(*this); }
 
+  bool operator<(const _GSDD& g) const{
+    if ( variable !=g.variable)
+      return variable < g.variable;
+    int n1 = valuation.size();
+    int n2 = g.valuation.size();
+    if (n1 < n2) return true;
+    if (n1 > n2) return false;
+    GSDD::const_iterator jt = g.valuation.begin();
+    for (GSDD::const_iterator it= valuation.begin() ; it != valuation.end() ; ++it, ++jt )
+      {
+	if (*it == *jt)
+	  continue;
+	if (*it < *jt)
+	  return true;
+	return false;
+      }
+    return false;
+  }
+
   /* Compare */
   bool operator==(const _GSDD& g) const 
   { 
@@ -315,6 +334,11 @@ GSDD::GSDD(int var,const SDD &val,const GSDD &d):concret(null.concret){ //var-va
 int GSDD::variable() const{
   return concret->variable;
 }
+
+bool GSDD::operator<(const GSDD& g) const {  
+      return *concret < * g.concret;
+};
+
 
 size_t GSDD::nbsons () const { 
   return concret->valuation.size();
