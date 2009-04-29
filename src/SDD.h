@@ -158,7 +158,7 @@ public:
   /// This ordering is necessary for hash and map storage of GDDD.
   /// \param g the node to compare to
   /// \return true if argument g is greater than "this" node.
-  bool operator<(const GSDD& g) const{return concret<g.concret;};
+    bool operator<(const GSDD& g) const ;
   
   //@}
 
