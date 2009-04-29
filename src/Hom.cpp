@@ -374,6 +374,7 @@ public:
   void mark() const{
     for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
       gi->mark();
+    partition_cache.clear();
   }
 
  void print (std::ostream & os) const {
