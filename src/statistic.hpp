@@ -50,7 +50,7 @@ class Statistic {
 	double nbShom;
   /// DDD cache
 	double ddd_cache;
-  /// SDD cache
+  /// SDD cache peak
 	double sdd_cache;
   /// Mode : include SDD or not
 	bool isPureDDD;
