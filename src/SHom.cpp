@@ -1089,9 +1089,9 @@ namespace sns {
 			  // d2 =  ( (L_part &  (*G_it))(d2)) + d2;
 			}
 		      if (can_garbage) {
-			std::cerr << "could trigger !!" << std::endl ;
+//			std::cerr << "could trigger !!" << std::endl ;
 			if (MemoryManager::should_garbage()) {
-			  std::cerr << "triggered !!" << std::endl ;
+//			  std::cerr << "triggered !!" << std::endl ;
 			  // ensure d1 and d2 are preserved
 			  SDD dd1 = d1;
 			  SDD dd2 = d2;
@@ -1116,9 +1116,9 @@ namespace sns {
 	      d1 = d2;
 	      d2 = arg(d2);
 	      if (can_garbage) {
-		std::cerr << "could trigger 2!!" << std::endl ;
+//		std::cerr << "could trigger 2!!" << std::endl ;
 		if (MemoryManager::should_garbage()) {
-		  std::cerr << "triggered !!" << std::endl ;
+//		  std::cerr << "triggered !!" << std::endl ;
 		  // ensure d1 and d2 are preserved
 		  SDD dd1 = d1;
 		  SDD dd2 = d2;
@@ -1473,7 +1473,7 @@ unsigned int GShom::statistics(){
 }
 
 size_t GShom::cache_size() {
-  return sns::cache.size();
+  return sns::cache.peak();
 }
 
 // Todo
@@ -1489,7 +1489,7 @@ static hash_map<d3::set<GShom>::type,GShom>::type addCache;
 void GShom::garbage(){
   addCache.clear();
   sns::cache.clear();
-
+  
   // mark phase
   for(UniqueTable<_GShom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
     if((*di)->refCounter!=0){
