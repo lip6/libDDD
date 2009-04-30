@@ -502,6 +502,11 @@ DataSet * DDD::empty_set() const {
 bool DDD::set_equal(const DataSet & b) const {
   return *this == (DDD &) b;
 }
+
+bool DDD::set_less_than(const DataSet & b) const {
+  return *this < (DDD&) b;
+}
+
   
 long double DDD::set_size() const { return nbStates(); }
 

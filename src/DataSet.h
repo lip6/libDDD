@@ -59,6 +59,8 @@ class DataSet
   virtual DataSet *empty_set() const = 0;
   /// Compares two sets for equality.
   virtual bool set_equal(const DataSet & b) const =0;
+  /// Compares two sets with a total order.
+  virtual bool set_less_than (const DataSet & b) const =0;
   /// \return the size (number of elements) in a set
   virtual long double set_size() const = 0;
   /// returns a hash function, used in the SDD hash function computation
