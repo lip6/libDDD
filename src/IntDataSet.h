@@ -113,6 +113,10 @@ public :
   bool set_equal(const DataSet & b) const {
     return data == ((const IntDataSet &) b).data;
   }
+  /// Compares two sets for equality.
+  bool set_less_than (const DataSet & b) const {
+    return data < ((const IntDataSet &) b).data;
+  }
   /// \return the size (number of elements) in a set
   long double set_size() const {
     return data->size();

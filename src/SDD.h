@@ -241,6 +241,8 @@ public:
   DataSet *empty_set() const;
   /// Compares to DataSet for equality.
   bool set_equal(const DataSet & b) const;
+  /// Compares two sets with a total order.
+  bool set_less_than (const DataSet & b) const ;
   /// Compares to DataSet for equality.
   long double set_size() const;
   /// Returns a hash key for the SDD.
