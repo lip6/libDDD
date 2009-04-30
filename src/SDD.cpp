@@ -53,6 +53,10 @@
 /*                             class _GSDD                                     */
 /******************************************************************************/
 
+static bool valsorter (const GSDD::Valuation::value_type &a, const GSDD::Valuation::value_type &b) {
+  return a.first->set_less_than (*b.first);
+}
+
 class _GSDD{
 public:
   /* Attributs*/
@@ -74,7 +78,9 @@ public:
 #ifdef HEIGHTSDD
 			   height(-1),
 #endif 
-			   marking(false){}; 
+			   marking(false){
+    sort (valuation.begin(), valuation.end(), valsorter);
+  }; 
 
   virtual ~_GSDD () {
     for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; ++it) {
@@ -289,7 +295,10 @@ GSDD::GSDD(const _GSDD *_g):concret(_g){
 GSDD::GSDD(const _GSDD &_g):concret(canonical(_g)){ 
 }
 
+
+
 GSDD::GSDD(int variable,Valuation value){
+  
   concret= value.size() != 0 ?  canonical(_GSDD(variable,value)) : null.concret;
 }
 
@@ -647,6 +656,10 @@ DataSet * GSDD::empty_set() const {
 
 bool GSDD::set_equal(const DataSet & b) const {
   return *this == (GSDD&) b;
+}
+
+bool GSDD::set_less_than(const DataSet & b) const {
+  return *this < (GSDD&) b;
 }
 
 long double GSDD::set_size() const { return nbStates(); }
