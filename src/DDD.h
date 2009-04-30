@@ -295,28 +295,30 @@ public:
   //@{  
   
   /// Return a new copy of a DDD. 
-  virtual DataSet *newcopy () const { return new DDD(*this); }
+   DataSet *newcopy () const { return new DDD(*this); }
   /// Compute intersection of two DDD. 
-  virtual DataSet *set_intersect (const DataSet & b) const ;
+   DataSet *set_intersect (const DataSet & b) const ;
   /// Compute union of two DDD. 
-  virtual DataSet *set_union (const DataSet & b)  const;
+   DataSet *set_union (const DataSet & b)  const;
   /// Compute set difference of two DDD. 
-  virtual DataSet *set_minus (const DataSet & b) const;
+   DataSet *set_minus (const DataSet & b) const;
   /// Return true if this is the empty set.
-  virtual bool empty() const;
+   bool empty() const;
   /// Returns a pointer to  GDDD::null.
-  virtual DataSet *empty_set() const;
+   DataSet *empty_set() const;
   /// Compares to DataSet for equality.
-  virtual bool set_equal(const DataSet & b) const;
+   bool set_equal(const DataSet & b) const;
+  /// Compares two sets with a total order.
+  bool set_less_than (const DataSet & b) const ;
   /// Compares to DataSet for equality.
-  virtual long double set_size() const;
+   long double set_size() const;
   /// Returns a hash key for the DDD.
-  virtual size_t set_hash() const;
+   size_t set_hash() const;
   /// Textual (human readable) output of a DDD.
-  virtual void set_print (std::ostream &os) const { os << *this; }
+   void set_print (std::ostream &os) const { os << *this; }
 #ifdef EVDDD
-  virtual DataSet *normalizeDistance(int n) const { return new DDD(GDDD::normalizeDistance(n)); }
-  virtual int getMinDistance() const { return GDDD::getMinDistance();}
+   DataSet *normalizeDistance(int n) const { return new DDD(GDDD::normalizeDistance(n)); }
+   int getMinDistance() const { return GDDD::getMinDistance();}
 #endif
 
   //@}
