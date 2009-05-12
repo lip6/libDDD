@@ -230,7 +230,73 @@ namespace sns {
 
   };
 
+  /** Extractor of variable domains for invert computations */
+  class DomExtract
+    :
+    public _GShom
+  {
 
+  public:
+
+    int target;
+
+    DomExtract()
+      :
+      target(0)
+    {}
+
+    DomExtract (int t) :target(t) {}
+
+
+    // this hom is a heavy modifier
+    bool skip_variable (int var) const {
+      return false;
+    }
+
+    bool is_selector () const {
+      return false;
+    }
+
+    const GShom::range_t  get_range () const {
+      GShom::range_t range;
+      return range;
+    }
+  
+    GSDD eval(const GSDD &d)const {
+      if (d == GSDD::one || d == GSDD::null || d == GSDD::top )
+	return d;
+
+      d3::set<GSDD>::type sum;
+
+      if (d.variable() != target) {
+	// destroy/propagate
+	for ( GSDD::const_iterator it = d.begin(); it != d.end(); ++it)
+	  sum.insert( GShom(this) (it->second) );
+      } else {
+	// grab all arc values and fuse them
+	for ( GSDD::const_iterator it = d.begin(); it != d.end(); ++it)
+	  sum.insert( GSDD (target,* it->first) );
+      }
+
+      return SDED::add(sum);
+    }
+  
+    size_t hash() const {
+      return  (target-253) * 2196727; 
+    }
+
+    bool operator==(const _GShom &s) const {
+      const DomExtract* ps = (const DomExtract *)&s;
+      return target == ps->target ;
+    }  
+
+    _GShom * clone () const {  return new DomExtract(*this); }
+
+    void print (std::ostream & os) const {
+      os << "(DomExtract:" << target << ")";
+    }
+
+  };
   /*************************************************************************/
   /*                         Class LocalApply : Hom version                */
   /*************************************************************************/
