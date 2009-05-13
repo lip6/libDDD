@@ -52,6 +52,9 @@ protected:
   ostream * D3out;
   ostream * out;
   
+  // set to true if no sharing of 1 terminals is desired
+  bool multiT;
+  
 
   void collect( const SDD& g){    
     collect((const GSDD &)g);
@@ -137,13 +140,22 @@ public :
 // 	  os << "     " << arctmp.str() << "->" << "one_" << nextAid-1  << " ;\n";  //name[gi->second]   ;
 // 	}
 // 	os << "     " << arctmp.str() << "->" ;
-
+	std::string succname =  name[gi->second];
+	if ( multiT ) {
+	  // don't share 1 terminals
+	  if ( succname == "one" ) {
+	    stringstream stmp ;
+	    stmp <<  "one_" << nextAid++ ;
+	    succname = stmp.str();
+	    *out << "     " << succname <<  " [shape=box,width=.3,height=.4,label=\"1\"];\n" ;	    
+	  }
+	}
 	
 	if (typeid(*gi->first)==typeid(DDD)) //(g.variable() == varP)
-	  *out <<  "     " << myname << "->" << name[gi->second] << "    [label=\""<< entryd3Name[(DDD &)*gi->first] << "\"];" << endl;
+	  *out <<  "     " << myname << "->" << succname << "    [label=\""<< entryd3Name[(DDD &)*gi->first] << "\"];" << endl;
 	     //"[style=dotted,minlen=2,constraint=false];\n" ;//constraint=false];\n" ;// minlen=2];\n" ;
 	else
-	  *out <<  "     " << myname << "->" << name[gi->second] << "    [label=\""<< entryName[(SDD &)*gi->first] << "\"];" << endl; 
+	  *out <<  "     " << myname << "->" << succname << "    [label=\""<< entryName[(SDD &)*gi->first] << "\"];" << endl; 
 	// "  [style=dotted,minlen=2];\n" ;//constraint=false];\n" ;minlen=2];\n" ;//
 // 	if (g.variable() < 2)
 // 	  os << entryd3Name[(DDD &)*gi->first] << "  [style=dotted];\n" ;
@@ -186,7 +198,7 @@ public :
     }
   }
 
-  dotExporter(const string &s="test"):path(s) {};
+  dotExporter(const string &s="test", bool multiT = false):path(s),multiT(multiT) {};
 
 typedef  hash_set<GSDD,d3::util::hash<GSDD>, d3::util::equal<GSDD> > gsdd_hash_set;
 
@@ -256,7 +268,7 @@ typedef  hash_set<GSDD,d3::util::hash<GSDD>, d3::util::equal<GSDD> > gsdd_hash_s
 
 class hDotExporter: public dotExporter {
 public :
-  hDotExporter(const string &s="test"):dotExporter(s) {};
+  hDotExporter(const string &s="test", bool multiT=false):dotExporter(s,multiT) {};
 
   virtual ~hDotExporter() {};
   
@@ -357,12 +369,12 @@ public :
 };
 
 
-int exportDot(const GSDD & g,const string &path,bool hierarchical) {
+int exportDot(const GSDD & g,const string &path,bool hierarchical, bool multiT) {
   if (!hierarchical) {
-    dotExporter dotout(path);
+    dotExporter dotout(path,multiT);
     return dotout(g);
   }  else {
-    hDotExporter dotout(path);
+    hDotExporter dotout(path,multiT);
     return dotout(g); 
   }
 }
@@ -370,7 +382,7 @@ int exportDot(const GSDD & g,const string &path,bool hierarchical) {
 /************** CLASS dotHighlight ************/
 
 // prepares to export in file named "path"
-dotHighlight::dotHighlight (const string & path) { de= new dotExporter(path); };
+dotHighlight::dotHighlight (const string & path) { de= new dotExporter(path,true); };
 dotHighlight::~dotHighlight () { delete de; }
 
 // Call this to empty the "known nodes" lists
@@ -390,4 +402,19 @@ void dotHighlight::setColor(const GSDD & g, const string & color) {
 // This creates the actual file
 void dotHighlight::exportDot() {
   de->finish();
+}
+
+
+
+static dotHighlight dotH = dotHighlight("table");
+
+static void addSDD (const GSDD & d) {
+  dotH.addSDD(d);
+}
+
+void exportUniqueTable ( const GSDD & d, const std::string & path ) {
+      dotH.initialize(path);
+      SDDutil::foreachTable ( & addSDD);
+      dotH.setColor(d,"green"); 
+      dotH.exportDot();
 }

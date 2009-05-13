@@ -32,7 +32,14 @@ using namespace std;
  * If hierarchical is true, single dot file is produced with dashed lines to represent arc values.
  * The default produces one graph xxx.dot with SDD and another with DDD d3XXX.dot 
  */
-int exportDot(const GSDD & g, const string & path="test",bool hierarchical=false);
+int exportDot(const GSDD & g, const string & path="test",bool hierarchical=false, bool multiT=true);
+
+
+/* Exports the full unique table of SDD into a dot file specified by path.
+ * Highlights nodes that belong to the SDD provided.
+ * NB : avoid if unique table size is too large... 
+ **/
+void exportUniqueTable ( const GSDD & d, const string & path="table" );
 
 class dotExporter;
 
