@@ -934,6 +934,12 @@ namespace sns {
       return left.is_selector() && right.is_selector();
     }
 
+    GShom invert (const GSDD & pot) const { 
+      // (h & h')^-1  =  h'^-1 & h^-1
+      return  right.invert(pot) & left.invert(pot);
+    }
+
+
     bool
     skip_variable(int var) const 
     {
@@ -994,6 +1000,11 @@ namespace sns {
       return left^right(d);
     }
 
+    //  not really sure how to implement this guy : default to assert(false)
+    //GShom invert (const GSDD & pot) const ;
+
+
+
     /* Memory Manager */
     void mark() const{
       left.mark();
@@ -1028,6 +1039,9 @@ namespace sns {
     {
       return get_concret(left)->skip_variable(var);
     }
+
+    //  not really sure how to implement this guy : default to assert(false)
+    //GShom invert (const GSDD & pot) const ;
 
 
     /* Eval */
@@ -1068,6 +1082,13 @@ namespace sns {
     GSDD eval(const GSDD &d)const{
       return left(d)-right;
     }
+
+
+    GShom invert (const GSDD & pot) const {
+      // (h - cte)^-1 (s) = h^-1 (s + cte) =  h^-1 & ( id + cte) 
+      return left.invert(pot) & (GShom::id + right);
+    }
+
 
     bool is_selector () const {
       // set difference is a natural selector
@@ -1123,6 +1144,12 @@ namespace sns {
       // wow ! why build a fixpoint of a selector ??
       return arg.is_selector();
     }
+
+    GShom invert (const GSDD & pot) const {
+      // (h^*)^-1 (s) = (h^-1 + id)^*  
+      return fixpoint ( arg.invert(pot) + GShom::id );
+    }
+
 
     /* Eval */
     GSDD 
