@@ -94,6 +94,10 @@ namespace sns {
     /* Eval */
     GSDD eval(const GSDD &d)const{return d;}
 
+    GShom invert (const GSDD & pot) const { 
+      return this;
+    }
+
     void print (std::ostream & os) const {
       os << "SId";
     }
@@ -129,6 +133,10 @@ namespace sns {
     /* Memory Manager */
     void mark() const{
       value.mark();
+    }
+
+    GShom invert (const GSDD & pot) const { 
+      return pot;
     }
 
 
@@ -170,6 +178,11 @@ namespace sns {
       return left.is_selector() ;
     }
 
+    GShom invert (const GSDD & pot) const { 
+      // (h * c)^-1 (s) = h^-1 ( s + pot - c) = ( h^-1 & ( id + (pot-c) ) ) (s)
+      return left.invert(pot) &  ( GShom::id + (pot - right) ) ;
+    }
+
     /* Memory Manager */
     void mark() const{
       left.mark();
@@ -205,9 +218,15 @@ namespace sns {
       return left(d) * right(d);
     }
 
+    GShom invert (const GSDD & pot) const { 
+      // (h * h')^-1 (s) =( h^-1 ( pot ) +  h^-1 (pot) ) (pot) 
+      return (left.invert(pot) + right.invert(pot)) (pot) ;
+    }
+
+
     bool is_selector () const {
       // intersection is a natural selector (if we forget about TOP)
-      return left.is_selector() ;
+      return left.is_selector() && right.is_selector();
     }
 
     bool
@@ -451,6 +470,11 @@ namespace sns {
       return  h.hash() ^ target * 2177; 
     }
 
+    GShom invert (const GSDD & pot) const { 
+      return localApply ( h.invert( GShom(DomExtract(target)) (pot) ), target)  ;
+    }
+
+
     bool operator==(const _GShom &s) const {
       const SLocalApply* ps = (const SLocalApply *)&s;
       return target == ps->target && h ==  ps->h;
@@ -485,6 +509,11 @@ namespace sns {
 
     const GShom::range_t  get_range () const {
       return cond_.get_range() ;
+    }
+
+    GShom invert (const GSDD & pot) const { 
+      // (! sel)^-1 = pot - !sel(pot) + s = ( (pot - !sel(pot)) + Id )
+      return  (pot - (GShom(this)(pot))) + GShom::id ;
     }
 
 
@@ -628,6 +657,16 @@ namespace sns {
 	gi->mark();
       }
     }
+
+    GShom invert (const GSDD & pot) const { 
+      // (\AND_i h_i)^-1  = \AND_i h_i^-1
+      GShom ret = GShom::id;
+      for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {
+	ret = ret & ( gi->invert(pot) );
+      }
+      return ret;
+    }
+
     
     void print (std::ostream & os) const {
       os << "(SAnd:" ;
@@ -711,6 +750,16 @@ namespace sns {
 	  return false;
       return true;
     }
+
+    GShom invert (const GSDD & pot) const { 
+      // (\ADD_i h_i)^-1  = \ADD_i h_i^-1
+      d3::set<GShom>::type ops;
+      for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {
+	ops.insert(  gi->invert(pot) );
+      }
+      return GShom::add(ops);
+    }
+
 
 
     bool
