@@ -126,6 +126,9 @@ public:
   // Elementary emptyset homomorphism
   static const GShom null;
 
+  /// returns the predescessor homomorphism, using pot to determine variable domains
+  GShom invert (const GSDD & pot) const;
+
   /// \name Comparisons between GShom.
   /// Comparisons between GShom for unicity table. Both equality comparison and
   /// total ordering provided to allow hash and map storage of GShom
@@ -407,6 +410,13 @@ public:
     get_concret(const GShom& gshom)
     {
         return gshom.concret;
+    }
+
+    // produce the predescessor homomorphism, using pot to compute variable domains
+    virtual GShom invert (const GSDD & pot) const { 
+      // default = raise assert
+      assert(0); 
+      return GShom::null;
     }
 
 };
