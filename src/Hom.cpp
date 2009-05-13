@@ -74,6 +74,11 @@ public:
   bool is_selector () const {
     return true; 
   }
+
+ GHom invert  (const GDDD & pot) const {
+   return this;
+ }
+
   void print (std::ostream & os) const {
     os << "Id";
   }
@@ -102,6 +107,11 @@ public:
   GDDD eval(const GDDD &d)const{
     return d==GDDD::null?GDDD::null:value;
   }
+
+ GHom invert  (const GDDD & pot) const {
+   return pot;
+ }
+
 
   /* Memory Manager */
   void mark() const{
@@ -135,6 +145,11 @@ public:
   /* Eval */
   GDDD eval(const GDDD &d)const{
     return left(d)*right;
+  }
+
+  GHom invert  (const GDDD & pot) const {
+    // (h * c)^-1 (s) = h^-1 ( s + pot - c) = ( h^-1 & ( id + (pot-c) ) ) (s)
+    return left.invert(pot) &  ( GHom::id + (pot - right) ) ;
   }
 
   bool is_selector () const {
@@ -196,6 +211,12 @@ public :
     return cond_ == ps->cond_ ;
   }  
 
+  GHom invert  (const GDDD & pot) const {
+    // (! sel)^-1 = pot - !sel(pot) + s = ( (pot - !sel(pot)) + Id )
+    return  (pot - (GHom(this)(pot))) + GHom::id ;
+  }
+
+
   _GHom * clone () const {  return new NotCond(*this); }
 
   void print (std::ostream & os) const {
@@ -211,71 +232,81 @@ class Add
 {
 public:
 
-    typedef std::pair< GHom , std::set<GHom> > partition;
+  typedef std::set<GHom> param_t;
+  typedef param_t::const_iterator param_it;
+
+    typedef std::pair< GHom , param_t > partition;
     typedef std::map<int,partition> partition_cache_type;
 
 
 private:
 
-    std::set<GHom> parameters;
-    mutable partition_cache_type partition_cache;
-    bool have_id;
+  param_t parameters;
+  mutable partition_cache_type partition_cache;
+  bool have_id;
        
 public:
   
     /* Constructor */
-    Add( const std::set<GHom> &param, int ref=0)
-  		:
-  		_GHom(ref,false),
-  		parameters(),
-		have_id(false)
-    {
-        for( std::set<GHom>::const_iterator it = param.begin(); it != param.end(); ++it)
-        {
-            if( typeid( *get_concret(*it) ) == typeid(Add) )
-            {
-                std::set<GHom>& local_param = ((Add*)get_concret(*it))->parameters;
-                parameters.insert( local_param.begin() , local_param.end());
-            }
-            else
-            {
-                parameters.insert(*it);
-            }
-        }
-    }
+  Add( const std::set<GHom> &param, int ref=0)
+    :
+    _GHom(ref,false),
+    parameters(),
+    have_id(false)
+  {
+    for( param_it it = param.begin(); it != param.end(); ++it) {
+      // fuse internal Add
+      if( typeid( *get_concret(*it) ) == typeid(Add) )	{
+	std::set<GHom>& local_param = ((Add*)get_concret(*it))->parameters;
+	parameters.insert( local_param.begin() , local_param.end());
 
-    bool
-    get_have_id() const
-    {
-      return parameters.find(GHom::id) != parameters.end();
+      } else {
+	parameters.insert(*it);
+      }
     }
+  }
+
+  bool
+  get_have_id() const
+  {
+    return parameters.find(GHom::id) != parameters.end();
+  }
    
-    std::set<GHom>&
-    get_parameters()
-    {
-        return this->parameters;
-    }
+  param_t &
+  get_parameters()
+  {
+    return this->parameters;
+  }
     
-    partition
-    get_partition(int var)
-    {
+  partition
+  get_partition(int var)
+  {
         this->skip_variable(var);
         return partition_cache.find(var)->second;
-    }
+  }
 
-    /* Compare */
-    bool
-    operator==(const _GHom &h) const
-    {
-        return parameters==((Add*)&h )->parameters;
+  GHom invert  (const GDDD & pot) const {
+    // (\ADD_i h_i)^-1  = \ADD_i h_i^-1
+    std::set<GHom> ops;
+    for(param_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {
+      ops.insert(  gi->invert(pot) );
     }
+    return GHom::add(ops);
+  }
+
+  /* Compare */
+  bool
+  operator==(const _GHom &h) const
+  {
+        return parameters==((Add*)&h )->parameters;
+  }
   
   
     size_t
     hash() const
     {
         size_t res=0;
-        for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+        for(param_it gi=parameters.begin();gi!=parameters.end();++gi)
         {
             res ^= gi->hash();
         }
@@ -283,7 +314,7 @@ public:
     }
 
   bool is_selector () const {
-    for (std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+    for (param_it gi=parameters.begin();gi!=parameters.end();++gi)
       if (! gi->is_selector() )
 	return false;
     return true;
@@ -291,33 +322,33 @@ public:
 
   _GHom * clone () const {  return new Add(*this); }
   
-    bool
-    skip_variable(int var) const
-    {
-        partition_cache_type::iterator part_it = partition_cache.find(var);
-        if( part_it == partition_cache.end() )
-        {
-            partition& part = partition_cache.insert(std::make_pair(var,partition())).first->second;
-
-            std::set<GHom> F;
-            for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
-            {
-                if( get_concret(*gi)->skip_variable(var) )
-                {
-                    // F part
-                    F.insert(*gi);
-                }
-                else
-                {
-                    // G part
-                    part.second.insert(*gi);
-                }
-            }
-            part.first = GHom::add(F);
-            return part.second.empty();
-        }
-        return part_it->second.second.empty();
-    }
+  bool
+  skip_variable(int var) const
+  {
+    partition_cache_type::iterator part_it = partition_cache.find(var);
+    if( part_it == partition_cache.end() )
+      {
+	partition& part = partition_cache.insert(std::make_pair(var,partition())).first->second;
+	
+	std::set<GHom> F;
+	for(param_it gi=parameters.begin();gi!=parameters.end();++gi)
+	  {
+	    if( get_concret(*gi)->skip_variable(var) )
+	      {
+		// F part
+		F.insert(*gi);
+	      }
+	    else
+	      {
+		// G part
+		part.second.insert(*gi);
+	      }
+	  }
+	part.first = GHom::add(F);
+	return part.second.empty();
+      }
+    return part_it->second.second.empty();
+  }
   
   /* Eval */
   GDDD
@@ -331,7 +362,7 @@ public:
       {
           std::set<GDDD> s;
           
-          for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+          for(param_it gi=parameters.begin();gi!=parameters.end();++gi)
           {
               s.insert((*gi)(d));
           }
@@ -350,14 +381,12 @@ public:
           }              
           
           GHom& F = part_it->second.first;
-          std::set<GHom>& G = part_it->second.second;
+          param_t & G = part_it->second.second;
           
-          for( std::set<GHom>::iterator it = G.begin() ; 
-              it != G.end();
-              ++it)
-              {
-                  s.insert((*it)(d));                  
-              } 
+          for( param_t::iterator it = G.begin() ; it != G.end(); ++it)
+	    {
+	      s.insert((*it)(d));                  
+	    } 
           
           
           GDDD v = F(d);
@@ -372,18 +401,16 @@ public:
     
   /* Memory Manager */
   void mark() const{
-    for(std::set<GHom>::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+    for(param_it gi=parameters.begin();gi!=parameters.end();++gi)
       gi->mark();
     partition_cache.clear();
   }
 
  void print (std::ostream & os) const {
     os << "(Add:" ;
-    std::set<GHom>::const_iterator gi=parameters.begin();
+    param_it gi=parameters.begin();
     os << *gi ;
-    for( ++gi;
-	 gi!=parameters.end();
-	 ++gi)
+    for( ++gi; gi!=parameters.end(); ++gi)
       {
 	os << " + " << *gi ;
       }
@@ -426,6 +453,13 @@ public:
     }
 
   _GHom * clone () const {  return new Compose(*this); }
+
+  GHom invert  (const GDDD & pot) const {
+    // (h & h')^-1  =  h'^-1 & h^-1
+    return  right.invert(pot) & left.invert(pot);
+  }
+
+
     
     bool
     skip_variable(int var) const
@@ -589,6 +623,12 @@ public:
     return left.is_selector() ;
   }
 
+  GHom invert  (const GDDD & pot) const {
+    // (h - cte)^-1 (s) = h^-1 (s + cte) =  h^-1 & ( id + cte) 
+    return left.invert(pot) & (GHom::id + right);
+  }
+
+
   void print (std::ostream & os) const {
     os << "(Minus:" << left << " - " << right << ")";
   }
@@ -635,6 +675,12 @@ public:
         return get_concret(arg)->skip_variable(var);
     }
    
+  GHom invert  (const GDDD & pot) const {
+    // (h^*)^-1 (s) = (h^-1 + id)^*  
+    return fixpoint ( arg.invert(pot) + GHom::id );
+  }
+
+
   bool is_selector () const {
     // wow ! why build a fixpoint of a selector ??
     return arg.is_selector();
@@ -722,6 +768,7 @@ public:
 GHom _GHom::compose (const GHom &r) const { 
   return GHom(this) & r; 
 }
+
 
 GDDD 
 _GHom::eval_skip(const GDDD& d) const
@@ -872,6 +919,11 @@ bool GHom::skip_variable(int var) const {
 GHom GHom::compose (const GHom &r) const { 
   return concret->compose(r); 
 }
+ /// returns the predescessor homomorphism, using pot to determine variable domains
+ GHom GHom::invert  (const GDDD & pot) const {
+   return concret->invert(pot);
+ }
+
 
 /* Eval */
 GDDD
