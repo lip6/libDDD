@@ -32,6 +32,7 @@
 #include <string>
 #include <set>
 #include <map>
+#include <cassert>
 /**********************************************************************/
 
 /// pre-declaration of concrete (private) class implemented in .cpp file
@@ -159,6 +160,10 @@ public:
   /// This predicate is true if the homomorphism global behavior is only to prune some paths.
   bool is_selector() const;
   //@}
+
+  /// returns the predescessor homomorphism, using pot to determine variable domains
+  GHom invert (const GDDD & pot) const;
+
 
   ///  Evaluation operator. Homomorphisms overload operator(), so they can be directly applied to DDD nodes.
   /// Note that evaluation through this operator uses and updates a cache.
@@ -373,6 +378,21 @@ public:
     {
         return false;
     }
+
+  /// returns the predescessor homomorphism, using pot to determine variable domains
+      GHom invert (const GDDD & pot) const {
+	// default = raise assert
+	if ( is_selector() ) {
+	  // A default implmentation is provided for selector homomorphisms, overloadable.
+	  // sel^-1 (s) = pot - sel(pot) + s = ((pot-sel(pot)) + id)
+	  return  ( (pot - GHom(this)(pot))+ GHom::id ); 
+	}
+	// No default implem if ! is_selector 
+	assert(0); 
+	return GHom(GDDD::null);
+      }
+
+
   /// Constructor. Note this class is abstract, so this is only used in initialization
   /// list of derived classes constructors (hard coded operations and StrongShom).
   _GHom(int ref=0,bool im=false):refCounter(ref),marking(false),immediat(im){};
