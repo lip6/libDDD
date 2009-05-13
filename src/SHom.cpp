@@ -1522,6 +1522,11 @@ GShom::eval(const GSDD &d) const
   return concret->eval_skip(d);
 }
 
+/// returns the predescessor homomorphism, using pot to determine variable domains
+GShom GShom::invert (const GSDD & pot) const {
+  return concret->invert(pot);
+}
+
 
 
 int GShom::refCounter() const{return concret->refCounter;}
