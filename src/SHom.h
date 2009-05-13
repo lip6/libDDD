@@ -415,6 +415,12 @@ public:
     // produce the predescessor homomorphism, using pot to compute variable domains
     virtual GShom invert (const GSDD & pot) const { 
       // default = raise assert
+      if ( is_selector() ) {
+	// A default implmentation is provided for selector homomorphisms, overloadable.
+	// sel^-1 (s) = pot - sel(pot) + s = ((pot-sel(pot)) + id)
+	return  ( (pot - GShom(this)(pot))+ GShom::id ); 
+      }
+      // No default implem if ! is_selector 
       assert(0); 
       return GShom::null;
     }
