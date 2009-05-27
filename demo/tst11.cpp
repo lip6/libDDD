@@ -1,218 +1,54 @@
-/****************************************************************************/
-/*								            */
-/* This file is part of libDDD, a library for manipulation of DDD and SDD.  */
-/*     						                            */
-/*     Copyright (C) 2001-2008 Yann Thierry-Mieg, Jean-Michel Couvreur      */
-/*                             and Denis Poitrenaud                         */
-/*     						                            */
-/*     This program is free software; you can redistribute it and/or modify */
-/*     it under the terms of the GNU Lesser General Public License as       */
-/*     published by the Free Software Foundation; either version 3 of the   */
-/*     License, or (at your option) any later version.                      */
-/*     This program is distributed in the hope that it will be useful,      */
-/*     but WITHOUT ANY WARRANTY; without even the implied warranty of       */
-/*     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        */
-/*     GNU LEsserGeneral Public License for more details.                   */
-/*     						                            */
-/* You should have received a copy of the GNU Lesser General Public License */
-/*     along with this program; if not, write to the Free Software          */
-/*Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
-/*     						                            */
-/****************************************************************************/
-
 #include <iostream>
-#include <cassert>
-#include <typeinfo>
-using namespace std;
-#include "DataSet.h"
+#include <vector>
+#include <map>
+
+#include "IntDataSet.h"
 #include "DDD.h"
-#include "DED.h"
 #include "SDD.h"
 #include "SDED.h"
 #include "MemoryManager.h"
-#define HADDOCK_EOB 666
-#define HADDOCK_INTEGER 1
 
+#include "statistic.hpp"
 
-class _selectAndSet : public StrongHom {
-    int oldPC; int newPC;
-    public :
-    _selectAndSet (int selectAndSet_oldPC, int selectAndSet_newPC) : oldPC(selectAndSet_oldPC), newPC(selectAndSet_newPC){}
-    GDDD phiOne() const { return GDDD::top;}
+int
+main(int argc, char** argv)
+{
 
-    GHom phi(int var, int val) const{
-	assert (var==HADDOCK_INTEGER);
-	if (val==oldPC) return DDD(var,newPC);
-	else return GDDD::null;
-    }
-
-    size_t hash() const {return 640049*oldPC+(640049^(2*newPC));}
-
-    bool operator ==(const StrongHom &s) const {_selectAndSet *ps = (_selectAndSet*) &s; return oldPC == ps->oldPC && newPC == ps->newPC;}
-  _GHom * clone () const {  return new _selectAndSet(*this); }
-};
-
-GHom selectAndSet(int oldPC, int newPC) {return _selectAndSet(oldPC, newPC);}
-
-class _rebuild : public StrongShom {
-int v; SDD t; 
-public :
-_rebuild (int rebuild_v, const GSDD& rebuild_t) : v(rebuild_v), t(rebuild_t){}
-GSDD phiOne() const { return GSDD::top;}
-
-GShom phi(int var, const DataSet& val) const{
-//    cout<<"rebuild "<<v<<" "<<var<<" "<<t<<endl;
-  //  cout<<((GDDD)((DDD&)val))<<endl;
-  //  cout<<((GSDD)((SDD&)val))<<endl;
-    if (var==HADDOCK_EOB)
-//	return SDD(v,t)^GShom::id;
-	return GShom(v,t,GShom::id);
-    else
-//	return GShom(new _rebuild(v,t^((GSDD) ((SDD&)val))));
-	return GShom(_rebuild(v,t^GSDD(var,val)));
-}
-
-size_t hash() const {return 640061*v;} //TODO
-
-/*void mark() {
-    t.mark();
-}*/
-
-bool operator ==(const StrongShom &s) const {_rebuild *ps = (_rebuild*) &s; return v == ps->v && t == ps->t;}
-
-  _GShom * clone () const {  return new _rebuild(*this); }
-};
-
-GShom rebuild(int v) {
-    //return GShom::id;
-    return _rebuild(v, GSDD::one);
-}
-
-
-class _updatePC : public StrongShom {
-int oldPC; int newPC; GShom hom; 
-public :
-_updatePC (int updatePC_oldPC, int updatePC_newPC, const GShom& updatePC_hom) : oldPC(updatePC_oldPC), newPC(updatePC_newPC), hom(updatePC_hom){}
-GSDD phiOne() const { return GSDD::top;}
-
-GShom phi(int var, const DataSet& val) const{
-    //cout<<"update"<<endl;
-    assert (typeid(val)==typeid(DDD));
-    assert (var==1);
-    DDD in = selectAndSet(oldPC,newPC) ((GDDD)((DDD&)val));
-    if (in == GDDD::null) {
-	//cout<<"NULL : "<<oldPC<<" "<<((GDDD)((DDD&)val));
-	return GSDD::null;
-    }
-    else {
-	//cout<<in<<endl;
-	return GShom (var,in,GShom(hom));
-    }
-}
-
-size_t hash() const {return oldPC+newPC/*+hom*/;}
-
-/*void mark() const {
-    hom.mark();
-}*/
-
-bool operator ==(const StrongShom &s) const {_updatePC *ps = (_updatePC*) &s; return oldPC == ps->oldPC && newPC == ps->newPC && hom == ps->hom;}
-
-  _GShom * clone () const {  return new _updatePC(*this); }
-
-};
-
-
-
-GShom updatePC(int oldPC, int newPC, const GShom& hom) {return  _updatePC(oldPC, newPC, hom);}
-
-
-class _setPC : public StrongShom {
-int index; int oldPC; int newPC; 
-DataSet* essai;
-public :
-_setPC (int setPC_index, int setPC_oldPC, int setPC_newPC, const DataSet& _essai) : index(setPC_index), oldPC(setPC_oldPC), newPC(setPC_newPC), essai(_essai.newcopy()){}
-~_setPC(){delete essai;}
-GSDD phiOne() const {
-    cout<<"ONE SETPC "<<index<<" "<<oldPC<<" "<<newPC<<endl;
-    return GSDD::top;}
-
-GShom phi(int var, const DataSet& val) const{
-    if (var==index) {
-    DDD in = DDD(HADDOCK_EOB,0,GDDD::one);
-	return rebuild(var)&
-	    updatePC(oldPC, newPC,GShom::id)&
-	    (((GSDD)((SDD&)val))^
-	     SDD(HADDOCK_EOB,in)^
-	     (GShom::id));
-    }
-    else {
-	return GShom(var,val,this);
-    }
-}
-
-/*void mark() {essai->set_mark();}*/
-
-size_t hash() const {return 746981*(index^(747547*oldPC+newPC));}
-
-bool operator ==(const StrongShom &s) const {_setPC *ps = (_setPC*) &s; return index == ps->index && oldPC == ps->oldPC && newPC == ps->newPC && essai->set_equal(*(ps->essai));}
-
-  _GShom * clone () const {  return new _setPC(*this); }
-};
-
-GShom setPC(int index, int oldPC, int newPC, const DataSet& essai) {
-    return _setPC(index, oldPC, newPC, essai);
-}
-
-
-int main(){
-
-  // Constants null, one , top
-  cout <<"*****************************"<<endl;
-  cout <<"* Tracking memory leaks in SDD *"<<endl;
-  cout <<"* You probably wish to run : *"<<endl;
-  cout <<"valgrind --tool=memcheck --leak-check=yes tst11"<<endl;
-  cout <<"*****************************"<<endl;
-
-
- // int i =0;
- // while(++i < 1000) 
+	int size = 100;
+  if( argc == 2 )
   {
-            DDD d1 =  DDD(1,0);
-            DDD d2 =  DDD(1,0);
-            SDD s1 = SDD(1,d1);
-            SDD s2 = SDD(1,d2);
-            SDD r = SDD(1,s1,SDD(2,s1));
-            for (int j=0; j<30; j++) {
-                for (int k=0; k<30; k++) {
-                   r = r + setPC(2,k,k+1,s2)(r);
-                }
-                r = r+ setPC(1,j,j+1,s1)(r);
-            MemoryManager::garbage();
-            }
-            cout<<r;
-            MemoryManager::garbage();
-            MemoryManager::garbage();
-            
+    size = atoi(argv[1]);
   }
 
-  cout<<MemoryManager::nbDDD()<<endl;
-  cout<<MemoryManager::nbHom()<<endl;
-  cout<<MemoryManager::nbDED()<<endl<<endl;
- 
-  MemoryManager::garbage();
-  
-  cout<<MemoryManager::nbDDD()<<endl;
-  cout<<MemoryManager::nbHom()<<endl;
-  cout<<MemoryManager::nbDED()<<endl;
+	SDD c = SDD::null;
+	for( int i = 0 ; i < size ; ++i )
+	{
+			std::vector<int> local_vec;
+			local_vec.push_back(i);
+			IntDataSet local_ids(local_vec);
+			c = c + SDD(3,local_ids);
+	}
+	
+	SDD b = SDD::null;
+	for( int i = 0 ; i < size ; ++i )
+	{
+			std::vector<int> local_vec;
+			local_vec.push_back(i);
+			IntDataSet local_ids(local_vec);
+			b = b + SDD(2,local_ids,c);
+	}
 
-  // This is not nice at all, but a second garbage is necessary to really clear the nodes
-  // hopefully will be corrected in the future
-  MemoryManager::garbage();
-  MemoryManager::pstats();
-  MemoryManager::garbage();
-  MemoryManager::garbage();
+	SDD a =  SDD::null;
+	for( int i = 0 ; i < size ; ++i )
+	{
+			std::vector<int> local_vec;
+			local_vec.push_back(i);
+			IntDataSet local_ids(local_vec);
+			a = a + SDD(1,local_ids,b);
+	}
 
+	Statistic S = Statistic(a,"tst11");
 
-  return 1;
+	S.print_line(std::cout);
+
 }
