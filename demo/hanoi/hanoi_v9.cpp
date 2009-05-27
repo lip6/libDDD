@@ -21,14 +21,14 @@
 /****************************************************************************/
 
 /** An example resolution of the famous towers of Hanoi puzzle. *
- * v8 : This variant exhibits the use IntDataSet based SDD, emphasizing the differences with DDD.
+* v8 : This variant exhibits the use IntDataSet based SDD, emphasizing the differences with DDD.
 */
 
 #include <cmath>
 #include <cstring>
 #include <string>
 #include <iostream>
-using namespace std;
+  using namespace std;
 
 #include "IntDataSet.h"
 #include "DDD.h"
@@ -52,6 +52,8 @@ static int NB_POLES= 3;
 #define VAR_STATES 0
 #define VAR_HIER 1
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 void initName() {
   char buff [12];
   for (int i=0; i< NB_RINGS; i++) {
@@ -60,15 +62,19 @@ void initName() {
   }
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // predeclaration
 GShom saturate ();
-  
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Removes any path such that one of the variables takes value i or value j
 // Not test on variable number means this operation should be used from "mid-height"
 class _no_ring_above : public StrongShom {
   // the 2 poles that have to be clear
   IntDataSet set;
-public :
+  public :
   _no_ring_above (int i, int j) { 
     // construct from vector
     vector<int> v (2);
@@ -80,7 +86,7 @@ public :
   GSDD phiOne() const {
     return GSDD::one;
   }     
-  
+
   // reject any path with ANY ring that is on pole i or pole j
   GShom phi(int vr, const DataSet & vl) const {
     if (vr == VAR_STATES) {
@@ -88,17 +94,17 @@ public :
       DataSet * tofree =  vl.set_minus(set);
       IntDataSet res ( *( (IntDataSet *) tofree ) );
       delete tofree;
-      
+
       // test is useless, if res is empty SDD canonization of GShom(vr,res)(GSDD::one) returns GSDD::null node
       if (! res.empty()) {
-	// usually we should
-	// propagate this test AND (re)saturate resulting nodes
-	// return GShom(vr,res, saturate() &GShom(this));
-	// but in fact successor should be GSDD::one so we know the result
-	return GShom(vr,res);
+  // usually we should
+  // propagate this test AND (re)saturate resulting nodes
+  // return GShom(vr,res, saturate() &GShom(this));
+  // but in fact successor should be GSDD::one so we know the result
+        return GShom(vr,res);
       } else {
-	// cut this branch and exploration
-	return GSDD::null;
+  // cut this branch and exploration
+        return GSDD::null;
       }
     } else {
       // propagate twice
@@ -119,36 +125,38 @@ public :
   _GShom * clone () const {  return new _no_ring_above(*this); }  
 };
 
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 // generic version no ring specified, just apply to current ring
 // move constrained to use 2 specific poles
 class _move_ring : public StrongShom {
   // the poles used
   int p1,p2;
-public :
+  public :
 
   _move_ring(int pp1,int pp2): p1(pp1),p2(pp2) { assert (p1<p2); };
-  
+
   GSDD phiOne() const {
     return GSDD::one;
   }                   
-  
+
   GShom phi(int vr, const DataSet& vl) const {
     // ring reached 
     // try to move to all new positions
-    
+
     if (vr == VAR_STATES) {
       // Initialize res with Id
       GShom res = GShom(vr,vl) ;
 
       // concrete level reached : vl is an IntDataSet
       for (IntDataSet::const_iterator vlit = ((const IntDataSet&)vl).begin() ; vlit != ((const IntDataSet&)vl).end() ; ++vlit ) {
-	if (*vlit == p1) {
-	  // move to p2
-	  res = res +  GShom (vr , IntDataSet(vector<int> (1,p2)));
-	} else if (*vlit == p2) {
-	  // move to p1
-	  res = res +  GShom (vr , IntDataSet(vector<int> (1,p1)));
-	}
+        if (*vlit == p1) {
+    // move to p2
+          res = res +  GShom (vr , IntDataSet(vector<int> (1,p2)));
+        } else if (*vlit == p2) {
+    // move to p1
+          res = res +  GShom (vr , IntDataSet(vector<int> (1,p1)));
+        }
       }
       return res ;
     } else {
@@ -158,23 +166,27 @@ public :
     }
 
   }
-  
-  
+
+
   size_t hash() const {
     return 6961*p1+p2;
   }
-  
+
   bool operator==(const StrongShom &s) const {
     return p1== ((const _move_ring &) s).p1 &&  p2== ((const _move_ring &) s).p2;
   }
   _GShom * clone () const {  return new _move_ring(*this); }
-  
+
 };
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // to be more pleasant for users  
 GShom move_ring (int i, int j ) {
   return _move_ring (i,j);
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // "saturate" fires all events that can be fired from a given node to
 //  the leaves and returns a saturated node (à la Ciardo's RecFireAndSat).
@@ -187,8 +199,9 @@ GShom saturate () {
   }
   return fixpoint(moves);
 }
-  
-  
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 int main(int argc, char **argv){
   if (argc == 2) {
     NB_RINGS = atoi(argv[1]);
