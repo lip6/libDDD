@@ -7,7 +7,7 @@ DDD_SRCDIR = $(top_srcdir)/src ./
 DDD_BUILDDIR = $(top_builddir)/src
 
 BASE = hom
-AM_CPPFLAGS =  -I $(DDD_SRCDIR) -I $(BOOST_CPPFLAGS) -I . -g -Wall $(TBBINC_FLAGS)
+AM_CPPFLAGS =  -I $(DDD_SRCDIR) -I $(BOOST_CPPFLAGS) -g -Wall $(TBBINC_FLAGS)
 LDADD = $(DDD_BUILDDIR)/libDDD_d.a
 
 #morpionv1_SOURCES = Hom_Basic.cpp Hom_Basic.hh hom_check_imp.cpp \
@@ -35,6 +35,8 @@ noinst_HEADERS = 	$(BASE)/check_imp.hpp \
 			$(BASE)/play.hpp \
 			$(BASE)/take_cell.hpp \
 			$(BASE)/winner.hpp \
+			$(BASE)/morpion_hom_vyann.hpp \
+			$(BASE)/general_v2.hpp \
 			$(BASE)/previous.hpp \
 			$(BASE)/check_impossible.hpp \
 			$(BASE)/validate_base.hpp \
