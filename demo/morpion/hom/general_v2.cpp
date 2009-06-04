@@ -10,7 +10,6 @@
 
 
 #include "notew.hpp"
-#include "nowinner.hpp"
 #include "play.hpp"
 #include "winner.hpp"
 
@@ -120,41 +119,7 @@ Hom CheckNoWinner ()
 		Hom res = ! ( CheckIsWinner ( PA ) + CheckIsWinner ( PB ) );
 		return res;
 	}
-	else
-	{
-		// copy paste from main
-		Hom noWinner;
-		typedef std::vector<game_status_type> players_array_type;
-		players_array_type players;
-		players.push_back(EMPTY);
-		players.push_back(PA);
-		players.push_back(PB);
-
-		for(players_array_type::const_iterator i = players.begin() ; i != players.end() ; ++i)
-		{
-			if ( *i == PA )
-			{
-				noWinner = ( CheckCellNoWinner ( *i, 0 ) + CheckCellNoWinner ( *i, 1 ) + CheckCellNoWinner ( *i, 2 ) ) ;
-			}
-			else
-			{
-				noWinner = noWinner & ( CheckCellNoWinner ( *i, 0 ) + CheckCellNoWinner ( *i, 1 ) + CheckCellNoWinner ( *i, 2 ) ) ;
-			}
-
-			noWinner = noWinner & ( CheckCellNoWinner ( *i, 3 ) + CheckCellNoWinner ( *i, 4 ) + CheckCellNoWinner ( *i, 5 ) ) ;
-
-			noWinner = noWinner & ( CheckCellNoWinner ( *i, 6 ) + CheckCellNoWinner ( *i, 7 ) + CheckCellNoWinner ( *i, 8 ) ) ;
-
-			noWinner = noWinner & ( CheckCellNoWinner ( *i, 0 ) + CheckCellNoWinner ( *i, 3 ) + CheckCellNoWinner ( *i, 6 ) ) ;
-			noWinner = noWinner & ( CheckCellNoWinner ( *i, 1 ) + CheckCellNoWinner ( *i, 4 ) + CheckCellNoWinner ( *i, 7 ) ) ;
-			noWinner = noWinner & ( CheckCellNoWinner ( *i, 2 ) + CheckCellNoWinner ( *i, 5 ) + CheckCellNoWinner ( *i, 8 ) ) ;
-
-			noWinner = noWinner & ( CheckCellNoWinner ( *i, 0 ) + CheckCellNoWinner ( *i, 4 ) + CheckCellNoWinner ( *i, 8 ) ) ;
-			noWinner = noWinner & ( CheckCellNoWinner ( *i, 2 ) + CheckCellNoWinner ( *i, 4 ) + CheckCellNoWinner ( *i, 6 ) ) ;
-		}
-
-		return noWinner;
-	}
+	
 }
 
 
