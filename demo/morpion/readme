@@ -1,0 +1,77 @@
+This program show an exemple of the generation space states of the Game Tic-Tac-Toe (Morpion)
+
+Required :
+This exemple required the Boost Library >= 1.33
+
+Command line :
+ ./morpionv2
+ 
+Environnement :
+    hom/const ==> Define type and constant of the Morpion GAME
+    hom/general_v2 ==> Define basic operation for :
+        1) Build the Initial State of the SDD for Morpion GAME
+        2) Build the homomorphism for
+            - PlayAnyFreeCell = Play all possible hit from a player X
+            - CheckIsWinner = Check if there is some winner configuration
+            - CheckIsNoWinner = Check if there is no winner configuration (**)
+    hom/notew ==> Define the homomorphism for note into state system that current configuration is won
+    hom/play ==> Homomorphism use for play one hit
+    hom/winner ==> Homomorphism use for build by composition the winner configuration
+    morpionv2 ==> Program Main
+
+
+Question :
+ 
+ What is the Initial DDD State ?
+ For each cell in game, we create one DDD Node.
+ Valuation on each arc can get three walue :
+    0 : Cell played by Gamer A
+    1 : Cell player by Gamer B
+   -1 : Empty Cell
+
+And the beginning DDD, we add one cell for define the state of the system, and can get 4 Values
+    -1 : It is to Gamer A to play 
+    -2 : It is to Gamer B to play
+     0 : The current configuration have been won by player A
+     1 : The current configuration have been won by player B
+     
+Exemple of Initial DDD for TicTacToe 3x3
+STATE -|-1|> 
+    0 -|-1|> 
+        1 -|-1|> 
+            2 -|-1|> 
+                3 -|-1|> 
+                    4 -|-1|> 
+                        5 -|-1|> 
+                            6 -|-1|> 
+                                7 -|-1|> 
+                                    8 -|-1|> 
+                                        9 -|-1|> 
+                                            TERMINAL
+ 
+ 
+ How to define on configuration winner ?
+ For this we use the composition homomorphism winner.
+ For exemple, for a 3x3 TicTacToc :
+ 
+  winner(A,0) & winner(A,1) & winner(A,2) :
+  XXX
+  ...
+  ...
+  
+  winner(A,0) & winner(A,3) & winner(A,6) :
+  X..
+  X..
+  X..
+ 
+ Then for get all possible configuration game for one player,  we do the union of them
+   
+
+How to define the no winner configuration ?
+For this, we use the negation of the homs checkIsWinner and get only the nowinner configuration.
+The is_selector operation is define by libDDD for do that, but it must be used only for a HOMOMORPHISM SELECTOR  
+
+   
+(**) Note :
+We define the Winner possibility by :
+   
