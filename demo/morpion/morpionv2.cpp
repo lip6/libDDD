@@ -10,11 +10,7 @@
 
 #include "hom/general_v2.hpp"
 #include "hom/const.hpp"
-#include "hom/check_imp.hpp"
 #include "hom/notew.hpp"
-#include "hom/check_impossible.hpp"
-#include "hom/validate_base.hpp"
-#include "hom/previous.hpp"
 
 
 
@@ -26,7 +22,7 @@
 
 /* A Modifier avec les standard de Boost */
 void usage() {
-  cerr << "Morpion V2; package " << PACKAGE_STRING <<endl;
+  cerr << "Morpion Game; package " << PACKAGE_STRING <<endl;
   cerr << "This tool performs state-space analysis of the tic-tac-toe a.k.a. morpion game.\n"
       << " The reachability set is computed using SDD/DDD, the Hierarchical Set Decision Diagram library, \n"
       << " Please see README file enclosed \n"
@@ -35,7 +31,7 @@ void usage() {
 }
 
 void bugreport () {
-  cerr << "Bugreport contact : " << PACKAGE_BUGREPORT <<endl;
+  cerr << "Bugreport contact : silien.hong@lip6.fr " << PACKAGE_BUGREPORT <<endl;
   cerr << "Sorry." << endl;
   exit(1);
 }
@@ -51,46 +47,24 @@ int main (int /*argc*/, char ** /*argv*/) {
   // Create the initial state
   DDD initial = createInitial ();
 
-  // Initialisation of the possible hit of players
+  // Initialisation of the homomorphism for one play of player A and B
   Hom nextAA = PlayAnyFreeCell();
 
-  // Initialisation of winner configuration
-  //std::tr1::array<Hom, 2> winners = {{CheckIsWinner (PA),CheckIsWinner (PB)}};
+  // Initialisation of the homomorphism for check one configuration of player is winner, for player A or B
   std::map<game_status_type,Hom> winners;
   winners[PA] = CheckIsWinner (PA);
-  //winners.insert( std::pair<game_status_type,Hom>(PB,CheckIsWinner (PB)));
-  //winners.insert(std::make_pair(PB,CheckIsWinner (PB)));
   winners[PB] = CheckIsWinner (PB);
 
   // Initialisation of no winner configuration
   Hom noWinner = CheckNoWinner();
 
-  std::clog << "Make the fix point for Grid Tic Tac Toe ["<< LINE << "," << COLUMN <<"] : \n\n\n" << std::endl ;
+  std::cout << "Make the fix point for Grid Tic Tac Toe ["<< LINE << "," << COLUMN <<"] : \n\n\n" << std::endl ;
   /* ALGO :
-  * 1) First we play BB, only if there is no winner in the current configuration
-  * 2) Next we try to play AA (only if there is no winner in the current configuration), there is two possibility in union
-  * 2.1) BB can play so it play (no winner and no full game)
-  * 2.2) BB can't play because the game is full (it is possible), so nextAA cut this configuration but Full keep it
-  * 3) Next we check if there is a winner for player A or B, if yes we note it at the end of the configuration game
+  * For each player :
+  *   1) We can play only if there is no winner configuration
+  *   2) If there is one winner A or B, we note into the globally state of the system that the current configuration is blocked 
   */
-  /*
-  GHom fullT2 = checkImpossible(tab,0,9) & fixpoint (
-                          ( NoteWinner(0) & (winnerA & ( (Full(9) + nextAA)  & nextBB ) ) )
-                           +
-                          ( NoteWinner(1) & (winnerB & ( (Full(9) + nextAA)  & nextBB ) ) )
-                           +
-                          ( noWinner & ( (Full(9) + nextAA)  & nextBB ) )
-
-			  + GHom::id ) ;
-  */
-
-  typedef boost::shared_ptr<const validate_base> ref_validate_base_type;
-  std::vector<ref_validate_base_type> tests;
-  tests.push_back(ref_validate_base_type(new check_lines()));
-
-
-
-  Hom fullT2 = /*checkImpossible(0,STATE_SYSTEM_CELL,tests) & */
+  Hom fullT2 = 
       fixpoint
       ( ( ( ( (NoteWinner(PA) & winners[PA])
             + (NoteWinner(PB) & winners[PB])
@@ -104,25 +78,9 @@ int main (int /*argc*/, char ** /*argv*/) {
   DDD reachable = fullT2 (initial);
   exportDot(SDD(0,reachable),"reach2");
   Statistic S2 = Statistic(reachable, "reach2" , CSV); // can also use LaTeX instead of CSV
+  std::cout << "Statistic Generation of Morpion Space State" << std::endl;
   S2.print_table(std::cout);
 
-  
-  
-  	/* Search the predecessor */
-  	DDD succ_reachable = reachable;
-  	int i = 0;
-  	do
-  	{
-  		Hom pred = previous( i,TO_PA ) + previous( i,TO_PB ) + previous( i,PA ) + previous( i,PB );
-  		previous(succ_reachable,pred);
-	  	std::cout << "-------------------------- PREDECESSOR WITH " << i+1 << " REMOVING HIT --------------------------" << std::endl;
-	  	S2 = Statistic(succ_reachable, "pred1" , CSV); // can also use LaTeX instead of CSV
-	  	S2.print_table(std::cout);
-	  	++i;
-  	}while(i<9);
-  	
-  	
-	exportDot(SDD(0,succ_reachable),"pred1");
 
 	
 	
