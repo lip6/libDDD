@@ -1,7 +1,8 @@
-This program show an exemple of the generation space states of the Game Tic-Tac-Toe (Morpion)
+This program show an exemple of the generation space states of the Game Tic-Tac-Toe based on the DDD Technology (Morpion) 
 
 Required :
-This exemple required the Boost Library >= 1.33
+ - the Boost Library >= 1.33
+ - the libDDD library
 
 Command line :
  ./morpionv2
@@ -11,9 +12,9 @@ Environnement :
     hom/general_v2 ==> Define basic operation for :
         1) Build the Initial State of the SDD for Morpion GAME
         2) Build the homomorphism for
-            - PlayAnyFreeCell = Play all possible hit from a player X
+            - PlayAnyFreeCell = Play all possible hit from one player X
             - CheckIsWinner = Check if there is some winner configuration
-            - CheckIsNoWinner = Check if there is no winner configuration (**)
+            - CheckIsNoWinner = Check if there is no winner configuration (Negation of the previous function)
     hom/notew ==> Define the homomorphism for note into state system that current configuration is won
     hom/play ==> Homomorphism use for play one hit
     hom/winner ==> Homomorphism use for build by composition the winner configuration
@@ -69,7 +70,75 @@ STATE -|-1|>
 
 How to define the no winner configuration ?
 For this, we use the negation of the homs checkIsWinner and get only the nowinner configuration.
-The is_selector operation is define by libDDD for do that, but it must be used only for a HOMOMORPHISM SELECTOR  
+The is_selector operation is define by libDDD for do that, but it must be used only for a HOMOMORPHISM SELECTOR
+
+What do the fixpoint game ?
+nextAA ==> Play all possible hit of one player (can be A or B switch the SYSTEM_STATE)
+winnerA ==> Check if there is a winner configuration for player A
+winnerB ==> Check if there is a winner configuration for player B
+noWinner ==> Check if there is no winner
+notewA ==> Note a winner a configuration for player A
+notewB ==> Note a winner a configuration for player B
+
+notewA & winnerA ==> If previous configuration have been won by player A, so we note it
+notewB & winnerB ==> If previous configuration have been won by player B, so we note it
+nextAA & nowinner ==> Else no winner have been detected in previous configuration, so we play another hit for the player designed into STATE_SYSTEM
+
+Now The fixpoint is the union of all of theirs wiht ID.
+
+( [ (notewA & winnerA) + (notewB & winnerB) + (nextAA & nowinner) ] + ID)* 
+
+
+ 
+
+
+Descritpion about Homomorphism :
+
+---- notew ----
+Used only for note a winner into the Initial Variable DDD System State
+ALGO :
+Terminal ==> Error
+PHI(vr,vl)(the_winner)
+    If vr == SYSTEM_STATE
+        return vr -|the_winner|-> ID
+        
+---- play ----
+Used only for play one gamer (PA or PB).
+Rules are :
+    - One user can play only if it is his state to play
+    - One user can play only if there is no current winner
+    - One user can take only a empty cell
+ALGO :
+Terminal ==> Error
+PHI(vr,vl)(the_cell,the_player)
+    If vr == SYSTEM_STATE
+        If vl == TO_PA && the_player == PA (It is to gamer A to play)
+            return vr -|TO_PB|-> Propagation_to_next(the_cell,the_player)
+        If vl == TO_PB && the_player == PB (It is to gamer B to play)
+            return vr -|TO_PA|-> Propagation_to_next(the_cell,the_player)
+        Else
+            return ZERO
+            
+    if vr == the_cell
+        if vl == EMPTY
+            return vr -|the_player|-> ID
+        else
+            return ZERO
+
+---- winner ----
+Used only for check if one cell have been taken by a specific gamer, and by composition, we can check
+if there are some winner configuration for a specific player
+ALGO :
+Terminal ==> Error
+PHI(vr,vl)(the_cell,the_player)
+    If vr == the_cell
+        If vl == the_player
+            return vr -|vl|-> ID
+        Else
+            return ZERO
+This homomorphism implements the is_selector function used for have its negation.
+
+   
 
    
 (**) Note :

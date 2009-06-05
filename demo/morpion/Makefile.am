@@ -14,6 +14,7 @@ LDADD = $(DDD_BUILDDIR)/libDDD_d.a
 morpionv2_SOURCES = 	$(BASE)/notew.cpp \
 			$(BASE)/play.cpp $(BASE)/winner.cpp \
 			$(BASE)/general_v2.cpp \
+			$(BASE)/const.cpp \
 			morpionv2.cpp
 
 

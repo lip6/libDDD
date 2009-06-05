@@ -5,11 +5,10 @@
 #include <boost/multi_array.hpp>
 #include <cmath>
 
-// Const variable
-static const size_t NBCELL = 9;
-static const size_t STATE_SYSTEM_CELL = NBCELL;
-static const size_t LINE = sqrt(NBCELL);
-static const size_t COLUMN = sqrt(NBCELL);
+extern size_t NBCELL;
+extern size_t STATE_SYSTEM_CELL;
+extern size_t LINE;
+extern size_t COLUMN;
 
 // players
 /**

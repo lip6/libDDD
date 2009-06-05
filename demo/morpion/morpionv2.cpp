@@ -18,16 +18,18 @@
 #include "util/dotExporter.h"
 #include "statistic.hpp"
 
-
-
 /* A Modifier avec les standard de Boost */
 void usage() {
-  cerr << "Morpion Game; package " << PACKAGE_STRING <<endl;
-  cerr << "This tool performs state-space analysis of the tic-tac-toe a.k.a. morpion game.\n"
+  cout << "Morpion Game; package " << PACKAGE_STRING <<endl;
+  cout << "This tool performs state-space analysis of the tic-tac-toe a.k.a. morpion game.\n"
       << " The reachability set is computed using SDD/DDD, the Hierarchical Set Decision Diagram library, \n"
       << " Please see README file enclosed \n"
       << "in the distribution for more details. \n \nOptions :" << endl;
-  cerr<<  "Problems ? Comments ? contact " << PACKAGE_BUGREPORT <<endl;
+  cout <<  "Problems ? Comments ? contact " << PACKAGE_BUGREPORT <<endl;
+  
+  cout << "\nCommand :" << endl;
+  cout << "morpionv2 <NB_LINE>" << endl;
+  cout << " NB_LINE : The number of Cell Game into one line (Morpion game is a square), by default it 3 for have a game 3x3" << endl;
 }
 
 void bugreport () {
@@ -42,8 +44,19 @@ void bugreport () {
  * @param
  * @return
  */
-int main (int /*argc*/, char ** /*argv*/) {
+int main (int argc, char ** argv) {
 
+  // Print the command usage
+  usage();
+  
+  // Initialization of the game cell configuration (the number of cell into one line)
+  LINE = 3;
+  if (argc == 2)
+    LINE = atoi(argv[1]);
+  NBCELL = LINE * LINE;
+  STATE_SYSTEM_CELL = NBCELL;
+  COLUMN = LINE;
+  
   // Create the initial state
   DDD initial = createInitial ();
 
@@ -57,8 +70,9 @@ int main (int /*argc*/, char ** /*argv*/) {
 
   // Initialisation of no winner configuration
   Hom noWinner = CheckNoWinner();
-
-  std::cout << "Make the fix point for Grid Tic Tac Toe ["<< LINE << "," << COLUMN <<"] : \n\n\n" << std::endl ;
+  cout << "\nPrint the initial DDD Graph : " << endl;
+  cout << initial << endl;
+  cout << "\nMake the fix point for Grid Tic Tac Toe ["<< LINE << "," << COLUMN <<"] :" << std::endl ;
   /* ALGO :
   * For each player :
   *   1) We can play only if there is no winner configuration
@@ -76,8 +90,9 @@ int main (int /*argc*/, char ** /*argv*/) {
 
 
   DDD reachable = fullT2 (initial);
-  exportDot(SDD(0,reachable),"reach2");
-  Statistic S2 = Statistic(reachable, "reach2" , CSV); // can also use LaTeX instead of CSV
+  std::cout << "Exporting the DDD Graph into morpion.dot file" << std::endl;
+  exportDot(SDD(0,reachable),"morpion");
+  Statistic S2 = Statistic(reachable, "morpion" , CSV); // can also use LaTeX instead of CSV
   std::cout << "Statistic Generation of Morpion Space State" << std::endl;
   S2.print_table(std::cout);
 
