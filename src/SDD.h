@@ -24,12 +24,10 @@
 #ifndef SDD_H
 #define SDD_H
 
-#include <iosfwd>
+#include <vector>
 #include <string>
-#include <ext/hash_set>
 
 #include "DataSet.h"
-#include "util/hash_support.hh"
 #include "hashfunc.hh"
 
 

@@ -24,14 +24,6 @@
 #include <cassert>
 #include <iostream>
 
-#include "Hom.h"
-#include "DDD.h"
-#include "DED.h"
-#include "SHom.h"
-#include "SDD.h"
-#include "SDED.h"
-#include "UniqueTable.h"
-#include "DataSet.h"
 #include "MemoryManager.h"
 #include "util/configuration.hh"
 #include "util/hash_support.hh"
