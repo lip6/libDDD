@@ -27,7 +27,6 @@
 #include <iosfwd>
 #include <string>
 #include <vector>
-#include <ext/hash_set>
 
 #include "DataSet.h"
 #include "hashfunc.hh"
