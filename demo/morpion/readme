@@ -139,8 +139,3 @@ PHI(vr,vl)(the_cell,the_player)
 This homomorphism implements the is_selector function used for have its negation.
 
    
-
-   
-(**) Note :
-We define the Winner possibility by :
-   
