@@ -23,7 +23,7 @@ Environnement :
     morpionv2 ==> Program Main
 
 
-Question :
+Questions / Answers :
  
  What is the Initial DDD State ?
  For each cell in game, we create one DDD Node.
@@ -32,7 +32,7 @@ Question :
     1 : Cell player by Gamer B
    -1 : Empty Cell
 
-And the beginning DDD, we add one cell for define the state of the system, and can get 4 Values
+At the beginning DDD, we add one cell for define the state of the system, and can get 4 values
     -1 : It is to Gamer A to play 
     -2 : It is to Gamer B to play
      0 : The current configuration have been won by player A
@@ -75,7 +75,7 @@ For this, we use the negation of the homs checkIsWinner and get only the nowinne
 The is_selector operation is define by libDDD for do that, but it must be used only for a HOMOMORPHISM SELECTOR
 
 What do the fixpoint game ?
-nextAA ==> Play all possible hit of one player (can be A or B switch the SYSTEM_STATE)
+nextAA ==> Play all possible hit of one player (can be A or B switch the variable SYSTEM_STATE)
 winnerA ==> Check if there is a winner configuration for player A
 winnerB ==> Check if there is a winner configuration for player B
 noWinner ==> Check if there is no winner
@@ -86,7 +86,7 @@ notewA & winnerA ==> If previous configuration have been won by player A, so we 
 notewB & winnerB ==> If previous configuration have been won by player B, so we note it
 nextAA & nowinner ==> Else no winner have been detected in previous configuration, so we play another hit for the player designed into STATE_SYSTEM
 
-Now The fixpoint is the union of all of theirs wiht ID.
+Now The fixpoint is the union of all of theirs with ID.
 
 ( [ (notewA & winnerA) + (notewB & winnerB) + (nextAA & nowinner) ] + ID)* 
 
@@ -97,7 +97,7 @@ Now The fixpoint is the union of all of theirs wiht ID.
 Descritpion about Homomorphism :
 
 ---- notew ----
-Used only for note a winner into the Initial Variable DDD System State
+Used only for note a winner into the Initial Variable DDD SYSTEM STATE
 ALGO :
 Terminal ==> Error
 PHI(vr,vl)(the_winner)
