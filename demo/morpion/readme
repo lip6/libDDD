@@ -1,44 +1,48 @@
-This program show an exemple of the generation space states of the Game Tic-Tac-Toe based on the DDD Technology (Morpion) 
+This program shows an example of the generation space states of the Game Tic-Tac-Toe (Morpion in French) using DDD.
 
-Required :
- - the Boost Library >= 1.33
+It is meant as a small tutorial, and shows how to write ad-hoc homomorphisms to represent a given transition relation.
+
+Requirements :
+ - the Boost Library >= 1.34
  - the libDDD library
 
 Command line :
- ./morpionv2 <NB_LINE>
+ ./morpionv2 <LINE_SIZE=3>
  
- <NB_LINE> : The number of Cell Game into one line (Morpion game is a square), by default it 3 for have a game 3x3
+ <LINE_SIZE> : The number of Cells in each line. The full grid is a square. The default is 3,  for a standard 3x3 grid.
  
-Environnement :
-    hom/const ==> Define type and constant of the Morpion GAME
-    hom/general_v2 ==> Define basic operation for :
-        1) Build the Initial State of the SDD for Morpion GAME
+Files:
+    hom/const ==> Define types and constants used in the Morpion
+    hom/general_v2 ==> Define basic operation to:
+        1) Build the Initial State of the Morpion (i.e.a DDD representing an empty grid, no one has played yet)
         2) Build the homomorphism for
-            - PlayAnyFreeCell = Play all possible hit from one player X
-            - CheckIsWinner = Check if there is some winner configuration
+            - PlayAnyFreeCell (X) = Play one of the possible move for player X
+            - CheckIsWinner  = Check if one of the players has won 
             - CheckIsNoWinner = Check if there is no winner configuration (Negation of the previous function)
-    hom/notew ==> Define the homomorphism for note into state system that current configuration is won
-    hom/play ==> Homomorphism use for play one hit
-    hom/winner ==> Homomorphism use for build by composition the winner configuration
+    hom/notew ==> A homomorphism used to mark configurations in which a player has won 
+    hom/play ==> Homomorphism used to play one move
+    hom/winner ==> Homomorphism used to build by composition the winner configuration tester CheckIsWinner
     morpionv2 ==> Program Main
 
 
 Questions / Answers :
  
- What is the Initial DDD State ?
- For each cell in game, we create one DDD Node.
+**** What is the Initial DDD State ?
+ For each cell in game, we create one DDD variable.
+ DDD variables are integers, thus the variable grid[i][j] = i * <LINE_SIZE> + j
+
  Valuation on each arc can get three walue :
-    0 : Cell played by Gamer A
-    1 : Cell player by Gamer B
+    0 : Cell played by Player A
+    1 : Cell player by Player B
    -1 : Empty Cell
 
-At the beginning DDD, we add one cell for define the state of the system, and can get 4 values
-    -1 : It is to Gamer A to play 
-    -2 : It is to Gamer B to play
+At the top of the DDD, we add one variable called STATE to represent the status of the game, which can take 4 values
+    -1 : It is to Player A to play 
+    -2 : It is to Player B to play
      0 : The current configuration have been won by player A
      1 : The current configuration have been won by player B
      
-Exemple of Initial DDD for TicTacToe 3x3
+Example of Initial DDD for TicTacToe 3x3
 STATE -|-1|> 
     0 -|-1|> 
         1 -|-1|> 
@@ -50,12 +54,16 @@ STATE -|-1|>
                                 7 -|-1|> 
                                     8 -|-1|> 
                                         9 -|-1|> 
-                                            TERMINAL
+                                            TERMINAL [1]
+
+ i.e. All cells empty, and STATE indicates that player A should play first.
+
  
- 
- How to define on configuration winner ?
- For this we use the composition homomorphism winner.
- For exemple, for a 3x3 TicTacToc :
+**** How to identify winning configurations ?
+ For this we use composition homomorphism of a "winner" homomorphism.
+ Basically, it tests if the the player's token is in the the specified cell.
+
+ For example, for a 3x3 TicTacToe :
  
   winner(A,0) & winner(A,1) & winner(A,2) :
   XXX
@@ -67,56 +75,64 @@ STATE -|-1|>
   X..
   X..
  
- Then for get all possible configuration game for one player,  we do the union of them
+ Then to obtain all possible winning configuration of the game for one player, we use the Union.
    
 
-How to define the no winner configuration ?
-For this, we use the negation of the homs checkIsWinner and get only the nowinner configuration.
-The is_selector operation is define by libDDD for do that, but it must be used only for a HOMOMORPHISM SELECTOR
+**** How to define configurations in which there is no winner ?
 
-What do the fixpoint game ?
-nextAA ==> Play all possible hit of one player (can be A or B switch the variable SYSTEM_STATE)
-winnerA ==> Check if there is a winner configuration for player A
-winnerB ==> Check if there is a winner configuration for player B
+For this, we simply use the negation of the homomorphism "checkIsWinner".
+Negation of a homomorphism is only available for "Selector" homomorphisms, i.e. \forall s \in SDD, h(s) \subseteq s.
+It yields a complement homomorphism, i.e. \forall s \in SDD, !h(s) = s \setminus h(s).
+
+The is_selector() member predicate in homomorphisms allows users to tag this property, hence allow use of operator!, ITE and other selector features.
+
+**** How to obtain all game configurations ? 
+
+We build several homomorphisms in the main program:
+
+nextAA ==> Play all possible moves of one player (can be A or B, and flip the variable STATE from A to B)
+winnerA ==> Check if there is a winning configuration for player A
+winnerB ==> Check if there is a winning configuration for player B
 noWinner ==> Check if there is no winner
-notewA ==> Note a winner a configuration for player A
-notewB ==> Note a winner a configuration for player B
+notewA ==> Note a winner a configuration for player A (update STATE variable)
+notewB ==> Note a winner a configuration for player B (update STATE variable)
 
-notewA & winnerA ==> If previous configuration have been won by player A, so we note it
-notewB & winnerB ==> If previous configuration have been won by player B, so we note it
-nextAA & nowinner ==> Else no winner have been detected in previous configuration, so we play another hit for the player designed into STATE_SYSTEM
+notewA & winnerA ==> If current configuration is winning for player A, update the STATE
+notewB & winnerB ==> If current configuration is winning for player A, update the STATE
+nextAA & nowinner ==> If no winner currently detected, play a move (for the current player as designated by STATE), and update STATE.
 
-Now The fixpoint is the union of all of theirs with ID.
+The full transition relation is then the union of these three possibilities: 
 
-( [ (notewA & winnerA) + (notewB & winnerB) + (nextAA & nowinner) ] + ID)* 
+Trans =  (notewA & winnerA) + (notewB & winnerB) + (nextAA & nowinner)
+
+Then, to obtain all reachable configurations, we compute a least fixpoint, with Id (the identity homomorphism) to accumulate states in the result.
+
+reach = fixpoint( Trans + Id ) ( InitialState ) 
 
 
- 
+**** Detailed Homomorphism Description:
 
-
-Descritpion about Homomorphism :
-
----- notew ----
-Used only for note a winner into the Initial Variable DDD SYSTEM STATE
+---- notew (PlayerID the_winner)----
+Used to note a winning configuration in variable STATE 
 ALGO :
 Terminal ==> Error
-PHI(vr,vl)(the_winner)
+PHI(vr,vl)
     If vr == SYSTEM_STATE
         return vr -|the_winner|-> ID
         
----- play ----
-Used only for play one gamer (PA or PB).
-Rules are :
-    - One user can play only if it is his state to play
-    - One user can play only if there is no current winner
-    - One user can take only a empty cell
+---- play (CellID the_cell, PlayerID the_player) ----
+Used to play a move of one player (PA or PB).
+Rules are:  A player can play iff
+    - STATE indicates that it is his turn to play
+    - STATE indicates there is no current winner
+    - The cell the player wants to play in is empty.
 ALGO :
 Terminal ==> Error
-PHI(vr,vl)(the_cell,the_player)
+PHI(vr,vl)
     If vr == SYSTEM_STATE
-        If vl == TO_PA && the_player == PA (It is to gamer A to play)
+        If vl == TO_PA && the_player == PA (It is to player A to play)
             return vr -|TO_PB|-> Propagation_to_next(the_cell,the_player)
-        If vl == TO_PB && the_player == PB (It is to gamer B to play)
+        If vl == TO_PB && the_player == PB (It is to player B to play)
             return vr -|TO_PA|-> Propagation_to_next(the_cell,the_player)
         Else
             return ZERO
@@ -127,17 +143,18 @@ PHI(vr,vl)(the_cell,the_player)
         else
             return ZERO
 
----- winner ----
-Used only for check if one cell have been taken by a specific gamer, and by composition, we can check
-if there are some winner configuration for a specific player
+---- winner (CellID the_cell, PlayerID the_player) ----
+Used only to check if a given cell has been taken by a specific player, and by composition, we can check
+if there are some winning configurations for a specific player
 ALGO :
 Terminal ==> Error
-PHI(vr,vl)(the_cell,the_player)
+PHI(vr,vl)
     If vr == the_cell
         If vl == the_player
             return vr -|vl|-> ID
         Else
             return ZERO
-This homomorphism implements the is_selector function used for have its negation.
+This homomorphism implements is_selector() predicate by "return true".
+This is used to allow use of its negation.
 
    
