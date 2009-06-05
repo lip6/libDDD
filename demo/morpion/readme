@@ -5,7 +5,9 @@ Required :
  - the libDDD library
 
 Command line :
- ./morpionv2
+ ./morpionv2 <NB_LINE>
+ 
+ <NB_LINE> : The number of Cell Game into one line (Morpion game is a square), by default it 3 for have a game 3x3
  
 Environnement :
     hom/const ==> Define type and constant of the Morpion GAME
