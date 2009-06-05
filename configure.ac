@@ -91,9 +91,9 @@ AC_CONFIG_FILES([   Makefile
                     demo/hanoi/Makefile
                     demo/expr/Makefile
                     demo/morpion/Makefile
-                    src/Makefile])
-                    # doc/Doxyfile
-                    # doc/Makefile])
+                    src/Makefile
+                    doc/Doxyfile
+                    doc/Makefile])
 
 # Do it !! (mandatory)
 AC_OUTPUT
