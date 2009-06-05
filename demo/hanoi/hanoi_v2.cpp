@@ -57,22 +57,23 @@ int main(int argc, char **argv){
   }
 
   // To store the set of events
-  vector<Hom> events;
+  set<GHom> events;
   for (int i=0 ; i < NB_RINGS ; i++) {
     // Consider one event per ring, it will split into the possible moves when it reaches the ring
     // ie : ev = \Sum_{i \neq j} swap_pole (ring,i,j)
     // with swap_pole defined as in hanoi_v1
-    events.push_back(move_ring(i));
+    events.insert(move_ring(i));
   }
 
+  DDD ss = fixpoint( GHom::add(events) + GHom::id ) (M0);
   // Fixpoint over events + Id
-  DDD ss, tmp = M0;
-  do {
-    ss = tmp;
-    for (vector<Hom>::reverse_iterator it = events.rbegin(); it != events.rend(); it++) {
-      tmp = tmp + (*it) (tmp);
-    }
-  } while (ss != tmp);
+//   DDD ss, tmp = M0;
+//   do {
+//     ss = tmp;
+//     for (vector<Hom>::reverse_iterator it = events.rbegin(); it != events.rend(); it++) {
+//       tmp = tmp + (*it) (tmp);
+//     }
+//   } while (ss != tmp);
 
  // stats
   Statistic S = Statistic(ss,"hanoiv2." + toString(NB_RINGS) + "." + toString(NB_POLES),CSV);  
