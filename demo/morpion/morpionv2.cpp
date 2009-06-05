@@ -72,7 +72,7 @@ int main (int argc, char ** argv) {
   Hom noWinner = CheckNoWinner();
   cout << "\nPrint the initial DDD Graph : " << endl;
   cout << initial << endl;
-  cout << "\nMake the fix point for Grid Tic Tac Toe ["<< LINE << "," << COLUMN <<"] :" << std::endl ;
+  cout << "\nMake the fix point for Grid Tic Tac Toe ["<< LINE << "," << COLUMN <<"] :\nIt can take a long time ... please wait ..." << std::endl ;
   /* ALGO :
   * For each player :
   *   1) We can play only if there is no winner configuration
