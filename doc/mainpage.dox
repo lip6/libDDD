@@ -4,17 +4,35 @@
 ///
 /// libDDD is a data decision diagram library.  It provides algorithms and data
 /// structures to implement symbolic manipulation of data, in particular in the 
-/// context of model-checking
+/// context of model-checking. It offers support for Hierarchical Set Decision Diagrams,
+/// and the simpler Data Decision Diagrams. Operations on theses structures are 
+/// both efficiently and elegantly encoded as Homomorphisms.
 ///
 /// See <a href="http://ddd.lip6.fr/">ddd.lip6.fr</a> for more
 /// information about this project.
 ///
-/// \section thisdoc This Document
+/// \section thisdoc Introduction
 ///
 /// This document describes all the public data structures and functions
 /// of libDDD.  This aims to be a reference manual, not a tutorial.
+/// 
+/// Although some effort has been invested in creating these doxy pages, 
+/// the actual source files often contain more comments which are not doxy-compliant.
 ///
 ///
 /// \section pointers Handy starting points
 ///
+/// Most user functionality is found in the files:
+///
+/// For SDD: SDD.h (Basic set operations) SHom.h (Homomorphisms)
+///
+/// For DDD: DDD.h (Basic set operations) Hom.h (Homomorphisms)
+/// 
+/// Then, as a starting point, have a look at the pages GSDD, and GShom.
+///
+/// Remember that garbage collection should be done by invoking MemoryManager::garbage().
+///
+/// Some useful annex functionality can be found in statistic.hpp and util/dotExporter.h
+
+
                           
