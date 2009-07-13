@@ -1762,11 +1762,31 @@ GShom fixpoint (const GShom &h, bool is_top_level) {
 	  if (const sns::Compose * comp = dynamic_cast<const sns::Compose*> ( _GShom::get_concret(other) ) ) {
 	    // hit : we have a composition
 //	    std::cerr << "Hit a composition! ";// comp->print(std::cerr) ; std::cerr << std::endl;
-	    if ( comp->left.is_selector() )
-	      if (const sns::Add * subadd = dynamic_cast<const sns::Add*> ( _GShom::get_concret(comp->right) ) ) {
+	    bool canApply = false;
+	    bool isLeftSel = true;
+	    const sns::Add * subadd = NULL;
+	    GShom selector;
+
+	    if ( comp->left.is_selector() ) {
+	      if (const sns::Add * subadd2 = dynamic_cast<const sns::Add*> ( _GShom::get_concret(comp->right) ) ) {
+		subadd = subadd2;
+		selector = comp->left;
+		isLeftSel = true;
+		canApply = true;
+	      }
+	    } else if (comp->right.is_selector() ) {
+	      if (const sns::Add * subadd2 = dynamic_cast<const sns::Add*> ( _GShom::get_concret(comp->left) ) ) {
+		subadd = subadd2;
+		selector = comp->right;
+		isLeftSel = false;
+		canApply = true;
+	      }
+	    }
+	    if (canApply) 
+	      {
 		// This is it !! apply rewriting strategy
 //		std::cerr << "Hit matches second criterion sel & Add ! " << std::endl;
-		GShom::range_t selr = comp->left.get_range();
+		GShom::range_t selr = selector.get_range();
 		if (! selr.empty() ) {
 		  // selector concerns a subset of variables, probably we can commute with at least some of the terms in subadd
 		  d3::set<GShom>::type doC, notC;
@@ -1782,12 +1802,17 @@ GShom fixpoint (const GShom &h, bool is_top_level) {
 		  
 		  if (! doC.empty() ) {
 		    // Great ! successful application of the rule is possible
-//		    std::cerr << "Hit Full ! " << doC.size() << "/" << notC.size() << std::endl;
+		    //		    std::cerr << "Hit Full ! " << doC.size() << "/" << notC.size() << std::endl;
 		    d3::set<GShom>::type finalU;
 		    finalU.insert(GShom::id);
-		    finalU.insert( sns::Fixpoint( (comp->left &  GShom::add(notC))  + GShom::id) );
 		    doC.insert(GShom::id);
-		    finalU.insert( comp->left & fixpoint ( GShom::add(doC) ) );
+		    if (isLeftSel ) {
+		      finalU.insert( sns::Fixpoint( (selector &  GShom::add(notC))  + GShom::id) );
+		      finalU.insert( selector & fixpoint ( GShom::add(doC) ) );
+		    } else {
+		      finalU.insert( sns::Fixpoint( (GShom::add(notC) & selector)  + GShom::id) );
+		      finalU.insert( fixpoint ( GShom::add(doC) ) & selector );
+		    }
 		    return sns::Fixpoint( GShom::add(finalU) ) ;
 		  }
 		}
