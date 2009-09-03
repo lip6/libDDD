@@ -33,6 +33,7 @@
 #include <set>
 #include <map>
 #include <cassert>
+#include <iostream>
 /**********************************************************************/
 
 /// pre-declaration of concrete (private) class implemented in .cpp file
@@ -380,7 +381,7 @@ public:
     }
 
   /// returns the predescessor homomorphism, using pot to determine variable domains
-      GHom invert (const GDDD & pot) const {
+      virtual GHom invert (const GDDD & pot) const {
 	// default = raise assert
 	if ( is_selector() ) {
 	  // A default implmentation is provided for selector homomorphisms, overloadable.
@@ -388,6 +389,9 @@ public:
 	  return  ( (pot - GHom(this)(pot))+ GHom::id ); 
 	}
 	// No default implem if ! is_selector 
+	std::cerr << "Cannot invert homomorphism : " ;
+	print (std::cerr);
+	std::cerr << std::endl ;	
 	assert(0); 
 	return GHom(GDDD::null);
       }
