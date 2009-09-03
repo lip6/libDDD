@@ -30,6 +30,7 @@
 #include "hashfunc.hh"
 
 #include <string>
+#include <iostream>
 #include <map>
 
 #include "util/set.hh"
@@ -421,6 +422,9 @@ public:
 	return  ( (pot - GShom(this)(pot))+ GShom::id ); 
       }
       // No default implem if ! is_selector 
+      std::cerr << "Cannot invert homomorphism : " ;
+      print (std::cerr);
+      std::cerr << std::endl ;
       assert(0); 
       return GShom::null;
     }
