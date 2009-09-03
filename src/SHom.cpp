@@ -378,6 +378,13 @@ namespace sns {
       return  h.hash() ^ target * 21727; 
     }
 
+    GShom invert (const GSDD & pot) const { 
+      GSDD localpot = GShom(DomExtract(target)) (pot);
+      GSDD::const_iterator gi = localpot.begin();
+      return localApply ( h.invert( *  ((const DDD *) gi->first) ), target)  ;
+    }
+
+
     bool operator==(const _GShom &s) const {
       const LocalApply* ps = (const LocalApply *)&s;
       return target == ps->target && h ==  ps->h;
@@ -462,8 +469,10 @@ namespace sns {
       return  h.hash() ^ target * 2177; 
     }
 
-    GShom invert (const GSDD & pot) const { 
-      return localApply ( h.invert( GShom(DomExtract(target)) (pot) ), target)  ;
+    GShom invert (const GSDD & pot) const {
+      GSDD localpot = GShom(DomExtract(target)) (pot);
+      GSDD::const_iterator gi = localpot.begin();
+      return localApply ( h.invert( *  ((const SDD *) gi->first) ), target)  ;
     }
 
 
@@ -2156,7 +2165,13 @@ GShom operator*(const GShom & h,const GShom & cond) {
     std::cerr << "Creating a * intersection between homomorphisms, but second argument is not a selector. " << std::endl;
     printCondError(cond);
     assert(false);
-  }  
+  }
+  if ( h == GShom::null || cond == GShom::null )
+    return GShom::null;
+    
+  // trivial case
+  if ( h == cond )
+    return h;
   return sns::Inter(h,cond);
 }
 
