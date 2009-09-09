@@ -211,10 +211,10 @@ public :
     return cond_ == ps->cond_ ;
   }  
 
-  GHom invert  (const GDDD & pot) const {
+  //GHom invert  (const GDDD & pot) const {
     // (! sel)^-1 = pot - !sel(pot) + s = ( (pot - !sel(pot)) + Id )
-    return  (pot - (GHom(this)(pot))) + GHom::id ;
-  }
+    // return  (pot - (GHom(this)(pot))) + GHom::id ;
+  //}
 
 
   _GHom * clone () const {  return new NotCond(*this); }

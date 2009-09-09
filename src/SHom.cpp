@@ -171,6 +171,7 @@ namespace sns {
     }
 
     GShom invert (const GSDD & pot) const { 
+      // (h * c) (s) = h(s) * c
       // (h * c)^-1 (s) = h^-1 ( s + pot - c) = ( h^-1 & ( id + (pot-c) ) ) (s)
       return left.invert(pot) &  ( GShom::id + (pot - right) ) ;
     }
@@ -211,8 +212,8 @@ namespace sns {
     }
 
     GShom invert (const GSDD & pot) const { 
-      // (h * h')^-1 (s) =( h^-1 ( pot ) +  h^-1 (pot) ) (pot) 
-      return (left.invert(pot) + right.invert(pot)) (pot) ;
+      // (h * h')^-1 (s) =( h^-1 ( pot ) +  h^-1 (pot) ) (s) 
+      return (left.invert(pot) + right.invert(pot)) ;
     }
 
 
@@ -512,10 +513,11 @@ namespace sns {
       return cond_.get_range() ;
     }
 
-    GShom invert (const GSDD & pot) const { 
+    //    GShom invert (const GSDD & pot) const { 
       // (! sel)^-1 = pot - !sel(pot) + s = ( (pot - !sel(pot)) + Id )
-      return  (pot - (GShom(this)(pot))) + GShom::id ;
-    }
+      // return  (pot - (GShom(this)(pot))) + GShom::id ;
+      // NEW version : (!sel)^-1 = !sel already default behavior
+    // }
 
 
     bool is_selector () const {
@@ -1147,6 +1149,8 @@ namespace sns {
     }
 
     GShom invert (const GSDD & pot) const {
+      // No correct solution here : many solutions may exist.
+      // simply add states that go to the target states (e.g. prefixes of cycles)
       // (h^*)^-1 (s) = (h^-1 + id)^*  
       return fixpoint ( arg.invert(pot) + GShom::id );
     }
