@@ -381,7 +381,7 @@ public:
     }
 
   /// returns the predescessor homomorphism, using pot to determine variable domains
-      virtual GHom invert (const GDDD & pot) const {
+      virtual GHom invert (const GDDD & ) const {
 	// default = raise assert
 	if ( is_selector() ) {
 	  // A default implmentation is provided for selector homomorphisms, overloadable.
