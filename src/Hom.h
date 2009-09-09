@@ -386,7 +386,8 @@ public:
 	if ( is_selector() ) {
 	  // A default implmentation is provided for selector homomorphisms, overloadable.
 	  // sel^-1 (s) = pot - sel(pot) + s = ((pot-sel(pot)) + id)
-	  return  ( (pot - GHom(this)(pot))+ GHom::id ); 
+	  // return  ( (pot - GHom(this)(pot))+ GHom::id );
+	  return this;
 	}
 	// No default implem if ! is_selector 
 	std::cerr << "Cannot invert homomorphism : " ;
