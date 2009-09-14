@@ -144,12 +144,13 @@ public:
 
   /* Eval */
   GDDD eval(const GDDD &d)const{
+    //  (h * c) (s) = h(s) * c
     return left(d)*right;
   }
 
   GHom invert  (const GDDD & pot) const {
-    // (h * c)^-1 (s) = h^-1 ( s + pot - c) = ( h^-1 & ( id + (pot-c) ) ) (s)
-    return left.invert(pot) &  ( GHom::id + (pot - right) ) ;
+    // (h * c)^-1 (s) = h^-1 ( s * c) = h^-1 & ( id * c ) (s)
+    return left.invert(pot) &  ( GHom::id * right) ;
   }
 
   bool is_selector () const {
@@ -210,11 +211,6 @@ public :
     const NotCond* ps = (const NotCond *)&s;
     return cond_ == ps->cond_ ;
   }  
-
-  //GHom invert  (const GDDD & pot) const {
-    // (! sel)^-1 = pot - !sel(pot) + s = ( (pot - !sel(pot)) + Id )
-    // return  (pot - (GHom(this)(pot))) + GHom::id ;
-  //}
 
 
   _GHom * clone () const {  return new NotCond(*this); }
