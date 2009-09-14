@@ -33,17 +33,17 @@
 #include "UniqueTable.h"
 #include "util/hash_support.hh"
 
-/// This class is a very basic implementation of DataSet interface 
+/// This class is a very basic implementation of DataSet interface
 /// based on std::std::vector<int> and a unicity table
 class IntDataSet : public DataSet {
   static UniqueTable<std::vector<int> > canonical;
-  
+
   static const std::vector<int> * empty_;
-  
+
   const std::vector<int>* data;
   // private constructors
   IntDataSet (const std::vector<int>* ddata): data(ddata) {};
-  
+
 public :
   /// typedef IntDataSet::const_iterator
   typedef std::vector<int>::const_iterator const_iterator;
@@ -59,14 +59,23 @@ public :
     sort( tmp.begin() , tmp.end() );
     data = canonical( tmp );
   }
+
+  /// public constructor from iterator (begin,end)
+  IntDataSet (const std::vector<int>::iterator & begin, const std::vector<int>::iterator & end) {
+    std::vector<int> ddata(begin,end);
+    std::vector<int> tmp = std::vector<int> (ddata);
+    sort( tmp.begin() , tmp.end() );
+    data = canonical( tmp );
+  }
+
   /// public deafult constructor = empty set
   IntDataSet () {
     data = empty_ ;
   }
-  
+
   /// destructor
   virtual ~IntDataSet() {};
-  /// returns a new instance copy of this 
+  /// returns a new instance copy of this
   DataSet *newcopy () const  {
     return new IntDataSet(data);
   }
@@ -78,7 +87,7 @@ public :
     // trim
     std::vector<int> trimres = std::vector<int> (res);
     assert (trimres.size() == trimres.capacity());
-    return new IntDataSet(canonical(trimres));	
+    return new IntDataSet(canonical(trimres));
   }
   /// returns a new instance with elements = this union b
   DataSet *set_union (const DataSet & b)  const {
@@ -88,7 +97,7 @@ public :
     // trim
     std::vector<int> trimres =  std::vector<int> (res);
     assert (trimres.size() == trimres.capacity());
-    return new IntDataSet(canonical(trimres));	
+    return new IntDataSet(canonical(trimres));
   }
   /// returns a new instance with elements = this setminus b
   DataSet *set_minus (const DataSet & b) const {
@@ -100,7 +109,7 @@ public :
     assert (trimres.size() == trimres.capacity());
     return new IntDataSet(canonical(trimres));
   }
-  
+
   /// returns true if this is the empty set
   bool empty() const {
     return data == empty_;
