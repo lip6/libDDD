@@ -644,8 +644,6 @@ namespace sns {
 	    res = (*gi) (res);
 	  }
 	}
-	if (res == GSDD::null)
-	  return res;
 	GShom nextSel = GShom::id ;
 	if ( ! F.empty() ) 
 	  nextSel = And (F);
@@ -1304,100 +1302,6 @@ namespace sns {
 		  } else {
 		    L_part = GShom::id ;
 		  }
-
-		  d3::set<GShom>::type G_part;
-		  // fill G with the updated elements in partition.G
-		  for( 	d3::set<GShom>::type::const_iterator G_it = partition.G.begin();
-			G_it != partition.G.end();
-			++G_it) 
-		    {
-		      // find elements of the form l & f
-		      // test if *it of the form l & f
-		      if (const And * hand = dynamic_cast<const And*> ( get_concret(*G_it) ) )  {
-			// to compute and store the f part of the composition
-			And::parameters_t newAnd;
-			newAnd.reserve(hand->parameters.size());
-			// local part
-			GShom l;
-
-			bool niceform = false;
-			for (And::parameters_it gi= hand->parameters.begin();gi!=hand->parameters.end();++gi) {
-			  if ( ! gi->skip_variable(variable) ) {
-			    if (  dynamic_cast<const LocalApply*> ( get_concret(*gi) ) )  {
-			      // looks good, l term identified
-			      l = *gi;
-			      niceform = true;
-			      
-			    } else if ( dynamic_cast<const SLocalApply*> ( get_concret(*gi) ) )  {
-			      
-			      // looks good, l term identified
-			      l = *gi;
-			      niceform = true;
-			      
-			    } else {
-			      // not a local, skip this g term
-			      // looks bad : we have a term in this composition which does not skip, and is not a local. Danger here, so revert to basic implementation.
-			      niceform = false;
-			      break;
-			    }
-			  } else {
-			    newAnd.push_back(*gi);
-			  }
-			}
-			if ( niceform) {
-			  // most conditions seem ok; this g term is of the form  l & And(newAnd)
-			  GShom fterm = And(newAnd);
-			  bool fsel = fterm.is_selector();
-			  bool lsel = l.is_selector();
-			  
-			  // Test for selectors 
-			  if ( lsel && fsel ) {
-			    // F* & f & L* & l
-			    fterm = F_part & fterm ;
-			    l = L_part & l ;
-			    std::cerr << "case 1\n" ;
-			  } else if ( lsel && ! fsel ) {
-			    // Best case: as l is evaluated before f, this can be written : (f + F + Id)* & L* & l
-			    fterm = fixpoint ( partition.F + fterm + GShom::id );
-			    l = L_part & l;
-			    std::cerr << "case 2\n" ;
-			  } else if ( ! lsel && fsel ) {
-			    // l is not a selector, however l is commutative with f, thus :  ( F* & f ) & l is ok
-			    fterm = F_part & fterm ;
-			    			    std::cerr << "case 3\n" ;
-			  }
-			  
-			  /*
-			  // test for selector in fterm
-			  if (partition.has_local) {
-			    if (fsel) {
-			      if (const LocalApply * loc = dynamic_cast<const LocalApply*> (partition.L)) {
-				// Hom/DDD case
-				GHom hh = fixpoint( GHom(loc->h) + ((const LocalApply*) get_concret(l))->h );
-				l =  localApply( hh ,variable);
-			      } else {	
-				GShom hh = fixpoint( GShom( ((const SLocalApply*)partition.L) ->h) + ((const SLocalApply*) get_concret(l))->h );
-				l =  localApply( hh ,variable);
-			      }
-			    } else {
-			      l =  L_part & l ;
-			    }
-			  }
-			  G_part.insert ( (l & fterm) & (*G_it) );
-			  */
-			  
-			  G_part.insert ( l & fterm );
-			} else {
-			  // commutative composiiton with bad terms inside
-			  G_part.insert ( *G_it );
-			}
-		      } else {
-			// not a commutative composition
-			G_part.insert ( *G_it );
-		      }
-
-		    }
-
 				
 		  do
 		    {
@@ -1406,8 +1310,8 @@ namespace sns {
 		      d2 = F_part(d2);
 		      d2 = L_part(d2);
 
-		      for( 	d3::set<GShom>::type::const_iterator G_it = G_part.begin();
-				G_it != G_part.end();
+		      for( 	d3::set<GShom>::type::const_iterator G_it = partition.G.begin();
+				G_it != partition.G.end();
 				++G_it) 
 			{
 
