@@ -715,6 +715,104 @@ namespace sns {
     bool have_id;
 
     
+    /** apply factorization rules adapted to g = l & f */
+    void factorizeByLevel ( d3::set<GShom>::type & G, int target) const {
+      
+      typedef d3::set<GShom>::type::iterator  set_it;
+      /** First step : for any g1 = l1 & f1 and any g2 = l2 & f2, if l1 == l2 then rewrite into g' = g1 + g2 = l1 & (f1+f2) */
+      typedef std::map<GShom, GShom> map_t;
+      typedef map_t::iterator map_it;
+      // map local to f terms
+      map_t map_ltof;
+
+      /** load the map */
+      // traverse the set G, if g = l & f, place into map_ltof and remove from G, else, leave alone.
+      for (set_it it = G.begin() ; it != G.end() ; /** Increment done conditionally in loop */ ) {
+	// test if *it of the form l & f
+	if (const And * hand = dynamic_cast<const And*> ( get_concret(*it) ) )  {
+	  // to compute and store the f part of the composition
+	  And::parameters_t newAnd;
+	  newAnd.reserve(hand->parameters.size());
+	  // local part
+	  GShom l;
+
+	  bool niceform = false;
+	  for (And::parameters_it gi= hand->parameters.begin();gi!=hand->parameters.end();++gi) {
+	    if ( ! gi->skip_variable(target) ) {
+	      if (  dynamic_cast<const LocalApply*> ( get_concret(*gi) ) )  {
+		// looks good, l term identified
+		l = *gi;
+		niceform = true;
+
+	      } else if ( dynamic_cast<const SLocalApply*> ( get_concret(*gi) ) )  {
+		
+		// looks good, l term identified
+		l = *gi;
+		niceform = true;
+
+	      } else {
+		// not a local, skip this g term
+		// looks bad : we have a term in this composition which does not skip, and is not a local. Danger here, so revert to basic implementation.
+		niceform = false;
+		break;
+	      }
+	    } else {
+	      newAnd.push_back(*gi);
+	    }
+	  }
+	  if ( niceform) {
+	    // most conditions seem ok; this g term is of the form  l & And(newAnd)
+	    
+	    // first remove from G set (and update the position)
+	    set_it tmpit = it ;
+	    ++tmpit;
+	    G.erase(it);
+	    it = tmpit;
+	    
+	    // try to add into local to f mapping
+	    GShom fterm = And(newAnd);
+	    std::pair<map_it, bool> insertion = map_ltof.insert( map_t::value_type(l, fterm) );
+	    if (insertion.second) {
+	      // did not exist, continue;
+	    } else {
+	      // already in map : Apply factorization rule
+	      insertion.first->second = insertion.first->second + fterm ;
+//	      std::cerr << "factorization rule 1 successful ! \n" ;
+	    }
+	    
+	  } else {
+	    // not a nice l&f composition, skip this g term
+	    ++it;
+	  }
+	} else {
+	  // not a nice l&f composition, skip this g term
+	  ++it;
+	}
+      }
+
+      /** We have now obtained a partition of G into the terms of the form l & f, stored by l key in the map_ltof,
+       *  and the "normal" or default g terms, that are still in G. */
+
+      /** Now apply second factorization wrt. the f value */
+      map_t map_ftol;
+      for (map_it it = map_ltof.begin() ; it != map_ltof.end(); ++it ) {
+	/** look if the term exists */
+	std::pair<map_it, bool> insertion = map_ftol.insert( map_t::value_type(it->second, it->first) );
+	if (insertion.second) {
+	  // did not exist, continue;
+	} else {
+	  // already in map : Apply factorization rule
+	  insertion.first->second = insertion.first->second + it->first ;
+//	  std::cerr << "factorization rule 2 successful ! \n" ;
+	}
+      }
+
+      /** Finally reinsert into the G set */
+      for (map_it it = map_ftol.begin() ; it != map_ftol.end(); ++it ) {
+	G.insert( it->second & it->first );
+      }
+      
+    }
 
 
   public:
@@ -808,6 +906,7 @@ namespace sns {
 	      }
 	  }
 	part.F = GShom::add(F);
+	factorizeByLevel (part.G, var);
 	return part.G.empty() && !part.has_local;
       }
       // cache hit
