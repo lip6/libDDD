@@ -172,8 +172,8 @@ namespace sns {
 
     GShom invert (const GSDD & pot) const { 
       // (h * c) (s) = h(s) * c
-      // (h * c)^-1 (s) = h^-1 ( s + pot - c) = ( h^-1 & ( id + (pot-c) ) ) (s)
-      return left.invert(pot) &  ( GShom::id + (pot - right) ) ;
+      // (h * c)^-1 (s) = h^-1 ( s * c) = ( h^-1 & ( id * c ) ) (s)
+      return left.invert(pot) &  ( GShom::id * right ) ;
     }
 
     /* Memory Manager */
