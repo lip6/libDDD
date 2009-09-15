@@ -211,7 +211,7 @@ const GSDD GSDD::null(canonical( _GSDD(0,1)));
 const GSDD GSDD::top(canonical( _GSDD(-1,1)));
 
 // declared here to ensure correct static init order
-const GShom GShom::null = GSDD::null ;
+const Shom Shom::null = GSDD::null ;
 // constant Id
 namespace sns {
   const _GShom * getIdentity();

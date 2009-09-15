@@ -124,8 +124,6 @@ public:
 
   /// Elementary SDD homomorphism identity. Applied to any SDD d, it returns d. 
   static const GShom id;
-  // Elementary emptyset homomorphism
-  static const GShom null;
 
   /// returns the predescessor homomorphism, using pot to determine variable domains
   GShom invert (const GSDD & pot) const;
@@ -297,6 +295,9 @@ public:
   ~Shom();
   //@}
 
+  // Elementary emptyset homomorphism
+  static const Shom null;
+
   /// \name Assignment operators.
   //@{
   /// Overloaded behavior for assignment operator, maintains reference counting.
@@ -428,7 +429,7 @@ public:
       print (std::cerr);
       std::cerr << std::endl ;
       assert(0); 
-      return GShom::null;
+      return Shom::null;
     }
 
 };
