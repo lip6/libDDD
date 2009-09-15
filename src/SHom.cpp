@@ -2175,7 +2175,7 @@ GShom operator&(const GShom &h1,const GShom &h2){
   addCompositionParameter (h2, args);
   if ( args.empty() ) {
     std::cerr << " WTF ?? (SHOM.cpp in operator&)" << std::endl;
-    return GShom::null;
+    return Shom::null;
   } else if ( args.size() == 1 ) {
     return *args.begin();
   } else {
@@ -2269,8 +2269,8 @@ GShom operator*(const GShom & h,const GShom & cond) {
     printCondError(cond);
     assert(false);
   }
-  if ( h == GShom::null || cond == GShom::null )
-    return GShom::null;
+  if ( h == Shom::null || cond == Shom::null )
+    return Shom::null;
     
   // trivial case
   if ( h == cond )
