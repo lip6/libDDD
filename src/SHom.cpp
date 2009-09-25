@@ -162,6 +162,12 @@ namespace sns {
     _GShom * clone () const {  return new Mult(*this); }
     /* Eval */
     GSDD eval(const GSDD &d)const{
+      /** optimized evaluation when left.skip : 
+       *  prune at current level and drop a recursive call
+       *  i.e. do OTF intersection with the constant */
+      if (left.skip_variable(d.variable()) {
+	    
+	  }
       return left(d)*right;
     }
 
