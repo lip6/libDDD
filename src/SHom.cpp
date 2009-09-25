@@ -165,7 +165,57 @@ namespace sns {
       /** optimized evaluation when left.skip : 
        *  prune at current level and drop a recursive call
        *  i.e. do OTF intersection with the constant */
-      if (left.skip_variable(d.variable()) {
+      int variable=d.variable();
+      if (left.skip_variable(variable)) {
+
+	    /** CODE COPY PASTE FROM SDED_MULT OF 2 SDD : TODO : REFACTOR THIS ALGO TO SHARE CODE */
+	    std::map<GSDD,DataSet *> res;
+	    
+	    GSDD s1inters2 ;
+	    // for each son of p1 :   v - a -> s1 
+	    for (GSDD::Valuation::const_iterator it = d.begin();it != d.end() ; ++it) {
+	      // for each son of p2 the constant :   v - b -> s2 
+	      for (GSDD::Valuation::const_iterator jt = right.begin();jt != right.end() ; ++jt) {
+		// test for equality first, fastest test
+		if ( it->first->set_equal(*jt->first) ) {
+		  // Recurse : left skips so is unchanged, it is the parameter, jt is the son of the constant
+		  square_union(res, (left * jt->second)  (it->second), it->first);
+		  // break out of inner loop
+		  break;
+		}
+		// compute a*b
+		DataSet *ainterb = it->first->set_intersect(*jt->first);
+		// if a*b = 0, skip
+		if (ainterb->empty() ) {
+		  delete ainterb;
+		  continue;
+		}
+		// Recurse since we have a non empty intersection case
+		s1inters2 = (left * jt->second)  (it->second) ;
+		square_union(res,s1inters2,ainterb);
+		
+		// b contains a
+		if ( it->first->set_equal(*ainterb) ) {
+		  delete ainterb;
+		  // we can stop exploring for this operand
+		  break;
+		}
+		
+		delete ainterb;
+	      }
+	    }
+	    
+	    GSDD::Valuation value;
+	    std::map<GSDD,DataSet *>::iterator nullmap = res.find(GSDD::null);
+	    if (nullmap != res.end()){
+	      delete nullmap->second;
+	      res.erase(nullmap);
+	    }
+	    value.reserve(res.size());  
+	    for (std::map<GSDD,DataSet *>::iterator it =res.begin() ;it!= res.end();++it)
+	      value.push_back(std::make_pair(it->second,it->first));
+	    
+	    return GSDD(variable,value);
 	    
 	  }
       return left(d)*right;
