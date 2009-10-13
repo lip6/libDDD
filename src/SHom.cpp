@@ -774,8 +774,9 @@ namespace sns {
     
     /** apply factorization rules adapted to g = l & f */
     void factorizeByLevel ( d3::set<GShom>::type & G, int target) const {
-      
-      typedef d3::set<GShom>::type::iterator  set_it;
+      typedef d3::set<GShom>::type set_t;
+      typedef set_t::iterator  set_it;
+      set_t ret;
       /** First step : for any g1 = l1 & f1 and any g2 = l2 & f2, if l1 == l2 then rewrite into g' = g1 + g2 = l1 & (f1+f2) */
       typedef std::map<GShom, GShom> map_t;
       typedef map_t::iterator map_it;
@@ -783,13 +784,13 @@ namespace sns {
       map_t map_ltof;
 
       /** load the map */
-      // traverse the set G, if g = l & f, place into map_ltof and remove from G, else, leave alone.
-      for (set_it it = G.begin() ; it != G.end() ; /** Increment done conditionally in loop */ ) {
+      // traverse the set G, if g = l & f, place into map_ltof, else place in ret 
+      for (set_it it = G.begin() ; it != G.end() ; ++it ) {
 	// test if *it of the form l & f
 	if (const And * hand = dynamic_cast<const And*> ( get_concret(*it) ) )  {
 	  // to compute and store the f part of the composition
 	  And::parameters_t newAnd;
-	  newAnd.reserve(hand->parameters.size());
+	  // newAnd.reserve(hand->parameters.size());
 	  // local part
 	  GShom l;
 
@@ -820,12 +821,6 @@ namespace sns {
 	  if ( niceform) {
 	    // most conditions seem ok; this g term is of the form  l & And(newAnd)
 	    
-	    // first remove from G set (and update the position)
-	    set_it tmpit = it ;
-	    ++tmpit;
-	    G.erase(it);
-	    it = tmpit;
-	    
 	    // try to add into local to f mapping
 	    GShom fterm = And(newAnd);
 	    std::pair<map_it, bool> insertion = map_ltof.insert( map_t::value_type(l, fterm) );
@@ -839,11 +834,11 @@ namespace sns {
 	    
 	  } else {
 	    // not a nice l&f composition, skip this g term
-	    ++it;
+	    ret.insert(*it);
 	  }
 	} else {
 	  // not a nice l&f composition, skip this g term
-	  ++it;
+	    ret.insert(*it);
 	}
       }
 
@@ -866,9 +861,10 @@ namespace sns {
 
       /** Finally reinsert into the G set */
       for (map_it it = map_ftol.begin() ; it != map_ftol.end(); ++it ) {
-	G.insert( it->second & it->first );
+	ret.insert( it->second & it->first );
       }
-      
+      // reassign into G
+      G = ret;
     }
 
 
