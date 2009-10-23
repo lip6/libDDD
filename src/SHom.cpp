@@ -1374,18 +1374,20 @@ namespace sns {
 			  // apply local part
 			  // d2 = L_part(d2);
 
-			  // saturate firings of each transition (for non deterministic : one to many transitions).
-			  // do an internal fixpoint on every g \in G, i.e. 
-			  // (\sum_i (g_i + id)\star) \star
-			  GSDD d3 = d2;
-			  do {
-			    d2 = d3;
-			    d3 =  ( (L_part &  (*G_it))(d2)) + d2;
-			  } while (d3 != d2);
-
-			  // was before :
-			  // chain application of Shom of this level
-			  // d2 =  ( (L_part &  (*G_it))(d2)) + d2;
+			  if (GShom::getFixpointStrategy() == GShom::DFS) {
+			    // saturate firings of each transition (for non deterministic : one to many transitions).
+			    // do an internal fixpoint on every g \in G, i.e. 
+			    // (\sum_i (g_i + id)\star) \star			  
+			    GSDD d3 = d2;
+			    do {
+			      d2 = d3;
+			      d3 =  ( (L_part &  (*G_it))(d2)) + d2;
+			    } while (d3 != d2);
+			  } else {
+			    // BFS
+			    // chain application of Shom of this level
+			    d2 =  ( (L_part &  (*G_it))(d2)) + d2;
+			  }
 			}
 		      if (can_garbage) {
 //			std::cerr << "could trigger !!" << std::endl ;
@@ -1709,6 +1711,7 @@ void StrongShom::print (std::ostream & os) const {
 using sns::canonical;
 
 // Note: Shom::null is defined in SDD.cpp for static initialization stupid C++ freaking semantics.
+GShom::fixpointStrategy GShom::fixpointStrategy_ = BFS;
 
 /* Constructor */
 GShom::GShom(const _GShom *h):concret(h){}
