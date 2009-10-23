@@ -191,6 +191,19 @@ public:
   /// SDED::garbage()) is important.
   static void garbage();
   //@}
+
+  // strategies for fixpoint evaluation insaturation context
+  // BFS = do each g_i once then go to g_i+1
+  // DFS = do each g_i to saturation then go to g_i+1
+  enum fixpointStrategy {BFS, DFS};
+  
+ private : 
+  static fixpointStrategy fixpointStrategy_;
+ public :
+  static fixpointStrategy getFixpointStrategy() { return fixpointStrategy_; }
+  static void setFixpointStrategy(fixpointStrategy strat) { fixpointStrategy_ = strat; }
+
+
 };
 
 
