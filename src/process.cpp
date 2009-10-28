@@ -27,6 +27,20 @@ size_t getResidentMemory() {
   if (! is_available) {
     return 0;
   }
+#ifdef linux
+  {
+    int size;
+
+    FILE* file = fopen("/proc/self/statm", "r");
+    if (!file)
+      return -1;
+    int res = fscanf(file, "%d", &size);
+    (void) fclose(file);
+    if (res != 1)
+      return -1;
+    return size;
+  }
+#else
   size_t m;
   char cmd [255];
   const char * tmpff = "ps-run";
@@ -49,6 +63,7 @@ size_t getResidentMemory() {
   fscanf(fd,"%s\n%zu",cmd,&m);
   unlink(tmpff);    
   return m;
+#endif
  }
 
 
