@@ -7,7 +7,7 @@ DDD_SRCDIR = $(top_srcdir)/src ./
 DDD_BUILDDIR = $(top_builddir)/src
 
 BASE = hom
-AM_CPPFLAGS =  -I $(DDD_SRCDIR) -I $(BOOST_CPPFLAGS) -g -Wall $(TBBINC_FLAGS)
+AM_CPPFLAGS =  -I $(DDD_SRCDIR) $(BOOST_CPPFLAGS) -g -Wall $(TBBINC_FLAGS)
 LDADD = $(DDD_BUILDDIR)/libDDD_d.a
 
 
