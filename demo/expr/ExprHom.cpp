@@ -226,6 +226,8 @@ public:
   }
   _GHom * clone () const {  return new _Predicate(*this); }
   GHom compose (const GHom & other) const ;
+   bool is_selector() const { return true; }
+
 };
 
 GHom predicate (const BoolExpression & e) {
