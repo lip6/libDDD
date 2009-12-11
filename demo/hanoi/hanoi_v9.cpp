@@ -2,7 +2,7 @@
 /*								            */
 /* This file is part of libDDD, a library for manipulation of DDD and SDD.  */
 /*     						                            */
-/*     Copyright (C) 2001-2008 Yann Thierry-Mieg, Jean-Michel Couvreur      */
+/*     Copyright (C) 2001-2009 Yann Thierry-Mieg, Jean-Michel Couvreur      */
 /*                             and Denis Poitrenaud                         */
 /*     						                            */
 /*     This program is free software; you can redistribute it and/or modify */
@@ -28,6 +28,7 @@
 #include <cstring>
 #include <string>
 #include <iostream>
+#include <cstdio>
   using namespace std;
 
 #include "IntDataSet.h"
@@ -43,7 +44,7 @@ std::string toString (int i) {
   return buff;
 }
 
-// we use one DDD variable per ring, ring 0 is the topmost, 
+// we use one DDD variable per ring, ring 0 is the topmost,
 // and is stored at the bottom of the DDD
 static int NB_RINGS= 3;
 // Each variable domain is {0,1,2} expressing the pole the variable is on
@@ -75,7 +76,7 @@ class _no_ring_above : public StrongShom {
   // the 2 poles that have to be clear
   IntDataSet set;
   public :
-  _no_ring_above (int i, int j) { 
+  _no_ring_above (int i, int j) {
     // construct from vector
     vector<int> v (2);
     v[0] = i ;
@@ -85,7 +86,7 @@ class _no_ring_above : public StrongShom {
 
   GSDD phiOne() const {
     return GSDD::one;
-  }     
+  }
 
   // reject any path with ANY ring that is on pole i or pole j
   GShom phi(int vr, const DataSet & vl) const {
@@ -122,7 +123,7 @@ class _no_ring_above : public StrongShom {
     return set.set_equal(ps->set );
   }
 
-  _GShom * clone () const {  return new _no_ring_above(*this); }  
+  _GShom * clone () const {  return new _no_ring_above(*this); }
 };
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -138,10 +139,10 @@ class _move_ring : public StrongShom {
 
   GSDD phiOne() const {
     return GSDD::one;
-  }                   
+  }
 
   GShom phi(int vr, const DataSet& vl) const {
-    // ring reached 
+    // ring reached
     // try to move to all new positions
 
     if (vr == VAR_STATES) {
@@ -181,7 +182,7 @@ class _move_ring : public StrongShom {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// to be more pleasant for users  
+// to be more pleasant for users
 GShom move_ring (int i, int j ) {
   return _move_ring (i,j);
 }
@@ -222,12 +223,12 @@ int main(int argc, char **argv){
   }
   //  cout << M0 << endl ;
 
-  // Consider one single saturate event that recursively fires all events 
+  // Consider one single saturate event that recursively fires all events
   // Saturate topmost node <=> reach fixpoint over transition relation
   SDD ss =  saturate() (M0) ;
 
  // stats
-  Statistic S = Statistic(ss,"hanoiv9." + toString(pow((double)2,(double)NB_RINGS)) + "." + toString(NB_POLES),CSV);  
+  Statistic S = Statistic(ss,"hanoiv9." + toString(pow((double)2,(double)NB_RINGS)) + "." + toString(NB_POLES),CSV);
   S.print_header(std::cout);
   S.print_line(std::cout);
 }
