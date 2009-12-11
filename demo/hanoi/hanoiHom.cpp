@@ -2,7 +2,7 @@
 /*								            */
 /* This file is part of libDDD, a library for manipulation of DDD and SDD.  */
 /*     						                            */
-/*     Copyright (C) 2001-2008 Yann Thierry-Mieg                            */
+/*     Copyright (C) 2001-2009 Yann Thierry-Mieg                            */
 /*     						                            */
 /*     This program is free software; you can redistribute it and/or modify */
 /*     it under the terms of the GNU Lesser General Public License as       */
@@ -23,16 +23,17 @@
 #include "hanoiHom.hh"
 #include "IntDataSet.h"
 #include <vector>
+#include <cstdio>
 
 // Global constants.
-// we use one DDD variable per ring, ring 0 is the topmost, 
+// we use one DDD variable per ring, ring 0 is the topmost,
 // and is stored at the bottom of the DDD
 int NB_RINGS = 5;
 // Each variable domain is {0,1,2} expressing the pole the variable is on
-int NB_POLES = 3; 
+int NB_POLES = 3;
 
 
-void initName() 
+void initName()
 {
   char buff [12];
   for (int i=0; i< NB_RINGS; i++) {
@@ -56,21 +57,21 @@ std::string toString (double i) {
 
 // Removes any path such that one of the variables takes value i or value j
 // Not test on variable number means this operation should be used from "mid-height"
-class _no_ring_above 
-    : 
+class _no_ring_above
+    :
     public StrongHom
     {
         // the 2 poles that have to be clear
         int i_,j_;
         public :
-        _no_ring_above (int i, int j) { 
-            /// force to have ii < jj since the operation is commutable,  
+        _no_ring_above (int i, int j) {
+            /// force to have ii < jj since the operation is commutable,
             // _no_ring_above(i,j) = _no_ring_above(j,i)
             // hence we have a canonical form
-            if (i < j) 
+            if (i < j)
             {
-                i_ = i; 
-                j_ = j; 
+                i_ = i;
+                j_ = j;
             }
             else
             {
@@ -78,13 +79,13 @@ class _no_ring_above
                 j_ = i ;
             }
         }
-        
+
         GDDD phiOne() const {
             return GDDD::one;
-        }     
-        
+        }
+
         // reject any path with ANY ring that is on pole i or pole j
-        GHom 
+        GHom
         phi(int vr, int vl) const {
             if ( vl == i_ || vl == j_ )
                 // cut this branch and exploration
@@ -93,16 +94,16 @@ class _no_ring_above
                 // propagate this test
                 return GHom(vr,vl,GHom(this));
         }
-        
+
         size_t hash() const {
             return (i_ &  j_<<16)  *  9749;
         }
-        
+
         bool operator==(const StrongHom &s) const {
             _no_ring_above* ps = (_no_ring_above*)&s;
             return i_ == ps->i_ && j_ == ps->j_ ;
         }
-  _GHom * clone () const {  return new _no_ring_above(*this); }        
+  _GHom * clone () const {  return new _no_ring_above(*this); }
     };
 
 
@@ -113,56 +114,56 @@ class _swap_pole : public StrongHom {
 	int ori_;
     // dest pole number
 	int dest_;
-    
+
 	public :
 	_swap_pole (int ring, int ori, int dest )
-    : 
+    :
     ring_(ring),
     ori_(ori),
     dest_(dest)
     {
     }
-    
+
 	GDDD
     phiOne() const
     {
 		return GDDD::one;
-	}                   
-    
-	GHom 
+	}
+
+	GHom
     phi(int vr, int vl) const
     {
-		if (vr != ring_ ) 
+		if (vr != ring_ )
         {
             // target ring not reached yet : propagate
 			return GHom(vr,vl,this);
-		} 
-        else 
+		}
+        else
         {
             // ring reached : shift the pole if ori == vl
-			if (ori_ != vl) 
+			if (ori_ != vl)
             {
                 // precondition not met for this event : we try to move ring from ori_ to dest_ but ring is NOT on ori_ !
 				return GDDD::null;
-			} 
-            else 
+			}
+            else
             {
                 // update ring position and test no ring above
-                // no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met 
+                // no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met
                 // or a DDD with only paths where the move is legal
 	      return GHom (ring_ , dest_) & GHom(_no_ring_above(ori_,dest_));
-                // another way of writing it is 
+                // another way of writing it is
                 // return GHom (ring_ , dest_, _no_ring_above(ori_,dest_) );
 			}
 		}
 	}
-    
+
     bool
     skip_variable(int v) const
     {
         return  v != ring_;
     }
-    
+
 	size_t
     hash() const
     {
@@ -170,7 +171,7 @@ class _swap_pole : public StrongHom {
         // be careful of multplying by 0 valued attributes...
 		return ((6961*(ring_+1)+ 3) * (ori_+7877 )) ^ (dest_-1) ;
 	}
-    
+
 	bool
     operator==(const StrongHom &s) const
     {
@@ -178,10 +179,10 @@ class _swap_pole : public StrongHom {
 		return ring_ == ps->ring_ && ori_ == ps->ori_ && dest_ == ps->dest_ ;
 	}
   _GHom * clone () const {  return new _swap_pole(*this); }
-    
+
 };
 
-// to be more pleasant for users  
+// to be more pleasant for users
 GHom swap_pole ( int ring, int ori, int dest ) {
 	return _swap_pole (ring, ori,dest);
 }
@@ -190,35 +191,35 @@ GHom swap_pole ( int ring, int ori, int dest ) {
 class _move_ring : public StrongHom {
   // ring we are trying to move
   int ring_;
-  
+
 public :
 
     _move_ring (int ring)
-    	: 
-    ring_(ring) 
+    	:
+    ring_(ring)
     {}
-  
+
     bool
     skip_variable(int v) const
     {
       return   v != ring_ ;
     }
-    
-      GDDD phiOne() const 
+
+      GDDD phiOne() const
     {
         return GDDD::one;
-    }              
-  
-    GHom phi(int vr, int vl) const 
+    }
+
+    GHom phi(int vr, int vl) const
     {
-        if (vr != ring_ ) 
+        if (vr != ring_ )
         {
             // target ring not reached yet : propagate
             return GHom(vr,vl,this) ;
         }
-        else 
+        else
         {
-            // ring reached 
+            // ring reached
             // try to move to all new positions
             GHom res = GDDD::null;
             for (int i=0 ; i <NB_POLES ; i++)
@@ -226,7 +227,7 @@ public :
                 // test all possible moves from current position = vl
                 if (i != vl) {
                     // update ring position and test no ring above
-                    // no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met 
+                    // no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met
                     // or a DDD with only paths where the move is legal
                     res = res + ( GHom (ring_ , i) &  _no_ring_above(i , vl) );
                 }
@@ -234,21 +235,21 @@ public :
             return res ;
         }
     }
-  
+
   size_t hash() const {
     // a hash function (avoid hash value 0)
     return 6961*(ring_+1);
   }
-  
+
   bool operator==(const StrongHom &s) const {
     _move_ring* ps = (_move_ring*)&s;
     return ring_ == ps->ring_;
   }
   _GHom * clone () const {  return new _move_ring(*this); }
-  
+
 };
 
-// to be more pleasant for users  
+// to be more pleasant for users
 GHom move_ring ( int ring ) {
   return _move_ring (ring);
 }
@@ -258,14 +259,14 @@ GHom move_ring ( int ring ) {
 class _move_ring_id : public StrongHom {
   // ring we are trying to move
   int ring_;
-  
+
 public :
   _move_ring_id (int ring): ring_(ring) {};
-  
+
   GDDD phiOne() const {
     return GDDD::one;
-  }                   
-  
+  }
+
     bool
     skip_variable(int v) const
     {
@@ -275,14 +276,14 @@ public :
         }
         return false;
     }
-    
-  
+
+
   GHom phi(int vr, int vl) const {
     if (vr != ring_ ) {
       // target ring not reached yet : propagate
       return GHom(vr,vl,this) ;
     } else {
-      // ring reached 
+      // ring reached
       // try to move to all new positions
       // Initialize res with Id
       // THIS IS THE ONLY LINE THAT DIFFERS FROM move_ring
@@ -291,7 +292,7 @@ public :
 	// test all possible moves from current position = vl
 	if (i != vl) {
 	  // update ring position and test no ring above
-	  // no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met 
+	  // no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met
 	  // or a DDD with only paths where the move is legal
 	  res = res + ( GHom (ring_ , i) & _no_ring_above(i , vl) );
 	}
@@ -299,21 +300,21 @@ public :
       return res ;
     }
   }
-  
+
   size_t hash() const {
     // a hash function (avoid hash value 0)
     return 6961*(ring_+1);
   }
-  
+
   bool operator==(const StrongHom &s) const {
     _move_ring_id* ps = (_move_ring_id*)&s;
     return ring_ == ps->ring_;
   }
   _GHom * clone () const {  return new _move_ring_id(*this); }
-  
+
 };
 
-// to be more pleasant for users  
+// to be more pleasant for users
 GHom move_ring_id ( int ring ) {
   return _move_ring_id (ring);
 }
@@ -324,27 +325,27 @@ GHom move_ring_id ( int ring ) {
 class _move_ring_sat : public StrongHom {
     // ring we are trying to move
     int ring_;
-    
+
     public :
     _move_ring_sat (int ring): ring_(ring) {};
-    
+
     GDDD phiOne() const {
         return GDDD::one;
-    }                   
-    
+    }
+
     bool
     skip_variable(int v) const
     {
         return v != ring_;
     }
-    
-    
+
+
     GHom phi(int vr, int vl) const {
         if (vr != ring_ ) {
             // target ring not reached yet : propagate
             return GHom(vr,vl,this) ;
         } else {
-            // ring reached 
+            // ring reached
             // try to move to all new positions
             // Initialize res with Id
             GHom res = GHom(vr,vl) ;
@@ -352,7 +353,7 @@ class _move_ring_sat : public StrongHom {
                 // test all possible moves from current position = vl
                 if (i != vl) {
                     // update ring position and test no ring above
-                    // no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met 
+                    // no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met
                     // or a DDD with only paths where the move is legal
                     res = (res + ( GHom (ring_ , i) & _no_ring_above(i , vl) )) & fixpoint (_move_ring_sat(ring_ -1));
                 }
@@ -360,21 +361,21 @@ class _move_ring_sat : public StrongHom {
             return res ;
         }
     }
-    
+
     size_t hash() const {
         // a hash function (avoid hash value 0)
         return 6961*(ring_+1);
     }
-    
+
     bool operator==(const StrongHom &s) const {
         _move_ring_sat* ps = (_move_ring_sat*)&s;
         return ring_ == ps->ring_;
     }
-    
+
   _GHom * clone () const {  return new _move_ring_sat(*this); }
 };
 
-// to be more pleasant for users  
+// to be more pleasant for users
 GHom move_ring_sat ( int ring ) {
     return _move_ring_sat (ring);
 }
@@ -383,15 +384,15 @@ GHom move_ring_sat ( int ring ) {
 // generic version no ring specified, just apply to current ring
 // builds upon version move_ring_sat
 class _move_ring_sat_gen : public StrongHom {
-  
+
 public :
-  
+
   GDDD phiOne() const {
     return GDDD::one;
-  }                   
-  
+  }
+
   GHom phi(int vr, int vl) const {
-    // ring reached 
+    // ring reached
     // try to move to all new positions
     // Initialize res with Id
     GHom res = GHom(vr,vl) ;
@@ -399,27 +400,27 @@ public :
       // test all possible moves from current position = vl
       if (i != vl) {
 	// update ring position and test no ring above
-	// no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met 
+	// no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met
 	// or a DDD with only paths where the move is legal
 	res = (res + ( GHom (vr , i) & _no_ring_above(i , vl) )) & fixpoint (_move_ring_sat_gen());
       }
     }
     return res ;
   }
-  
-  
+
+
   size_t hash() const {
     return 6961;
   }
-  
+
   bool operator==(const StrongHom&) const {
     return true;
   }
-  
+
   _GHom * clone () const {  return new _move_ring_sat_gen(*this); }
 };
 
-// to be more pleasant for users  
+// to be more pleasant for users
 GHom move_ring_sat_gen ( ) {
   return _move_ring_sat_gen ();
 }
@@ -427,15 +428,15 @@ GHom move_ring_sat_gen ( ) {
 
 // generic version no ring specified, just apply to current ring
 class _move_ring_explicit_sat : public StrongHom {
-  
+
 public :
-  
+
   GDDD phiOne() const {
     return GDDD::one;
-  }                   
-  
+  }
+
   GHom phi(int vr, int vl) const {
-    // ring reached 
+    // ring reached
     // try to move to all new positions
     // Initialize res with Id
     GHom res = GHom(vr,vl) ;
@@ -444,7 +445,7 @@ public :
       if (i != vl) {
 	// first of all saturate successor node then
 	// update ring position and test no ring above
-	// no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met 
+	// no_ring_above propagates on the bottom of the DDD ; it returns 0 if preconditions are not met
 	// or a DDD with only paths where the move was legal
 	// Additionnally we resaturate the results of this test before using them
 	res = (res + ( GHom (vr , i) & saturate() & _no_ring_above(i , vl) )) & saturate()  ;
@@ -452,18 +453,18 @@ public :
     }
     return res ;
   }
-  
+
   size_t hash() const {
     return 6961;
   }
-  
+
   bool operator==(const StrongHom&) const {
     return true;
   }
     _GHom * clone () const {  return new _move_ring_explicit_sat(*this); }
 };
 
-// to be more pleasant for users  
+// to be more pleasant for users
 GHom move_ring_explicit_sat ( ) {
   return _move_ring_explicit_sat ();
 }
@@ -473,7 +474,7 @@ GHom move_ring_explicit_sat ( ) {
 GHom saturate () {
   return fixpoint(move_ring_explicit_sat());
 }
-  
+
 
 /// SDD homomorphism of the transition relation
 class transition_relation : public StrongShom {
@@ -497,12 +498,12 @@ class transition_relation : public StrongShom {
 
   bool operator==(const StrongShom&) const {
      return  true;
-  }  
+  }
   _GShom * clone () const {  return new transition_relation(*this); }
-}; 
+};
 
 // SDD application
-GShom saturateSDD_singleDepth () { 
+GShom saturateSDD_singleDepth () {
   return transition_relation() ;
 }
 
@@ -511,14 +512,14 @@ GShom saturateSDD_singleDepth () {
 //////// Working with SDD and IntDataSet
 
 
- 
+
 // Removes any path such that one of the variables takes value i or value j
 // Not test on variable number means this operation should be used from "mid-height"
 class _no_ring_above_intdata : public StrongShom {
   // the 2 poles that have to be clear
   IntDataSet set;
 public :
-  _no_ring_above_intdata (int i, int j) { 
+  _no_ring_above_intdata (int i, int j) {
     // construct from vector
     std::vector<int> v (2);
     v[0] = i ;
@@ -528,8 +529,8 @@ public :
 
   GSDD phiOne() const {
     return GSDD::one;
-  }     
-  
+  }
+
   // reject any path with ANY ring that is on pole i or pole j
   GShom phi(int vr, const DataSet & vl) const {
     // we know there is only one level of depth, therefore DataSet concrete type is IntDataSet
@@ -555,21 +556,21 @@ public :
     return set.set_equal(ps->set );
   }
 
-  _GShom * clone () const {  return new _no_ring_above_intdata(*this); }  
+  _GShom * clone () const {  return new _no_ring_above_intdata(*this); }
 };
 
 
 // generic version no ring specified, just apply to current ring
 class _move_ring_intdata : public StrongShom {
-  
+
 public :
-  
+
   GSDD phiOne() const {
     return GSDD::one;
-  }                   
-  
+  }
+
   GShom phi(int vr, const DataSet& vl) const {
-    // ring reached 
+    // ring reached
     // try to move to all new positions
     // Initialize res with Id
     GShom res = GShom(vr,vl) ;
@@ -579,7 +580,7 @@ public :
 	if (i != *vlit) {
 	  // first of all saturate successor node then
 	  // update ring position and test no ring above
-	  // no_ring_above_intdata propagates on the bottom of the SDD ; it returns 0 if preconditions are not met 
+	  // no_ring_above_intdata propagates on the bottom of the SDD ; it returns 0 if preconditions are not met
 	  // or an SDD with only paths where the move was legal
 	  // Additionnally we resaturate the results of this test before using them
 	  res = (res + ( GShom (vr , IntDataSet(std::vector<int> (1,i)) ) & saturateSDD_IntData() & _no_ring_above_intdata(i , *vlit) )) & saturateSDD_IntData()  ;
@@ -588,19 +589,19 @@ public :
     }
     return res ;
   }
-  
+
   size_t hash() const {
     return 6961;
   }
-  
+
   bool operator==(const StrongShom&) const {
     return true;
   }
-  
+
   _GShom * clone () const {  return new _move_ring_intdata(*this); }
 };
 
-// to be more pleasant for users  
+// to be more pleasant for users
 GShom move_ring_intdata ( ) {
   return  _move_ring_intdata ();
 }
