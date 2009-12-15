@@ -277,6 +277,14 @@ GShom operator^(const GShom &,const GSDD &);
 ///
 /// Semantics : (h - d1) (d) =  h(d) - d1
 GShom operator-(const GShom &,const GSDD &); 
+/// Set difference (generalized).
+/// Note that this operation is not commutative, nor is it \e linear.
+/// This means the operation a priori cannot "skip", and it could be incorrect to apply it at
+///  an arbitrary level of the structure. However, in some cases it is still useful and it can
+/// be applied directly at the top node of the structure yielding correct results.
+///
+/// Semantics : (h1 - h2) (d) =  h1(d) - h2(d)
+GShom operator-(const GShom &,const GShom &); 
 //@}
 
 

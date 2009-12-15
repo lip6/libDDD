@@ -1261,6 +1261,54 @@ namespace sns {
 
   };
 
+
+  /************************** HomMinus */
+  class HomMinus:public _GShom{
+  private:
+    GShom left;
+    GShom right;
+  public:
+    /* Constructor */
+    HomMinus(const GShom &l,const GShom &r,int ref=0):_GShom(ref),left(l),right(r){}
+    /* Compare */
+    bool operator==(const _GShom &h) const{
+      return left==((HomMinus*)&h )->left && right==((HomMinus*)&h )->right;
+    }
+    size_t hash() const{
+      return 15971*left.hash()+24023*right.hash();
+    }
+    _GShom * clone () const {  return new HomMinus(*this); }
+
+    /* Eval */
+    GSDD eval(const GSDD &d)const{
+      return left(d)-right(d);
+    }
+
+
+    GShom invert (const GSDD & pot) const {
+      // a bit too large a set... but how to compute a better approximation ??
+      // (h1 - h2)^-1 (s) = h1^-1 (s)  + h2^-1 (pot -s) 
+      std::cerr << "/!\\ Be careful, you are using invert of a minus between two homomorphisms, and I am not sure the invert is correct. FIXME !" << std::endl;
+      return left.invert(pot) + (right.invert(pot) & (pot - GShom::id)) ;
+    }
+
+
+    bool is_selector () const {
+      // set difference is a natural selector, if the left hom is a selector
+      return left.is_selector() ;
+    }
+    /* Memory Manager */
+    void mark() const{
+      left.mark();
+      right.mark();
+    }
+
+    void print (std::ostream & os) const {
+      os << "(SHomMinus:" << left << " - " << right << ")";
+    }
+
+  };
+
   /************************** Fixpoint */
 
   class Fixpoint
@@ -2273,6 +2321,11 @@ GShom operator^(const GShom &h,const GSDD &d){
 GShom operator-(const GShom &h,const GSDD &d){
   return sns::Minus(h,d);
 }
+
+GShom operator-(const GShom &h1,const GShom &h2){
+  return sns::HomMinus(h1,h2);
+}
+
 
 /// An IF-THEN-ELSE construct.
 /// The behavior of the condition **must** be a selection, as indicated by its isSelector() flag.
