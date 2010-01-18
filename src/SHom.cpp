@@ -276,7 +276,7 @@ namespace sns {
     bool is_selector () const {
       // intersection is a natural selector (if we forget about Top)
       // if either left or tight is a selector.
-      return left.is_selector() + right.is_selector();
+      return left.is_selector() && right.is_selector();
     }
 
     bool
