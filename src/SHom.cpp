@@ -1468,9 +1468,10 @@ namespace sns {
 //		std::cerr << "could trigger 2!!" << std::endl ;
 		if (MemoryManager::should_garbage()) {
 //		  std::cerr << "triggered !!" << std::endl ;
-		  // ensure d1 and d2 are preserved
+		  // ensure d1 and d2 and argument are preserved
 		  SDD dd1 = d1;
 		  SDD dd2 = d2;
+		  Shom t = arg;
 		  
 		  MemoryManager::garbage();
 		}
