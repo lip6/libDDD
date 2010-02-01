@@ -1442,11 +1442,13 @@ namespace sns {
 			if (MemoryManager::should_garbage()) {
 //			  std::cerr << "triggered !!" << std::endl ;
 			  // ensure d1 and d2 are preserved
-			  SDD dd1 = d1;
-			  SDD dd2 = d2;
+			  d1.mark();
+			  d2.mark();
 			  // ensure current operands are preserved
 			  F_part.mark();
 			  L_part.mark();
+			  Shom tt = Shom(this);
+
 			  for( 	d3::set<GShom>::type::const_iterator G_it = partition.G.begin();
 				G_it != partition.G.end();
 				++G_it) 
@@ -1469,9 +1471,10 @@ namespace sns {
 		if (MemoryManager::should_garbage()) {
 //		  std::cerr << "triggered !!" << std::endl ;
 		  // ensure d1 and d2 and argument are preserved
-		  SDD dd1 = d1;
-		  SDD dd2 = d2;
-		  Shom t = arg;
+		  d1.mark();
+		  d2.mark();
+		  arg.mark();
+		  Shom tt = Shom(this);
 		  
 		  MemoryManager::garbage();
 		}
