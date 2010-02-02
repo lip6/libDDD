@@ -13,6 +13,16 @@ using namespace std;
 
 namespace process {
 
+  static size_t page_mult_ = 0;
+  static size_t page_mult () {
+    if (! page_mult_) {
+      size_t page_size = sysconf(_SC_PAGESIZE);
+      page_mult_ = page_size / 1024;
+    }
+    return page_mult_;
+  }
+
+
 double getTotalTime() {
     struct tms tbuff;
     double m;
@@ -29,16 +39,16 @@ size_t getResidentMemory() {
   }
 #ifdef linux
   {
-    int size;
+    int total_size, rss_size;
 
     FILE* file = fopen("/proc/self/statm", "r");
     if (!file)
       return -1;
-    int res = fscanf(file, "%d", &size);
+    int res = fscanf(file, "%d %d", &total_size, &rss_size);
     (void) fclose(file);
     if (res != 1)
       return -1;
-    return size;
+    return rss_size * page_mult();
   }
 #else
   size_t m;
