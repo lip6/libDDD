@@ -39,14 +39,14 @@ size_t getResidentMemory() {
   }
 #ifdef linux
   {
-    int total_size, rss_size;
+    size_t total_size, rss_size;
 
     FILE* file = fopen("/proc/self/statm", "r");
     if (!file)
       return -1;
-    int res = fscanf(file, "%d %d", &total_size, &rss_size);
+    int res = fscanf(file, "%ld %ld", &total_size, &rss_size);
     (void) fclose(file);
-    if (res != 1)
+    if (res != 2)
       return -1;
     return rss_size * page_mult();
   }
