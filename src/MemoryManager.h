@@ -30,6 +30,8 @@
 #include "SDED.h"
 #include "SHom.h"
 
+#include "process.hpp"
+
 /// This class defines a few utility functions common to DDD.
 /// Note that all functions are declared static, so this is more of a namespace than a class.
 /// One important function is garbage(), only this MemoryManager::garbage() should be caled :
@@ -62,7 +64,15 @@ public:
     static bool should_garbage() {
       // trigger at rougly 5 million objects =1 Gig RAM
       //return nbDED() + nbSDED() + nbShom() + nbSDD() > 3000000;
-      return true;
+      size_t mem = process::getResidentMemory();
+      if (mem > last_mem) {
+	std::cerr << "GC triggered at mem=" << mem << std::endl;
+	last_mem = mem;
+	return true;
+      } else {
+	std::cerr << "GC not triggered mem=" << mem << std::endl;
+	return false;
+      }
     }
 
   /// Garbage collection function. 
@@ -93,6 +103,10 @@ public:
     GHom::pstats(reinit);
     GDDD::pstats(reinit);    
   }
-  
+
+ private :
+  // actually defined in DDD.cpp, bottom of file.
+  static size_t last_mem;
+
 };
 #endif
