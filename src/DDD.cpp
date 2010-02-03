@@ -615,4 +615,9 @@ void loadDDD(std::istream& is, std::vector<DDD>& list) {
 }
 
 
+#include "MemoryManager.h"
+
+// for lack of a better place to put it...
+size_t MemoryManager::last_mem = 1300000;
+
 
