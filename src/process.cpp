@@ -9,10 +9,15 @@
 #include <cstdio>
 #include <cstdlib>
 
+#if defined(LINUX) || defined(__CYGWIN__) || defined(cygwin) || defined(WIN32)
+#define USE_PROC_MEM
+#endif
+
 using namespace std;
 
 namespace process {
 
+#ifdef USE_PROC_MEM 
   static size_t page_mult_ = 0;
   static size_t page_mult () {
     if (! page_mult_) {
@@ -21,7 +26,7 @@ namespace process {
     }
     return page_mult_;
   }
-
+#endif
 
 double getTotalTime() {
     struct tms tbuff;
@@ -37,20 +42,21 @@ size_t getResidentMemory() {
   if (! is_available) {
     return 0;
   }
-#ifdef linux
+#ifdef USE_PROC_MEM
   {
     size_t total_size, rss_size;
 
     FILE* file = fopen("/proc/self/statm", "r");
     if (!file)
       return -1;
-    int res = fscanf(file, "%ld %ld", &total_size, &rss_size);
+    int res = fscanf(file, "%zu %zu", &total_size, &rss_size);
     (void) fclose(file);
     if (res != 2)
       return -1;
     return rss_size * page_mult();
   }
 #else
+  /// i.e. mostly MacOS target
   size_t m;
   char cmd [255];
   const char * tmpff = "ps-run";
