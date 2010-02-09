@@ -256,17 +256,17 @@ public:
 /// Textual output of SDD into a stream in (relatively) human readable format.
 std::ostream& operator<<(std::ostream &,const GSDD &);
 /* Binary operators */
-/// Operator for union of SDD. See SDD operations documentation section for details.
-/// \todo Write the DDD operations documentation !!
+/// Operator for concatenation of two SDD.
+/// Semantics : d1 ^ d2 replaces "one" terminals of d1 by d2
 GSDD operator^(const GSDD&,const GSDD&); // concatenation
-/// Operator for union of DDD. See DDD operations documentation section for details.
-/// \todo Write the DDD operations documentation !!
+/// Operator for union of DDD.
+/// Semantics : d1 + d2 produces the union d1 and d2
 GSDD operator+(const GSDD&,const GSDD&); // union
-/// Operator for intersection of DDD. See DDD operations documentation section for details.
-/// \todo Write the DDD operations documentation !!
+/// Operator for intersection of DDD.
+/// Semantics : d1 * d2 designates the intersection of the two sets
 GSDD operator*(const GSDD&,const GSDD&); // intersection
-/// Operator for set difference of DDD. See DDD operations documentation section for details.
-/// \todo Write the DDD operations documentation !!
+/// Operator for set difference of DDD.
+/// Semantics : d1 - d2 contains elements in d1 and not in d2
 GSDD operator-(const GSDD&,const GSDD&); // difference
 
  
