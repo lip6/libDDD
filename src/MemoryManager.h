@@ -65,12 +65,14 @@ public:
       // trigger at rougly 5 million objects =1 Gig RAM
       //return nbDED() + nbSDED() + nbShom() + nbSDD() > 3000000;
       size_t mem = process::getResidentMemory();
+      if (mem == -1)
+	return true;
       if (mem > last_mem) {
-	std::cerr << "GC triggered at mem=" << mem << std::endl;
+/* 	std::cerr << "GC triggered at mem=" << mem << std::endl; */
 	last_mem = mem;
 	return true;
       } else {
-	std::cerr << "GC not triggered mem=" << mem << std::endl;
+/* 	std::cerr << "GC not triggered mem=" << mem << std::endl; */
 	return false;
       }
     }
