@@ -9,7 +9,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-#if defined(LINUX) || defined(__CYGWIN__) || defined(cygwin) || defined(WIN32)
+#if defined(LINUX) || defined(linux) || defined(__CYGWIN__) || defined(cygwin) || defined(WIN32)
 #define USE_PROC_MEM
 #endif
 
