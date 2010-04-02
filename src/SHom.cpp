@@ -1450,8 +1450,13 @@ namespace sns {
 			}
 		      if (can_garbage) {
 		    	  /* Call the fixpoint Observer */
-		    	  if (sns::__fixpointObs != NULL)
+		    	  if (sns::__fixpointObs != NULL){
 		    		  sns::__fixpointObs->update(d2,d1);
+		    		  /* We must continue */
+		    		  if (sns::__fixpointObs->shouldInterrupt())
+						  /* BREAK THE LOOP and return result */
+						  return d1;
+		    	  }
 		    	  //std::cout << d1.nbStates() << std::endl;
 //			std::cerr << "could trigger !!" << std::endl ;
 			if (MemoryManager::should_garbage()) {
@@ -1486,6 +1491,14 @@ namespace sns {
 	      d1 = d2;
 	      d2 = arg(d2);
 	      if (can_garbage) {
+	    	  /* Call the fixpoint Observer */
+			  if (sns::__fixpointObs != NULL){
+				  sns::__fixpointObs->update(d2,d1);
+				  /* We must continue */
+				  if (sns::__fixpointObs->shouldInterrupt())
+					  /* BREAK THE LOOP and return result */
+					  return d1;
+			  }
 //		std::cerr << "could trigger 2!!" << std::endl ;
 		if (MemoryManager::should_garbage()) {
 //		  std::cerr << "triggered !!" << std::endl ;

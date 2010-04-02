@@ -28,6 +28,7 @@
 #include "SDD.h"
 #include "Hom.h"
 #include "hashfunc.hh"
+#include "Cache.hh"
 
 #include <string>
 #include <iostream>
@@ -530,6 +531,13 @@ public:
 	 * \param after  : The SDD after Fixpoint pass
 	 */
 	virtual void update(const GSDD /*before*/,const GSDD /*after*/) const = 0;
+	/**
+	 * Would you stop the Fixpoint ?
+	 */
+	virtual bool shouldInterrupt() const {
+		/* By default return FALSE */
+		return false;
+	}
 };
 
 /**
