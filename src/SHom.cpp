@@ -37,6 +37,9 @@
 #endif
 
 
+static SDD __sdd;
+
+
 namespace d3 { namespace util {
   template<>
   struct equal<_GShom*>{
@@ -61,6 +64,11 @@ namespace sns {
 
   static ShomCache cache;
 
+  /**
+   * Static definition of the Observer Fixpoint
+   */
+  static const IFixpointObserver* __fixpointObs = NULL;
+
 
   /************************** Identity */
   class Identity:public _GShom{
@@ -84,7 +92,9 @@ namespace sns {
     }
 
     /* Eval */
-    GSDD eval(const GSDD &d)const{return d;}
+    GSDD eval(const GSDD &d)const{
+		return d;
+	}
 
     GShom invert (const GSDD & pot) const { 
       return this;
@@ -1311,6 +1321,7 @@ namespace sns {
 
   /************************** Fixpoint */
 
+
   class Fixpoint
     : public _GShom
   {
@@ -1438,6 +1449,10 @@ namespace sns {
 			  }
 			}
 		      if (can_garbage) {
+		    	  /* Call the fixpoint Observer */
+		    	  if (sns::__fixpointObs != NULL)
+		    		  sns::__fixpointObs->update(d2,d1);
+		    	  //std::cout << d1.nbStates() << std::endl;
 //			std::cerr << "could trigger !!" << std::endl ;
 			if (MemoryManager::should_garbage()) {
 //			  std::cerr << "triggered !!" << std::endl ;
@@ -1454,10 +1469,14 @@ namespace sns {
 				++G_it) 
 			    G_it->mark();
 			  MemoryManager::garbage();
+
 			}
 		      }
-		    }
+				//std::cout << __sdd.nbStates() << std::endl;
+			}
 		  while (d1 != d2);
+			//__cpt += d1.nbStates();
+			//std::cout << d1.nbStates()  << " : " << __cpt << std::endl;
 		  return d1;
 		}
 	    }                                                                                               
@@ -1482,7 +1501,7 @@ namespace sns {
 
 	    }
 	  while (d1 != d2);
-
+		
 	  return d1;
 	}
     }
@@ -1498,10 +1517,12 @@ namespace sns {
 
   };
 
+	
 
 
 
 } // end namespace H_Homomorphism
+
 
 
 
@@ -1782,10 +1803,17 @@ GShom::GShom(int var,const DataSet & val, const GShom &h) {
 
 //////////////////////////////////////////////////////////////////////////////
 
+
+
 /* Eval */
 GSDD 
 GShom::operator()(const GSDD &d) const
 {
+	/*if (first == false){
+		__sdd=d;
+		first = true;
+	}*/
+	  
   if(concret->immediat)
     {
       return eval(d);
@@ -2410,4 +2438,9 @@ void GShom::pstats(bool)
 std::ostream & operator << (std::ostream & os, const GShom & h) {
   h.concret->print(os);
   return os;
+}
+
+// Implementation of setter Observer
+void fixpointObserver(const IFixpointObserver& obs){
+	sns::__fixpointObs = &obs;
 }
