@@ -24,6 +24,7 @@
  *  This variant uses only DDD and no saturation */
 #include <cstring>
 #include <string>
+#include <cstdlib>
 #include <iostream>
 using namespace std;
 
