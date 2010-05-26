@@ -23,6 +23,7 @@
 #include "MLHom.h"
 #include "UniqueTable.h"
 #include <typeinfo>
+#include "util/set.hh"
 
 namespace d3 { namespace util {
   template<>
@@ -256,7 +257,7 @@ HomNodeMap StrongMLHom::eval(const GDDD &d) const {
 /********* operators *****************/
 
 MLHom operator+(const MLHom &h1,const MLHom &h2){
-  std::set<MLHom> s;
+  d3::set<MLHom>::type s;
   s.insert(h1);
   s.insert(h2);
   return canonical( Add(s));
