@@ -52,7 +52,7 @@ size_t getResidentMemory() {
     int res = fscanf(file, "%zu %zu", &total_size, &rss_size);
     (void) fclose(file);
     if (res != 2)
-      return -1;
+      return 0;
     return rss_size * page_mult();
   }
 #else
