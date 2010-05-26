@@ -24,7 +24,7 @@
 #include <iostream>
 #include <cassert>
 #include <map>
-#include <set>
+#include "util/set.hh"
 
 
 #include "Hom.h"
@@ -1106,7 +1106,7 @@ GHom operator&(const GHom &h1,const GHom &h2){
 
 
 GHom operator+(const GHom &h1,const GHom &h2){
-  std::set<GHom> s;
+  d3::set<GHom>::type s;
   s.insert(h1);
   s.insert(h2);
 //  return(new Add(s));
