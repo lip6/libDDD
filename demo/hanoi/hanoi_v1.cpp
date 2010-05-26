@@ -23,6 +23,7 @@
 /** An example resolution of the famous towers of Hanoi puzzle. *
  *  This variant uses only DDD and no saturation */
 #include <cstring>
+#include <cstdlib>
 #include <string>
 #include <iostream>
 using namespace std;
