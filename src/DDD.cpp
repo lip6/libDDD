@@ -20,6 +20,9 @@
 /*     						                            */
 /****************************************************************************/
 
+// C functions atoi, etc..
+#include <cstdlib>
+#include <cstring>
 /* -*- C++ -*- */
 #include <string>
 #include <iostream>
@@ -27,7 +30,6 @@
 #include <set>
 // modif
 #include <cassert>
-#include <ext/hash_map>
 #include <map>
 // modif
 #include <sstream>

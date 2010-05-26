@@ -25,7 +25,6 @@
 #include <iostream>
 #include <vector>
 #include "util/set.hh"
-#include <ext/hash_map>
 #include <map>
 #include <sstream>
 #include <cassert>
