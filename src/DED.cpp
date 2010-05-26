@@ -30,6 +30,7 @@
 // ajout
 
 #include "util/configuration.hh"
+#include "util/set.hh"
 #include "DDD.h"
 #include "DED.h"
 #include "Hom.h"
@@ -662,7 +663,7 @@ GDDD DED::add(const std::set<GDDD> &s){
 };
 
 GDDD operator+(const GDDD &g1,const GDDD &g2){
-  std::set<GDDD> s;
+  d3::set<GDDD>::type s;
   s.insert(g1);
   s.insert(g2);
   return DED::add(s);
