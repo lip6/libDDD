@@ -26,7 +26,7 @@
 
 #include <cassert>
 #include <vector>
-#include <tr1/unordered_set>
+#include "util/hash_set.hh"
 #include "util/hash_support.hh"
 
 
@@ -95,7 +95,7 @@ public:
   }
 
   /// Typedef helps hide implementation type (currently gnu gcc's hash_set).
-    typedef std::tr1::unordered_set<const T*,d3::util::hash<const T*>,d3::util::equal<const T*> > Table;
+    typedef typename d3::hash_set<const T*>::type  Table;
   /// The actual table, operations on the UniqueTable are delegated on this.
   Table table; // Unique table of GDDD
 
