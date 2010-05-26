@@ -1,7 +1,18 @@
 #ifndef _EXT_HASH_MAP_HH_
 #define _EXT_HASH_MAP_HH_
 
+#define GCC_VERSION (__GNUC__ * 10000 \
+                + __GNUC_MINOR__ * 100 \
+                   + __GNUC_PATCHLEVEL__)
+
+#if GCC_VERSION < 40300
+#include <ext/hash_map>
+#else
 #include <tr1/unordered_map>
+#endif
+
+
+
 #include "util/hash_support.hh"
 #include <utility>
 
@@ -17,7 +28,12 @@ class ext_hash_map
   // Types
 public:
 
+#if GCC_VERSION < 40300
+  typedef __gnu_cxx::hash_map<Key,Data,HashKey,EqualKey> internal_hash_map;
+#else
   typedef std::tr1::unordered_map<Key,Data,HashKey,EqualKey> internal_hash_map;
+#endif
+
   typedef typename internal_hash_map::iterator iterator;
   typedef typename internal_hash_map::const_iterator const_iterator;
   typedef typename internal_hash_map::size_type size_type;
