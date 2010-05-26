@@ -2,6 +2,7 @@
 #define __HANOI_HOM_HH__
 
 #include <string>
+#include <cstdlib>
 #include "Hom.h"
 #include "SHom.h"
 #include "statistic.hpp"
