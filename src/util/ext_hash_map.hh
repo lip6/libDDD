@@ -1,7 +1,7 @@
 #ifndef _EXT_HASH_MAP_HH_
 #define _EXT_HASH_MAP_HH_
 
-#include <ext/hash_map>
+#include <tr1/unordered_map>
 #include "util/hash_support.hh"
 #include <utility>
 
@@ -17,7 +17,7 @@ class ext_hash_map
   // Types
 public:
 
-  typedef __gnu_cxx::hash_map<Key,Data,HashKey,EqualKey> internal_hash_map;
+  typedef std::tr1::unordered_map<Key,Data,HashKey,EqualKey> internal_hash_map;
   typedef typename internal_hash_map::iterator iterator;
   typedef typename internal_hash_map::const_iterator const_iterator;
   typedef typename internal_hash_map::size_type size_type;

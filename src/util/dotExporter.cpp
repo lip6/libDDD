@@ -25,7 +25,6 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include <ext/hash_set>
 #include "util/hash_support.hh"
 using namespace std;
 using namespace __gnu_cxx;
@@ -200,7 +199,7 @@ public :
 
   dotExporter(const string &s="test", bool multiT = false):path(s),multiT(multiT) {};
 
-typedef  hash_set<GSDD,d3::util::hash<GSDD>, d3::util::equal<GSDD> > gsdd_hash_set;
+  typedef  std::tr1::unordered_set<GSDD,d3::util::hash<GSDD>, d3::util::equal<GSDD> > gsdd_hash_set;
 
   void printColor (const GSDD & g, const string & color,gsdd_hash_set &visited) {
     if (visited.find(g) == visited.end() ) {
