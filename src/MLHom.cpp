@@ -262,3 +262,29 @@ MLHom operator+(const MLHom &h1,const MLHom &h2){
   s.insert(h2);
   return canonical( Add(s));
 }
+
+void MLHom::garbage(){
+  // mark phase
+  for(UniqueTable<_MLHom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
+    if((*di)->refCounter!=0){
+      (*di)->marking=true;
+      (*di)->mark();
+    }
+  }
+  // sweep phase
+  for(UniqueTable<_MLHom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
+    if(!(*di)->marking){
+      UniqueTable<_MLHom>::Table::iterator ci=di;
+      di++;
+      const _MLHom *g=*ci;
+      canonical.table.erase(ci);
+      delete g;
+    }
+    else{
+      (*di)->marking=false;
+      di++;
+    }
+  }
+  
+
+}

@@ -88,6 +88,11 @@ public :
   /// cache calls to eval
   HomNodeMap operator() (const GDDD &) const;
 
+  
+  /// Collects and destroys unused homomorphisms. Do not call this directly but through 
+  /// MemoryManager::garbage() as order of calls (among GSDD::garbage(), GShom::garbage(), 
+  /// SDED::garbage()) is important.
+  static void garbage();
 
 };
 
@@ -99,9 +104,24 @@ public :
 MLHom operator+(const MLHom &,const MLHom &); 
 
 class _MLHom {
+  /// For garbage collection. 
+  /// Counts the number of times a _MLHom is referenced from the context of an MLHom.
   mutable int refCounter;
+  /// For garbage collection. Used in the two phase garbage collection process.
+  /// A Shom that is not marked after the first pass over the unicity table, will
+  /// be sweeped in the second phase. Outside of garbage collection routine, marking
+  /// should always bear the value false.
+  mutable bool marking;
+
+  /// open access to container class MLHom.
+  friend class MLHom;
+
+  /// For garbage collection. Used in first phase of garbage collection.
+  virtual void mark() const{};
+
+  
 public:
-  _MLHom (int ref=0) : refCounter(ref) {}
+  _MLHom (int ref=0) : refCounter(ref),marking(false) {}
   /** test if caching should be done : default means should cache */
   virtual bool shouldCache () const { return true ; }
 
