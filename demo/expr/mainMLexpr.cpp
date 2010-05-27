@@ -1,5 +1,6 @@
 #include "MLHom.h"
 #include "statistic.hpp"
+#include "MemoryManager.h"
 
 #include "ExprHom.hpp"
 #include <iostream>
@@ -23,6 +24,7 @@ void initName() {
 class _AssertionHom;
 
 int main () {
+  {
   initName();
 
   DDD test1 = GDDD(A,1,GDDD(B,2,GDDD(C,3,GDDD(D,4,GDDD(E,5,GDDD(F,6,GDDD(G,7)))))));
@@ -37,12 +39,12 @@ int main () {
   IntExpression Gexpr = IntExpressionFactory::createVariable(Context::getVariable(G));
   
 
-  GHom be = assignExpr(B,Eexpr);
-  GHom eb = assignExpr(E,Bexpr);
-  GHom bg = assignExpr(B,Gexpr);
+  Hom be = assignExpr(B,Eexpr);
+  Hom eb = assignExpr(E,Bexpr);
+  Hom bg = assignExpr(B,Gexpr);
 
   IntExpression eplusg = Eexpr * Gexpr + (2 * Bexpr) - Aexpr;
-  GHom beg = assignExpr(B,eplusg);  
+  Hom beg = assignExpr(B,eplusg);  
 
   cout << "Input :\n" << test5 << endl;
   cout << "b:=" << Eexpr << " \n" << be(test5) << endl;
@@ -50,16 +52,18 @@ int main () {
   cout << "b:=" << Gexpr << " \n" << bg(test5) << endl;
   cout << "b:=" << eplusg << " \n" <<  beg(test5) << endl;
 
-  GHom gmax = predicate (Gexpr < 9);
-  GHom incrG = assignExpr(G, Gexpr+1);
+  Hom gmax = predicate (Gexpr < 9);
+  Hom incrG = assignExpr(G, Gexpr+1);
 
   cout <<  "g:=" <<  (Gexpr+1) << "["<<  (Gexpr < 9) << "]" << endl;
   cout << (incrG & gmax) (test5) << endl ;
   cout << "fixpoint :" << endl;
-  cout << fixpoint((incrG & gmax) + GHom::id) (test5)<< endl;
+  Hom fp =  fixpoint((incrG & gmax) + GHom::id) ;
+  cout <<fp (test5)<< endl;
 
   Statistic stat = Statistic(test5, "stats") ;
   stat.print_table (cout);
-
+  }
+  MemoryManager::garbage();
   return 0;
 }
