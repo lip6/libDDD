@@ -1,7 +1,7 @@
 #ifndef __INT_EXPRESSION_HH__
 #define __INT_EXPRESSION_HH__
 
-#include <set>
+#include "util/set.hh"
 #include <iostream>
 #include <string>
 #include <UniqueTable.h>
@@ -107,7 +107,7 @@ public :
 };
 
 
-typedef std::multiset<IntExpression> NaryParamType ;
+typedef d3::multiset<IntExpression>::type NaryParamType ;
 
 class IntExpressionFactory {
   static UniqueTable<_IntExpression> unique;
@@ -130,23 +130,21 @@ public :
 
 /**************  administrative trivia. *********************************/
 /******************************************************************************/
-namespace __gnu_cxx { 
+namespace d3 { namespace util { 
   template<>
   struct hash<IntExpression> {
     size_t operator()(const IntExpression &g) const{
       return g.hash(); 
     }
   };
-}
 
-namespace std {
   template<>
-  struct equal_to<IntExpression> {
+  struct equal<IntExpression> {
     bool operator()(const IntExpression &g1,const IntExpression &g2) const{
       return g1.equals(g2);
     }
   };
-}
+} }
 
 namespace std {
   template<>
