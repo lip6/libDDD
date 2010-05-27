@@ -1,4 +1,5 @@
 #include "MLHom.h"
+#include "MemoryManager.h"
 
 
 // assign a constant to a value
@@ -129,6 +130,7 @@ void initName() {
 using namespace std;
 
 int main () {
+  {
   initName();
 
   DDD test1 = GDDD(A,1,GDDD(B,2,GDDD(C,3,GDDD(D,4,GDDD(E,5,GDDD(F,6,GDDD(G,7)))))));
@@ -146,6 +148,8 @@ int main () {
   cout << "b:=e :" << be(test5) << endl;
   cout << "e:=b :" << eb(test5) << endl;
   cout << "b:=g :" << bg(test5) << endl;
+  }
 
+  MemoryManager::garbage();
   return 0;
 }
