@@ -3,7 +3,7 @@ if HAVE_BOOST
   noinst_PROGRAMS += morpionv2
 endif
 
-DDD_SRCDIR = $(top_srcdir)/src ./
+DDD_SRCDIR = $(top_srcdir)/src
 DDD_BUILDDIR = $(top_builddir)/src
 
 BASE = hom
