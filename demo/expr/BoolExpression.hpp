@@ -92,7 +92,7 @@ BoolExpression  operator>=(const IntExpression & l, const IntExpression & r) ;
 BoolExpression  operator<=(const IntExpression & l, const IntExpression & r) ;
 
 
-typedef std::set<BoolExpression> NaryBoolParamType ;
+typedef d3::set<BoolExpression>::type NaryBoolParamType ;
 
 class BoolExpressionFactory {
   static UniqueTable<_BoolExpression> unique;
@@ -114,23 +114,22 @@ public :
 
 /**************  administrative trivia. *********************************/
 /******************************************************************************/
-namespace __gnu_cxx { 
+namespace d3 { namespace util { 
   template<>
   struct hash<BoolExpression> {
     size_t operator()(const BoolExpression &g) const{
       return g.hash(); 
     }
   };
-}
 
-namespace std {
   template<>
-  struct equal_to<BoolExpression> {
+  struct equal<BoolExpression> {
     bool operator()(const BoolExpression &g1,const BoolExpression &g2) const{
       return g1==g2;
     }
   };
-}
+} }
+
 
 namespace std {
   template<>
