@@ -29,6 +29,8 @@
 #include "SDD.h"
 #include "SDED.h"
 #include "SHom.h"
+#include "MLHom.h"
+
 
 #include "process.hpp"
 
@@ -81,6 +83,7 @@ public:
   /// Call this to reclaim intermediate nodes, unused operations and related cache.
   /// Note that this function is quite costly, and it totally destroys the cache
   static void garbage(){
+    MLHom::garbage();
     // FIXME : if you dont use SDD suppress the following
     SDED::garbage();
     GShom::garbage();
