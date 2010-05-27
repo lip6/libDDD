@@ -50,23 +50,21 @@ class _BoolExpression {
 };
 
 
-namespace __gnu_cxx {
+namespace d3 { namespace util {
   template<>
   struct hash<_BoolExpression*> {
     size_t operator()(_BoolExpression * g) const{
       return g->hash();
     }
   };
-}
 
-namespace std {
   template<>
-  struct equal_to<_BoolExpression*> {
+  struct equal<_BoolExpression*> {
     bool operator()(_BoolExpression *g1,_BoolExpression *g2) const{
       return (typeid(*g1) == typeid(*g2) && *g1 == *g2);
     }
   };
-}
+} }
 
 
 class NaryBoolExpr : public _BoolExpression {

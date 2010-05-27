@@ -53,23 +53,21 @@ class _IntExpression {
 };
 
 
-namespace __gnu_cxx {
+namespace d3 { namespace util {
   template<>
   struct hash<_IntExpression*> {
     size_t operator()(_IntExpression * g) const{
       return g->hash();
     }
   };
-}
 
-namespace std {
   template<>
-  struct equal_to<_IntExpression*> {
+  struct equal<_IntExpression*> {
     bool operator()(_IntExpression *g1,_IntExpression *g2) const{
       return (typeid(*g1) == typeid(*g2) && *g1 == *g2);
     }
   };
-}
+} } 
 
 // namespace std {
 //   template<>
