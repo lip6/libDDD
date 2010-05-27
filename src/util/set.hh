@@ -17,6 +17,21 @@ struct set
 {
     typedef typename std::set<Key,Compare,Allocator> type;
 };
+
+
+template
+    <
+      typename Key
+    , typename Compare = std::less<Key>
+    , typename Allocator = typename conf::allocator<Key>::type
+    >
+struct multiset
+{
+    typedef typename std::multiset<Key,Compare,Allocator> type;
+};
+
+
+
     
 } // namespace d3
 
