@@ -26,6 +26,7 @@ util_hdrs   =   util/dotExporter.h \
                 util/configuration.hh \
                 util/ext_hash_map.hh \
                 util/hash_support.hh \
+		util/hash_set.hh \
                 util/tbb_hash_map.hh \
                 util/vector.hh \
                 util/set.hh \
