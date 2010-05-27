@@ -24,18 +24,11 @@
 #ifndef SHOM_H_
 #define SHOM_H_
 
-#include "DataSet.h"
 #include "SDD.h"
 #include "Hom.h"
-#include "hashfunc.hh"
 #include "Cache.hh"
 
-#include <string>
-#include <iostream>
-#include <map>
-
 #include "util/set.hh"
-#include "util/hash_support.hh"
 
 /**********************************************************************/
 
@@ -530,7 +523,7 @@ public:
 	 * \param before : The SDD before Fixpoint pass
 	 * \param after  : The SDD after Fixpoint pass
 	 */
-	virtual void update(const GSDD /*before*/,const GSDD /*after*/) const = 0;
+	virtual void update(const GSDD before,const GSDD after) const = 0;
 	/**
 	 * Would you stop the Fixpoint ?
 	 */

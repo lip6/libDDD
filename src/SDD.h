@@ -24,11 +24,11 @@
 #ifndef SDD_H
 #define SDD_H
 
-#include <vector>
+
 #include <string>
 
+#include "UniqueTable.h"
 #include "DataSet.h"
-#include "hashfunc.hh"
 
 
 #define HEIGHTSDD
@@ -322,8 +322,6 @@ public:
 
 /// Namespace declared to hide these functions. 
 /// It is not very nice to access unicity table directly, these functions were exposed to allow graphical dot export of the unicity table contents.
-#include "UniqueTable.h"
-
 namespace SDDutil {
   /// accessor to UniqueTable instance declared in cpp file, (hem, please don't touch it). 
   /// \todo implement nice generic dot export and eliminate this.

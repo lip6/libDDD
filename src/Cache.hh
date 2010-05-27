@@ -2,7 +2,6 @@
 #define _CACHE_HH_
   
 #include "util/configuration.hh"
-#include "util/hash_support.hh"
 
 
 template

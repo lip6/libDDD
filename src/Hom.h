@@ -25,12 +25,8 @@
 #define HOM_H_
 
 #include "DDD.h"
-#include "DataSet.h"
-#include "hashfunc.hh"
 #include "util/hash_support.hh"
 
-#include <string>
-#include <set>
 #include <map>
 #include <cassert>
 #include <iostream>
@@ -189,9 +185,9 @@ public:
   /// Note that for canonisation and optimization reasons, union is an n-ary and commutative composition operator.
   /// Use of this constructor may be slightly more efficient than using operator+ multiple times.
   /// H({h1,h2, ..hn}) (d) = sum_i h_i (d).
-  /// \param anonymous the set of homomorphisms to put in the union.
+  /// \param set the set of homomorphisms to put in the union.
   /// \todo std::set not very efficient for storage, replace by a sorted vector ?
-  static GHom add(const std::set<GHom>&);
+  static GHom add(const std::set<GHom>&set);
 
   // pretty print of homomorphisms
   friend std::ostream & operator << (std::ostream & os, const GHom & h);

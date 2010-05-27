@@ -223,17 +223,17 @@ public:
 /// Textual output of DDD into a stream in (relatively) human readable format.
 std::ostream& operator<<(std::ostream &,const GDDD &);
 /* Binary operators */
-/// Operator for concatenation of DDD. See DDD operations documentation section for details.
-/// \todo Write the DDD operations documentation !!
+/// Operator for concatenation of DDD. 
+/// Semantics : d1 ^ d2 replaces "one" terminals of d1 by d2
 GDDD operator^(const GDDD&,const GDDD&); 
-/// Operator for union of DDD. See DDD operations documentation section for details.
-/// \todo Write the DDD operations documentation !!
+/// Operator for union of DDD. 
+/// Semantics : d1 + d2 produces the union d1 and d2
 GDDD operator+(const GDDD&,const GDDD&);
-/// Operator for intersection of DDD. See DDD operations documentation section for details.
-/// \todo Write the DDD operations documentation !!
+/// Operator for intersection of DDD.
+/// Semantics : d1 * d2 designates the intersection of the two sets
 GDDD operator*(const GDDD&,const GDDD&); 
-/// Operator for set difference of DDD. See DDD operations documentation section for details.
-/// \todo Write the DDD operations documentation !!
+/// Operator for set difference of DDD. 
+/// Semantics : d1 - d2 contains elements in d1 and not in d2
 GDDD operator-(const GDDD&,const GDDD&); 
 
 
