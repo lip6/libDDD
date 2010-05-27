@@ -36,10 +36,6 @@
 #include <tbb/concurrent_vector.h>
 #endif
 
-
-static SDD __sdd;
-
-
 namespace d3 { namespace util {
   template<>
   struct equal<_GShom*>{
@@ -94,7 +90,7 @@ namespace sns {
     /* Eval */
     GSDD eval(const GSDD &d)const{
 		return d;
-	}
+    }
 
     GShom invert (const GSDD & pot) const { 
       return this;
@@ -1477,8 +1473,8 @@ namespace sns {
 
 			}
 		      }
-				//std::cout << __sdd.nbStates() << std::endl;
-			}
+
+		    }
 		  while (d1 != d2);
 			//__cpt += d1.nbStates();
 			//std::cout << d1.nbStates()  << " : " << __cpt << std::endl;
@@ -1822,11 +1818,6 @@ GShom::GShom(int var,const DataSet & val, const GShom &h) {
 GSDD 
 GShom::operator()(const GSDD &d) const
 {
-	/*if (first == false){
-		__sdd=d;
-		first = true;
-	}*/
-	  
   if(concret->immediat)
     {
       return eval(d);
