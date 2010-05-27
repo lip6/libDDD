@@ -285,6 +285,4 @@ void MLHom::garbage(){
       di++;
     }
   }
-  
-
 }
