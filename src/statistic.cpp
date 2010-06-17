@@ -96,7 +96,7 @@ void Statistic::print_header (std::ostream & os) {
   if (! isPureDDD) os << "SDD cache "<< value_sep[style];
   os << "DDD Hom "<< value_sep[style];
   os << "DDD cache"<< value_sep[style];
-  os << "SHom cache";
+  if (! isPureDDD) os << "SHom cache";
   os << line_sep[style] ;
 }
 
@@ -131,5 +131,26 @@ void Statistic::print_table (std::ostream & os) {
   print_header(os);
   print_line (os);
   print_trailer(os);
+}
+
+/// Print a legend to the table.
+/// give interpretation for row headers
+void Statistic::print_legend (std::ostream & os) {
+  os << "Legend " << line_sep[style] << line_sep[style];
+  os << "Each statistic line describes an SDD/DDD and gives some stats on memory/time usage at the point of the sample." << line_sep[style];
+  os << "* Model : A title for this statistics line." << line_sep[style];
+  os << "* |S| : Number of states (paths) in the SDD/DDD."<< line_sep[style]; 
+  os << "* Time : process execution time when this stat was built."<< line_sep[style];
+  os << "* Mem(kb) : process memory in kilobytes when this stat was built (may be unavailable for certain platforms)"<< line_sep[style];
+  if (! isPureDDD) os << "* fin. SDD : Size in SDD nodes of the SDD."<< line_sep[style];
+  os << "* fin. DDD : Size in DDD nodes of the DDD. "<< line_sep[style];
+  if (! isPureDDD) os << "* peak SDD : peak number of nodes in SDD unique table."<< line_sep[style];
+  os << "* peak DDD : peak number of DDD nodes in unique table."<< line_sep[style];
+  if (! isPureDDD) os << "* SDD Hom : Number of SDD homomorphisms that exist in the unique table."<< line_sep[style];
+  if (! isPureDDD) os << "* SDD cache : Number of elementary SDD node operations currently cached."<< line_sep[style];
+  os << "* DDD Hom : Number of SDD homomorphisms that exist in the unique table."<< line_sep[style];
+  os << "* DDD cache : Number of homomorphism applications to an SDD node currently cached."<< line_sep[style];
+  if (! isPureDDD) os << "* SHom cache : Number of homomorphism applications to an SDD node currently cached." ;
+  os << line_sep[style] ;  
 }
   

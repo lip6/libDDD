@@ -98,6 +98,10 @@ public:
   /// Calls print_header,print_line,print_trailer in this order.
   void print_table (std::ostream & os);
 
+  /// Print a legend to the table.
+  /// give interpretation for row headers
+  void print_legend (std::ostream & os);
+
   /// Setter for style.
   void setStyle (OutputType style);
 
