@@ -7,6 +7,7 @@ ddd_hdrs    =   DataSet.h \
                 DDD.h \
                 DED.h \
                 Hom.h \
+                Hom_Basic.hh \
                 MemoryManager.h \
                 SDD.h \
                 SDED.h \
@@ -37,6 +38,7 @@ srcs     =  DED.cpp \
             Cache.hh \
             DDD.cpp \
             Hom.cpp \
+            Hom_Basic.cpp \
             SDED.cpp \
             SDD.cpp \
             SHom.cpp \
