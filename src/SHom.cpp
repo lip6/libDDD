@@ -778,7 +778,7 @@ namespace sns {
     typedef hash_map<int,partition >::type partition_cache_type;
 
   public:
-    typedef d3::set<GShom>::type parameters_t ;
+    typedef std::vector<GShom> parameters_t ;
     typedef parameters_t::const_iterator parameters_it;
     // for direct manipulation in Fixpoint eval
     parameters_t parameters;
@@ -892,7 +892,7 @@ namespace sns {
   public:
         
 
-    Add(const d3::set<GShom>::type& p, bool have_id): parameters(p), have_id(have_id)
+    Add(const d3::set<GShom>::type& p, bool have_id): parameters(p.begin(),p.end()), have_id(have_id)
     {}
 
     bool
@@ -912,7 +912,7 @@ namespace sns {
     hash() const
     {
       size_t res = 3821;
-      for(d3::set<GShom>::type::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+      for(parameters_it gi=parameters.begin();gi!=parameters.end();++gi)
 	res^=gi->hash();
       return res;
     }
@@ -920,7 +920,7 @@ namespace sns {
     _GShom * clone () const {  return new Add(*this); }
 
     bool is_selector () const {
-      for (d3::set<GShom>::type::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+      for (parameters_it gi=parameters.begin();gi!=parameters.end();++gi)
 	if (! gi->is_selector() )
 	  return false;
       return true;
@@ -949,8 +949,8 @@ namespace sns {
 	part.has_local = false;
 	part.L  = NULL;
 	d3::set<GShom>::type F;
-			
-	for(	d3::set<GShom>::type::const_iterator gi = parameters.begin();
+	d3::set<GShom>::type partG;
+	for(parameters_it gi = parameters.begin();
 		gi != parameters.end();
 		++gi )
 	  {
@@ -976,10 +976,11 @@ namespace sns {
 	    else
 	      {
 		// G part
-		part.G.push_back(*gi);
+		partG.insert(*gi);
 	      }
 	  }
 	part.F = GShom::add(F);
+	part.G = Gset_t (partG.begin(), partG.end());
 	factorizeByLevel (part.G, var);
 	return part.G.empty() && !part.has_local;
       }
@@ -1021,7 +1022,7 @@ namespace sns {
 	{
 	  d3::set<GSDD>::type s;
 		
-	  for(d3::set<GShom>::type::const_iterator gi=parameters.begin();gi!=parameters.end();++gi)
+	  for(parameters_it gi=parameters.begin();gi!=parameters.end();++gi)
 	    {
 	      s.insert((*gi)(d));
 	    }
@@ -1064,7 +1065,7 @@ namespace sns {
     void
     mark() const
     {
-      for( d3::set<GShom>::type::const_iterator gi=parameters.begin();
+      for( parameters_it gi=parameters.begin();
 	   gi!=parameters.end();
 	   ++gi)
 	{
@@ -1076,7 +1077,7 @@ namespace sns {
 
     void print (std::ostream & os) const {
       os << "(SAdd:" ;
-      d3::set<GShom>::type::const_iterator gi=parameters.begin();
+      parameters_it gi=parameters.begin();
       os << *gi ;
       for( ++gi;
 	   gi!=parameters.end();
@@ -2120,8 +2121,8 @@ static  void addParameter (const GShom & hh, 	std::map<int, GHom> & local_homs, 
   const std::type_info & t = typeid( *h );
   if( t == typeid(sns::Add) )
     {
-      const d3::set<GShom>::type & local_param = ((const sns::Add*) h)->parameters;
-      for (d3::set<GShom>::type::const_iterator it = local_param.begin() ; it != local_param.end() ; ++it ){
+      const sns::Add::parameters_t & local_param = ((const sns::Add*) h)->parameters;
+      for (sns::Add::parameters_it it = local_param.begin() ; it != local_param.end() ; ++it ){
 	addParameter( _GShom::get_concret(*it), local_homs,local_shoms ,parameters,have_id );
       }
     }
