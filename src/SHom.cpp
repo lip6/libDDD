@@ -632,6 +632,8 @@ namespace sns {
       :
       _GShom(ref,false),
       parameters(p) {
+//      assert (! p.empty());
+//      assert(p.size() > 1);
     }
       
     /* Compare */
@@ -708,9 +710,13 @@ namespace sns {
 	  }
 	}
 	GShom nextSel = GShom::id ;
-	if ( ! F.empty() ) 
-	  nextSel = And (F);
-	
+	if (! F.empty()) {
+	  if ( F.size() > 1 ) 
+	    nextSel = And (F);
+	  else 
+	    nextSel = *F.begin();
+	}
+
 	return  nextSel (res)  ;	
       }
     }
@@ -828,7 +834,12 @@ namespace sns {
 	    // most conditions seem ok; this g term is of the form  l & And(newAnd)
 	    
 	    // try to add into local to f mapping
-	    GShom fterm = And(newAnd);
+	    GShom fterm;
+	    if (newAnd.size() > 1)
+	      fterm = And(newAnd);
+	    else
+	      fterm = *newAnd.begin();
+
 	    std::pair<map_it, bool> insertion = map_ltof.insert( map_t::value_type(l, fterm) );
 	    if (insertion.second) {
 	      // did not exist, continue;
@@ -2427,6 +2438,7 @@ GShom operator*(const GShom & h,const GShom & cond) {
 void GShom::pstats(bool)
 {
   std::cout << "*\nGSHom Stats : size unicity table = " <<  canonical.size() << std::endl;
+/*
   std::ostream & os = std::cout;
   int i = 0;
   for (UniqueTable<_GShom>::Table::const_iterator it= canonical.table.begin() ;
@@ -2436,6 +2448,7 @@ void GShom::pstats(bool)
     (*it)->print(os);
     os << std::endl;
   }
+*/
 }
 
 // pretty print
