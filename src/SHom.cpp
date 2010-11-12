@@ -1875,7 +1875,7 @@ unsigned int GShom::statistics(){
 }
 
 size_t GShom::cache_size() {
-  return sns::cache.peak();
+  return sns::cache.size();
 }
 
 // Todo
