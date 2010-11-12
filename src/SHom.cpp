@@ -762,12 +762,15 @@ namespace sns {
 
     // types
   public:
+    typedef std::vector<GShom> Gset_t;
+    typedef Gset_t::const_iterator Gset_it;
+    
 	
     typedef
     struct
     {
       GShom F;
-      d3::set<GShom>::type G;
+      Gset_t G;
       const _GShom* L;
       bool has_local;
     } partition;
@@ -785,10 +788,11 @@ namespace sns {
 
     
     /** apply factorization rules adapted to g = l & f */
-    void factorizeByLevel ( d3::set<GShom>::type & G, int target) const {
+    void factorizeByLevel ( Gset_t & G, int target) const {
       typedef d3::set<GShom>::type set_t;
       typedef set_t::iterator  set_it;
       set_t ret;
+      
       /** First step : for any g1 = l1 & f1 and any g2 = l2 & f2, if l1 == l2 then rewrite into g' = g1 + g2 = l1 & (f1+f2) */
       typedef std::map<GShom, GShom> map_t;
       typedef map_t::iterator map_it;
@@ -797,7 +801,7 @@ namespace sns {
 
       /** load the map */
       // traverse the set G, if g = l & f, place into map_ltof, else place in ret 
-      for (set_it it = G.begin() ; it != G.end() ; ++it ) {
+      for (Gset_it it = G.begin() ; it != G.end() ; ++it ) {
 	// test if *it of the form l & f
 	if (const And * hand = dynamic_cast<const And*> ( get_concret(*it) ) )  {
 	  // to compute and store the f part of the composition
@@ -881,7 +885,7 @@ namespace sns {
 	ret.insert( it->second & it->first );
       }
       // reassign into G
-      G = ret;
+      G = Gset_t ( ret.begin(), ret.end());
     }
 
 
@@ -972,7 +976,7 @@ namespace sns {
 	    else
 	      {
 		// G part
-		part.G.insert(*gi);
+		part.G.push_back(*gi);
 	      }
 	  }
 	part.F = GShom::add(F);
@@ -1042,9 +1046,9 @@ namespace sns {
 			
 	  s.insert( part_it->second.F(d) );
 	
-	  const d3::set<GShom>::type& G = part_it->second.G;
+	  const Gset_t & G = part_it->second.G;
 
-	  for( 	d3::set<GShom>::type::const_iterator it = G.begin(); 
+	  for( 	Gset_it it = G.begin(); 
 		it != G.end();
 		++it )
 	    {
@@ -1429,7 +1433,7 @@ namespace sns {
 		      d2 = F_part(d2);
 		      d2 = L_part(d2);
 
-		      for( 	d3::set<GShom>::type::const_iterator G_it = partition.G.begin();
+		      for( 	Add::Gset_it G_it = partition.G.begin();
 				G_it != partition.G.end();
 				++G_it) 
 			{
@@ -1476,7 +1480,7 @@ namespace sns {
 			  L_part.mark();
 			  Shom tt = Shom(this);
 
-			  for( 	d3::set<GShom>::type::const_iterator G_it = partition.G.begin();
+			  for( 	Add::Gset_it G_it = partition.G.begin();
 				G_it != partition.G.end();
 				++G_it) 
 			    G_it->mark();
