@@ -1141,7 +1141,7 @@ GHom operator-(const GHom &h,const GDDD &d){
 void GHom::pstats(bool)
 {
   std::cout << "*\nGHom Stats : size unicity table = " <<  canonical.size() << std::endl;
-
+/*
   std::ostream & os = std::cout;
   int i = 0;
   for (UniqueTable<_GHom>::Table::const_iterator it= canonical.table.begin() ;
@@ -1151,7 +1151,7 @@ void GHom::pstats(bool)
     (*it)->print(os);
     os << std::endl;
   }
-
+*/
 }
 
 
