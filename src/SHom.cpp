@@ -794,7 +794,7 @@ namespace sns {
       set_t ret;
       
       /** First step : for any g1 = l1 & f1 and any g2 = l2 & f2, if l1 == l2 then rewrite into g' = g1 + g2 = l1 & (f1+f2) */
-      typedef std::map<GShom, GShom> map_t;
+      typedef std::map<GShom, d3::set<GShom>::type> map_t;
       typedef map_t::iterator map_it;
       // map local to f terms
       map_t map_ltof;
@@ -843,13 +843,15 @@ namespace sns {
 	      fterm = And(newAnd);
 	    else
 	      fterm = *newAnd.begin();
+	    d3::set<GShom>::type sf;
+	    sf.insert(fterm);
 
-	    std::pair<map_it, bool> insertion = map_ltof.insert( map_t::value_type(l, fterm) );
+	    std::pair<map_it, bool> insertion = map_ltof.insert( map_t::value_type(l, sf) );
 	    if (insertion.second) {
 	      // did not exist, continue;
 	    } else {
 	      // already in map : Apply factorization rule
-	      insertion.first->second = insertion.first->second + fterm ;
+	      insertion.first->second.insert(fterm) ;
 //	      std::cerr << "factorization rule 1 successful ! \n" ;
 	    }
 	    
@@ -870,19 +872,21 @@ namespace sns {
       map_t map_ftol;
       for (map_it it = map_ltof.begin() ; it != map_ltof.end(); ++it ) {
 	/** look if the term exists */
-	std::pair<map_it, bool> insertion = map_ftol.insert( map_t::value_type(it->second, it->first) );
+	d3::set<GShom>::type tmp;
+	tmp.insert(it->first); 
+	std::pair<map_it, bool> insertion = map_ftol.insert( map_t::value_type(add(it->second), tmp) );
 	if (insertion.second) {
 	  // did not exist, continue;
 	} else {
 	  // already in map : Apply factorization rule
-	  insertion.first->second = insertion.first->second + it->first ;
+	  insertion.first->second.insert(it->first) ;
 //	  std::cerr << "factorization rule 2 successful ! \n" ;
 	}
       }
 
       /** Finally reinsert into the G set */
       for (map_it it = map_ftol.begin() ; it != map_ftol.end(); ++it ) {
-	ret.insert( it->second & it->first );
+	ret.insert( GShom::add(it->second) & it->first );
       }
       // reassign into G
       G = Gset_t ( ret.begin(), ret.end());
