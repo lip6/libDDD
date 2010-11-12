@@ -874,7 +874,7 @@ namespace sns {
 	/** look if the term exists */
 	d3::set<GShom>::type tmp;
 	tmp.insert(it->first); 
-	std::pair<map_it, bool> insertion = map_ftol.insert( map_t::value_type(add(it->second), tmp) );
+	std::pair<map_it, bool> insertion = map_ftol.insert( map_t::value_type(GShom::add(it->second), tmp) );
 	if (insertion.second) {
 	  // did not exist, continue;
 	} else {
