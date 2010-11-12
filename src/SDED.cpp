@@ -712,8 +712,8 @@ void SDED::pstats(bool reinit)
 {
   std::cout << "*\nCache Stats : size=" << statistics() << "   --- Peak size=" <<  namespace_SDED::Max_SDED << std::endl;
   
-
-  std::cout << "\nCache hit ratio : " << double (namespace_SDED::Hits*100) / double(namespace_SDED::Misses+1+namespace_SDED::Hits) << "%" << std::endl;
+  
+  std::cout << "Cache hit ratio : " << double (namespace_SDED::Hits*100) / double(namespace_SDED::Misses+1+namespace_SDED::Hits) << "% ("<< namespace_SDED::Hits << "/" <<namespace_SDED::Misses << ")" << std::endl;
   // long hitr=(Hits*100) / (Misses+1+Hits) ;
   if (reinit){
     namespace_SDED::Hits =0;
