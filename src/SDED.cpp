@@ -145,8 +145,10 @@ GShom pushEVSDD(int v){return new _pushEVSDD(v);};
 /******************************************************************************/
 class _SDED_Add:public _SDED{
 private:
-  d3::set<GSDD>::type parameters;
-  _SDED_Add(const d3::set<GSDD>::type &d):parameters(d){};
+  typedef std::vector<GSDD> parameters_t; 
+  typedef parameters_t::const_iterator parameters_it;
+  parameters_t parameters;
+  _SDED_Add(const d3::set<GSDD>::type &d):parameters(d.begin(),d.end()){};
 public:
   static  _SDED *create(const GSDD &g1,const GSDD &g2);
   static  _SDED *create(const d3::set<GSDD>::type &d);
@@ -166,7 +168,7 @@ public:
 /* Compare */
 size_t _SDED_Add::hash() const{
   size_t res=0;
-  for(d3::set<GSDD>::type::const_iterator si=parameters.begin();si!=parameters.end();++si){
+  for(parameters_it si=parameters.begin();si!=parameters.end();++si){
     res+= si->hash();
   }
   return res;
@@ -189,7 +191,7 @@ GSDD _SDED_Add::eval() const{
   DataSet * tofree;
 
   // The current operand
-  d3::set<GSDD>::type::const_iterator opit =  parameters.begin();
+  parameters_it opit =  parameters.begin();
 
   // Initialize with copy of first operand
   for (GSDD::Valuation::const_iterator it = opit->begin();it != opit->end() ; ++it) 
