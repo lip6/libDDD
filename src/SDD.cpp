@@ -252,7 +252,7 @@ size_t GSDD::peak() {
 
 void GSDD::pstats(bool)
 {
-  std::cout << "Peak number of SDD nodes in unicity table :" << peak() << std::endl; 
+  std::cout << "Current/Peak number of SDD nodes in unicity table :" << canonical.size() << "/" << peak() << std::endl; 
 }
 
 
