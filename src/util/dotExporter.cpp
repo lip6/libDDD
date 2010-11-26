@@ -65,6 +65,8 @@ protected:
 public :
   virtual ~dotExporter() {};
 
+  void setPath(const string & path) { this->path = path; }
+
    /* make a census and name all nodes in the sdd */
   virtual void collect(const GSDD& g){    
     if(name.find(g)==name.end()){
@@ -79,6 +81,8 @@ public :
 	  tmp << "\"" << "mod_" <<  g.variable() << "_" << nextid++ << "\"";
 //	  if (g.variable() == varP) {
 	  *out << "     " << tmp.str() << "  [label=\"" <<  "mod " << g.variable()     ;
+	  if (g.refCounter())
+	    *out << "\",color=\"red";
 #ifdef OTF_GARBAGE
 	  *out << "\",color=\""<< (g.isSon()?string("green"):string("red")) ;
 #endif
@@ -97,14 +101,35 @@ public :
       name[g] =  myname; 
       for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++) {
 	if(typeid(*gi->first)==typeid(DDD) ) {
-	  //(g.variable() == varP) {
-	  // only one level of deepness supported at present, referenced value is always DDD type
+	  // only one level of depth, referenced value is DDD type
 	  DDD & arc = (DDD &) *gi->first;
 	  collect(arc);
 	  if (entryd3Name.find(arc) == entryd3Name.end()) {
-	    stringstream tmp2 ;
-	    tmp2 <<  "Mod" << "_" << nextPid++ ;
-	    entryd3Name[arc] = tmp2.str() ;
+
+	    // Test for a form that can be represented as a set of values
+	    bool onevar = true;
+	    std::stringstream tmp3;
+	    tmp3 << "[";
+	    for (DDD::const_iterator it = arc.begin() ; it != arc.end() ; /** increment in loop */ ) {
+	      if (it->second == DDD::one) {
+		tmp3 << it->first ;
+		++it;
+		if (it != arc.end()) tmp3 << ",";
+	      } else {
+		onevar =false;
+		break;
+	      }
+	    }
+	    std::string name;
+	    if (onevar == false) {
+	      stringstream tmp2 ;
+	      tmp2 <<  "Mod" << "_" << nextPid++ ;
+	      name = tmp2.str();
+	    } else {
+	      tmp3 << "]";
+	      name = tmp3.str();
+	    }
+	    entryd3Name[arc] = name ;
 	    entryd3Nb[arc] = 1;
 	  } else {
 	    entryd3Nb[arc]++;
@@ -386,7 +411,7 @@ dotHighlight::dotHighlight (const string & path) { de= new dotExporter(path,true
 dotHighlight::~dotHighlight () { delete de; }
 
 // Call this to empty the "known nodes" lists
-void dotHighlight::initialize (const string&) { de->init() ; }
+void dotHighlight::initialize (const string& path) {  de->setPath(path); de->init() ; }
 
 // This adds an SDD node and all  sons to a graph
 void dotHighlight::addSDD (const GSDD & g) {
