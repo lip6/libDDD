@@ -124,6 +124,9 @@ public:
   /// returns the predescessor homomorphism, using pot to determine variable domains
   GShom invert (const GSDD & pot) const;
 
+  /// returns true if and only if h(d) != SDD::null
+  bool has_image (const GSDD & d) const;
+
   /// \name Comparisons between GShom.
   /// Comparisons between GShom for unicity table. Both equality comparison and
   /// total ordering provided to allow hash and map storage of GShom
@@ -192,12 +195,18 @@ public:
   // BFS = do each g_i once then go to g_i+1
   // DFS = do each g_i to saturation then go to g_i+1
   enum fixpointStrategy {BFS, DFS};
-  
+  enum saturationStrategy {ORDINARY, RECFIREANDSAT};
+
  private : 
   static fixpointStrategy fixpointStrategy_;
+  static saturationStrategy saturationStrategy_;
+
  public :
   static fixpointStrategy getFixpointStrategy() { return fixpointStrategy_; }
   static void setFixpointStrategy(fixpointStrategy strat) { fixpointStrategy_ = strat; }
+
+  static saturationStrategy getSaturationStrategy() { return saturationStrategy_; }
+  static void setSaturationStrategy(saturationStrategy strat) { saturationStrategy_ = strat; }
 
 
 };
@@ -324,6 +333,8 @@ public:
   //@}
 };
 
+
+
 /******************************************************************************/
 
 
@@ -408,6 +419,10 @@ public:
 
   // for use by unique table : return new MyConcreteClassName(*this);
   virtual _GShom * clone () const =0 ;
+
+  virtual bool has_image (const GSDD & d) const {
+    return GShom(this).eval(d) != SDD::null;
+  }
 
 
   /// The computation function responsible for evaluation over a node.

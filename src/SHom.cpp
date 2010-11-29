@@ -36,6 +36,9 @@
 #include <tbb/concurrent_vector.h>
 #endif
 
+#define trace while(0) std::cerr
+// #define trace std::cerr
+
 namespace d3 { namespace util {
   template<>
   struct equal<_GShom*>{
@@ -96,12 +99,18 @@ namespace sns {
       return this;
     }
 
+    bool has_image (const GSDD & d) const {
+      return true;
+    }
+
     void print (std::ostream & os) const {
       os << "SId";
     }
   };
 
   const _GShom * getIdentity() { return canonical(Identity(1)); }
+
+  
 
 
   /************************** Constant */
@@ -137,6 +146,9 @@ namespace sns {
       return pot;
     }
 
+    bool has_image (const GSDD & d) const {
+      return true;
+    }
 
     bool is_selector () const {
       // the empty set is a kind of "false" selector
@@ -276,6 +288,13 @@ namespace sns {
     GShom invert (const GSDD & pot) const { 
       // (h * h')^-1 (s) =( h^-1 ( pot ) +  h^-1 (pot) ) (s) 
       return (left.invert(pot) + right.invert(pot)) ;
+    }
+
+    bool has_image (const GSDD & d) const {
+      if (is_selector())
+	return left.has_image(d) && right.has_image(d);
+      else
+	return _GShom::has_image(d);
     }
 
 
@@ -539,6 +558,12 @@ namespace sns {
       return localApply ( h.invert( *  ((const SDD *) gi->first) ), target)  ;
     }
 
+    bool has_image (const GSDD & d) const {
+      for (SDD::const_iterator it = d.begin() ; it != d.end() ; ++it) 
+	if (h.has_image( * ((const SDD *) it->first)))
+	  return true;
+      return false;
+    }
 
     bool operator==(const _GShom &s) const {
       const SLocalApply* ps = (const SLocalApply *)&s;
@@ -594,6 +619,7 @@ namespace sns {
       GSDD condtrue = cond_ (d);
       return (d - condtrue);
     }
+
 
     void mark() const {
       cond_.mark();
@@ -739,6 +765,65 @@ namespace sns {
       return ret;
     }
 
+
+    bool has_image (const GSDD & d) const {
+      
+      if( d == GSDD::null ||  d == GSDD::one || d == GSDD::top ) {	
+	return _GShom::has_image(d);
+      } else {
+
+	parameters_t F;
+	int var = d.variable();
+	const LocalApply* ld3 = NULL;
+	const SLocalApply* l = NULL;
+
+	GHom local;
+	GShom Slocal;
+	for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+	  if ( gi->skip_variable(var) ) {
+	    F.push_back(*gi);
+	  } else if ( (ld3 = dynamic_cast<const LocalApply*> ( get_concret(*gi) ) ))  {
+	    local = ld3->h;
+	    // looks good, l term identified
+	    // l = *gi;
+	  } else if (( l = dynamic_cast<const SLocalApply*> ( get_concret(*gi) )) )  {
+	    Slocal = l->h;
+     	    // looks good, l term identified
+	    // l = *gi;
+	  } else {
+	    std::cerr << "Bad has_image case : And containing non local " << std::endl;
+	    return _GShom::has_image(d);
+	  }
+	}
+
+	GShom nextSel = GShom::id ;
+	if (! F.empty()) {
+	  if ( F.size() > 1 ) 
+	    nextSel = And (F);
+	  else 
+	    nextSel = *F.begin();
+	}
+	
+
+
+	for (SDD::const_iterator it = d.begin() ; it != d.end() ; ++it ){
+	  if (l != NULL) {
+	    if ( Slocal.has_image( *((const SDD *) it->first))  && nextSel.has_image(it->second))
+	      return true;	    
+	  } else if (ld3 != NULL) {
+	    if ( local ( *((const DDD *) it->first)) != DDD::null  && nextSel.has_image(it->second))
+	      return true;	  
+	  } else {
+	    if ( nextSel.has_image(it->second) ) {
+	      return true;
+	    }
+	  }
+	}
+	return false;
+
+      }
+    }
+
     
     void print (std::ostream & os) const {
       os << "(SAnd:" ;
@@ -852,7 +937,7 @@ namespace sns {
 	    } else {
 	      // already in map : Apply factorization rule
 	      insertion.first->second.insert(fterm) ;
-//	      std::cerr << "factorization rule 1 successful ! \n" ;
+//	      trace << "factorization rule 1 successful ! \n" ;
 	    }
 	    
 	  } else {
@@ -880,7 +965,7 @@ namespace sns {
 	} else {
 	  // already in map : Apply factorization rule
 	  insertion.first->second.insert(it->first) ;
-//	  std::cerr << "factorization rule 2 successful ! \n" ;
+//	  trace << "factorization rule 2 successful ! \n" ;
 	}
       }
 
@@ -922,6 +1007,15 @@ namespace sns {
     }
 
     _GShom * clone () const {  return new Add(*this); }
+
+    bool has_image (const GSDD & d) const {
+      for (parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) 
+	if ( gi->has_image(d))
+	  return true;
+      
+      return false;
+    }
+
 
     bool is_selector () const {
       for (parameters_it gi=parameters.begin();gi!=parameters.end();++gi)
@@ -1093,6 +1187,277 @@ namespace sns {
     }
   };
 
+
+  /************************** RecFireSat */
+
+  // predeclaration
+  GShom recFireSat (const GShom & sat, const GShom & lf) ;
+
+  // TODO class RecFireSat
+  class RecFireSat:public _GShom {
+    GShom sat;
+    GShom lf;
+  public:
+    /* Constructor */
+    RecFireSat (const GShom &sat,const GShom &lf,int ref=0):_GShom(ref,false),sat(sat),lf(lf){}
+    /* Compare */
+    bool operator==(const _GShom &h) const{
+      return sat==((RecFireSat*)&h )->sat && lf==((RecFireSat*)&h )->lf;
+    }
+    size_t hash() const{
+      return 19381*sat.hash()+19681*lf.hash();
+    }
+    _GShom * clone () const {  return new RecFireSat(*this); }
+
+    bool is_selector () const {
+      return sat.is_selector() && lf.is_selector();
+    }
+
+    GShom invert (const GSDD & pot) const { 
+      // (h & h')^-1  =  h'^-1 & h^-1
+      return  lf.invert(pot) & sat.invert(pot);
+    }
+
+
+    bool
+    skip_variable(int var) const 
+    {
+      return sat.skip_variable(var)
+	&& lf.skip_variable(var);
+    }
+
+    const GShom::range_t  get_range () const {
+      GShom::range_t ret = sat.get_range();
+      if ( ret.empty() )
+	return ret;
+      GShom::range_t pret = lf.get_range();
+      if ( pret.empty() )
+	return pret;
+      
+      ret.insert(pret.begin() , pret.end()) ;
+      return ret;
+    }
+
+
+    /* Eval */
+    GSDD eval(const GSDD &d)const{
+      if( d == GSDD::null )
+	{
+	  return GSDD::null;
+	}
+      else if( d == GSDD::one || d == GSDD::top )
+	{
+	  return (fixpoint ( sat ) & lf)(d);
+	}
+      else
+	{
+
+
+      int variable = d.variable();
+
+	  trace << "Current lf = " << lf << std::endl;
+	  trace << "Current sat = " << sat << std::endl;
+	  trace << "Current variable = " << variable << std::endl;
+      // The decomposition of lf into : lf = SLocal(lterm) & fterm in SDD case
+      // or lf =  Local(ltermd3)  & fterm in DDD arc value case
+      GShom lterm;
+      GHom ltermd3;
+      GShom fterm;
+
+      bool isDDDarcval =  (typeid(*d.begin()->first) == typeid(const DDD&));
+
+      // decompose lf into  l & f
+      // A priori :  lf IS of the form l & f 
+      if (const And * hand = dynamic_cast<const And*> ( get_concret(lf) ) )  {
+	// to compute and store the f part of the composition
+	And::parameters_t newAnd;
+	newAnd.reserve(hand->parameters.size());
+	// local part
+
+	for (And::parameters_it gi= hand->parameters.begin();gi!=hand->parameters.end();++gi) {
+	  if ( ! gi->skip_variable(variable) ) {
+	    if (  dynamic_cast<const LocalApply*> ( get_concret(*gi) ) )  {
+//	      isDDDarcval = true;
+	      // looks good, l term identified
+	      ltermd3 = ((const LocalApply*)get_concret(*gi)) ->h ;
+	    } else if ( dynamic_cast<const SLocalApply*> ( get_concret(*gi) ) )  {
+	      // looks good, l term identified
+	      lterm = ((const SLocalApply*)get_concret(*gi)) ->h ;
+	    } else {
+	      // not a local, skip this g term
+	      // looks bad : we have a term in this composition which does not skip, and is not a local. Danger here, so revert to basic implementation.
+	      assert(false);
+	    }
+	  } else {
+	    newAnd.push_back(*gi);
+	  }
+	}
+	// most conditions seem ok; this g term is of the form  l & And(newAnd)
+	if (! newAnd.empty())
+	  fterm = And(newAnd);
+      } else {
+	trace<< "Built a RecFireSat with lf = " << lf << std::endl;
+	return (fixpoint(sat) & lf) (d);
+      }
+
+      trace << "deduce lterm = "<< lterm << std::endl;
+      trace << "deduce ltermd3 = "<< ltermd3 << std::endl;
+      trace << "deduce fterm = "<< fterm << std::endl;
+      trace << "deduce isDDDarcval = "<< isDDDarcval << std::endl;
+
+
+
+
+      // Fsat will be RecFireSat ( sat.F , lf.f)
+      GShom Fsat;
+      // Lsat will be RecFireSat ( body(sat.L) , Lterm ) if SDD arc value
+      // or  (body(sat.L) + id)^* & Ltermd3 : otherwise
+      GShom Lsat;
+      GHom Lsatd3;
+
+      // True if there are some G transitions in sat
+      bool hasGpart = false;
+
+      if (const Add * add = dynamic_cast<const Add*> ( get_concret(sat) ) ) {
+	// Check if we have ( Id + F + G )* where F can be forwarded to the next variable
+	
+	// Rewrite ( Id + F + G )*
+	// into ( O(Gn + Id) o (O(Fn + Id)*)* )* 
+	if( add->get_have_id() ) {                           
+	  Add::partition partition = add->get_partition(variable);
+
+	  hasGpart = ! partition.G.empty();
+	  // partition.F contains id by construction
+	  Fsat = partition.F ;
+	  // Conceptually :
+	  // Lsat = fixpoint(partition.L + GShom::id);
+	  // but we need to ensure that  : (Local(l) + id)^* = Local( (l +id)^* ) 
+	  // so this form for Lsat is built "by hand"
+	  if (partition.has_local) {
+	    if (const LocalApply * loc = dynamic_cast<const LocalApply*> (get_concret(*partition.L))) {
+	      // Hom/DDD case
+	      GHom hh = fixpoint(GHom(loc->h));
+	      Lsatd3 =  hh  & ltermd3 ;
+	    } else if (const SLocalApply* sloc = dynamic_cast<const SLocalApply*> ( get_concret(*partition.L) ) )  {
+	      Lsat = sns::recFireSat(GShom(sloc->h), lterm );
+	    } else {
+	      // looks bad 
+	      assert(false);
+	    }
+	  } else {
+	    Lsat = lterm ;
+	    Lsatd3 = ltermd3;
+	  }
+	} else {
+	  // No identity in sat part ???
+	  assert(false);
+	}
+      } else {
+	// Sat is not a sum ??
+	assert(false);
+      }
+
+      Fsat = recFireSat( Fsat, fterm);
+      // Fsat will be RecFireSat ( sat.F , lf.f)
+      trace << "Current Fsat = " << Fsat << std::endl;
+      // Lsat will be RecFireSat ( body(sat.L) , Lterm ) if SDD arc value
+      // or  (body(sat.L) + id)^* & Ltermd3 : otherwise
+      trace << "Current Lsat = " << Lsat << std::endl;
+      trace << "Current Lsatd3 = " << Lsatd3 << std::endl;
+
+      // True if there are some G transitions in sat
+      trace << "Current hasGpart = " << hasGpart << std::endl;
+
+
+	
+      // We now have collected the various elements for evaluation :
+      // (G + F + L + id )^* & l&f (d) =>
+      //    for ( (val,son) in arcs(d) ) {
+      //            if (l.has_image(val)) {
+      //                 son' = Fstar & f (son) = RecFireSat( F + id, f ) (son) = Fsat (son) 
+      //                 val' = LStar & Local(l) (d) ~= (L + Id)^* & l (val) =  RecFireSat( L + id , l) (val) = Lsat(val); // or Lsatd3
+      //                 sum.add( SDD(var, val', son')
+      //            }
+      //    }
+
+      d3::set<GSDD>::type sum;      
+      for (GSDD::const_iterator it= d.begin() ; it != d.end() ; ++it) {
+	if (isDDDarcval) {
+	  DDD val = ( DDD &) *it->first;
+	  GSDD son = it->second;
+
+	  if ( ltermd3 (val) != DDD::null ) {
+	    son = Fsat(son);
+	    if (son != SDD::null) {
+	      val = Lsatd3 (val);
+
+	      // Should not happen, since ltermd3 leaves some image and Lsatd3 should contain Id
+	      assert(val != DDD::null); 
+
+	      sum.insert( GSDD(variable, val, son) );
+	    }
+	  }
+
+	} else {
+	  GSDD val = (SDD &) *it->first;
+	  GSDD son = it->second;
+	  
+// 	  trace << " Current value :" << std::endl;
+// 	  trace << val ;
+// 	  trace << " Current lterm :" << std::endl;
+// 	  trace << lterm << std::endl;
+// 	  trace << " Current ltermd3 :" << std::endl;
+// 	  trace << lterm << std::endl;
+
+	  if ( lterm.has_image(val)) {
+	    son = Fsat(son);
+	    if (son != SDD::null) {
+	      val = Lsat (val);
+
+	      if (val != SDD::null) {
+		sum.insert( GSDD(variable, val, son) );
+	      }
+	    }
+	  }
+	       
+	}	
+      }
+      if (sum.empty())
+	return SDD::null;
+      
+      GSDD summed = SDED::add(sum);
+      
+      if ( hasGpart ) {
+	return fixpoint(sat) (summed);
+      } else {
+	return summed;
+      }
+	}   
+    }
+
+    /* Memory Manager */
+    void mark() const{
+      sat.mark();
+      lf.mark();
+    }
+
+    void print (std::ostream & os) const {
+      os << "(RecFireSat:" << sat << " , " << lf << ")";
+    }
+
+
+  };
+
+
+
+   GShom recFireSat (const GShom & sat, const GShom & lf) {
+     if ( dynamic_cast<const Add*> ( _GShom::get_concret(sat) ) ) {       
+       return RecFireSat(sat,lf);
+     } else {       
+       return sat & lf;
+     }
+   }
+
   /************************** Compose */
   class Compose:public _GShom{
   public:
@@ -1146,6 +1511,14 @@ namespace sns {
       return left(right(d));
     }
 
+    bool has_image (const GSDD & d) const {
+      if (! right.has_image(d)) {
+	return false;
+      }
+      return _GShom::has_image(d);
+    }
+
+
     /* Memory Manager */
     void mark() const{
       left.mark();
@@ -1184,6 +1557,9 @@ namespace sns {
     //  not really sure how to implement this guy : default to assert(false)
     //GShom invert (const GSDD & pot) const ;
 
+    bool has_image (const GSDD & d) const {
+      return right.has_image(d);
+    }
 
 
     /* Memory Manager */
@@ -1223,6 +1599,10 @@ namespace sns {
 
     //  not really sure how to implement this guy : default to assert(false)
     //GShom invert (const GSDD & pot) const ;
+
+    bool has_image (const GSDD & d) const {
+      return left.has_image(d);
+    }
 
 
     /* Eval */
@@ -1430,77 +1810,219 @@ namespace sns {
 		  } else {
 		    L_part = GShom::id ;
 		  }
-				
-		  do
+
+		  if (GShom::getSaturationStrategy() == GShom::RECFIREANDSAT) {
+
+		    /// Step 1 : identify G = G_part + LF_part such that g \in LF_part <=> g = l & f
+		    Add::Gset_t G_part;
+		    Add::Gset_t LF_part;
+		    GShom LF_sat;		    
 		    {
-		      d1 = d2;
+		      d3::set<GShom>::type add_param;
+		      add_param.insert(L_part);
+		      add_param.insert(partition.F);
+		      add_param.insert(Shom::id);
+		      LF_sat = GShom::add(add_param);
+		      // release add_param
+		    }
+		    trace << "In fixpoint of sum : " << arg << std::endl;
+		    trace << "Variable = " << variable << std::endl;
+		    trace << "Deduced LF_sat = " << LF_sat << std::endl;
 
-		      d2 = F_part(d2);
-		      d2 = L_part(d2);
-
-		      for( 	Add::Gset_it G_it = partition.G.begin();
+		    // fill G with the updated elements in partition.G
+		    for( 	Add::Gset_it G_it = partition.G.begin();
 				G_it != partition.G.end();
 				++G_it) 
-			{
+		    {
+		      trace << "testing g element : " << *G_it<< std::endl;
+		      // find elements of the form l & f
+		      // test if *it of the form l & f
+		      if (const And * hand = dynamic_cast<const And*> ( get_concret(*G_it) ) )  {
+			bool niceform = true;
 
-			  // d2 = F_part(d2);
-			  // 						d2 = L_part(d2);
-
-			  // apply local part
-			  // d2 = L_part(d2);
-
-			  if (GShom::getFixpointStrategy() == GShom::DFS) {
-			    // saturate firings of each transition (for non deterministic : one to many transitions).
-			    // do an internal fixpoint on every g \in G, i.e. 
-			    // (\sum_i (g_i + id)\star) \star			  
-			    GSDD d3 = d2;
-			    do {
-			      d2 = d3;
-			      d3 =  ( (L_part &  (*G_it))(d2)) + d2;
-			    } while (d3 != d2);
+			for (And::parameters_it gi= hand->parameters.begin();gi!=hand->parameters.end();++gi) {
+			  if (  dynamic_cast<const LocalApply*> ( get_concret(*gi) )) {
+			    continue;
+			  }  else if ( dynamic_cast<const SLocalApply*> ( get_concret(*gi) ) )  {
+			    continue;			    
 			  } else {
+			    // not a local, add this g term to G_part
+			    // looks bad : we have a term in this composition which does not skip, and is not a local. Danger here, so revert to basic implementation.
+			    niceform = false;
+			    break;
+			  }
+			}
+
+		    
+			if (niceform) {
+			  trace << "IS nice form"<< std::endl;
+			  // Use the recursive fire and sat rewriting
+			  // (F + L + id + l&f)^* (d) = (L+F+id)^* & (l&f) (d) = RecFireSat( L+F+id , l&f ) (d);   			  
+			  LF_part.push_back( recFireSat(LF_sat,*G_it) );
+			} else {
+			  // Not nice although it is a And commutative composition
+			  // Could still be handled ???
+			  trace << "IS almost nice form"<< std::endl;
+			  G_part.push_back(*G_it);
+			
+			}
+
+		      } else {
+			  trace << "IS NOT  nice form"<< std::endl;
+			// Not nice 
+			G_part.push_back(*G_it);
+		      }
+		    }
+
+
+		    do
+		      {
+			d1 = d2;
+
+			d2 = F_part(d2);
+			d2 = L_part(d2);
+
+			// Elements in G' : not a nice l&f form : default to usual behavior
+			for( 	Add::Gset_it G_it = G_part.begin();
+				G_it != G_part.end();
+				++G_it) 
+			  {
 			    // BFS
 			    // chain application of Shom of this level
 			    d2 =  ( (L_part &  (*G_it))(d2)) + d2;
+			    
 			  }
-			}
-		      if (can_garbage) {
+			
+			
+			for( 	Add::Gset_it G_it = LF_part.begin();
+				G_it != LF_part.end();
+				++G_it) 
+			  {
+			    // Use the recursive fire and sat rewriting
+			    // Elements in LF_part have been built to be of the form :
+			    // (F + L + id + l&f)^* (d) = RecFire[(L+F+id)^* & (l&f)] (d);   
+			    trace << "HIT" << std::endl;
+			    
+			    d2 =  (*G_it)(d2) + d2;
+			    
+			  }
+			
+
+
+			if (can_garbage) {
 		    	  /* Call the fixpoint Observer */
 		    	  if (sns::__fixpointObs != NULL){
-		    		  sns::__fixpointObs->update(d2,d1);
-		    		  /* We must continue */
-		    		  if (sns::__fixpointObs->shouldInterrupt())
-						  /* BREAK THE LOOP and return result */
-						  return d1;
+			    sns::__fixpointObs->update(d2,d1);
+			    /* We must continue */
+			    if (sns::__fixpointObs->shouldInterrupt())
+			      /* BREAK THE LOOP and return result */
+			      return d1;
 		    	  }
 		    	  //std::cout << d1.nbStates() << std::endl;
-//			std::cerr << "could trigger !!" << std::endl ;
-			if (MemoryManager::should_garbage()) {
-//			  std::cerr << "triggered !!" << std::endl ;
-			  // ensure d1 and d2 are preserved
-			  d1.mark();
-			  d2.mark();
-			  // ensure current operands are preserved
-			  F_part.mark();
-			  L_part.mark();
-			  Shom tt = Shom(this);
+			  //			std::cerr << "could trigger !!" << std::endl ;
+			  if (MemoryManager::should_garbage()) {
+			    //			  std::cerr << "triggered !!" << std::endl ;
+			    // ensure d1 and d2 are preserved
+			    d1.mark();
+			    d2.mark();
+			    // ensure current operands are preserved
+			    F_part.mark();
+			    L_part.mark();
+			    Shom tt = Shom(this);
 
-			  for( 	Add::Gset_it G_it = partition.G.begin();
+			    for( 	Add::Gset_it G_it = partition.G.begin();
+					G_it != partition.G.end();
+					++G_it) 
+			      G_it->mark();
+			    MemoryManager::garbage();
+
+			  }
+			}
+
+		      }
+		    while (d1 != d2);
+		    //__cpt += d1.nbStates();
+		    //std::cout << d1.nbStates()  << " : " << __cpt << std::endl;
+		    return d1;
+		  
+
+
+		  ///END RECFIREANDSAT CASE
+		} else {
+
+				
+		do
+		  {
+		    d1 = d2;
+
+		    d2 = F_part(d2);
+		    d2 = L_part(d2);
+
+		    for( 	Add::Gset_it G_it = partition.G.begin();
 				G_it != partition.G.end();
 				++G_it) 
-			    G_it->mark();
-			  MemoryManager::garbage();
+		      {
 
+			// d2 = F_part(d2);
+			// 						d2 = L_part(d2);
+
+			// apply local part
+			// d2 = L_part(d2);
+
+			if (GShom::getFixpointStrategy() == GShom::DFS) {
+			  // saturate firings of each transition (for non deterministic : one to many transitions).
+			  // do an internal fixpoint on every g \in G, i.e. 
+			  // (\sum_i (g_i + id)\star) \star			  
+			  GSDD d3 = d2;
+			  do {
+			    d2 = d3;
+			    d3 =  ( (L_part &  (*G_it))(d2)) + d2;
+			  } while (d3 != d2);
+			} else {
+			  // BFS
+			  // chain application of Shom of this level
+			  d2 =  ( (L_part &  (*G_it))(d2)) + d2;
 			}
 		      }
+		    if (can_garbage) {
+		      /* Call the fixpoint Observer */
+		      if (sns::__fixpointObs != NULL){
+			sns::__fixpointObs->update(d2,d1);
+			/* We must continue */
+			if (sns::__fixpointObs->shouldInterrupt())
+			  /* BREAK THE LOOP and return result */
+			  return d1;
+		      }
+		      //std::cout << d1.nbStates() << std::endl;
+		      //			trace << "could trigger !!" << std::endl ;
+		      if (MemoryManager::should_garbage()) {
+			//			  trace << "triggered !!" << std::endl ;
+			// ensure d1 and d2 are preserved
+			d1.mark();
+			d2.mark();
+			// ensure current operands are preserved
+			F_part.mark();
+			L_part.mark();
+			Shom tt = Shom(this);
 
+			for( 	Add::Gset_it G_it = partition.G.begin();
+				G_it != partition.G.end();
+				++G_it) 
+			  G_it->mark();
+			MemoryManager::garbage();
+
+		      }
 		    }
-		  while (d1 != d2);
-			//__cpt += d1.nbStates();
-			//std::cout << d1.nbStates()  << " : " << __cpt << std::endl;
-		  return d1;
-		}
-	    }                                                                                               
+
+		  }
+		while (d1 != d2);
+		//__cpt += d1.nbStates();
+		//std::cout << d1.nbStates()  << " : " << __cpt << std::endl;
+		return d1;
+	      }
+		  
+	    }
+	}                                                                                               
 
 	  do
 	    {
@@ -1515,9 +2037,9 @@ namespace sns {
 					  /* BREAK THE LOOP and return result */
 					  return d1;
 			  }
-//		std::cerr << "could trigger 2!!" << std::endl ;
+//		trace << "could trigger 2!!" << std::endl ;
 		if (MemoryManager::should_garbage()) {
-//		  std::cerr << "triggered !!" << std::endl ;
+//		  trace << "triggered !!" << std::endl ;
 		  // ensure d1 and d2 and argument are preserved
 		  d1.mark();
 		  d2.mark();
@@ -1814,6 +2336,7 @@ using sns::canonical;
 
 // Note: Shom::null is defined in SDD.cpp for static initialization stupid C++ freaking semantics.
 GShom::fixpointStrategy GShom::fixpointStrategy_ = BFS;
+GShom::saturationStrategy GShom::saturationStrategy_ = ORDINARY;
 
 /* Constructor */
 GShom::GShom(const _GShom *h):concret(h){}
@@ -1876,6 +2399,16 @@ int GShom::refCounter() const{return concret->refCounter;}
 // GShom GShom::add(const set<GShom>& s){
 //    return(new Sum(s));
 // }
+
+bool GShom::has_image (const GSDD & d) const {
+  
+
+  /// test cache
+  
+  //  if (miss)
+  return concret->has_image(d);
+  
+}
 
 
 /* Memory Manager */
@@ -2013,6 +2546,7 @@ GShom fixpoint (const GShom &h, bool is_top_level) {
   if( typeid( *_GShom::get_concret(h) ) == typeid(sns::Fixpoint)
       || h == GShom::id  || h.is_selector() )
     return h;
+  
 
   
   // is it the fixpoint of an union ?
@@ -2033,7 +2567,7 @@ GShom fixpoint (const GShom &h, bool is_top_level) {
 	  // Check if : other = sel & F
 	  if (const sns::Compose * comp = dynamic_cast<const sns::Compose*> ( _GShom::get_concret(other) ) ) {
 	    // hit : we have a composition
-//	    std::cerr << "Hit a composition! ";// comp->print(std::cerr) ; std::cerr << std::endl;
+//	    trace << "Hit a composition! ";// comp->print(std::cerr) ; std::cerr << std::endl;
 	    bool canApply = false;
 	    bool isLeftSel = true;
 	    const sns::Add * subadd = NULL;
@@ -2057,7 +2591,7 @@ GShom fixpoint (const GShom &h, bool is_top_level) {
 	    if (canApply) 
 	      {
 		// This is it !! apply rewriting strategy
-//		std::cerr << "Hit matches second criterion sel & Add ! " << std::endl;
+//		trace << "Hit matches second criterion sel & Add ! " << std::endl;
 		GShom::range_t selr = selector.get_range();
 		if (! selr.empty() ) {
 		  // selector concerns a subset of variables, probably we can commute with at least some of the terms in subadd
@@ -2074,7 +2608,7 @@ GShom fixpoint (const GShom &h, bool is_top_level) {
 		  
 		  if (! doC.empty() ) {
 		    // Great ! successful application of the rule is possible
-		    //		    std::cerr << "Hit Full ! " << doC.size() << "/" << notC.size() << std::endl;
+		    //		    trace << "Hit Full ! " << doC.size() << "/" << notC.size() << std::endl;
 		    d3::set<GShom>::type finalU;
 		    finalU.insert(GShom::id);
 		    doC.insert(GShom::id);
