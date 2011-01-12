@@ -175,6 +175,8 @@ public:
   static  unsigned int statistics();
   /// Return the current size of the cache for GShom.
   static size_t cache_size();
+	/// Return the peak size of the cache for GShom.
+  static size_t cache_peak();
   
   /// Print some usage statistics on Shom. Mostly used for development and debug.
   /// \todo Allow output not in std::cout.
@@ -479,7 +481,7 @@ class StrongShom : public _GShom
 public:
   /// Default constructor. Empty behavior.
   /// \todo Is this declaration useful ?
-  StrongShom(){};
+  StrongShom(bool im=false): _GShom(0,im) {};
   /// Default destructor. Empty behavior.
   /// \todo Is this declaration useful ?
   virtual ~StrongShom(){};
