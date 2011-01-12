@@ -2420,6 +2420,10 @@ size_t GShom::cache_size() {
   return sns::cache.size();
 }
 
+size_t GShom::cache_peak() {
+  return sns::cache.peak();
+}
+
 // Todo
 void GShom::mark()const{
   if(!concret->marking){
