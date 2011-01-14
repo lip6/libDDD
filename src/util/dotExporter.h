@@ -52,8 +52,12 @@ public:
   dotHighlight (const string & path);
   // Call this to empty the "known nodes" lists
   void initialize (const string & path);
+  // Sets the vars to be aligned 
+  void setVarAlignment (bool isAligned);
   // This adds an SDD node and all sons to a graph
   void addSDD (const GSDD & g);
+  // This adds an SDD node and names it with the provided label
+  void addSDD (const GSDD & g, const string &label);
   // This changes the color of a node and sons
   void setColor(const GSDD & g, const string & color);
   // This creates the actual file
