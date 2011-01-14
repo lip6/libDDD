@@ -42,7 +42,7 @@ public:
   GDDD eval();
   DED(_DED *c):concret(c){};
   bool operator==(const DED&) const; 
-  static GDDD add(const std::set<GDDD> &);
+  static GDDD add(const d3::set<GDDD>::type &);
   static GDDD hom(const GHom &,const GDDD&);
 
   /* Memory Manager */
