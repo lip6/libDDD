@@ -823,8 +823,14 @@ GSDD SDED::Shom(const GShom &h,const GSDD&g){
 
 
 GSDD SDED::add(const d3::set<GSDD>::type &s){
-   SDED e(_SDED_Add::create(s));
-   return e.eval();
+  if (s.empty()) {
+    return GSDD::null;
+  } else if (s.size() == 1) {
+    return *s.begin();
+  } else {
+    SDED e(_SDED_Add::create(s));
+    return e.eval();
+  }
 };
 
 GSDD operator+(const GSDD &g1,const GSDD &g2){
