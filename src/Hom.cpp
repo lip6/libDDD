@@ -125,6 +125,79 @@ public:
   
 };
 
+// Apply a 2 level DDD to current value
+class Apply2k:public _GHom{
+private:
+  // should be strictly 2 variables high, variable identities are irrelevant.
+  GDDD value;
+public:
+  /* Constructor */
+  Apply2k(const GDDD &d,int ref=0):_GHom(ref,false),value(d){}
+
+  /* Compare */
+  bool operator==(const _GHom &h) const{
+    return value==((Apply2k*)&h )->value;
+  }
+  size_t hash() const{
+    return value.hash() * 13;
+  }
+  _GHom * clone () const {  return new Apply2k(*this); }
+  /* Eval */
+  GDDD eval(const GDDD &d)const{
+
+//    std::cerr << "Apply transition " << value << "\n to value :" << d << std::endl;
+
+    if ( d==GDDD::null || value==GDDD::null)
+      return GDDD::null; 
+    
+    // joint traversal
+    GDDD::const_iterator it1 = d.begin();
+    GDDD::const_iterator it2 = value.begin();
+    d3::set<GDDD>::type toadd;
+
+    for ( ; it1 != d.end() && it2 != value.end() ; ) {
+      if (it1->first == it2->first) {
+	// We have a match
+	const GDDD & son = it2->second;
+	for (GDDD::const_iterator it3 = son.begin() ; it3 != son.end() ; ++it3) {
+	  toadd.insert( GDDD(d.variable(),it3->first,it1->second) );
+	}
+	++it1;
+	++it2;
+      } else if (it1->first > it2->first) {
+	// the value in transition => no such current value in d
+	// shift tr
+	++it2;
+      } else {
+	// so no such arc in tr => no successor for this arc
+	++it1;
+      }
+    }
+
+//    std::cerr << " obtained "<< DED::add(toadd) << std::endl;
+
+    return DED::add(toadd);
+
+  }
+
+ GHom invert  (const GDDD & pot) const {
+   return pot;
+ }
+
+
+  /* Memory Manager */
+  void mark() const{
+    value.mark();
+  }
+
+  void print (std::ostream & os) const {
+    os << "(Apply:" << value << ")";
+  }
+
+  
+};
+
+
 /************************** Mult */
 class Mult:public _GHom{
 private:
@@ -1131,6 +1204,13 @@ GHom operator^(const GHom &h,const GDDD &d){
 
 GHom operator-(const GHom &h,const GDDD &d){
   return GHom(canonical( Minus(h,d)));
+}
+
+GHom apply2k (const GDDD & d) {
+  if (d == GDDD::null || d == GDDD::one || d == GDDD::top ) {
+    return GDDD::null;
+  }
+  return GHom(canonical ( Apply2k(d) ));
 }
 
 /*************************************************************************/
