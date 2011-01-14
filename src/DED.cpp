@@ -658,8 +658,14 @@ GDDD DED::hom(const GHom &h,const GDDD&g){
 };
 
 GDDD DED::add(const std::set<GDDD> &s){
-  DED e(_DED_Add::create(s));
-  return e.eval();
+  if (s.empty()) {
+    return GDDD::null;
+  } else if (s.size() == 1) {
+    return *s.begin();
+  } else {
+    DED e(_DED_Add::create(s));
+    return e.eval();
+  }
 };
 
 GDDD operator+(const GDDD &g1,const GDDD &g2){
