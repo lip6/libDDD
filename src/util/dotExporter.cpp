@@ -53,7 +53,14 @@ protected:
   
   // set to true if no sharing of 1 terminals is desired
   bool multiT;
-  
+
+  // set to true if you want to force to align nodes by variable id
+  bool isAligned;
+
+  typedef std::set<int> seen_t;
+  typedef seen_t::const_iterator seen_it;
+  typedef seen_t::const_reverse_iterator seen_rit;
+  seen_t seen;
 
   void collect( const SDD& g){    
     collect((const GSDD &)g);
@@ -78,6 +85,8 @@ public :
       } else if (g == GSDD::top) {
 	tmp << "null";
       } else {
+	  seen.insert(g.variable());
+
 	  tmp << "\"" << "mod_" <<  g.variable() << "_" << nextid++ << "\"";
 //	  if (g.variable() == varP) {
 	  *out << "     " << tmp.str() << "  [label=\"" <<  "mod " << g.variable()     ;
@@ -198,8 +207,9 @@ public :
 	tmp << "top";
       } else if (g == GDDD::null) {
 	tmp << "null";
-      } else
+      } else {
 	tmp << GDDD::getvarName(g.variable()) << "_" << nextid++;
+      }
       d3name[g] = tmp.str();
       if (g == GDDD::top||g == GDDD::null) { 
 	*D3out << "     " << tmp.str() << ";\n";
@@ -222,7 +232,7 @@ public :
     }
   }
 
-  dotExporter(const string &s="test", bool multiT = false):path(s),multiT(multiT) {};
+  dotExporter(const string &s="test", bool multiT = false):path(s),multiT(multiT),isAligned(false) {};
 
   //  typedef  std::tr1::unordered_set<GSDD,d3::util::hash<GSDD>, d3::util::equal<GSDD> > gsdd_hash_set;
   typedef d3::hash_set<GSDD>::type gsdd_hash_set;
@@ -255,13 +265,22 @@ public :
     entryName.clear();
     entryd3Nb.clear();
     entryd3Name.clear();
-
+    seen.clear();
 
     out = new ofstream ( string(path+".dot").c_str() );
     D3out = new ofstream ( string("d3"+path+".dot").c_str());
     *out << "digraph \""<<path<<"\" {\n    size=\"20,20\";\n"; 
     *D3out << "digraph  \"d3"<<path<<"\" {\n    size=\"20,20\";\n"; 
 
+  }
+
+  void setAlign (bool align) {
+    isAligned = align;
+  }
+
+  void label (const GSDD &g, const string & name) {
+    collect(g);
+    entryName[g] =  name ;
   }
 
   int operator()(const GSDD& g){
@@ -271,16 +290,44 @@ public :
     return 1;
   }
 
+  void printLevels () {
+    // force order
+    *out << "     node [shape=plaintext,fontsize=16] ;" << endl << "     ";
+    for (seen_rit sit = seen.rbegin() ; sit != seen.rend() ; ) {
+      *out << "\"Level " << *sit  << "\"" ;
+      if (++sit != seen.rend()) 
+	*out << " -> ";    
+    }
+    *out << " ; " << endl ;
+
+    // output ranks
+    for (seen_it sit = seen.begin() ; sit != seen.end() ; ++sit) {
+      *out << "{ rank = same; " << " \"Level " << *sit  << "\" ; " ;
+      for (map<GSDD,string>::const_iterator it = name.begin() ; it != name.end() ; ++it) {
+	if (it->first == SDD::one || it->first == SDD::null || it->first == SDD::top) {
+	  continue;
+	}
+	if (it->first.variable() == *sit) {
+	  *out << it->second << " ;";
+	}
+      }
+      *out << "}\n";
+    }
+  }
+
   void finish () {
+    if (isAligned)
+      printLevels();
+
     for (map<GDDD,string>::iterator it = entryd3Name.begin() ; it != entryd3Name.end() ; it++ ) {
-      *D3out <<  "     " << it->second   << "  [shape=invhouse];\n";
-      *D3out <<  "     " << it->second   << "  [label=\"" << it->second << "\"];\n";
-      *D3out <<  "     " << it->second   <<  "->" <<  d3name[it->first] << "    [label=\""<< entryd3Nb[it->first] << "\"];" <<endl;
+      *D3out <<  "     \"" << it->second   << "\"  [shape=invhouse];\n";
+      *D3out <<  "     \"" << it->second   << "\"  [label=\"" << it->second << "\"];\n";
+      *D3out <<  "     \"" << it->second   <<  "\" ->" <<  d3name[it->first] << "    [label=\""<< entryd3Nb[it->first] << "\"];" <<endl;
     }
     for (map<GSDD,string>::iterator it = entryName.begin() ; it != entryName.end() ; it++ ) {
-      *out <<  "     " << it->second   << "  [shape=invhouse];\n";
-      *out <<  "     " << it->second   << "  [label=\"" << it->second << "\"];\n";
-      *out <<  "     " << it->second   <<  "->" <<  name[it->first] << "    [label=\""<< entryNb[it->first] << "\"];" <<endl;
+      *out <<  "     \"" << it->second   << "\"  [shape=invhouse];\n";
+      *out <<  "     \"" << it->second   << "\"  [label=\"" << it->second << "\"];\n";
+      *out <<  "     \"" << it->second   <<  "\" ->" <<  name[it->first] << "    [label=\""<< entryNb[it->first] << "\"];" <<endl;
     }
 
 
@@ -407,15 +454,26 @@ int exportDot(const GSDD & g,const string &path,bool hierarchical, bool multiT) 
 /************** CLASS dotHighlight ************/
 
 // prepares to export in file named "path"
-dotHighlight::dotHighlight (const string & path) { de= new dotExporter(path,true); };
+dotHighlight::dotHighlight (const string & path) { de= new dotExporter(path,true); de->init(); };
 dotHighlight::~dotHighlight () { delete de; }
 
 // Call this to empty the "known nodes" lists
 void dotHighlight::initialize (const string& path) {  de->setPath(path); de->init() ; }
 
+// Sets the vars to be aligned 
+void dotHighlight::setVarAlignment (bool isAligned) {
+  de->setAlign(isAligned);
+}
+
 // This adds an SDD node and all  sons to a graph
 void dotHighlight::addSDD (const GSDD & g) {
   de->collect(g);
+}
+
+// This adds an SDD node and labels it with the provided label  sons to a graph
+void dotHighlight::addSDD (const GSDD & g, const string & label) {
+  de->collect(g);
+  de->label(g, label);
 }
 
 
