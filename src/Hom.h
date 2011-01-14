@@ -26,6 +26,7 @@
 
 #include "DDD.h"
 #include "util/hash_support.hh"
+#include "util/set.hh"
 
 #include <map>
 #include <cassert>
@@ -187,7 +188,7 @@ public:
   /// H({h1,h2, ..hn}) (d) = sum_i h_i (d).
   /// \param set the set of homomorphisms to put in the union.
   /// \todo std::set not very efficient for storage, replace by a sorted vector ?
-  static GHom add(const std::set<GHom>&set);
+    static GHom add(const d3::set<GHom>::type & set);
 
   // pretty print of homomorphisms
   friend std::ostream & operator << (std::ostream & os, const GHom & h);
@@ -278,6 +279,10 @@ GHom operator^(const GHom &,const GDDD &);
 ///
 /// Semantics : (h - d1) (d) =  h(d) - d1
 GHom operator-(const GHom &,const GDDD &); 
+
+/// Apply a 2 level DDD representing a transition relation to current variable.
+GHom apply2k (const GDDD &);
+
 //@}
 
 
