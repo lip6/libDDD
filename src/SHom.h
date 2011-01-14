@@ -292,6 +292,11 @@ GShom operator-(const GShom &,const GSDD &);
 ///
 /// Semantics : (h1 - h2) (d) =  h1(d) - h2(d)
 GShom operator-(const GShom &,const GShom &); 
+
+/// Apply a 2 level DDD representing a transition relation to current variable.
+GShom apply2k (const GSDD &);
+
+
 //@}
 
 

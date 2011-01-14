@@ -161,6 +161,76 @@ namespace sns {
 
   };
 
+  /************************** Apply 2k level SDD */
+  class SApply2k:public _GShom{
+  private:
+    GSDD value;
+  public:
+    /* Constructor */
+    SApply2k(const GSDD &d,int ref=0):_GShom(ref,false),value(d){}
+
+    /* Compare */
+    bool operator==(const _GShom &h) const{
+      return value==((SApply2k*)&h )->value;
+    }
+
+    size_t hash() const{
+      return value.hash() * 13;
+    }
+
+    _GShom * clone () const {  return new SApply2k(*this); }
+
+    /* Eval */
+    GSDD eval(const GSDD &d)const{
+      if (d==GSDD::null || value == GSDD::null)
+	return GSDD::null;
+
+      d3::set<GSDD>::type toadd;
+      // cant avoid quadratic complexity :(
+      for (GSDD::const_iterator it1 = d.begin(); it1 != d.end() ; ++it1 ){
+	for (GSDD::const_iterator it2 = value.begin(); it2 != value.end() ; ++it2 ){
+
+	  // downcast this garbage to DDD
+	  DDD newval = apply2k (* (const DDD*) it2->first ) ( * (const DDD *) it1->first );
+	  if (newval != DDD::null) {
+	    toadd.insert( GSDD(d.variable(), newval, apply2k(it2->second) (it1->second)));
+	  }
+	}
+      }
+      return SDED::add(toadd);
+    }
+      
+    bool
+    skip_variable(int var) const 
+    {
+      return var != value.variable();
+    }
+
+    /* Memory Manager */
+    void mark() const{
+      value.mark();
+    }
+
+    GShom invert (const GSDD & pot) const { 
+      return pot;
+    }
+
+    bool has_image (const GSDD & d) const {
+      return true;
+    }
+
+    bool is_selector () const {
+      // the empty set is a kind of "false" selector
+      return value == SDD::null ; 
+    }
+
+    void print (std::ostream & os) const {
+      os << "(SApply2k:" << value << ")";
+    }
+
+  };
+
+
   /************************** Mult */
   class Mult:public _GShom{
   private:
@@ -2964,6 +3034,15 @@ GShom operator! (const GShom & cond) {
   } else {
     return sns::SNotCond(cond);
   }
+}
+
+GShom apply2k (const GSDD & d) {
+  if (d == GSDD::null || d == GSDD::top ) {
+    return d;
+  } else if (d == GSDD::one) {
+    return GShom::id;
+  }
+  return  sns::SApply2k(d);
 }
 
 GShom operator*(const GShom & h,const GShom & cond) {
