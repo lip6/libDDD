@@ -67,6 +67,8 @@ class DataSet
   virtual size_t set_hash() const =0;
   /// returns a formatted string description of the set
   virtual void set_print (std::ostream &os) const =0;
+	/// for memory management : if your DataSet references no GDD,GHom,GSDD,GShom, mark() should do nothing
+	virtual void mark() const = 0;
 #ifdef EVDDD
   virtual DataSet *normalizeDistance(int n) const =0;
   virtual int getMinDistance() const = 0;
