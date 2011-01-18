@@ -144,6 +144,9 @@ public :
     }
     os << "]" ;
   }
+	/// nothing to mark : do nothing
+	void mark() const {}
+	
 #ifdef EVDDD
   DataSet *normalizeDistance(int n) const {
     return new IntDataSet(data);
