@@ -315,6 +315,8 @@ public:
    size_t set_hash() const;
   /// Textual (human readable) output of a DDD.
    void set_print (std::ostream &os) const { os << *this; }
+	/// mark() from DataSet interface
+	void mark() const { GDDD::mark(); }
 #ifdef EVDDD
    DataSet *normalizeDistance(int n) const { return new DDD(GDDD::normalizeDistance(n)); }
    int getMinDistance() const { return GDDD::getMinDistance();}

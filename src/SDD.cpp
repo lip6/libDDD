@@ -235,9 +235,7 @@ void _GSDD::mark()const{
   if(!marking){
     marking=true;
     for(GSDD::Valuation::const_iterator vi=valuation.begin();vi!=valuation.end();++vi){
-      if (const GSDD * arc = dynamic_cast<const GSDD*> ( vi->first ) ) {
-	arc->mark();
-      }
+			vi->first->mark();
       vi->second.mark();
     }
   }
