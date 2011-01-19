@@ -454,7 +454,7 @@ int exportDot(const GSDD & g,const string &path,bool hierarchical, bool multiT) 
 /************** CLASS dotHighlight ************/
 
 // prepares to export in file named "path"
-dotHighlight::dotHighlight (const string & path) { de= new dotExporter(path,true); de->init(); };
+dotHighlight::dotHighlight (const string & path) { de= new dotExporter(path,true); de->init(); setVarAlignment(true); };
 dotHighlight::~dotHighlight () { delete de; }
 
 // Call this to empty the "known nodes" lists
