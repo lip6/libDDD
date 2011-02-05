@@ -109,6 +109,9 @@ public:
     GDDD::pstats(reinit);    
   }
 
+  static void setGCThreshold (size_t nbKbyte) {
+    last_mem = nbKbyte;
+  }
  private :
   // actually defined in DDD.cpp, bottom of file.
   static size_t last_mem;
