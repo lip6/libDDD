@@ -83,7 +83,7 @@ if test "x${with_libtbbbin}" != x; then
 fi
 
 # Enable boost if found:
-AX_BOOST_BASE([1.34])
+AX_BOOST_BASE([1.31])
 AM_CONDITIONAL([HAVE_BOOST], [test "${BOOST_DETECTED}" = "true"])
 
 AC_CONFIG_FILES([   Makefile
