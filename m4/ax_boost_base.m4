@@ -26,6 +26,8 @@ ac_cv_boost_recent=no
 ])])
 if test "x$ac_cvboost_recent" = xno; then
   AC_MSG_ERROR([Boost appears to be too old.  We need version $1 or more recent.])
+else
+  AC_DEFINE(HAVE_BOOST,,[define if the Boost library is available])
 fi
 
 AC_LANG_POP([C++])
