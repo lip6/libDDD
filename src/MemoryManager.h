@@ -112,6 +112,11 @@ public:
   static void setGCThreshold (size_t nbKbyte) {
     last_mem = nbKbyte;
   }
+
+  static size_t getPeakMemory () {
+    should_garbage();
+    return last_mem;
+  }
  private :
   // actually defined in DDD.cpp, bottom of file.
   static size_t last_mem;
