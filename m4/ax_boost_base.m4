@@ -2,7 +2,7 @@ AC_DEFUN([AX_CHECK_BOOST],
 [
 AC_LANG_PUSH([C++])
 
-AC_CHECK_HEADER([boost/version.hpp],, [AC_MSG_ERROR([
+AC_CHECK_HEADER([boost/version.hpp],, [AC_MSG_WARN([
 Cannot find Boost headers.  If they are installed on an unusuall path on
 your system, please run configure with the suitable CPPFLAGS and LDFLAGS
 options.  For instance if it is installed in /opt/boost/ please use:
