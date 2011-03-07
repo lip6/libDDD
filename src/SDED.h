@@ -24,6 +24,7 @@
 #ifndef SDED_H
 #define SDED_H
 
+#include <map>
 #include "util/set.hh"
 
 #include "DataSet.h"
