@@ -198,6 +198,74 @@ public:
 };
 
 
+  /** Extractor of variable domains for invert computations */
+  class DomExtract
+    :
+    public _GHom
+  {
+
+  public:
+
+    int target;
+
+    DomExtract()
+      :
+      target(0)
+    {}
+
+    DomExtract (int t) :target(t) {}
+
+
+    // this hom is a heavy modifier
+    bool skip_variable (int var) const {
+      return false;
+    }
+
+    bool is_selector () const {
+      return false;
+    }
+
+  
+    GDDD eval(const GDDD &d)const {
+      if (d == GDDD::one || d == GDDD::null || d == GDDD::top )
+	return d;
+
+      d3::set<GDDD>::type sum;
+
+      if (d.variable() != target) {
+	// destroy/propagate
+	for ( GDDD::const_iterator it = d.begin(); it != d.end(); ++it)
+	  sum.insert( GHom(this) (it->second) );
+      } else {
+	// grab all arc values and fuse them
+	for ( GDDD::const_iterator it = d.begin(); it != d.end(); ++it)
+	  sum.insert( GDDD (target,it->first) );
+      }
+
+      return DED::add(sum);
+    }
+  
+    size_t hash() const {
+      return  (target-273) * 2196727; 
+    }
+
+    bool operator==(const _GHom &s) const {
+      const DomExtract* ps = (const DomExtract *)&s;
+      return target == ps->target ;
+    }  
+
+    _GHom * clone () const {  return new DomExtract(*this); }
+
+    void print (std::ostream & os) const {
+      os << "(DomExtract:" << target << ")";
+    }
+
+  };
+
+GDDD computeDomain (int var, const GDDD& d) {
+  return GHom(DomExtract(var)) (d);
+}
+
 /************************** Mult */
 class Mult:public _GHom{
 private:
