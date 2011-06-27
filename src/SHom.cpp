@@ -395,7 +395,7 @@ namespace sns {
   };
 
   /** Extractor of variable domains for invert computations */
-  class DomExtract
+  class SDomExtract
     :
     public _GShom
   {
@@ -404,12 +404,12 @@ namespace sns {
 
     int target;
 
-    DomExtract()
+    SDomExtract()
       :
       target(0)
     {}
 
-    DomExtract (int t) :target(t) {}
+    SDomExtract (int t) :target(t) {}
 
 
     // this hom is a heavy modifier
@@ -450,14 +450,14 @@ namespace sns {
     }
 
     bool operator==(const _GShom &s) const {
-      const DomExtract* ps = (const DomExtract *)&s;
+      const SDomExtract* ps = (const SDomExtract *)&s;
       return target == ps->target ;
     }  
 
-    _GShom * clone () const {  return new DomExtract(*this); }
+    _GShom * clone () const {  return new SDomExtract(*this); }
 
     void print (std::ostream & os) const {
-      os << "(DomExtract:" << target << ")";
+      os << "(SDomExtract:" << target << ")";
     }
 
   };
@@ -532,7 +532,7 @@ namespace sns {
     }
 
     GShom invert (const GSDD & pot) const { 
-      GSDD localpot = GShom(DomExtract(target)) (pot);
+      GSDD localpot = GShom(SDomExtract(target)) (pot);
       GSDD::const_iterator gi = localpot.begin();
       return localApply ( h.invert( *  ((const DDD *) gi->first) ), target)  ;
     }
@@ -623,7 +623,7 @@ namespace sns {
     }
 
     GShom invert (const GSDD & pot) const {
-      GSDD localpot = GShom(DomExtract(target)) (pot);
+      GSDD localpot = GShom(SDomExtract(target)) (pot);
       GSDD::const_iterator gi = localpot.begin();
       return localApply ( h.invert( *  ((const SDD *) gi->first) ), target)  ;
     }
@@ -3043,6 +3043,10 @@ GShom apply2k (const GSDD & d) {
     return GShom::id;
   }
   return  sns::SApply2k(d);
+}
+
+GSDD extractPotential (const GSDD & d) {
+  return  GShom(sns::SPotExtract()) (d);
 }
 
 GShom operator*(const GShom & h,const GShom & cond) {
