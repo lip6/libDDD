@@ -283,6 +283,10 @@ GHom operator-(const GHom &,const GDDD &);
 /// Apply a 2 level DDD representing a transition relation to current variable.
 GHom apply2k (const GDDD &);
 
+/// Return the domain of the first variable bearing the provided index in the provided DDD
+/// Useful for invert computations.
+GDDD computeDomain (int var, const GDDD& );
+
 //@}
 
 
