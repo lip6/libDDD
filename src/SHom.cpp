@@ -3045,9 +3045,6 @@ GShom apply2k (const GSDD & d) {
   return  sns::SApply2k(d);
 }
 
-GSDD extractPotential (const GSDD & d) {
-  return  GShom(sns::SPotExtract()) (d);
-}
 
 GShom operator*(const GShom & h,const GShom & cond) {
   if (! cond.is_selector() ) {
