@@ -532,7 +532,7 @@ namespace sns {
     }
 
     GShom invert (const GSDD & pot) const { 
-      GSDD localpot = GShom(SDomExtract(target)) (pot);
+      GSDD localpot = (extractPotential(target)) (pot);
       GSDD::const_iterator gi = localpot.begin();
       return localApply ( h.invert( *  ((const DDD *) gi->first) ), target)  ;
     }
@@ -623,7 +623,7 @@ namespace sns {
     }
 
     GShom invert (const GSDD & pot) const {
-      GSDD localpot = GShom(SDomExtract(target)) (pot);
+      GSDD localpot = (extractPotential(target)) (pot);
       GSDD::const_iterator gi = localpot.begin();
       return localApply ( h.invert( *  ((const SDD *) gi->first) ), target)  ;
     }
@@ -3045,6 +3045,12 @@ GShom apply2k (const GSDD & d) {
   return  sns::SApply2k(d);
 }
 
+/// Extract the domain of a given variable.
+/// Returns the union of the first nodes encountered that bear this variable, with 1 as signle successor.
+/// In other words, an SDD of a single var, with an edge value that is the union of all Datasets in the reachable SDD.
+GShom extractPotential (int var) {
+  return  sns::SDomExtract (var);
+}
 
 GShom operator*(const GShom & h,const GShom & cond) {
   if (! cond.is_selector() ) {
