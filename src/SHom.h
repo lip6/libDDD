@@ -232,6 +232,11 @@ GShom fixpoint(const GShom &, bool is_top_level=false);
  GShom localApply(const GHom &,int target);
  GShom localApply(const GShom &,int target);
 
+/// Extract the domain of a given variable.
+/// Returns the union of the first nodes encountered that bear this variable, with 1 as signle successor.
+/// In other words, an SDD of a single var, with an edge value that is the union of all Datasets in the reachable SDD.
+ GShom extractPotential (int var);
+
 /// An IF-THEN-ELSE construct.
 /// The behavior of the condition **must** be a selection, as indicated by its isSelector() flag.
 /// PITFALL : Otherwise an assertion violation will be raised (with an explicit stderr message)
