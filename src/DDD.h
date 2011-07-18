@@ -73,8 +73,10 @@ private:
 public:
   /// \name Public Accessors 
   //@{
+  /// An edge is a pair <value,child node>
+  typedef std::pair<int,GDDD> edge_t;
   /// To hide how arcs are actually stored. Use GDDD::Valuation to refer to arcs type
-  typedef std::vector<std::pair<int,GDDD> > Valuation;
+  typedef std::vector<edge_t > Valuation;
   /// To hide how arcs are stored. Also for more compact expressions : 
   /// use GDDD::const_iterator to iterate over the arcs of a DDD
   typedef Valuation::const_iterator const_iterator;
