@@ -420,11 +420,6 @@ namespace sns {
     bool is_selector () const {
       return false;
     }
-
-    const GShom::range_t  get_range () const {
-      GShom::range_t range;
-      return range;
-    }
   
     GSDD eval(const GSDD &d)const {
       if (d == GSDD::one || d == GSDD::null || d == GSDD::top )
@@ -2585,6 +2580,7 @@ bool GShom::skip_variable(int var) const {
 
 
 const GShom::range_t GShom::full_range = GShom::range_t() ; 
+const GHom::range_t GHom::full_range = GHom::range_t() ; 
 
 const GShom::range_t  GShom::get_range() const {
  return concret->get_range();
@@ -2618,7 +2614,7 @@ static bool notInRange (const GShom::range_t & h1r, const GShom & h2) {
 /* Operations */
 GShom fixpoint (const GShom &h, bool is_top_level) {
   if( typeid( *_GShom::get_concret(h) ) == typeid(sns::Fixpoint)
-      || h == GShom::id  || h.is_selector() )
+      || h == GShom::id  || h.is_selector() || h == GShom(GSDD::null))
     return h;
   
 
@@ -2869,6 +2865,7 @@ static bool commutative (const GShom & h1, const GShom & h2) {
 
 // add an operand to a commutative composition of hom
 static void addCompositionParameter (const GShom & h, sns::And::parameters_t & args) {
+	// associativity : a && (b && c) = a && b && c
   if ( const sns::And * hAnd = dynamic_cast<const sns::And*> ( _GShom::get_concret(h) ) ) {
     // recursively add each parameter
      for (sns::And::parameters_it it = hAnd->parameters.begin() ; it != hAnd->parameters.end() ; ++it ) {
