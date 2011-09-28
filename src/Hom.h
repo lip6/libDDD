@@ -159,6 +159,13 @@ public:
   bool is_selector() const;
   //@}
 
+	typedef d3::set<int>::type range_t;
+	typedef range_t::const_iterator range_it;
+	/// Returns the range for this homomorphism, i.e. the dual of skip_variable
+	const range_t  get_range () const;  
+	/// The full_range : that targets everyone
+	static const range_t full_range;
+	
   /// returns the predescessor homomorphism, using pot to determine variable domains
   GHom invert (const GDDD & pot) const;
 
@@ -385,6 +392,12 @@ public:
         return false;
     }
 
+	/// The range returns the dual of skip_variable, default implem considers that all variables are affected by this homomorphism.
+	virtual const GHom::range_t get_range () const 
+    {
+		return GHom::full_range;
+    }
+	
   /// returns the predescessor homomorphism, using pot to determine variable domains
       virtual GHom invert (const GDDD & ) const {
 	// default = raise assert
@@ -434,11 +447,10 @@ public:
   virtual GHom compose (const GHom &r) const ;
 
   virtual void print (std::ostream & os) const = 0;
-protected:
   
   // Enable access to the concrete GHom for _GHom homorphisms
-  const _GHom*
-  get_concret(const GHom& ghom) const
+  static const _GHom*
+  get_concret(const GHom& ghom)
   {
     return ghom.concret;
   }
