@@ -328,6 +328,10 @@ public :
     return get_concret(cond_)->skip_variable(var);
   }
 
+	const GHom::range_t  get_range () const {
+		return cond_.get_range() ;
+    }
+	
   bool is_selector () const {
     return true;
   }
@@ -414,7 +418,18 @@ public:
   {
     return this->parameters;
   }
-    
+   
+	const GHom::range_t  get_range () const {
+		GHom::range_t ret;
+		for(param_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+			GHom::range_t pret = gi->get_range();
+			if ( pret.empty() )
+				return pret;
+			ret.insert(pret.begin() , pret.end()) ;
+		}
+		return ret;
+    }
+	
   partition
   get_partition(int var)
   {
@@ -603,6 +618,18 @@ public:
     {
         return get_concret(left)->skip_variable(var) && get_concret(right)->skip_variable(var);
     }
+	
+	const GHom::range_t  get_range () const {
+		GHom::range_t ret = left.get_range();
+		if ( ret.empty() )
+			return ret;
+		GHom::range_t pret = right.get_range();
+		if ( pret.empty() )
+			return pret;
+		
+		ret.insert(pret.begin() , pret.end()) ;
+		return ret;
+    }
 
   bool is_selector () const {
     return left.is_selector() && right.is_selector();
@@ -626,6 +653,148 @@ public:
   }
 
 };
+
+/************************** And */
+/** A commutative composition of n homomorphisms */
+class And
+:
+public _GHom
+{
+public :
+    typedef std::vector<GHom> parameters_t;
+    typedef parameters_t::const_iterator parameters_it;
+    /// PLEASE DONT HURT ME !!
+    parameters_t parameters;
+	
+public:
+	
+	/* Constructor */
+    And(const parameters_t & p, int ref=0)
+	:
+	_GHom(ref,false),
+	parameters(p) {
+		//      assert (! p.empty());
+		//      assert(p.size() > 1);
+    }
+	
+	/* Compare */
+    bool
+    operator==(const _GHom &h) const
+    {
+		return parameters == ((And*)&h )->parameters;	
+    }
+	
+    size_t
+    hash() const
+    {
+		size_t res = 40693 ;
+		for(parameters_it gi=parameters.begin();gi!=parameters.end();++gi)
+			res^=gi->hash();
+		return res;
+    }
+	
+    _GHom * clone () const {  return new And(*this); }
+	
+    bool is_selector () const {
+		for (parameters_it gi=parameters.begin();gi!=parameters.end();++gi)
+			if (! gi->is_selector() )
+				return false;
+		return true;
+    }
+    
+    bool
+    skip_variable( int var ) const
+    {
+		for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+			if( ! gi->skip_variable(var) )
+			{
+				return false;
+			}
+		}
+		return true;
+    }
+	
+    const GHom::range_t  get_range () const {
+		GHom::range_t ret;
+		for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+			GHom::range_t pret = gi->get_range();
+			if ( pret.empty() )
+				return pret;
+			ret.insert(pret.begin() , pret.end()) ;
+		}
+		return ret;
+    }
+	
+    /* Eval */
+    GDDD
+    eval(const GDDD& d)const {
+		if( d == GDDD::null ) {
+			return GDDD::null;
+			
+		} else if (  d == GDDD::one || d == GDDD::top ) {
+			GDDD res = d;
+			// simply apply composition semantics
+			for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+				res = (*gi) (res);
+			}
+			return res;
+		} else {
+			GDDD res = d;
+			parameters_t F;
+			int var = d.variable() ;
+			for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+				if ( gi->skip_variable(var) ) {
+					F.push_back(*gi);
+				} else {
+					res = (*gi) (res);
+				}
+			}
+			GHom nextSel = GHom::id ;
+			if (! F.empty()) {
+				if ( F.size() > 1 ) 
+					nextSel = And (F);
+				else 
+					nextSel = *F.begin();
+			}
+			
+			return  nextSel (res)  ;	
+		}
+    }
+	
+	/* Memory Manager */
+    void
+    mark() const
+    {
+		for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+			gi->mark();
+		}
+    }
+	
+	GHom invert (const GDDD & pot) const { 
+		// (\AND_i h_i)^-1  = \AND_i h_i^-1
+		GHom ret = GHom::id;
+		for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {
+			ret = ret & ( gi->invert(pot) );
+		}
+		return ret;
+    }
+	
+	void print (std::ostream & os) const {
+		os << "(And:" ;
+		parameters_it gi=parameters.begin();
+		os << *gi ;
+		
+		for( ++gi;
+			gi!=parameters.end();
+			++gi)
+		{
+			os << " && " << *gi ;
+		}
+		os << ")";
+    }
+	
+};
+
 
 /************************** LeftConcat */
 class LeftConcat
@@ -811,6 +980,10 @@ public:
     {
         return get_concret(arg)->skip_variable(var);
     }
+	
+	const GHom::range_t  get_range () const {
+		return arg.get_range();
+    }
    
   GHom invert  (const GDDD & pot) const {
     // (h^*)^-1 (s) = (h^-1 + id)^*  
@@ -903,7 +1076,8 @@ public:
 };
 
 GHom _GHom::compose (const GHom &r) const { 
-  return GHom(this) & r; 
+  //return GHom(this) & r; 
+	return Compose(GHom(this), r);
 }
 
 
@@ -1053,6 +1227,44 @@ bool GHom::skip_variable(int var) const {
   return concret->skip_variable(var);
 }
 
+const GHom::range_t  GHom::get_range() const {
+	return concret->get_range();
+}
+
+// a test used in commutativity assesment
+static bool notInRange (const GHom::range_t & h1r, const GHom & h2) {
+	GHom::range_t h2r = h2.get_range();
+	// ALL variables range
+	if ( h2r.empty() )
+		return false;
+	
+    // Test empty intersection relying on sorted property of sets.
+	GHom::range_it h1it = h1r.begin();
+	GHom::range_it h2it = h2r.begin();
+	while ( h1it != h1r.end() && h2it != h2r.end() ) {
+		if ( *h1it == *h2it ) 
+			return false;
+		else if ( *h1it < *h2it ) 
+			++h1it;
+		else
+			++h2it;
+    }
+	
+	return true;
+}
+
+static bool commutative (const GHom & h1, const GHom & h2) {
+	if ( h1.is_selector() && h2.is_selector() ) 
+		return true;
+	
+	GHom::range_t h1r = h1.get_range();
+	// ALL variables range
+	if ( h1r.empty() )
+		return false;
+	
+	return notInRange (h1r , h2);
+}
+
 GHom GHom::compose (const GHom &r) const { 
   return concret->compose(r); 
 }
@@ -1198,11 +1410,13 @@ bool GHom::is_selector() const {
 
 /* Operations */
 GHom fixpoint (const GHom &h) {
-  if (h != GHom::id)
-    return GHom(canonical( Fixpoint(h)));
-  else
-    return GHom::id;
+	if( typeid( *_GHom::get_concret(h) ) == typeid(Fixpoint)
+	   || h == GHom::id  || h.is_selector() || h == GHom(GDDD::null))
+		return h;
+	
+    return Fixpoint(h);
 }
+
 static void printCondError (const GHom & cond) {
 
   std::cerr << " but the homomorphism passed :" << std::endl;
@@ -1231,6 +1445,38 @@ GHom operator! (const GHom & cond) {
   return NotCond(cond);
 }
 
+// add an operand to a commutative composition of hom
+static void addCompositionParameter (const GHom & h, And::parameters_t & args) {
+	// associativity : a && (b && c) = a && b && c
+	if ( const And * hAnd = dynamic_cast<const And*> ( _GHom::get_concret(h) ) ) {
+		// recursively add each parameter
+		for (And::parameters_it it = hAnd->parameters.begin() ; it != hAnd->parameters.end() ; ++it ) {
+			addCompositionParameter (*it, args) ;
+		}
+	} else {
+		// partition args into elements that commute with h or not
+		And::parameters_t argsC, argsNOTC;
+		for (And::parameters_it it = args.begin() ; it != args.end() ; ++it ) {
+			if ( commutative (*it, h) ) {
+				argsC.push_back(*it);
+			} else {
+				argsNOTC.push_back(*it);
+			}
+		}
+		args = argsC;
+		
+		if ( argsNOTC.empty() ) {
+			args.push_back ( h );
+		} else if ( argsNOTC.size() == 1 ) {
+			GHom h1 = *argsNOTC.begin();
+			// let the user-defined semantic composition apply
+			args.push_back ( Compose ( h1, h ) );
+		} else {
+			args.push_back ( Compose ( And (argsNOTC), h) );    
+		}
+	}
+}
+
 GHom operator&(const GHom &h1,const GHom &h2){
   GHom nullHom = GDDD::null;
   if (h1 == nullHom || h2 == nullHom)
@@ -1242,7 +1488,23 @@ GHom operator&(const GHom &h1,const GHom &h2){
 	if( h2 == GHom::id )
 		return h1;
 
-	return GHom(canonical( Compose(h1,h2)));
+	GHom h = h1.compose(h2);
+	if (typeid(*_GHom::get_concret(h)) != typeid(Compose)) {
+		return h;
+	}
+	// Test commutativity of h1 and h2
+	And::parameters_t args;
+	addCompositionParameter (h1, args);
+	addCompositionParameter (h2, args);
+	if ( args.empty() ) {
+		std::cerr << " WTF ?? (SHOM.cpp in operator&)" << std::endl;
+		return GHom(GDDD::null);
+	} else if ( args.size() == 1 ) {
+		return *args.begin();
+	} else {
+		return And (args);
+	}
+	//return GHom(canonical( Compose(h1,h2)));
 }
 
 
