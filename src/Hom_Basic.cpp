@@ -36,6 +36,12 @@ public:
     return vr != var;
   }
   
+	const GHom::range_t  get_range () const {
+		GHom::range_t ret;
+		ret.insert(var) ;
+		return ret;
+    }
+	
   GDDD phiOne() const {
     return GDDD::one;
   }                   
@@ -67,6 +73,57 @@ public:
     else
       return GHom(GDDD::null);
   }
+	
+	GHom compose (const GHom & other) const {
+		const _GHom * c = get_concret(other);
+		if (typeid(*c) == typeid(_VarCompState)) {
+			const _VarCompState * cc = (const _VarCompState *)c;
+			if (cc->var == var) {
+				const _VarCompState * cc1, * cc2;
+				if (comp == EQ) {
+					cc1 = this;
+					cc2 = cc;
+				} else {
+					cc1 = cc;
+					cc2 = this;
+				}
+				
+				if (cc1->comp == EQ) {
+					if (cc2->comp == EQ) {
+						if (cc1->val == cc2->val) {
+							// [x=a] & [x=a] = [x=a]
+							return this;
+						} else {
+							// [x=a] & [x=b] = null if a <> b
+							return GDDD::null;
+						}
+					} else if (cc2->comp == LT) {
+						if (cc2->val > cc1->val) {
+							// [x=a] & [x<b] = [x=a] if a < b
+							return cc1;
+						} else {
+							// [x=a] & [x<b] = null if a >= b
+							return GDDD::null;
+						}
+					}
+				} else if (cc1->comp == LT) {
+					if (cc2->comp == LT) {
+						if (cc1->val < cc2->val) {
+							// [x<a] & [x<b] = [x<a] if a < b
+							return cc1;
+						} else {
+							// [x<a] & [x<b] = [x<a] if a >= b
+							return cc2;
+						}
+					}
+				}
+				/// \todo other cases to be treated
+				std::cerr << "please improve composition of basic homs" << std::endl;
+			}
+		}
+		return _GHom::compose(other);
+	}
+	 
   
   size_t hash() const {
     return 8097*(var+2)^val * comp;
@@ -133,6 +190,12 @@ public:
     return vr != var;
   }
   
+	const GHom::range_t  get_range () const {
+		GHom::range_t ret;
+		ret.insert(var) ;
+		return ret;
+    }
+	
   GDDD phiOne() const {
     return GDDD::one;
   }                   
@@ -183,6 +246,12 @@ public:
     return target != var;
   }
     
+	const GHom::range_t  get_range () const {
+		GHom::range_t ret;
+		ret.insert(target) ;
+		return ret;
+    }
+	
   GHom invert (const GDDD & pot) const { 
     return incVar(target, -val);
    }
@@ -256,6 +325,13 @@ public:
 		return vr != var1 && vr != var2;
 	}
 	
+	const GHom::range_t  get_range () const {
+		GHom::range_t ret;
+		ret.insert(var1) ;
+		ret.insert(var2) ;
+		return ret;
+    }
+	
 	GDDD phiOne() const {
 		return GDDD::one;
 	}                   
@@ -266,6 +342,34 @@ public:
 		} else { // vr == var2
 			return GHom(vr,vl,varCompState(var1,invertComp(c),vl));
 		}
+	}
+	
+	GHom compose (const GHom & other) const {
+		const _GHom * h = get_concret(other);
+		if (typeid(*h) == typeid(_VarCompVar)) {
+			const _VarCompVar * cc = (const _VarCompVar *)h;
+			if ((var1 == cc->var1 && var2 == cc->var2) || (var2 == cc->var1 && var1 == cc->var2)) {
+				if (c == EQ && cc->c != EQ) {
+					// [x==y] & [x??y] = null
+					return GDDD::null;
+				} else if (c == EQ && cc->c == EQ) {
+					// [x==y] & [x==y] = [x==y]
+					return this;
+				} else if (c == LT && cc->c == LT) {
+					if (var1 != cc->var1) {
+						// [x < y] & [x > y] = null
+						return GDDD::null;
+					} else {
+						// [x < y] & [x < y] = [x < y]
+						return this;
+					}
+				}
+				/// \todo other cases to be treated
+				std::cerr << "please improve composition of basic homs" << std::endl;
+			}
+		}
+		
+		return _GHom::compose(other);
 	}
 	
 	size_t hash() const {
@@ -297,14 +401,20 @@ GHom varEqVar (int var, int var2) {
 	if (var == var2) {
 		return GHom::id;
 	}
-  return varCompVar(var,EQ,var2);
+	if (var < var2)
+		return varCompVar(var,EQ,var2);
+	else
+		return varCompVar(var2,EQ,var);
 }
 
 GHom varNeqVar (int var, int var2) {
 	if (var == var2) {
 		return GHom(GDDD::null);
 	}
-  return varCompVar (var,NEQ,var2);
+	if (var < var2)
+		return varCompVar (var,NEQ,var2);
+	else
+		return varCompVar (var2,NEQ,var);
 }
 
 GHom varGeqVar (int var, int var2) {
