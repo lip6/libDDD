@@ -22,8 +22,6 @@ std::string to_string (comparator comp) {
     }
 }
 
-
-
 class _VarCompState:public StrongHom {
 
   int var;
@@ -145,8 +143,9 @@ public:
     return GHom(vr, vl, GHom(this)); 
   }
 
-  GHom invert (const GDDD & pot) const { 
+  GHom invert (const GDDD & potall) const { 
     std::set<GHom> sum;
+    GDDD pot = computeDomain(var,potall);
     for (GDDD::const_iterator it = pot.begin() ; it != pot.end() ; ++it ) {
       sum.insert ( setVarConst(var,it->first) );
     }
@@ -226,4 +225,112 @@ public:
 
 GHom incVar (int var, int val) {
   return _incVar(var,val);
+}
+
+static comparator invertComp(comparator comp) {
+	switch (comp) {
+    case EQ : case NEQ :
+      return comp;
+    case LT :
+      return GT;
+    case GT :
+      return LT;
+    case LEQ :
+      return GEQ;
+    case GEQ :
+      return LEQ;
+    default:
+      assert(false);
+      return EQ;
+    }
+}
+
+class _VarCompVar : public StrongHom {	
+	int var1;
+	int var2;
+	comparator c;
+public:
+	_VarCompVar(int v1, comparator c, int v2) : var1(v1), var2(v2), c(c) {}
+	
+	bool skip_variable(int vr) const {
+		return vr != var1 && vr != var2;
+	}
+	
+	GDDD phiOne() const {
+		return GDDD::one;
+	}                   
+	
+	GHom phi(int vr, int vl) const {
+		if (vr == var1) {
+			return GHom(vr,vl,varCompState(var2,c,vl));
+		} else { // vr == var2
+			return GHom(vr,vl,varCompState(var1,invertComp(c),vl));
+		}
+	}
+	
+	size_t hash() const {
+		return 6073*(var1+2)^var2 * c;
+	}
+	
+	bool is_selector () const {
+		return true;
+	}
+	
+	// invert : already handled by default selector implem
+	
+	void print (std::ostream & os) const {
+		os << "[ " << DDD::getvarName(var1) << to_string(c) << DDD::getvarName(var2) << " ]";
+	}
+	
+	bool operator==(const StrongHom &s) const {
+		_VarCompVar* ps = (_VarCompVar*)&s;
+		return var1 == ps->var1 && var2 == ps->var2 && c == ps->c;
+	}
+    _GHom * clone () const {  return new _VarCompVar(*this); }
+};
+
+GHom varCompVar (int var, comparator c , int var2) {
+  return _VarCompVar(var, c , var2);
+}
+
+GHom varEqVar (int var, int var2) {
+	if (var == var2) {
+		return GHom::id;
+	}
+  return varCompVar(var,EQ,var2);
+}
+
+GHom varNeqVar (int var, int var2) {
+	if (var == var2) {
+		return GHom(GDDD::null);
+	}
+  return varCompVar (var,NEQ,var2);
+}
+
+GHom varGeqVar (int var, int var2) {
+	if (var == var2) {
+		return GHom::id;
+	}
+	return varCompVar (var,GEQ,var2);
+}
+
+GHom varGtVar (int var, int var2) {
+	if (var == var2) {
+		return GHom(GDDD::null);
+	}
+  return varCompVar (var,GT,var2);
+}
+
+GHom varLeqVar (int var, int var2) {
+	if (var == var2) {
+		return GHom::id;
+	}
+ return varCompVar (var,LEQ,var2);
+}
+
+GHom varLtVar (int var, int var2) {
+	if (var == var2) {
+		return GHom(GDDD::null);
+	}
+  return varCompVar (var,LT,var2);
 }
