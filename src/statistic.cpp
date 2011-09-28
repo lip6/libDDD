@@ -37,11 +37,11 @@ std::string remove_bad_latex (const std::string & s) {
   return news;
 }
 
-Statistic::Statistic (const SDD & s, const std::string & name, OutputType sstyle): isPureDDD(false),style(sstyle),stat_name(remove_bad_latex (name)) {
+Statistic::Statistic (const SDD & s, const std::string & name, OutputType sstyle, bool show_peak): isPureDDD(false),style(sstyle),stat_name(remove_bad_latex (name)), show_peak(show_peak) {
   load (s);
 }
 
-Statistic::Statistic (const DDD & s, const std::string & name, OutputType sstyle): isPureDDD(true),style(sstyle),stat_name(remove_bad_latex (name)) {
+Statistic::Statistic (const DDD & s, const std::string & name, OutputType sstyle, bool show_peak): isPureDDD(true),style(sstyle),stat_name(remove_bad_latex (name)), show_peak(show_peak) {
   load (s);
 }
 
@@ -56,8 +56,13 @@ void Statistic::load (const SDD & s) {
   memory = process::getResidentMemory();
   nbHom = GHom::statistics();
   nbShom = GShom::statistics();
-  ddd_cache = DED::peak();
-  sdd_cache = SDED::peak();
+	if (show_peak) {
+		ddd_cache = DED::peak();
+		sdd_cache = SDED::peak();
+	} else {
+	  ddd_cache = DED::statistics();
+	  sdd_cache = SDED::statistics();
+	}
   shom_cache = GShom::cache_size();
 }
 
@@ -68,7 +73,11 @@ void Statistic::load (const DDD & s) {
   total_time = process::getTotalTime();
   memory = process::getResidentMemory();
   nbHom = GHom::statistics();
-  ddd_cache = DED::peak();
+	if (show_peak) {
+	  ddd_cache = DED::peak();
+	} else {
+		ddd_cache = DED::statistics();
+	}
 }
 
 void Statistic::print_header (std::ostream & os) {
@@ -93,9 +102,9 @@ void Statistic::print_header (std::ostream & os) {
   if (! isPureDDD) os << "peak SDD "<< value_sep[style];
   os << "peak DDD "<< value_sep[style];
   if (! isPureDDD) os << "SDD Hom "<< value_sep[style];
-  if (! isPureDDD) os << "SDD cache "<< value_sep[style];
+  if (! isPureDDD) os << "SDD cache " << (show_peak?"peak ":"") << value_sep[style];
   os << "DDD Hom "<< value_sep[style];
-  os << "DDD cache"<< value_sep[style];
+  os << "DDD cache"<< (show_peak?"peak ":"") << value_sep[style];
   if (! isPureDDD) os << "SHom cache";
   os << line_sep[style] ;
 }
@@ -147,9 +156,9 @@ void Statistic::print_legend (std::ostream & os) {
   if (! isPureDDD) os << "* peak SDD : peak number of nodes in SDD unique table."<< line_sep[style];
   os << "* peak DDD : peak number of DDD nodes in unique table."<< line_sep[style];
   if (! isPureDDD) os << "* SDD Hom : Number of SDD homomorphisms that exist in the unique table."<< line_sep[style];
-  if (! isPureDDD) os << "* SDD cache : Number of elementary SDD node operations currently cached."<< line_sep[style];
+  if (! isPureDDD) os << "* SDD cache : Number of elementary SDD node operations" << (show_peak?" peak":"currently cached.") << line_sep[style];
   os << "* DDD Hom : Number of SDD homomorphisms that exist in the unique table."<< line_sep[style];
-  os << "* DDD cache : Number of homomorphism applications to an SDD node currently cached."<< line_sep[style];
+  os << "* DDD cache : Number of homomorphism applications to an SDD node " << (show_peak?" peak":"currently cached.") << line_sep[style];
   if (! isPureDDD) os << "* SHom cache : Number of homomorphism applications to an SDD node currently cached." ;
   os << line_sep[style] ;  
 }
