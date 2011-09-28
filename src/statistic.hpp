@@ -62,6 +62,8 @@ class Statistic {
   /// Size of SHom cache
 	size_t shom_cache;
 
+  /// show peak
+	bool show_peak;
   /// load from a SDD
 	void load (const SDD & s);
   /// load from a DDD
@@ -73,13 +75,15 @@ public:
   /// \param s the SDD used for final node and state count.
   /// \param name the row name (first column)
   /// \param style use LATEX for formatted latex table or CSV to import in excel or gnumeric.
-  Statistic (const SDD & s, const std::string & name, OutputType style=LATEX);
+  /// \param show_peak if you want to show peak size instead of current size for caches
+  Statistic (const SDD & s, const std::string & name, OutputType style=LATEX, bool show_peak = true);
   /// Create a statistic for the current DDD s, style LATEX by default.
   /// The statistic is sampled and stored, this call triggers DDD mode (less columns).
   /// \param s the DDD used for final node and state count.
   /// \param name the row name (first column)
   /// \param style use LATEX for formatted latex table or CSV to import in excel or gnumeric.
-  Statistic (const DDD & s, const std::string & name, OutputType style=LATEX);
+  /// \param show_peak if you want to show peak size instead of current size for caches
+  Statistic (const DDD & s, const std::string & name, OutputType style=LATEX, bool show_peak = true);
 
   /// Print column headers, using current style.
   /// For latex this also outputs a header (\begin document etc...).
