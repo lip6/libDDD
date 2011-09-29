@@ -320,6 +320,8 @@ class NotCond
 {
   // selector hom
   GHom cond_;
+    
+    friend GHom operator!(const GHom &);
 public :
   NotCond (const GHom & cond): cond_(cond) {};
 
@@ -1441,7 +1443,15 @@ GHom operator! (const GHom & cond) {
     std::cerr << "Creating a complement condition with operator! :  ! cond" << std::endl;
     printCondError(cond);
     assert(false);
-  }  
+  }
+    if (cond == GHom::id) {
+        return GDDD::null;
+    } else if (cond == GDDD::null) {
+        return GHom::id;
+    } else if (const NotCond * hNot = dynamic_cast<const NotCond *> ( _GHom::get_concret(cond) )) {
+        std::cerr << "double not simplification" << std::endl;
+        return hNot->cond_;
+    }
   return NotCond(cond);
 }
 
@@ -1517,30 +1527,30 @@ GHom operator+(const GHom &h1,const GHom &h2){
 }
 
 GHom operator*(const GDDD &d,const GHom &h){
-  return GHom(canonical( Mult(h,d)));
+  return Mult(h,d);
 }
 
 GHom operator*(const GHom &h,const GDDD &d){
-  return GHom(canonical( Mult(h,d)));
+  return Mult(h,d);
 }
 
 GHom operator^(const GDDD &d,const GHom &h){
-  return GHom(canonical( LeftConcat(d,h)));
+  return LeftConcat(d,h);
 }
 
 GHom operator^(const GHom &h,const GDDD &d){
-  return GHom(canonical( RightConcat(h,d)));
+  return RightConcat(h,d);
 }
 
 GHom operator-(const GHom &h,const GDDD &d){
-  return GHom(canonical( Minus(h,d)));
+  return Minus(h,d);
 }
 
 GHom apply2k (const GDDD & d) {
   if (d == GDDD::null || d == GDDD::one || d == GDDD::top ) {
     return GDDD::null;
   }
-  return GHom(canonical ( Apply2k(d) ));
+  return Apply2k(d);
 }
 
 /*************************************************************************/
