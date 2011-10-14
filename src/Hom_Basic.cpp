@@ -117,8 +117,8 @@ public:
 	    }
 	  }
 	}
-	/// \todo other cases to be treated
-	  std::cerr << "please improve composition of basic homs : no semantic composition of :" << GHom(this) << " and " << other << std::endl;
+	// \todo other cases to be treated
+	// std::cerr << "please improve composition of basic homs : no semantic composition of :" << GHom(this) << " and " << other << std::endl;
       }
     }
     return _GHom::compose(other);
