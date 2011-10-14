@@ -73,56 +73,56 @@ public:
     else
       return GHom(GDDD::null);
   }
-	
-	GHom compose (const GHom & other) const {
-		const _GHom * c = get_concret(other);
-		if (typeid(*c) == typeid(_VarCompState)) {
-			const _VarCompState * cc = (const _VarCompState *)c;
-			if (cc->var == var) {
-				const _VarCompState * cc1, * cc2;
-				if (comp == EQ) {
-					cc1 = this;
-					cc2 = cc;
-				} else {
-					cc1 = cc;
-					cc2 = this;
-				}
-				
-				if (cc1->comp == EQ) {
-					if (cc2->comp == EQ) {
-						if (cc1->val == cc2->val) {
-							// [x=a] & [x=a] = [x=a]
-							return this;
-						} else {
-							// [x=a] & [x=b] = null if a <> b
-							return GDDD::null;
-						}
-					} else if (cc2->comp == LT) {
-						if (cc2->val > cc1->val) {
-							// [x=a] & [x<b] = [x=a] if a < b
-							return cc1;
-						} else {
-							// [x=a] & [x<b] = null if a >= b
-							return GDDD::null;
-						}
-					}
-				} else if (cc1->comp == LT) {
-					if (cc2->comp == LT) {
-						if (cc1->val < cc2->val) {
-							// [x<a] & [x<b] = [x<a] if a < b
-							return cc1;
-						} else {
-							// [x<a] & [x<b] = [x<a] if a >= b
-							return cc2;
-						}
-					}
-				}
-				/// \todo other cases to be treated
-				std::cerr << "please improve composition of basic homs" << std::endl;
-			}
-		}
-		return _GHom::compose(other);
+  
+  GHom compose (const GHom & other) const {
+    const _GHom * c = get_concret(other);
+    if (typeid(*c) == typeid(_VarCompState)) {
+      const _VarCompState * cc = (const _VarCompState *)c;
+      if (cc->var == var) {
+	const _VarCompState * cc1, * cc2;
+	if (comp == EQ) {
+	  cc1 = this;
+	  cc2 = cc;
+	} else {
+	  cc1 = cc;
+	  cc2 = this;
 	}
+	
+	if (cc1->comp == EQ) {
+	  if (cc2->comp == EQ) {
+	    if (cc1->val == cc2->val) {
+	      // [x=a] & [x=a] = [x=a]
+	      return this;
+	    } else {
+	      // [x=a] & [x=b] = null if a <> b
+	      return GDDD::null;
+	    }
+	  } else if (cc2->comp == LT) {
+	    if (cc2->val > cc1->val) {
+	      // [x=a] & [x<b] = [x=a] if a < b
+	      return cc1;
+	    } else {
+	      // [x=a] & [x<b] = null if a >= b
+	      return GDDD::null;
+						}
+	  }
+	} else if (cc1->comp == LT) {
+	  if (cc2->comp == LT) {
+	    if (cc1->val < cc2->val) {
+	      // [x<a] & [x<b] = [x<a] if a < b
+	      return cc1;
+	    } else {
+	      // [x<a] & [x<b] = [x<a] if a >= b
+	      return cc2;
+	    }
+	  }
+	}
+	/// \todo other cases to be treated
+	  std::cerr << "please improve composition of basic homs : no semantic composition of :" << GHom(this) << " and " << other << std::endl;
+      }
+    }
+    return _GHom::compose(other);
+  }
 	 
   
   size_t hash() const {
