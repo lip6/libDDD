@@ -25,6 +25,7 @@
 #include <set>
 #include <vector>
 #include <typeinfo>
+#include <string>
 
 #include "hashfunc.hh"
 
