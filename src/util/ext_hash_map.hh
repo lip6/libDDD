@@ -11,8 +11,6 @@
 #include <tr1/unordered_map>
 #endif
 
-
-
 #include "util/hash_support.hh"
 #include <utility>
 
