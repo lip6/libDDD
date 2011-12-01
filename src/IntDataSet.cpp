@@ -28,3 +28,25 @@
 UniqueTable<std::vector<int> > IntDataSet::canonical = UniqueTable<std::vector<int> > ();
 
 const std::vector<int> * IntDataSet::empty_ = canonical(std::vector<int>(0));
+
+IntDataSet::marktable_t IntDataSet::marktable = marktable_t();
+
+
+void IntDataSet::garbage () {
+  // sweep phase  
+  for(canonical_it di=canonical.table.begin();di!=canonical.table.end();){
+    if(marktable.find(*di) == marktable.end() ){
+      canonical_it ci=di;
+      di++;
+      const std::vector<int> *g=(*ci);
+      canonical.table.erase(ci);
+      delete g;
+    }else {
+      di++;
+    }
+  }
+  marktable.clear();
+}
+
+
+

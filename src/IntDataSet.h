@@ -36,11 +36,20 @@
 /// This class is a very basic implementation of DataSet interface
 /// based on std::std::vector<int> and a unicity table
 class IntDataSet : public DataSet {
-  static UniqueTable<std::vector<int> > canonical;
+  typedef UniqueTable<std::vector<int> > canonical_t;
+  typedef canonical_t::Table::iterator canonical_it;
+  static canonical_t canonical;
+
+  typedef std::set<const std::vector<int> *> marktable_t;
+  typedef marktable_t::const_iterator marktable_it;
+  static marktable_t marktable;
 
   static const std::vector<int> * empty_;
 
   const std::vector<int>* data;
+
+  
+
   // private constructors
   IntDataSet (const std::vector<int>* ddata): data(ddata) {};
 
@@ -54,7 +63,7 @@ public :
 
 
   /// public constructor from non unique std::vector<int>
-  IntDataSet (const std::vector<int> & ddata) {
+    IntDataSet (const std::vector<int> & ddata) {
     std::vector<int> tmp = std::vector<int> (ddata);
     sort( tmp.begin() , tmp.end() );
     data = canonical( tmp );
@@ -144,8 +153,9 @@ public :
     }
     os << "]" ;
   }
-	/// nothing to mark : do nothing
-	void mark() const {}
+
+  // mark phase of mark and sweep : add the reference to the set of those that SHOULD NOT be collected
+  void mark() const { marktable.insert(data); }
 	
 #ifdef EVDDD
   DataSet *normalizeDistance(int n) const {
@@ -155,6 +165,10 @@ public :
     return 0;
   }
 #endif
+
+
+  // Garbage collector
+  static void garbage () ;
 
 };
 

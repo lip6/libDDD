@@ -30,6 +30,7 @@
 #include "SDED.h"
 #include "SHom.h"
 #include "MLHom.h"
+#include "IntDataSet.h"
 
 
 #include "process.hpp"
@@ -88,6 +89,8 @@ public:
     SDED::garbage();
     GShom::garbage();
     GSDD::garbage();
+    // clear the IntDataSet
+    IntDataSet::garbage();
     // END FIXME 
     DED::garbage();
     GHom::garbage();
