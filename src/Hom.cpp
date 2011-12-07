@@ -590,8 +590,7 @@ public:
 	    _GHom(ref,true),
     	left(l),
 	    right(r)
-    {
-    }
+    {}
 
     /* Compare */
     bool
@@ -1079,7 +1078,20 @@ public:
 
 GHom _GHom::compose (const GHom &r) const { 
   //return GHom(this) & r; 
-	return Compose(GHom(this), r);
+  
+  // Note: code duplicated unfortunately
+  GHom nullHom = GDDD::null;
+  GHom thisH (this);
+  if (thisH == nullHom || r == nullHom)
+    return nullHom;
+
+  if( thisH == GHom::id )
+    return r;
+
+  if( r == GHom::id )
+    return thisH;
+
+  return Compose(thisH, r);
 }
 
 
@@ -1492,29 +1504,29 @@ GHom operator&(const GHom &h1,const GHom &h2){
   if (h1 == nullHom || h2 == nullHom)
     return nullHom;
 
-	if( h1 == GHom::id )
-		return h2;
+  if( h1 == GHom::id )
+    return h2;
 
-	if( h2 == GHom::id )
-		return h1;
+  if( h2 == GHom::id )
+    return h1;
 
-	GHom h = h1.compose(h2);
-	if (typeid(*_GHom::get_concret(h)) != typeid(Compose)) {
-		return h;
-	}
-	// Test commutativity of h1 and h2
-	And::parameters_t args;
-	addCompositionParameter (h1, args);
-	addCompositionParameter (h2, args);
-	if ( args.empty() ) {
-		std::cerr << " WTF ?? (SHOM.cpp in operator&)" << std::endl;
-		return GHom(GDDD::null);
-	} else if ( args.size() == 1 ) {
-		return *args.begin();
-	} else {
-		return And (args);
-	}
-	//return GHom(canonical( Compose(h1,h2)));
+  GHom h = h1.compose(h2);
+  if (typeid(*_GHom::get_concret(h)) != typeid(Compose)) {
+    return h;
+  }
+  // Test commutativity of h1 and h2
+  And::parameters_t args;
+  addCompositionParameter (h1, args);
+  addCompositionParameter (h2, args);
+  if ( args.empty() ) {
+    std::cerr << " WTF ?? (SHOM.cpp in operator&)" << std::endl;
+    return GHom(GDDD::null);
+  } else if ( args.size() == 1 ) {
+    return *args.begin();
+  } else {
+    return And (args);
+  }
+  //return GHom(canonical( Compose(h1,h2)));
 }
 
 
