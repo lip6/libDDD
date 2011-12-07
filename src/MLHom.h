@@ -148,6 +148,7 @@ public :
 
   /// User defined behavior is input through this function
   virtual HomHomMap phi (int var,int val) const=0;   
+  virtual HomNodeMap phiOne () const=0;   
 
 };
 
