@@ -237,6 +237,16 @@ bool StrongMLHom::operator==(const _MLHom &h) const {
 HomNodeMap StrongMLHom::eval(const GDDD &d) const {
   HomNodeMap res;
 
+  if (d == GDDD::top || d == GDDD::null) {
+    res.add(GHom::id, d);
+//    std::cerr << "MLHom array out of bounds !!" << std::endl;
+//    print(std::cerr);
+//    exit(1);
+    return res;
+  } else if (d== GDDD::one) {    
+    return phiOne();
+  }
+
   int var = d.variable();
 
   for (GDDD::const_iterator dit = d.begin() ; dit != d.end() ; ++dit) {   
