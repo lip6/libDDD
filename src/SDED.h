@@ -43,6 +43,9 @@ public:
 	
   GSDD eval();
   SDED(_SDED *c):concret(c){};
+  // for google hash
+    SDED () : concret(NULL) {};
+
   bool operator==(const SDED&) const; 
   
   static GSDD add(const d3::set<GSDD>::type &);

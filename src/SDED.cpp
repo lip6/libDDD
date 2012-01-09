@@ -751,15 +751,19 @@ void SDED::garbage(){
 }; 
 
 bool SDED::operator==(const SDED& e) const{
+  if (concret == NULL)
+    return e.concret==NULL;
   if(typeid(*concret)!=typeid(*(e.concret)))
-  return false;
+    return false;
   else 
-  return (*concret==*(e.concret));
+    return (*concret==*(e.concret));
 };
 
 // eval and std::set to NULL the DED
 GSDD SDED::eval(){
-
+  if (concret == NULL) {
+    return GSDD::null;
+  }
 
    if(typeid(*concret)==typeid(_SDED_GSDD)){
      GSDD res=concret->eval();
@@ -810,6 +814,8 @@ GSDD SDED::eval(){
 
 
 size_t SDED::hash () const {
+  if (concret == NULL)
+    return 0;
   return concret->hash();
 }
 

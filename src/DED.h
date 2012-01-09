@@ -41,6 +41,8 @@ private:
 public:
   GDDD eval();
   DED(_DED *c):concret(c){};
+  // ctor necessary for google sparse hash
+  DED():concret(NULL){};
   bool operator==(const DED&) const; 
   static GDDD add(const d3::set<GDDD>::type &);
   static GDDD hom(const GHom &,const GDDD&);

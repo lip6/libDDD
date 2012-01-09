@@ -605,16 +605,21 @@ void DED::garbage(){
 
 
 bool DED::operator==(const DED& e) const{
-  if(typeid(*concret)!=typeid(*(e.concret)))
-  return false;
+  if (concret==NULL)
+    return e.concret == NULL;
+  else if(typeid(*concret)!=typeid(*(e.concret)))
+    return false;
   else 
-  return (*concret==*(e.concret));
+    return (*concret==*(e.concret));
 };
 
 // eval and std::set to NULL the DED
 GDDD
 DED::eval()
 {
+  if (concret == NULL) {
+    return GDDD::null;
+  }
   if( typeid(*concret) == typeid(_DED_GDDD) )
     {
       GDDD res=concret->eval();
@@ -647,6 +652,8 @@ DED::eval()
 }
 
 size_t DED::hash () const {
+  if (concret == NULL)
+    return 0;
   return concret->hash();
 }
 
