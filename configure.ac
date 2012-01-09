@@ -37,6 +37,25 @@ AC_ARG_WITH([libtbbbin],
                             [specify the library linker path of libtbb])])
 
 
+#Options for disabling google hash
+stdhash=false
+
+AC_ARG_ENABLE(	[stdhash],
+        [AC_HELP_STRING([--enable-stdhash],[revert std lib hash map(default uses google sparse hash)])],
+        [  case "${enable_stdhash}" in
+            yes) stdhash=true
+                ;;
+            no)
+                ;;
+            *)  AC_MSG_ERROR(Bad value ${enableval})
+                ;;
+            esac])
+
+if test "x$stdhash" = "xtrue"; then
+    AC_DEFINE([USE_STD_HASH],1,[Define if you want to use std hash instead of google sparse hash.])
+fi
+
+
 
 AC_ARG_ENABLE(	[reentrant],
         [AC_HELP_STRING([--enable-reentrant],[turn on on thread-safe mode])],
@@ -62,6 +81,8 @@ AC_ARG_ENABLE(	[parallel],
                 ;;
             esac])
 
+
+
 if test "x$parallel" = "xtrue"; then
     AC_DEFINE([PARALLEL_DD],1,[Define if you want parallel code.])
 fi
@@ -69,6 +90,8 @@ fi
 if test "x$reentrant" = "xtrue"; then
     AC_DEFINE([REENTRANT],1,[Define if you want a thread-safe library.])
 fi
+
+
 
 AM_CONDITIONAL([REENTRANT], [test "x${reentrant}" = "xtrue" ])
 
