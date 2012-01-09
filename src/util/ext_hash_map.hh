@@ -5,10 +5,15 @@
                 + __GNUC_MINOR__ * 100 \
                    + __GNUC_PATCHLEVEL__)
 
+
+#ifndef USE_STD_HASH
+#include <google/sparse_hash_map>
+#else
 #if GCC_VERSION < 40300
 #include <ext/hash_map>
 #else
 #include <tr1/unordered_map>
+#endif
 #endif
 
 #include "util/hash_support.hh"
@@ -26,10 +31,14 @@ class ext_hash_map
   // Types
 public:
 
+#ifndef USE_STD_HASH
+  typedef google::sparse_hash_map<Key,Data,HashKey,EqualKey> internal_hash_map;
+#else
 #if GCC_VERSION < 40300
   typedef __gnu_cxx::hash_map<Key,Data,HashKey,EqualKey> internal_hash_map;
 #else
   typedef std::tr1::unordered_map<Key,Data,HashKey,EqualKey> internal_hash_map;
+#endif
 #endif
 
   typedef typename internal_hash_map::iterator iterator;
