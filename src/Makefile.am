@@ -1,6 +1,8 @@
 lib_LIBRARIES = libDDD.a \
                 libDDD_d.a
 
+MYSRCDIR= $(abs_top_srcdir)/src
+
 ddddir      =   $(pkgincludedir)
 ddd_hdrs    =   DataSet.h \
                 Cache.hh \
@@ -53,10 +55,11 @@ if WITH_LIBTBBINC_PATH
 TBBINC_FLAGS=-I $(LIBTBB_INC)
 endif
 
+
 # standard version
 libDDD_a_SOURCES    =   $(ddd_hdrs) $(util_hdrs) $(srcs)
-libDDD_a_CPPFLAGS =   -g -O3 -Wall -DNDEBUG $(TBBINC_FLAGS)
+libDDD_a_CPPFLAGS =   -g -O3 -Wall -DNDEBUG $(TBBINC_FLAGS) -I $(MYSRCDIR)
 
 # debug version
 libDDD_d_a_SOURCES  =   $(ddd_hdrs) $(util_hdrs) $(srcs)
-libDDD_d_a_CPPFLAGS =   -g -O0 -Wall $(TBBINC_FLAGS)
+libDDD_d_a_CPPFLAGS =   -g -O0 -Wall $(TBBINC_FLAGS) -I $(MYSRCDIR)
