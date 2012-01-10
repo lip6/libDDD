@@ -92,6 +92,11 @@ public:
     table_mutex_()
 #endif
   {
+#ifndef REENTRANT
+#ifndef USE_STD_HASH
+    table.set_deleted_key(NULL);
+#endif
+#endif
   }
 
   /// Typedef helps hide implementation type (currently gnu gcc's hash_set).
