@@ -72,6 +72,7 @@ struct hash<T*>
   size_t 
   operator()(const T* e) const
   {
+    if (e == NULL) return 0;
     return e->hash();
   }
 };
@@ -83,6 +84,8 @@ struct equal<T*>
   bool
   operator()(const T* e1,const T* e2) const
   {
+    if (e1 == NULL) return e2==NULL;
+    if (e2 == NULL) return false;
     return (typeid(*e1)==typeid(*e2)?(*e1)==(*e2):false);
   }
 };
