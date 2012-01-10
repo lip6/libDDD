@@ -27,6 +27,7 @@
 #include "MemoryManager.h"
 #include "util/configuration.hh"
 #include "util/hash_support.hh"
+#include "util/ext_hash_map.hh"
 #include "Cache.hh"
 
 
@@ -2498,7 +2499,8 @@ void GShom::mark()const{
 }
 
 // used to reduce Shom::add creation complexity in recursive cases
-static hash_map<d3::set<GShom>::type,GShom>::type addCache;
+typedef ext_hash_map<d3::set<GShom>::type,const _GShom*>::internal_hash_map  addCache_t;
+static addCache_t addCache;
 void GShom::garbage(){
   addCache.clear();
   sns::cache.clear();
@@ -2815,7 +2817,7 @@ static void buildUnionParameters(d3::set<GShom>::type& p, d3::set<GShom>::type& 
 
 
 // addcache declaration is just above function garbageCollect
-// static hash_map<d3::set<GShom>::type,GShom>::type addCache;
+// static addCache_t addCache;
 GShom GShom::add(const d3::set<GShom>::type& set)
 {  
   if (set.empty() ) 
@@ -2828,8 +2830,9 @@ GShom GShom::add(const d3::set<GShom>::type& set)
     s.erase(Shom::null);
     if( s.size() == 1 )
       return *(s.begin());
-    hash_map<d3::set<GShom>::type,GShom>::type::accessor acc;
-    if (addCache.insert(acc,s)) {
+
+    addCache_t::const_iterator acc = addCache.find(s);
+    if (acc == addCache.end()) {
       // build the union up
       d3::set<GShom>::type parameters;
       bool have_id = false;
@@ -2841,7 +2844,8 @@ GShom GShom::add(const d3::set<GShom>::type& set)
       else
         added = sns::Add(parameters, have_id);
       
-      acc->second = added;
+      addCache[s] = added.concret;
+      // acc->second = added.concret;
       return added;
     } else {
       return acc->second;
