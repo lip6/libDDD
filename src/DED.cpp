@@ -593,13 +593,17 @@ size_t DED::peak() {
 void DED::garbage(){
   if (cache.size() > DEDpeak)
     DEDpeak = cache.size();
-  for(Cache::iterator di=cache.begin();di!=cache.end();){
-      Cache::iterator ci=di;
-      di++;
-      _DED *d=ci->first.concret;
-      cache.erase(ci->first);
-      delete d;
-  } 
+  std::vector<_DED *> todel;
+  todel.reserve(cache.size());
+  for(Cache::iterator di=cache.begin();di!=cache.end();di++)
+    {
+      todel.push_back(di->first.concret);
+    } 
+  cache.clear();
+  for (std::vector<_DED *>::iterator it =todel.begin() ; it != todel.end() ; ++it) {
+    delete *it;
+  }
+
   //cache.clear();
 }; 
 
