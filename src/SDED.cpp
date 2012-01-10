@@ -737,17 +737,17 @@ void SDED::garbage(){
 	{
 		namespace_SDED::Max_SDED=namespace_SDED::cache.size();
 	}
-	for(namespace_SDED::Cache::iterator di=namespace_SDED::cache.begin();di!=namespace_SDED::cache.end();)
+
+	std::vector<_SDED *> todel;
+	todel.reserve(namespace_SDED::cache.size());
+	for(namespace_SDED::Cache::iterator di=namespace_SDED::cache.begin();di!=namespace_SDED::cache.end();di++)
 	{
-		namespace_SDED::Cache::iterator ci = di;
-		di++;
-		_SDED* d = ci->first.concret;
-		namespace_SDED::cache.erase(ci->first);
-		delete d;
+	  todel.push_back(di->first.concret);
 	} 
-
-//  cache.clear();
-
+	namespace_SDED::cache.clear();
+	for (std::vector<_SDED *>::iterator it =todel.begin() ; it != todel.end() ; ++it) {
+	  delete *it;
+	}
 }; 
 
 bool SDED::operator==(const SDED& e) const{
