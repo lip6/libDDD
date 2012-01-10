@@ -58,9 +58,9 @@ public:
   private:
 
     friend class ext_hash_map;
-    friend class accessor;
     bool has_result_;
     const_iterator current_bucket_;
+
     
     // Methods
   public:
@@ -106,8 +106,6 @@ public:
 
   ////////////////////////////////////////////////////////////////
   class accessor
-    :
-    public const_accessor
   {
     // Types
   public:
@@ -115,6 +113,7 @@ public:
     
     // Attributes
   private:
+    bool has_result_;
     iterator current_bucket_;
     
     friend class ext_hash_map;
@@ -133,6 +132,32 @@ public:
       return &operator*();
     }
 
+    accessor()
+      :
+      has_result_(false),
+      current_bucket_()
+    {
+    }
+
+    bool
+    empty() const
+    {
+      return ! has_result_;
+    }
+
+    void
+    release()
+    {
+      // nothing to do, because there are no mutexes to release
+    }
+
+  private:
+    
+    // cannot copy or assign a const_accessor
+    accessor(const accessor&);
+    accessor& operator=(const accessor&);
+
+
   };
   
   ////////////////////////////////////////////////////////////////
@@ -141,6 +166,7 @@ public:
 private:
 
   friend class const_accessor;
+  friend class accessor;
   internal_hash_map map_;
 
   // Methods
