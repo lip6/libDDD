@@ -33,13 +33,12 @@ int main(){
 
 	std::cout << "sizeof(DDD) " << sizeof(DDD) << std::endl;
 	std::cout << "sizeof(GDDD) " << sizeof(GDDD) << std::endl;
-	std::cout << "sizeof(_GDDD) " << sizeof(_GDDD) << std::endl;
 	
 
 	std::cout << "sizeof(SDD) " << sizeof(SDD) << std::endl;
 	std::cout << "sizeof(GSDD) " << sizeof(GSDD) << std::endl;
-	std::cout << "sizeof(_GSDD) " << sizeof(_GSDD) << std::endl;
-	
+
+	MemoryManager::pstats();
 
   return 1;
 }
