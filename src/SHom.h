@@ -383,13 +383,16 @@ private:
   /// be sweeped in the second phase. Outside of garbage collection routine, marking
   /// should always bear the value false.
   mutable bool marking;
+
+  /// The procedure responsible for propagating efficiently across "skipped" variable nodes.
+    GSDD eval_skip(const GSDD &) const;
+
   /// For operation cache management. 
   /// If immediat==true,  eval is called without attempting a cache hit. 
   /// Currently only the constant homomorphism has this attribute set to true.
-  mutable bool immediat;
-  /// The procedure responsible for propagating efficiently across "skipped" variable nodes.
-    GSDD eval_skip(const GSDD &) const;
-  
+  /// Overload and return true for immediate computations.
+  virtual bool immediat () const {return false;}
+	
 public:
 
     /// The skip_variable predicate indicates which variables are "don't care" with respect to this SHom.
@@ -417,7 +420,7 @@ public:
 
   /// Constructor. Note this class is abstract, so this is only used in initialization
   /// list of derived classes constructors (hard coded operations and StrongShom).
-  _GShom(int ref=0,bool im=false):refCounter(ref),marking(false),immediat(im){};
+  _GShom(int ref=0):refCounter(ref),marking(false){};
   /// Destructor. Default behavior. 
   /// \todo Remove this declaration ? compiler generated version sufficient.
   virtual ~_GShom(){};
@@ -494,7 +497,7 @@ class StrongShom : public _GShom
 public:
   /// Default constructor. Empty behavior.
   /// \todo Is this declaration useful ?
-  StrongShom(bool im=false): _GShom(0,im) {};
+  StrongShom(): _GShom(0) {};
   /// Default destructor. Empty behavior.
   /// \todo Is this declaration useful ?
   virtual ~StrongShom(){};
