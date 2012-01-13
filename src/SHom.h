@@ -37,6 +37,7 @@ class _GShom;
 /// pre-declare StrongShom for constructor(s) of GShom
 class StrongShom;
 class MyGShom;
+class MLShom;
 
 
 
@@ -104,6 +105,8 @@ public:
     /// This call ensures unicity of representation.
    GShom(const _GShom &_h);
 
+  /// Encapsulate an MLShom, by setting a stop level for the upstream homomorphisms.
+  GShom(const MLShom &);
 
   /// Construct a constant homomorphism. Applied to any SDD this homomorphism
   /// will return the value it was initialized with.
