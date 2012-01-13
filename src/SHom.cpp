@@ -3072,7 +3072,12 @@ GShom operator*(const GShom & h,const GShom & cond) {
 void GShom::pstats(bool)
 {
   std::cout << "*\nGSHom Stats : size unicity table = " <<  canonical.size() << std::endl;
-/*
+
+  std::cout << "sizeof(_GShom):" << sizeof(_GShom) << std::endl; 
+  std::cout << "sizeof(SIdentity):" << sizeof(sns::Identity) << std::endl; 
+ 
+  
+  /*
   std::ostream & os = std::cout;
   int i = 0;
   for (UniqueTable<_GShom>::Table::const_iterator it= canonical.table.begin() ;
