@@ -6,7 +6,7 @@ AM_INIT_AUTOMAKE(-Wall)
 
 # programs used to build
 # we make static libs (use ranlib)
-AC_PROG_RANLIB
+LT_INIT([disable-shared])
 
 # M4 macros location
 AC_CONFIG_MACRO_DIR([m4])
