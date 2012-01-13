@@ -57,28 +57,28 @@ public:
   const int variable;
   GDDD::Valuation valuation;
 
+ private :
 #ifdef REENTRANT
-	mutable tbb::atomic<unsigned long int> refCounter;
-	mutable tbb::atomic<bool> marking;
+	mutable tbb::atomic<unsigned long int> _refCounter;
 #else
-  	mutable unsigned long int refCounter;
-  	mutable bool marking;
+  	mutable unsigned long int _refCounter;
 #endif
 
+public :
   /* Constructor */
 	_GDDD(int var,int cpt=0)
 		: variable(var)
 	{
-		refCounter = cpt;
-		marking = false;
+		_refCounter = 2 * cpt;
+	//	refCounter |= marking ;
 	} 
 
 	_GDDD(int var,GDDD::Valuation val,int cpt=0)
 		: variable(var)
 		, valuation(val)
 	{
-		refCounter = cpt;
-		marking = false;
+		_refCounter = 2*cpt;
+		// refCounter |= false; // initially unmarked
 	}
 
   /* Compare */
@@ -89,6 +89,37 @@ public:
 
   _GDDD * clone () const { return new _GDDD(*this); }
 
+  void mark_if_refd () const {
+	if ( _refCounter >> 1 ) {
+		_refCounter |= 1;
+	}  
+  }
+  
+  void ref () const {
+	_refCounter += 2;
+  }
+  
+  void deref () const {
+	_refCounter -= 2;
+  }
+  
+  unsigned long int refCounter() const {
+	return _refCounter >> 1;
+  }
+  
+  bool is_marked() const {
+	return _refCounter & 1;
+  }
+  
+  void set_mark (bool val) const {
+	if (val) {
+		_refCounter |= 1;
+	} else {
+		_refCounter >>= 1;
+		_refCounter <<= 1;		
+	}
+  }
+  
   size_t hash () const {
     size_t res=(size_t) variable;
     for(GDDD::const_iterator vi=valuation.begin();vi!=valuation.end();++vi)
@@ -139,8 +170,8 @@ void GDDD::mark()const{
 }
 
 void _GDDD::mark()const{
-  if(!marking){
-    marking=true;
+  if(! is_marked()){
+    set_mark(true);
     for(GDDD::Valuation::const_iterator vi=valuation.begin();vi!=valuation.end();++vi){
       vi->second.mark();
     }
@@ -224,7 +255,7 @@ GDDD::const_iterator GDDD::end() const{
 
 /* Visualisation */
 unsigned int GDDD::refCounter() const{
-  return concret->refCounter;
+  return concret->refCounter();
 }
 
 class MySize{
@@ -335,14 +366,13 @@ void GDDD::garbage(){
   MyNbStates::clear();
 
   for(UniqueTable<_GDDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
-    if((*di)->refCounter!=0)
-      (*di)->mark();
+    (*di)->mark_if_refd();
   }
 
   // sweep phase
   
   for(UniqueTable<_GDDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
-    if(!((*di)->marking)){
+    if(!((*di)->is_marked())){
       UniqueTable<_GDDD>::Table::iterator ci=di;
       di++;
       const _GDDD *g=(*ci);
@@ -350,7 +380,7 @@ void GDDD::garbage(){
       delete g;
     }
     else{
-      (*di)->marking=false;
+      (*di)->set_mark(false);
       di++;
     }
   }
@@ -369,11 +399,11 @@ const GDDD GDDD::top(canonical(_GDDD(-1,1)));
 /******************************************************************************/
 
 DDD::DDD(const DDD &g):GDDD(g.concret),DataSet(){
-  (concret->refCounter)++;
+  concret->ref();
 }
 
 DDD::DDD(const GDDD &g):GDDD(g.concret){
-  (concret->refCounter)++;
+  concret->ref();
 }
 
 GDDD::GDDD(int var,int val,const GDDD &d):concret(null.concret){ //var-val->d
@@ -411,29 +441,29 @@ GDDD::GDDD(int var,int val1,int val2,const GDDD &d):concret(null.concret){ //var
 }
 
 DDD::DDD(int var,int val,const GDDD &d):GDDD(var,val,d){
-  concret->refCounter++;
+  concret->ref();
 }
 
 DDD::DDD(int var,int val1,int val2,const GDDD &d):GDDD(var,val1,val2,d){
-  concret->refCounter++;
+  concret->ref();
 }
 
 DDD::~DDD(){
-  assert(concret->refCounter>0);
-  concret->refCounter--;
+  assert(concret->refCounter()>0);
+  concret->ref();
 }
 
 DDD &DDD::operator=(const GDDD &g){
-  concret->refCounter--;
+  concret->deref();
   concret=g.concret;
-  concret->refCounter++;
+  concret->ref();
   return *this;
 }
 
 DDD &DDD::operator=(const DDD &g){
-  concret->refCounter--;
+  concret->deref();
   concret=g.concret;
-  concret->refCounter++;
+  concret->ref();
   return *this;
 }
 
