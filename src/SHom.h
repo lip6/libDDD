@@ -453,8 +453,8 @@ public:
   virtual void mark() const{};
 
   void mark_if_refd () const {
-	if ( _refCounter >> 1 ) {
-		_refCounter |= 1;
+	if ( refCounter() ) {		
+		set_mark(true);		
 	}  
   }
   
@@ -476,7 +476,10 @@ public:
   
   void set_mark (bool val) const {
 	if (val) {
-		_refCounter |= 1;
+		if (! is_marked() ) {
+			_refCounter |= 1;
+			mark();
+		}
 	} else {
 		_refCounter >>= 1;
 		_refCounter <<= 1;		
