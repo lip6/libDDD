@@ -31,7 +31,7 @@
 #include "DataSet.h"
 
 
-#define HEIGHTSDD
+// #define HEIGHTSDD
 
 /// pre-declaration of concrete (private) class implemented in .cpp file
 class _GSDD;
