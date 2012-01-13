@@ -74,8 +74,12 @@ namespace sns {
   class Identity:public _GShom{
   public:
     /* Constructor */
-    Identity(int ref=0):_GShom(ref,true){}
+    Identity(int ref=0):_GShom(ref){}
 
+	// Overloaded
+	bool immediat () const  { return true; }
+
+	
     /* Compare */
     bool operator==(const _GShom&) const{return true;}
     size_t hash() const{return 17;}
@@ -120,8 +124,11 @@ namespace sns {
     GSDD value;
   public:
     /* Constructor */
-    Constant(const GSDD &d,int ref=0):_GShom(ref,true),value(d){}
+    Constant(const GSDD &d,int ref=0):_GShom(ref),value(d){}
 
+	// Overloaded
+	bool immediat () const  { return true; }
+	
     /* Compare */
     bool operator==(const _GShom &h) const{
       return value==((Constant*)&h )->value;
@@ -168,7 +175,7 @@ namespace sns {
     GSDD value;
   public:
     /* Constructor */
-    SApply2k(const GSDD &d,int ref=0):_GShom(ref,false),value(d){}
+    SApply2k(const GSDD &d,int ref=0):_GShom(ref),value(d){}
 
     /* Compare */
     bool operator==(const _GShom &h) const{
@@ -722,7 +729,7 @@ namespace sns {
   public :
     And(const parameters_t & p, int ref=0)
       :
-      _GShom(ref,false),
+      _GShom(ref),
       parameters(p) {
 //      assert (! p.empty());
 //      assert(p.size() > 1);
@@ -1265,7 +1272,7 @@ namespace sns {
     GShom lf;
   public:
     /* Constructor */
-    RecFireSat (const GShom &sat,const GShom &lf,int ref=0):_GShom(ref,false),sat(sat),lf(lf){}
+    RecFireSat (const GShom &sat,const GShom &lf,int ref=0):_GShom(ref),sat(sat),lf(lf){}
     /* Compare */
     bool operator==(const _GShom &h) const{
       return sat==((RecFireSat*)&h )->sat && lf==((RecFireSat*)&h )->lf;
@@ -1532,7 +1539,7 @@ namespace sns {
     GShom right;
   public:
     /* Constructor */
-    Compose(const GShom &l,const GShom &r,int ref=0):_GShom(ref,false),left(l),right(r){}
+    Compose(const GShom &l,const GShom &r,int ref=0):_GShom(ref),left(l),right(r){}
     /* Compare */
     bool operator==(const _GShom &h) const{
       return left==((Compose*)&h )->left && right==((Compose*)&h )->right;
@@ -1605,7 +1612,7 @@ namespace sns {
     GShom right;
   public:
     /* Constructor */
-    LeftConcat(const GSDD &l,const GShom &r,int ref=0):_GShom(ref,false),left(l),right(r){}
+    LeftConcat(const GSDD &l,const GShom &r,int ref=0):_GShom(ref),left(l),right(r){}
     /* Compare */
     bool operator==(const _GShom &h) const{
       return left==((LeftConcat*)&h )->left && right==((LeftConcat*)&h )->right;
@@ -1647,7 +1654,7 @@ namespace sns {
     GSDD right;
   public:
     /* Constructor */
-    RightConcat(const GShom &l,const GSDD &r,int ref=0):_GShom(ref,false),left(l),right(r){}
+    RightConcat(const GShom &l,const GSDD &r,int ref=0):_GShom(ref),left(l),right(r){}
     /* Compare */
     bool operator==(const _GShom &h) const{
       return left==((RightConcat*)&h )->left && right==((RightConcat*)&h )->right;
@@ -2285,7 +2292,7 @@ _GShom::eval_skip(const GSDD& d) const
 	  for(  GSDD::const_iterator it = d.begin();
 		it != d.end() ;
 		++it,i++) {
-	    if (immediat) {
+	    if (immediat()) {
 	      // right concatenating a constant ? ah : Can this happen ?
 	      // if this assert is raised, remove it !
               son_result.push_back(eval(it->second));
@@ -2464,7 +2471,7 @@ GShom::GShom(int var,const DataSet & val, const GShom &h) {
 GSDD 
 GShom::operator()(const GSDD &d) const
 {
-  if(concret->immediat)
+  if(concret->immediat())
     {
       return eval(d);
     }
