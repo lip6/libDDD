@@ -1573,7 +1573,13 @@ GHom apply2k (const GDDD & d) {
 void GHom::pstats(bool)
 {
   std::cout << "*\nGHom Stats : size unicity table = " <<  canonical.size() << std::endl;
-/*
+
+  
+  std::cout << "sizeof(_GHom):" << sizeof(_GHom) << std::endl; 
+  std::cout << "sizeof(Identity):" << sizeof(Identity) << std::endl; 
+   
+  
+  /*
   std::ostream & os = std::cout;
   int i = 0;
   for (UniqueTable<_GHom>::Table::const_iterator it= canonical.table.begin() ;
