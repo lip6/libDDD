@@ -2536,7 +2536,7 @@ size_t GShom::cache_peak() {
 
 // Todo
 void GShom::mark()const{
-  concret->mark();
+	concret->set_mark(true);
 }
 
 // used to reduce Shom::add creation complexity in recursive cases
