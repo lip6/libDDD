@@ -158,6 +158,7 @@ size_t GDDD::peak() {
 void GDDD::pstats(bool)
 {
   std::cout << "Peak number of DDD nodes in unicity table :" << peak() << std::endl; 
+  std::cout << "sizeof(_GDDD):" << sizeof(_GDDD) << std::endl;   
 }
 
 
