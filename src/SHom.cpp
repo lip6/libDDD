@@ -2502,7 +2502,7 @@ GShom GShom::invert (const GSDD & pot) const {
 
 
 
-int GShom::refCounter() const{return concret->refCounter;}
+int GShom::refCounter() const{return concret->refCounter();}
 
 /* Sum */
 
@@ -2536,10 +2536,7 @@ size_t GShom::cache_peak() {
 
 // Todo
 void GShom::mark()const{
-  if(!concret->marking){
-    concret->marking=true;
-    concret->mark();
-  }
+  concret->mark();
 }
 
 // used to reduce Shom::add creation complexity in recursive cases
@@ -2551,14 +2548,11 @@ void GShom::garbage(){
   
   // mark phase
   for(UniqueTable<_GShom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
-    if((*di)->refCounter!=0){
-      (*di)->marking=true;
-      (*di)->mark();
-    }
+      (*di)->mark_if_refd();
   }
   // sweep phase
   for(UniqueTable<_GShom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
-    if(!(*di)->marking){
+    if(!(*di)->is_marked()){
       UniqueTable<_GShom>::Table::iterator ci=di;
       di++;
       const _GShom *g=*ci;
@@ -2566,7 +2560,7 @@ void GShom::garbage(){
       delete g;
     }
     else{
-      (*di)->marking=false;
+      (*di)->set_mark(false);
       di++;
     }
   }
@@ -2577,41 +2571,41 @@ void GShom::garbage(){
 /*************************************************************************/
 /* Constructor */
 Shom::Shom(const Shom &h):GShom(h.concret){
-  concret->refCounter++;
+  concret->ref();
 }
 
 Shom::Shom(const GShom &h):GShom(h.concret){
-  concret->refCounter++;
+  concret->ref();
 }
 
 Shom::Shom(const GSDD& d):GShom(d){
-  concret->refCounter++;
+  concret->ref();
 }
 
 Shom::Shom(int var,const DataSet &  val, const GShom &h):GShom(var,val,h){
-  concret->refCounter++;
+  concret->ref();
 }
 
 Shom::~Shom(){
-  assert(concret->refCounter>0);
-  concret->refCounter--;
+  assert(concret->refCounter()>0);
+  concret->deref();
 }
 
 /* Set */
 
 Shom &Shom::operator=(const Shom &h){
-  assert(concret->refCounter>0);
-  concret->refCounter--;
+  assert(concret->refCounter()>0);
+  concret->deref();
   concret=h.concret;
-  concret->refCounter++;
+  concret->ref();
   return *this;
 }
 
 Shom &Shom::operator=(const GShom &h){
-  assert(concret->refCounter>0);
-  concret->refCounter--;
+  assert(concret->refCounter()>0);
+  concret->deref();
   concret=h.concret;
-  concret->refCounter++;
+  concret->ref();
   return *this;
 }
 
