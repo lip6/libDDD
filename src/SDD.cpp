@@ -61,23 +61,23 @@ public:
   /* Attributs*/
   const int variable;
   GSDD::Valuation valuation;
-  mutable unsigned long int refCounter;
+  mutable unsigned long int _refCounter;
 #ifdef HEIGHTSDD
   mutable short int height;
 #endif
-  mutable bool marking;
+
 
   /* Constructor */
-  _GSDD(int var,int cpt=0):variable(var),refCounter(cpt),
+  _GSDD(int var,int cpt=0):variable(var),_refCounter(2*cpt)
 #ifdef HEIGHTSDD
-			   height(-1),
+			   ,height(-1)
 #endif 
-			   marking(false){}; 
-  _GSDD(int var,GSDD::Valuation val,int cpt=0):variable(var),valuation(val),refCounter(cpt),
+			   {}; 
+  _GSDD(int var,GSDD::Valuation val,int cpt=0):variable(var),valuation(val),_refCounter(2*cpt)
 #ifdef HEIGHTSDD
-			   height(-1),
+			   ,height(-1)
 #endif 
-			   marking(false){
+			   {
     sort (valuation.begin(), valuation.end(), valsorter);
   }; 
 
@@ -90,11 +90,11 @@ public:
 
   
 
-  _GSDD (const _GSDD &g):variable(g.variable),valuation(g.valuation),refCounter(g.refCounter),
+  _GSDD (const _GSDD &g):variable(g.variable),valuation(g.valuation),_refCounter(g._refCounter)
 #ifdef HEIGHTSDD
-			   height(g.height),
+			   ,height(g.height)
 #endif 
-			 marking(g.marking) {
+			{
     for (GSDD::Valuation::iterator it= valuation.begin(); it != valuation.end() ; ++it) {
       it->first = it->first->newcopy();
     }
@@ -160,6 +160,36 @@ public:
     return res;
   }
 
+  void mark_if_refd () const {
+	if ( _refCounter >> 1 ) {
+		_refCounter |= 1;
+	}  
+  }
+  
+  void ref () const {
+	_refCounter += 2;
+  }
+  
+  void deref () const {
+	_refCounter -= 2;
+  }
+  
+  unsigned long int refCounter() const {
+	return _refCounter >> 1;
+  }
+  
+  bool is_marked() const {
+	return _refCounter & 1;
+  }
+  
+  void set_mark (bool val) const {
+	if (val) {
+		_refCounter |= 1;
+	} else {
+		_refCounter >>= 1;
+		_refCounter <<= 1;		
+	}
+  }
 
 };
 
@@ -232,8 +262,8 @@ void GSDD::mark()const{
 }
 
 void _GSDD::mark()const{
-  if(!marking){
-    marking=true;
+  if(! is_marked() ){
+    set_mark(true);
     for(GSDD::Valuation::const_iterator vi=valuation.begin();vi!=valuation.end();++vi){
 			vi->first->mark();
       vi->second.mark();
@@ -251,6 +281,8 @@ size_t GSDD::peak() {
 void GSDD::pstats(bool)
 {
   std::cout << "Current/Peak number of SDD nodes in unicity table :" << canonical.size() << "/" << peak() << std::endl; 
+
+  std::cout << "sizeof(_GSDD):" << sizeof(_GSDD) << std::endl;
 }
 
 
@@ -366,7 +398,7 @@ GSDD::const_iterator GSDD::end() const{
 
 /* Visualisation */
 unsigned int GSDD::refCounter() const{
-  return concret->refCounter;
+  return concret->refCounter();
 }
 
 class SddSize{
@@ -534,15 +566,14 @@ void GSDD::garbage(){
   MySDDNbStates::clear();
   // mark phase
   for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
-    if((*di)->refCounter!=0)
-      (*di)->mark();
+    (*di)->mark_if_refd();
   }
 
   
 
   // sweep phase  
   for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
-    if(! (*di)->marking){
+    if(! (*di)->is_marked()){
       UniqueTable<_GSDD>::Table::iterator ci=di;
       di++;
       const _GSDD *g=(*ci);
@@ -550,7 +581,7 @@ void GSDD::garbage(){
       delete g;
     }
     else{
-      (*di)->marking=false;
+      (*di)->set_mark(false);
       di++;
     }
   }
@@ -571,44 +602,44 @@ void GSDD::garbage(){
 SDD::SDD(const SDD &g)
     : GSDD(g.concret)
 {
-    (concret->refCounter)++;
+    concret->ref();
 }
 
 SDD::SDD(const GSDD &g):GSDD(g.concret){
-  (concret->refCounter)++;
+  concret->ref();
 }
 
 
 SDD::SDD(int var,const DataSet& val,const GSDD &d):GSDD(var,val,d){
-  concret->refCounter++;
+  concret->ref();
 }
 
 SDD::SDD(int var,const GSDD& val,const GSDD &d):GSDD(var,val,d){
-  concret->refCounter++;
+  concret->ref();
 }
 
 SDD::SDD(int var,const SDD& val,const GSDD &d):GSDD(var, val,d){
-  concret->refCounter++;
+  concret->ref();
 }
 
 
 SDD::~SDD(){
-  assert(concret->refCounter>0);
-  concret->refCounter--;
+  assert(concret->refCounter()>0);
+  concret->deref();
 }
 
 
 SDD &SDD::operator=(const GSDD &g){
-  concret->refCounter--;
+  concret->deref();
   concret=g.concret;
-  concret->refCounter++;
+  concret->ref();
   return *this;
 }
 
 SDD &SDD::operator=(const SDD &g){
-  concret->refCounter--;
+  concret->deref();
   concret=g.concret;
-  concret->refCounter++;
+  concret->ref();
   return *this;
 }
 
