@@ -377,12 +377,13 @@ private:
   friend class Shom;
   /// For garbage collection. 
   /// Counts the number of times a _GShom is referenced from the context of an Shom.
-  mutable int refCounter;
-  /// For garbage collection. Used in the two phase garbage collection process.
+   /// For garbage collection: lowest bit of refCounter gives marking value for mark&sweep.
+  ///	Used in the two phase garbage collection process.
   /// A Shom that is not marked after the first pass over the unicity table, will
   /// be sweeped in the second phase. Outside of garbage collection routine, marking
   /// should always bear the value false.
-  mutable bool marking;
+  mutable int _refCounter;
+ 
 
   /// The procedure responsible for propagating efficiently across "skipped" variable nodes.
     GSDD eval_skip(const GSDD &) const;
@@ -420,7 +421,7 @@ public:
 
   /// Constructor. Note this class is abstract, so this is only used in initialization
   /// list of derived classes constructors (hard coded operations and StrongShom).
-  _GShom(int ref=0):refCounter(ref),marking(false){};
+  _GShom(int ref=0):_refCounter(2*ref){};
   /// Destructor. Default behavior. 
   /// \todo Remove this declaration ? compiler generated version sufficient.
   virtual ~_GShom(){};
@@ -451,6 +452,38 @@ public:
   /// For garbage collection. Used in first phase of garbage collection.
   virtual void mark() const{};
 
+  void mark_if_refd () const {
+	if ( _refCounter >> 1 ) {
+		_refCounter |= 1;
+	}  
+  }
+  
+  void ref () const {
+	_refCounter += 2;
+  }
+  
+  void deref () const {
+	_refCounter -= 2;
+  }
+  
+  unsigned long int refCounter() const {
+	return _refCounter >> 1;
+  }
+  
+  bool is_marked() const {
+	return _refCounter & 1;
+  }
+  
+  void set_mark (bool val) const {
+	if (val) {
+		_refCounter |= 1;
+	} else {
+		_refCounter >>= 1;
+		_refCounter <<= 1;		
+	}
+  }
+  
+  
   virtual void print (std::ostream & os) const = 0;
 public:
     
