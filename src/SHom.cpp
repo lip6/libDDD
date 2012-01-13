@@ -29,7 +29,7 @@
 #include "util/hash_support.hh"
 #include "util/ext_hash_map.hh"
 #include "Cache.hh"
-
+#include "MLSHom.h"
 
 #ifdef PARALLEL_DD
 #include <tbb/blocked_range.h>
@@ -2135,7 +2135,42 @@ namespace sns {
   };
 
 	
-
+class MLShomAdapter :public _GShom{
+private:
+  MLShom h;
+public:
+  /* Constructor */
+  MLShomAdapter(const MLShom &hh):h(hh){}
+  /* Compare */
+  bool operator==(const _GShom &other) const{
+    return h==((MLShomAdapter*)& other )->h;
+  }
+  size_t hash() const{
+    return 19751*h.hash();
+  }
+  _GShom * clone () const {  return new MLShomAdapter(*this); }
+  
+  /* Eval */
+  GSDD eval(const GSDD &d)const{
+    SHomNodeMap m = h (d);
+    std::set<GSDD> sum;
+    for (SHomNodeMap::const_iterator it = m.begin() ; it != m.end() ; ++it) {
+      sum.insert(it->first (it->second));
+    }
+    return SDED::add(sum);
+  }
+  
+  /* Memory Manager */
+  void mark() const{
+    /// ???????
+    // h.mark();
+  }
+  
+  void print (std::ostream & os) const {
+    os << "MLHom";
+  }
+  
+};
 
 
 } // end namespace H_Homomorphism
@@ -2408,6 +2443,8 @@ GShom::saturationStrategy GShom::saturationStrategy_ = ORDINARY;
 GShom::GShom(const _GShom *h):concret(h){}
 
 GShom::GShom(const _GShom &h):concret(canonical(h)){}
+
+GShom::GShom(const MLShom &h):concret(canonical( sns::MLShomAdapter(h) )) {};
 
 GShom::GShom(const GSDD& d):concret(canonical( sns::Constant(d))){}
 

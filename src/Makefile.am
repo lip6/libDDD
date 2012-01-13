@@ -18,6 +18,7 @@ ddd_hdrs    =   DataSet.h \
                 IntDataSet.h \
                 hashfunc.hh \
                 MLHom.h \
+                MLSHom.h \
                 statistic.hpp \
                 process.hpp \
                 AdditiveMap.hpp \
@@ -46,6 +47,7 @@ srcs     =  DED.cpp \
             SHom.cpp \
             IntDataSet.cpp \
             MLHom.cpp \
+            MLSHom.cpp \
             statistic.cpp \
             process.cpp \
             util/dotExporter.cpp
