@@ -1,5 +1,5 @@
 # AC_INIT (package, version, [bug-report], [tarname])
-AC_INIT(DDD,1.6.0,[Yann.Thierry-Mieg@lip6.fr])
+AC_INIT(DDD,1.7.0,[Yann.Thierry-Mieg@lip6.fr])
 
 # We use automake to build makefiles
 AM_INIT_AUTOMAKE(-Wall)
@@ -20,9 +20,13 @@ AC_CONFIG_MACRO_DIR([m4])
 test -z "$CFLAGS" && CFLAGS=
 test -z "$CXXFLAGS" && CXXFLAGS=
 
+
+AC_CHECK_LIB(tcmalloc, malloc, ,AC_MSG_WARN(google perftool not detected : not using tcmalloc))
+
 #compile in C++
 AC_PROG_CXX
 AC_LANG(C++)
+
 
 reentrant=false
 parallel=false
@@ -104,6 +108,9 @@ AM_CONDITIONAL([WITH_LIBTBBBIN_PATH], [test "x${with_libtbbbin}" != x])
 if test "x${with_libtbbbin}" != x; then
     AC_SUBST([LIBTBB_BIN],["${with_libtbbbin}"])
 fi
+
+
+
 
 # Enable boost if found:
 AX_CHECK_BOOST([1.31], [103100])
