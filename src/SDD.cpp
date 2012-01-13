@@ -160,9 +160,9 @@ public:
     return res;
   }
 
-  void mark_if_refd () const {
-	if ( _refCounter >> 1 ) {
-		_refCounter |= 1;
+void mark_if_refd () const {
+	if ( refCounter() ) {		
+		mark();	
 	}  
   }
   
