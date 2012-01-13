@@ -90,8 +90,8 @@ public :
   _GDDD * clone () const { return new _GDDD(*this); }
 
   void mark_if_refd () const {
-	if ( _refCounter >> 1 ) {
-		_refCounter |= 1;
+	if ( refCounter() ) {
+		mark();
 	}  
   }
   
