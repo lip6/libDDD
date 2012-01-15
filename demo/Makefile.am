@@ -1,6 +1,6 @@
 SUBDIRS = hanoi morpion
 
-noinst_PROGRAMS = tst1 tst2 tst3 tst4 tst5 tst6 tst7 tst8 tst9 tst10 tst11 tst12 tst14 #tst13
+noinst_PROGRAMS = tst1 tst2 tst3 tst4 tst5 tst6 tst7 tst8 tst9 tst10 tst11 tst12 tst14 tst15 #tst13
 
 # Flags for TBB
 if WITH_LIBTBBINC_PATH
@@ -23,6 +23,7 @@ endif
 PLUSPLUS = PlusPlus.hh PlusPlus.cpp
 SETVAR = SetVar.hh SetVar.cpp
 SWAPVAR = PermuteVar.hh PermuteVar.cpp
+SWAP_MLHOM = SwapMLHom.hh SwapMLHom.cpp
 
 tst1_SOURCES = tst1.cpp
 tst2_SOURCES = tst2.cpp
@@ -37,6 +38,7 @@ tst10_SOURCES = tst10.cpp $(PLUSPLUS)
 tst11_SOURCES = tst11.cpp
 tst12_SOURCES = tst12.cpp
 tst14_SOURCES = tst14.cpp
+tst15_SOURCES = tst15.cpp $(SWAP_MLHOM)
 #tst13_SOURCES = tst13.cpp
 #tst13_LDADD =  $(DDD_BUILDDIR)/libDDD_ev.a
 #tst13_CPPFLAGS = -I $(DDD_SRCDIR) -g -Wall -D EVDDD
