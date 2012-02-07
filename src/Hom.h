@@ -62,6 +62,11 @@ private:
   /// Application consists in : while ( h(d) != d ) d = h(d);
   /// Where d is a DDD and h a homomorphism.
   friend GHom fixpoint(const GHom &);
+  /// This operator applies its arguments to a node until a fixpoint is reached.
+  /// Similar to the fixpoint, but we suppose here that the parameters are commutative
+  /// And that any application order converges to the same result
+  /// Typically this is the property of a base of monotonic< permutations.
+  friend GHom monotonic(const d3::set<GHom>::type & set);
   /// This operator creates an operation that is the union of two operations.
   /// By definition, as homomorphism are linear, (h+g) (d) = h(d) + g(d) ;
   /// Where g,h are homomorphisms and d is a DDD.

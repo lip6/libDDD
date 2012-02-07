@@ -378,8 +378,8 @@ public:
   typedef std::set<GHom> param_t;
   typedef param_t::const_iterator param_it;
 
-    typedef std::pair< GHom , param_t > partition;
-    typedef std::map<int,partition> partition_cache_type;
+  typedef std::pair< GHom , param_t > partition;
+  typedef std::map<int,partition> partition_cache_type;
 
 
 private:
@@ -571,6 +571,187 @@ public:
     os << ")";
   }
 };
+/************************** Monotonic< fixpoint */
+class Monotonic
+	:
+    public _GHom
+{
+public:
+
+  typedef std::set<GHom> param_t;
+  typedef param_t::const_iterator param_it;
+
+  typedef std::pair< GHom , param_t > partition;
+  typedef std::map<int,partition> partition_cache_type;
+
+
+private:
+
+  param_t parameters;
+  mutable partition_cache_type partition_cache;
+       
+public:
+  
+    /* Constructor */
+  Monotonic( const std::set<GHom> &param, int ref=0)
+    :
+    _GHom(ref,false),
+    parameters(param)
+  {
+  }
+   
+  param_t &
+  get_parameters()
+  {
+    return this->parameters;
+  }
+   
+  const GHom::range_t  get_range () const {
+    GHom::range_t ret;
+    for(param_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+      GHom::range_t pret = gi->get_range();
+      if ( pret.empty() )
+	return pret;
+      ret.insert(pret.begin() , pret.end()) ;
+    }
+    return ret;
+  }
+	
+  partition
+  get_partition(int var)
+  {
+        this->skip_variable(var);
+        return partition_cache.find(var)->second;
+  }
+
+  GHom invert  (const GDDD & pot) const {
+    // There is no real point to inverting a monotonous<
+    // particularly if this is in a reverse transition relation, we would rather keep
+    // the canonicity when firing backwards.
+    return this;
+  }
+
+  /* Compare */
+  bool
+  operator==(const _GHom &h) const
+  {
+    return parameters==((Monotonic*)&h )->parameters;
+  }
+  
+  
+  size_t
+  hash() const
+  {
+    size_t res=5468731;
+    for(param_it gi=parameters.begin();gi!=parameters.end();++gi)
+      {
+	res ^= gi->hash();
+      }
+    return res;
+  }
+
+  bool is_selector () const {
+    return false;
+  }
+
+  _GHom * clone () const {  return new Monotonic(*this); }
+  
+  bool
+  skip_variable(int var) const
+  {
+    partition_cache_type::iterator part_it = partition_cache.find(var);
+    if( part_it == partition_cache.end() )
+      {
+	partition& part = partition_cache.insert(std::make_pair(var,partition())).first->second;
+	
+	std::set<GHom> F;
+	for(param_it gi=parameters.begin();gi!=parameters.end();++gi)
+	  {
+	    if( get_concret(*gi)->skip_variable(var) )
+	      {
+		// F part
+		F.insert(*gi);
+	      }
+	    else
+	      {
+		// G part
+		part.second.insert(*gi);
+	      }
+	  }
+	part.first = monotonic(F);
+	return part.second.empty();
+      }
+    return part_it->second.second.empty();
+  }
+  
+  /* Eval */
+  GDDD
+  eval(const GDDD &d) const
+  {
+    if( d == GDDD::null || d == GDDD::one || d == GDDD::top )
+      {
+	return d;
+      }
+    else
+      {
+	std::set<GDDD> s;
+	int var = d.variable();
+        
+	partition_cache_type::iterator part_it = partition_cache.find(var);
+	if( part_it == partition_cache.end() )
+          {
+	    this->skip_variable(var);
+	    part_it = partition_cache.find(var);
+          }              
+	
+	GHom& F = part_it->second.first;
+	param_t & G = part_it->second.second;
+	
+	
+	GDDD d1 = d;
+	GDDD d2 = d;
+	
+	
+	do
+	  {
+	    d1 = d2;
+	    
+	    // Apply ( F )* on all sons
+	    d2 = F (d2);
+            
+	    // Apply ( G )*
+	    for (param_it it = G.begin() ; it != G.end() ; ++it ) {
+	      d2 = (*it) (d2);
+	    }
+	  }
+	while (d1 != d2);
+	return d1;
+	
+      }
+  }
+  
+  /* Memory Manager */
+  void mark() const{
+    for(param_it gi=parameters.begin();gi!=parameters.end();++gi)
+      gi->mark();
+    partition_cache.clear();
+  }
+
+ void print (std::ostream & os) const {
+    os << "(Monotonic:" ;
+    param_it gi=parameters.begin();
+    os << *gi ;
+    for( ++gi; gi!=parameters.end(); ++gi)
+      {
+	os << " + " << *gi ;
+      }
+    os << ")";
+ }
+};
+
+
+
+
 /************************** Compose */
 class Compose
 	:
@@ -1430,6 +1611,12 @@ GHom fixpoint (const GHom &h) {
 	
     return Fixpoint(h);
 }
+
+
+GHom monotonic (const d3::set<GHom>::type & set) {
+  return Monotonic(set);
+}
+
 
 static void printCondError (const GHom & cond) {
 
