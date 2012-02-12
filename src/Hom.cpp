@@ -375,10 +375,10 @@ class Add
 {
 public:
 
-  typedef std::set<GHom> param_t;
+  typedef std::vector<GHom> param_t;
   typedef param_t::const_iterator param_it;
 
-  typedef std::pair< GHom , param_t > partition;
+  typedef std::pair< GHom , std::set<GHom> > partition;
   typedef std::map<int,partition> partition_cache_type;
 
 
@@ -397,22 +397,24 @@ public:
     parameters(),
     have_id(false)
   {
-    for( param_it it = param.begin(); it != param.end(); ++it) {
+    std::set<GHom> tmp;
+    for( std::set<GHom>::const_iterator it = param.begin(); it != param.end(); ++it) {
       // fuse internal Add
       if( typeid( *get_concret(*it) ) == typeid(Add) )	{
-	std::set<GHom>& local_param = ((Add*)get_concret(*it))->parameters;
-	parameters.insert( local_param.begin() , local_param.end());
+	std::vector<GHom>& local_param = ((Add*)get_concret(*it))->parameters;
+	tmp.insert( local_param.begin() , local_param.end());
 
       } else {
-	parameters.insert(*it);
+	tmp.insert(*it);
       }
     }
+    parameters = param_t(tmp.begin(), tmp.end());
   }
 
   bool
   get_have_id() const
   {
-    return parameters.find(GHom::id) != parameters.end();
+    return find(parameters.begin(), parameters.end(), GHom::id) != parameters.end();
   }
    
   param_t &
@@ -535,9 +537,9 @@ public:
           }              
           
           GHom& F = part_it->second.first;
-          param_t & G = part_it->second.second;
+        std::set<GHom> & G = part_it->second.second;
           
-          for( param_t::iterator it = G.begin() ; it != G.end(); ++it)
+          for( std::set<GHom>::iterator it = G.begin() ; it != G.end(); ++it)
 	    {
 	      s.insert((*it)(d));                  
 	    } 
