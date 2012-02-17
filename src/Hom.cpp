@@ -111,7 +111,11 @@ public:
  GHom invert  (const GDDD & pot) const {
    return pot;
  }
-
+  
+  bool is_selector () const {
+    // in any other case, it might return a value outside the entry set, but empty set is always a legal subset of any DDD
+    return (value == GDDD::null) ;
+  }
 
   /* Memory Manager */
   void mark() const{
@@ -718,13 +722,14 @@ public:
 	  {
 	    d1 = d2;
 	    
-	    // Apply ( F )* on all sons
-	    d2 = F (d2);
             
-	    // Apply ( G )*
+	    // Apply ( G ) as a composition
 	    for (param_it it = G.begin() ; it != G.end() ; ++it ) {
 	      d2 = (*it) (d2);
 	    }
+
+	    // Apply ( F )* on all sons
+	    d2 = F (d2);
 	  }
 	while (d1 != d2);
 	return d1;
