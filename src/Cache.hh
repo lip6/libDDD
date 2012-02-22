@@ -63,8 +63,11 @@ public:
       return std::make_pair(insertion,result);
     }
   
-
-    
+#ifdef HASH_STAT
+  std::map<std::string, size_t> get_hits() const { return cache_.get_hits(); }
+  std::map<std::string, size_t> get_misses() const { return cache_.get_misses(); }
+  std::map<std::string, size_t> get_bounces() const { return cache_.get_bounces(); }
+#endif // HASH_STAT    
 };
 
 #endif /* _CACHE_HH_ */

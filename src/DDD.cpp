@@ -189,7 +189,25 @@ size_t GDDD::peak() {
 void GDDD::pstats(bool)
 {
   std::cout << "Peak number of DDD nodes in unicity table :" << peak() << std::endl; 
-  std::cout << "sizeof(_GDDD):" << sizeof(_GDDD) << std::endl;   
+  std::cout << "sizeof(_GDDD):" << sizeof(_GDDD) << std::endl;
+  
+#ifdef HASH_STAT
+  std::map<std::string, size_t> hits = canonical.get_hits();
+  std::map<std::string, size_t> misses = canonical.get_misses();
+  std::map<std::string, size_t> bounces = canonical.get_bounces();
+  std::cout << "DDD Hits :" << std::endl;
+  for (std::map<std::string, size_t>::const_iterator it = hits.begin() ; it != hits.end() ; ++it) {
+    std::cout << it->first << " : " << it->second << std::endl;
+  }
+  std::cout << std::endl << "DDD Misses :" << std::endl;
+  for (std::map<std::string, size_t>::const_iterator it = misses.begin() ; it != misses.end() ; ++it) {
+    std::cout << it->first << " : " << it->second << std::endl;
+  }
+  std::cout << std::endl << "DDD bounces" << std::endl;
+  for (std::map<std::string, size_t>::const_iterator it = bounces.begin() ; it != bounces.end() ; ++it) {
+    std::cout << it->first << " : " << it->second << std::endl;
+  }
+#endif // HASH_STAT
 }
 
 
