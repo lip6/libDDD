@@ -134,6 +134,12 @@ public:
   {
     return table.size();
   }
+  
+#ifdef HASH_STAT
+  std::map<std::string, size_t> get_hits() const { return table.get_hits(); }
+  std::map<std::string, size_t> get_misses() const { return table.get_misses(); }
+  std::map<std::string, size_t> get_bounces() const { return table.get_bounces(); }
+#endif // HASH_STAT
 };
 
 #endif

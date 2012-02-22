@@ -59,7 +59,18 @@ if test "x$stdhash" = "xtrue"; then
     AC_DEFINE([USE_STD_HASH],1,[Define if you want to use std hash instead of google sparse hash.])
 fi
 
-
+# Option to enable hash stats
+AC_ARG_ENABLE([hash-stat],
+				[AC_HELP_STRING([--enable-hash-stat],[collect stats on hash])],
+				[ case "${enable_hash_stat}" in
+					 yes) CFLAGS="-DHASH_STAT $CFLAGS"
+					 CXXFLAGS="-DHASH_STAT $CXXFLAGS"
+					 ;;
+					 no)
+					 ;;
+					 *) AC_MSG_ERROR(Bad value ${enableval})
+					 ;;
+				esac])
 
 AC_ARG_ENABLE(	[reentrant],
         [AC_HELP_STRING([--enable-reentrant],[turn on on thread-safe mode])],

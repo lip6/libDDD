@@ -558,6 +558,31 @@ void DED::pstats(bool reinit)
 {
   std::cout << "*\nCache Stats : size=" << cache.size() << std::endl;  
   std::cout << "\nCache hit ratio : " << double (Hits*100) / double(Misses+1+Hits) << "%" << std::endl;
+  
+#ifdef HASH_STAT
+  std::map<std::string, size_t> hits = cache.get_hits();
+  std::map<std::string, size_t> misses = cache.get_misses();
+  std::map<std::string, size_t> bounces = cache.get_bounces();
+  size_t h = 0;
+  size_t m = 0;
+  size_t b = 0;
+  std::cout << "DED Hits :" << std::endl;
+  for (std::map<std::string, size_t>::const_iterator it = hits.begin() ; it != hits.end() ; ++it) {
+    std::cout << it->first << " : " << it->second << std::endl;
+    h += it->second;
+  }
+  std::cout << std::endl << "DED Misses :" << std::endl;
+  for (std::map<std::string, size_t>::const_iterator it = misses.begin() ; it != misses.end() ; ++it) {
+    std::cout << it->first << " : " << it->second << std::endl;
+    m += it->second;
+  }
+  std::cout << std::endl << "DED bounces" << std::endl;
+  for (std::map<std::string, size_t>::const_iterator it = bounces.begin() ; it != bounces.end() ; ++it) {
+    std::cout << it->first << " : " << it->second << std::endl;
+    b += it->second;
+  }
+  std::cout << "Hits : " << h << " , Misses : "  << m << " , Bounces : " << b << std::endl;
+#endif // HASH_STAT
   // long hitr=(Hits*100) / (Misses+1+Hits) ;
   if (reinit){
     Hits = 0;
