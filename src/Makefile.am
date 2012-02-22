@@ -50,7 +50,8 @@ srcs     =  DED.cpp \
             MLSHom.cpp \
             statistic.cpp \
             process.cpp \
-            util/dotExporter.cpp
+            util/dotExporter.cpp \
+            util/hash_burtle.cpp
 
 # Flags for TBB
 if WITH_LIBTBBINC_PATH

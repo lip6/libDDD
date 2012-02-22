@@ -1767,7 +1767,30 @@ GHom apply2k (const GDDD & d) {
 void GHom::pstats(bool)
 {
   std::cout << "*\nGHom Stats : size unicity table = " <<  canonical.size() << std::endl;
-
+#ifdef HASH_STAT
+  std::map<std::string, size_t> hits = canonical.get_hits();
+  std::map<std::string, size_t> misses = canonical.get_misses();
+  std::map<std::string, size_t> bounces = canonical.get_bounces();
+  size_t h = 0;
+  size_t m = 0;
+  size_t b = 0;
+  std::cout << "Hom Hits :" << std::endl;
+  for (std::map<std::string, size_t>::const_iterator it = hits.begin() ; it != hits.end() ; ++it) {
+    std::cout << it->first << " : " << it->second << std::endl;
+    h += it->second;
+  }
+  std::cout << std::endl << "Hom Misses :" << std::endl;
+  for (std::map<std::string, size_t>::const_iterator it = misses.begin() ; it != misses.end() ; ++it) {
+    std::cout << it->first << " : " << it->second << std::endl;
+    m += it->second;
+  }
+  std::cout << std::endl << "Hom bounces" << std::endl;
+  for (std::map<std::string, size_t>::const_iterator it = bounces.begin() ; it != bounces.end() ; ++it) {
+    std::cout << it->first << " : " << it->second << std::endl;
+    b += it->second;
+  }
+  std::cout << "Hits : " << h << " , Misses : "  << m << " , Bounces : " << b << std::endl;
+#endif // HASH_STAT
   
   std::cout << "sizeof(_GHom):" << sizeof(_GHom) << std::endl; 
   std::cout << "sizeof(Identity):" << sizeof(Identity) << std::endl; 

@@ -253,6 +253,12 @@ public:
   {
     return map_.erase(key) > 1 ? false : true; 
   }
+  
+#ifdef HASH_STAT
+  std::map<std::string, size_t> get_hits() const { return map_.get_hits(); }
+  std::map<std::string, size_t> get_misses() const { return map_.get_misses(); }
+  std::map<std::string, size_t> get_bounces() const { return map_.get_bounces(); }
+#endif // HASH_STAT
 
 };
 

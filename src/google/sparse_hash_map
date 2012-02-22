@@ -129,6 +129,12 @@ class sparse_hash_map {
   ht rep;
 
  public:
+#ifdef HASH_STAT
+  std::map<std::string, size_t> get_hits() const { return rep.get_hits(); }
+  std::map<std::string, size_t> get_misses() const { return rep.get_misses(); }
+  std::map<std::string, size_t> get_bounces() const { return rep.get_bounces(); }
+#endif // HASH_STAT
+  
   typedef typename ht::key_type key_type;
   typedef T data_type;
   typedef T mapped_type;

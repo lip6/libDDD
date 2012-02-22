@@ -106,6 +106,12 @@
 #include <google/sparsetable>    // IWYU pragma: export
 #include <stdexcept>                 // For length_error
 
+#ifdef HASH_STAT
+#include <map>
+#include <typeinfo>
+#include <iostream>
+#endif // HASH_STAT
+
 _START_GOOGLE_NAMESPACE_
 
 namespace base {   // just to make google->opensource transition easier
@@ -113,7 +119,11 @@ using GOOGLE_NAMESPACE::remove_const;
 }
 
 #ifndef SPARSEHASH_STAT_UPDATE
-#define SPARSEHASH_STAT_UPDATE(x) ((void) 0)
+#ifdef HASH_STAT
+#define SPARSEHASH_STAT_UPDATE(x) x;
+#else
+#define SPARSEHASH_STAT_UPDATE(x) ((void)0);
+#endif
 #endif
 
 // The probing method
@@ -321,8 +331,62 @@ template <class Value, class Key, class HashFcn,
 class sparse_hashtable {
  private:
   typedef typename Alloc::template rebind<Value>::other value_alloc_type;
-
+  
+#ifdef HASH_STAT
+  mutable std::map<std::string, size_t> hits;
+  mutable std::map<std::string, size_t> misses;
+  mutable std::map<std::string, size_t> bounces;
+  
+  template<class T>
+  void
+  add_hit(T o, size_t i) const
+  {
+    hits[typeid(o).name()] += i;
+  }
+  
+  template<class T>
+  void
+  add_hit(const T *o, size_t i) const
+  {
+    hits[typeid(*o).name()] += i;
+  }
+  
+  template<class T>
+  void
+  add_miss(T o, size_t i) const
+  {
+    misses[typeid(o).name()] += i;
+  }
+  
+  template<class T>
+  void
+  add_miss(const T *o, size_t i) const
+  {
+    misses[typeid(*o).name()] += i;
+  }
+  
+  template<class T>
+  void
+  add_bounce(T o, size_t i) const
+  {
+    bounces[typeid(o).name()] += i;
+  }
+  
+  template<class T>
+  void
+  add_bounce(const T *o, size_t i) const
+  {
+    bounces[typeid(*o).name()] += i;
+  }
+#endif // HASH_STAT
+  
  public:
+#ifdef HASH_STAT
+  std::map<std::string, size_t> get_hits() const { return hits; }
+  std::map<std::string, size_t> get_misses() const { return misses; }
+  std::map<std::string, size_t> get_bounces() const { return bounces; }
+#endif // HASH_STAT
+  
   typedef Key key_type;
   typedef Value value_type;
   typedef HashFcn hasher;
@@ -786,6 +850,11 @@ class sparse_hashtable {
         table(0, ht.get_allocator()) {
     settings.reset_thresholds(bucket_count());
     copy_from(ht, min_buckets_wanted);   // copy_from() ignores deleted entries
+#ifdef HASH_STAT
+          hits = ht.hits;
+          misses = ht.misses;
+          bounces = ht.bounces;
+#endif // HASH_STAT
   }
   sparse_hashtable(MoveDontCopyT mover, sparse_hashtable& ht,
                    size_type min_buckets_wanted = HT_DEFAULT_STARTING_BUCKETS)
@@ -795,6 +864,11 @@ class sparse_hashtable {
         table(0, ht.get_allocator()) {
     settings.reset_thresholds(bucket_count());
     move_from(mover, ht, min_buckets_wanted);  // ignores deleted entries
+#ifdef HASH_STAT
+          hits = ht.hits;
+          misses = ht.misses;
+          bounces = ht.bounces;
+#endif // HASH_STAT
   }
 
   sparse_hashtable& operator= (const sparse_hashtable& ht) {
@@ -805,6 +879,11 @@ class sparse_hashtable {
     // copy_from() calls clear and sets num_deleted to 0 too
     copy_from(ht, HT_MIN_BUCKETS);
     // we purposefully don't copy the allocator, which may not be copyable
+#ifdef HASH_STAT
+    hits = ht.hits;
+    misses = ht.misses;
+    bounces = ht.bounces;
+#endif // HASH_STAT
     return *this;
   }
 
@@ -817,6 +896,11 @@ class sparse_hashtable {
     settings.reset_thresholds(bucket_count());  // also resets consider_shrink
     ht.settings.reset_thresholds(ht.bucket_count());
     // we purposefully don't swap the allocator, which may not be swap-able
+#ifdef HASH_STAT
+    std::swap(hits, ht.hits);
+    std::swap(misses, ht.misses);
+    std::swap(bounces, ht.bounces);
+#endif
   }
 
   // It's always nice to be able to clear a table without deallocating it
@@ -840,10 +924,11 @@ class sparse_hashtable {
     const size_type bucket_count_minus_one = bucket_count() - 1;
     size_type bucknum = hash(key) & bucket_count_minus_one;
     size_type insert_pos = ILLEGAL_BUCKET; // where we would insert
-    SPARSEHASH_STAT_UPDATE(total_lookups += 1);
+    //SPARSEHASH_STAT_UPDATE(total_lookups += 1);
     while ( 1 ) {                          // probe until something happens
       if ( !table.test(bucknum) ) {        // bucket is empty
-        SPARSEHASH_STAT_UPDATE(total_probes += num_probes);
+        SPARSEHASH_STAT_UPDATE(add_bounce(key, num_probes));
+        SPARSEHASH_STAT_UPDATE(add_miss(key, 1));
         if ( insert_pos == ILLEGAL_BUCKET )  // found no prior place to insert
           return std::pair<size_type,size_type>(ILLEGAL_BUCKET, bucknum);
         else
@@ -854,7 +939,8 @@ class sparse_hashtable {
           insert_pos = bucknum;
 
       } else if ( equals(key, get_key(table.unsafe_get(bucknum))) ) {
-        SPARSEHASH_STAT_UPDATE(total_probes += num_probes);
+        SPARSEHASH_STAT_UPDATE(add_bounce(key, num_probes));
+        SPARSEHASH_STAT_UPDATE(add_hit(key, 1));
         return std::pair<size_type,size_type>(bucknum, ILLEGAL_BUCKET);
       }
       ++num_probes;                        // we're doing another probe
