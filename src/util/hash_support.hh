@@ -28,7 +28,6 @@
 #include <string>
 
 #include "hashfunc.hh"
-#include "util/hash_burtle.hh"
 
 #define GCC_VERSION (__GNUC__ * 10000 \
                 + __GNUC_MINOR__ * 100 \
@@ -112,27 +111,22 @@ struct hash<std::pair<T1,T2> > {
 template <typename T1>
 struct hash<std::set<T1> > {
   size_t operator() (const std::set<T1> &p)const {
-    uint32_t tmp[p.size()];
-    size_t i = 0;
-    typename std::set<T1>::const_iterator it = p.begin();
-    for ( ; it != p.end() ; ++i, ++it) {
-      tmp[i] = it->hash();
-    }
-    return hashword(tmp, p.size(), 11317);
+    size_t res = 11317;
+    typename std::set<T1>::const_iterator it;
+    for ( it = p.begin() ; it != p.end() ; ++it )
+      res ^= it->hash();
+    return res;
   };
 };
 // Specialized version for std::vector<int>.
 template <>
 struct hash<const std::vector<int> > {
   size_t operator() (const std::vector<int> &p)const {
-    uint32_t tmp[p.size()];
-    size_t i = 0;
-    std::vector<int>::const_iterator it = p.begin();
-    for ( ; it != p.end() ; ++i, ++it) {
-      //tmp[i] = ddd::wang32_hash(*it);
-      tmp[i] = *it;
-    }
-    return hashword(tmp, p.size(), 2473);
+    size_t res = 2473;
+    std::vector<int>::const_iterator it;
+    for ( it = p.begin() ; it != p.end() ; ++it )
+      res ^= (ddd::wang32_hash(*it)* res);
+    return res;
   };
 };
 // could this be removed somehow ??
