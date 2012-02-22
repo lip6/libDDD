@@ -126,7 +126,12 @@ public:
 	 
   
   size_t hash() const {
-    return 8097*(var+2)^val * comp;
+    std::vector<int> tmp;
+    tmp.push_back(var);
+    tmp.push_back(val);
+    tmp.push_back(comp);
+    return d3::util::hash<std::vector<int> >()(tmp);
+    //return 8097*(var+2)^val * comp;
   }
   
   bool is_selector () const {
