@@ -195,18 +195,22 @@ void GDDD::pstats(bool)
   std::map<std::string, size_t> hits = canonical.get_hits();
   std::map<std::string, size_t> misses = canonical.get_misses();
   std::map<std::string, size_t> bounces = canonical.get_bounces();
-  std::cout << "DDD Hits :" << std::endl;
-  for (std::map<std::string, size_t>::const_iterator it = hits.begin() ; it != hits.end() ; ++it) {
-    std::cout << it->first << " : " << it->second << std::endl;
-  }
-  std::cout << std::endl << "DDD Misses :" << std::endl;
+  std::cout << std::endl << "DDD Unicity table stats :" << std::endl;
+  size_t h,m,b;
+  h = m = b =0;
   for (std::map<std::string, size_t>::const_iterator it = misses.begin() ; it != misses.end() ; ++it) {
-    std::cout << it->first << " : " << it->second << std::endl;
+    std::cout << it->first << " : ";
+    std::cout << hits[it->first] << " hits, ";
+    std::cout << misses[it->first] << " misses, ";
+    std::cout << bounces[it->first] << " bounces, ";
+    std::cout << (bounces[it->first]*100 / (hits[it->first] + misses[it->first])) << " b. per h.(%)";
+    std::cout << std::endl;
+    h += hits[it->first];
+    m += misses[it->first];
+    b += bounces[it->first];
   }
-  std::cout << std::endl << "DDD bounces" << std::endl;
-  for (std::map<std::string, size_t>::const_iterator it = bounces.begin() ; it != bounces.end() ; ++it) {
-    std::cout << it->first << " : " << it->second << std::endl;
-  }
+  std::cout << "Hits : " << h << " , Misses : "  << m << " , Bounces : " << b << std::endl;
+  std::cout << std::endl;
 #endif // HASH_STAT
 }
 
