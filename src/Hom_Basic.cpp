@@ -126,7 +126,8 @@ public:
 	 
   
   size_t hash() const {
-    return 8097*(var+2)^val * comp;
+    //return 8097*(var+2)^val * comp;
+    return ddd::wang32_hash( 8097 * (var << 16) | (val << 8) ^ (comp));
   }
   
   bool is_selector () const {
