@@ -1767,46 +1767,13 @@ GHom apply2k (const GDDD & d) {
 void GHom::pstats(bool)
 {
   std::cout << "*\nGHom Stats : size unicity table = " <<  canonical.size() << std::endl;
-#ifdef HASH_STAT
-  std::map<std::string, size_t> hits = canonical.get_hits();
-  std::map<std::string, size_t> misses = canonical.get_misses();
-  std::map<std::string, size_t> bounces = canonical.get_bounces();
-  size_t h = 0;
-  size_t m = 0;
-  size_t b = 0;
-  std::cout << std::endl << "GHom Unicity table stats :" << std::endl;
-  for (std::map<std::string, size_t>::const_iterator it = misses.begin() ; it != misses.end() ; ++it) {
-    std::cout << it->first << " : ";
-    std::cout << hits[it->first] << " hits, ";
-    std::cout << misses[it->first] << " misses, ";
-    std::cout << bounces[it->first] << " bounces, ";
-    std::cout << (bounces[it->first]*100 / (hits[it->first] + misses[it->first])) << " b. per h.(%)";
-    std::cout << std::endl;
-    h += hits[it->first];
-    m += misses[it->first];
-    b += bounces[it->first];
-  }
-  std::cout << "Hits : " << h << " , Misses : "  << m << " , Bounces : " << b << std::endl;
-  std::cout << std::endl;
   
-  h = m = b = 0;
-  hits = cache.get_hits();
-  misses = cache.get_misses();
-  bounces = cache.get_bounces();
+#ifdef HASH_STAT
+  std::cout << std::endl << "GHom Unicity table stats :" << std::endl;
+  print_hash_stats(canonical.get_hits(), canonical.get_misses(), canonical.get_bounces());
+
   std::cout << "GHom cache stats : " << std::endl;
-  for (std::map<std::string, size_t>::const_iterator it = misses.begin() ; it != misses.end() ; ++it) {
-    std::cout << it->first << " : ";
-    std::cout << hits[it->first] << " hits, ";
-    std::cout << misses[it->first] << " misses, ";
-    std::cout << bounces[it->first] << " bounces, ";
-    std::cout << (bounces[it->first]*100 / (hits[it->first] + misses[it->first])) << " b. per h.(%)";
-    std::cout << std::endl;
-    h += hits[it->first];
-    m += misses[it->first];
-    b += bounces[it->first];
-  }
-  std::cout << "Hits : " << h << " , Misses : "  << m << " , Bounces : " << b << std::endl;
-  std::cout << std::endl;
+  print_hash_stats(cache.get_hits(), cache.get_misses(), cache.get_bounces());
 #endif // HASH_STAT
   
   std::cout << "sizeof(_GHom):" << sizeof(_GHom) << std::endl; 
