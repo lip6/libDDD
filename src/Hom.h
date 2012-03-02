@@ -95,6 +95,14 @@ private:
   /// (h - d1) (d2) = h(d2) - d1
   /// Where h is a homomorphism and d1, d2 are DDD.
   friend GHom operator-(const GHom &,const GDDD &); 
+  
+#ifdef HASH_STAT
+  // open access to instrumented hashtable
+  template <class Value, class Key, class HashFcn,
+  class ExtractKey, class SetKey, class EqualKey, class Alloc>
+  friend class google::sparse_hashtable;
+#endif
+  
   /// The real implementation class. All true operations are delagated on this pointer.
   /// Construction/destruction take care of ensuring concret is only instantiated once in memory.  
   const _GHom* concret;
