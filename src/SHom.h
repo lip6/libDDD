@@ -76,7 +76,14 @@ private:
   friend GShom operator^(const GShom &,const GSDD &); 
   friend GShom operator-(const GShom &,const GSDD &);
   //@}
-
+  
+#ifdef HASH_STAT
+  // open access to instrumented hashtable
+  template <class Value, class Key, class HashFcn,
+  class ExtractKey, class SetKey, class EqualKey, class Alloc>
+  friend class google::sparse_hashtable;
+#endif
+  
   /// Pointer to the data instance in the unicity table.
   const _GShom* concret;
 public:
