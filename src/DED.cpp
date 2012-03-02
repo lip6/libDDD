@@ -560,25 +560,8 @@ void DED::pstats(bool reinit)
   std::cout << "\nCache hit ratio : " << double (Hits*100) / double(Misses+1+Hits) << "%" << std::endl;
   
 #ifdef HASH_STAT
-  std::map<std::string, size_t> hits = cache.get_hits();
-  std::map<std::string, size_t> misses = cache.get_misses();
-  std::map<std::string, size_t> bounces = cache.get_bounces();
   std::cout << std::endl << "DED Unicity table stats :" << std::endl;
-  size_t h,m,b;
-  h = m = b =0;
-  for (std::map<std::string, size_t>::const_iterator it = misses.begin() ; it != misses.end() ; ++it) {
-    std::cout << it->first << " : ";
-    std::cout << hits[it->first] << " hits, ";
-    std::cout << misses[it->first] << " misses, ";
-    std::cout << bounces[it->first] << " bounces, ";
-    std::cout << (bounces[it->first]*100 / (hits[it->first] + misses[it->first])) << " b. per h.(%)";
-    std::cout << std::endl;
-    h += hits[it->first];
-    m += misses[it->first];
-    b += bounces[it->first];
-  }
-  std::cout << "Hits : " << h << " , Misses : "  << m << " , Bounces : " << b << std::endl;
-  std::cout << std::endl;
+  print_hash_stats(cache.get_hits(), cache.get_misses(), cache.get_bounces());
 #endif // HASH_STAT
   // long hitr=(Hits*100) / (Misses+1+Hits) ;
   if (reinit){

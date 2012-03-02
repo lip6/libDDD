@@ -192,25 +192,8 @@ void GDDD::pstats(bool)
   std::cout << "sizeof(_GDDD):" << sizeof(_GDDD) << std::endl;
   
 #ifdef HASH_STAT
-  std::map<std::string, size_t> hits = canonical.get_hits();
-  std::map<std::string, size_t> misses = canonical.get_misses();
-  std::map<std::string, size_t> bounces = canonical.get_bounces();
   std::cout << std::endl << "DDD Unicity table stats :" << std::endl;
-  size_t h,m,b;
-  h = m = b =0;
-  for (std::map<std::string, size_t>::const_iterator it = misses.begin() ; it != misses.end() ; ++it) {
-    std::cout << it->first << " : ";
-    std::cout << hits[it->first] << " hits, ";
-    std::cout << misses[it->first] << " misses, ";
-    std::cout << bounces[it->first] << " bounces, ";
-    std::cout << (bounces[it->first]*100 / (hits[it->first] + misses[it->first])) << " b. per h.(%)";
-    std::cout << std::endl;
-    h += hits[it->first];
-    m += misses[it->first];
-    b += bounces[it->first];
-  }
-  std::cout << "Hits : " << h << " , Misses : "  << m << " , Bounces : " << b << std::endl;
-  std::cout << std::endl;
+  print_hash_stats(canonical.get_hits(), canonical.get_misses(), canonical.get_bounces());
 #endif // HASH_STAT
 }
 
