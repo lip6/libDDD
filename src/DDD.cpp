@@ -121,7 +121,7 @@ public :
   }
   
   size_t hash () const {
-    size_t res=(size_t) variable;
+    size_t res=ddd::wang32_hash(variable);
     for(GDDD::const_iterator vi=valuation.begin();vi!=valuation.end();++vi)
       res+=(size_t)(vi->first+1011)* vi->second.hash();
     return res;
