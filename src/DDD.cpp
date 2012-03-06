@@ -652,6 +652,32 @@ void loadDDD(std::istream& is, std::vector<DDD>& list) {
     
 }
 
+#ifdef HASH_STAT
+// a function that prints statistics about caches
+void
+print_hash_stats(std::map<std::string, size_t> hits, 
+                 std::map<std::string, size_t> misses,
+                 std::map<std::string, size_t> bounces)
+{
+  size_t h,m,b;
+  h = m = b =0;
+  for (std::map<std::string, size_t>::const_iterator it = misses.begin() ; it != misses.end() ; ++it) {
+    std::cout << it->first << " : ";
+    std::cout << hits[it->first] << " hits, ";
+    std::cout << misses[it->first] << " misses, ";
+    std::cout << bounces[it->first] << " bounces, ";
+    std::cout << "hit ratio " << (hits[it->first]*100 / (hits[it->first] + misses[it->first] + 1)) << " %, ";
+    std::cout << (bounces[it->first]*100 / (hits[it->first] + misses[it->first] + 1)) << " b. per h.(%)";
+    std::cout << std::endl;
+    h += hits[it->first];
+    m += misses[it->first];
+    b += bounces[it->first];
+  }
+  std::cout << "Hits : " << h << " , Misses : "  << m << " , Bounces : " << b << std::endl;
+  std::cout << std::endl;
+}
+#endif // HASH_STAT
+
 
 #include "MemoryManager.h"
 
