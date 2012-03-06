@@ -123,7 +123,7 @@ public:
       T * clone = unique::clone<T>() (_g);
       std::pair<typename Table::iterator, bool> ref=table.insert(clone); 
       assert(ref.second);
-           
+      ((void)ref);   
       return clone;
     }
   }
