@@ -348,6 +348,16 @@ namespace std {
 #define DISTANCE -3
 #endif
 
+#ifdef HASH_STAT
+// a function that prints statistics about caches
+// for lack of a better okace to put it
+#include <map>
+
+void
+print_hash_stats(std::map<std::string, size_t> hits, 
+                 std::map<std::string, size_t> misses,
+                 std::map<std::string, size_t> bounces);
+#endif // HASH_STAT
 
 #endif
 
