@@ -24,6 +24,7 @@
 #include <iostream>
 #include <cassert>
 #include <map>
+#include <algorithm>
 #include "util/set.hh"
 
 
