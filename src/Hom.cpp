@@ -36,6 +36,7 @@
 #include "util/hash_support.hh"
 #include "util/configuration.hh"
 #include "Cache.hh"
+#include "MemoryManager.h"
 
 namespace d3 { namespace util {
   template<>
@@ -1139,15 +1140,16 @@ class Fixpoint
 
 private:
     GHom arg;
-
+    bool can_garbage;
 public:
 
     /* Constructor */
 
-    Fixpoint(const GHom &a,int ref=0)
+    Fixpoint(const GHom &a,int ref=0,bool is_top_level=false)
     	:
         _GHom(ref,false),
-        arg(a)
+        arg(a),
+        can_garbage(is_top_level)
     {
     }
 
@@ -1236,6 +1238,24 @@ public:
                         for (std::set<GHom>::const_iterator it = partition.second.begin() ; it != partition.second.end() ; ++it ) {
 			  d2 = (*it) (d2) + d2;
 			}
+                      if (can_garbage) {
+                        //		trace << "could trigger 2!!" << std::endl ;
+                        if (MemoryManager::should_garbage()) {
+                          //		  trace << "triggered !!" << std::endl ;
+                          // ensure d1 and d2 and argument are preserved
+                          d1.mark();
+                          d2.mark();
+                          //arg.mark();
+                          F_part.mark();
+                          for (std::set<GHom>::const_iterator it = partition.second.begin() ; it != partition.second.end() ; ++it ) {
+                            it->mark();
+                          }
+                          Hom tt = Hom(this);
+                          //std::cerr << "garbage saturation" << std::endl;
+                          MemoryManager::garbage();
+                        }
+                      }
+                      
                     }
                     while (d1 != d2);
                     return d1;
@@ -1246,6 +1266,19 @@ public:
             {
                 d1 = d2;
                 d2 = arg(d2);
+              if (can_garbage) {
+                //		trace << "could trigger 2!!" << std::endl ;
+                if (MemoryManager::should_garbage()) {
+                  //		  trace << "triggered !!" << std::endl ;
+                  // ensure d1 and d2 and argument are preserved
+                  d1.mark();
+                  d2.mark();
+                  arg.mark();
+                  Hom tt = Hom(this);
+                  //std::cerr << "garbage" << std::endl;
+                  MemoryManager::garbage();
+                }
+              }
             } 
             while (d1 != d2);
 
@@ -1612,12 +1645,12 @@ bool GHom::is_selector() const {
 
 
 /* Operations */
-GHom fixpoint (const GHom &h) {
+GHom fixpoint (const GHom &h, bool is_top_level) {
 	if( typeid( *_GHom::get_concret(h) ) == typeid(Fixpoint)
 	   || h == GHom::id  || h.is_selector() || h == GHom(GDDD::null))
 		return h;
 	
-    return Fixpoint(h);
+    return Fixpoint(h, 0, is_top_level);
 }
 
 

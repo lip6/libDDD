@@ -61,7 +61,7 @@ private:
   /// This operator applies its argument to a node until a fixpoint is reached.
   /// Application consists in : while ( h(d) != d ) d = h(d);
   /// Where d is a DDD and h a homomorphism.
-  friend GHom fixpoint(const GHom &);
+  friend GHom fixpoint(const GHom &, bool);
   /// This operator applies its arguments to a node until a fixpoint is reached.
   /// Similar to the fixpoint, but we suppose here that the parameters are commutative
   /// And that any application order converges to the same result
@@ -251,7 +251,7 @@ public:
 ///
 /// fixpoint ( h + GShom::id )
 ///
-GHom fixpoint(const GHom &);
+GHom fixpoint(const GHom &, bool is_top_level=false);
 /// A negation/complement constructor for **selector** homomophisms.
 /// Let cond be a selector, !cond(d) = d - cond(d)
 /// PITFALL : Raises an assert violation if is_selector() returns false !

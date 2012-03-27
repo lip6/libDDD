@@ -1866,6 +1866,23 @@ namespace sns {
 		{                           
 		  Add::partition partition = add->get_partition(variable);
 
+      if (can_garbage && partition.F == GShom::id && partition.G.empty()) {
+        Shom L_part = GShom::id;
+        if (partition.has_local) {
+          if (const LocalApply * loc = dynamic_cast<const LocalApply*> (partition.L)) {
+            // Hom/DDD case
+            GHom hh = fixpoint(GHom(loc->h), true);
+            L_part =  localApply( hh ,variable);
+          } else {	
+            GShom hh = fixpoint(GShom( ((const SLocalApply*)partition.L) ->h), true);
+            L_part =  localApply( hh ,variable);
+          }
+        }
+        d.mark();
+        Shom tt = Shom(this);
+        return L_part(d);
+      }
+      
 		  // operations that can be forwarded to the next variable
 		  GShom F_part = fixpoint(partition.F);
 
