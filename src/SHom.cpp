@@ -2754,6 +2754,16 @@ GShom fixpoint (const GShom &h, bool is_top_level) {
 	}
       }
     }
+  if (is_top_level) {
+    if (const sns::LocalApply * lapp = dynamic_cast<const sns::LocalApply *>( _GShom::get_concret(h) ) ) {
+      std::cerr << "fixpoint of localApply rewriting as localApply of fixpoint" << std::endl;
+      return localApply( fixpoint(lapp->h, true), lapp->target );
+    }
+    else if (const sns::SLocalApply * lapp = dynamic_cast<const sns::SLocalApply *>( _GShom::get_concret(h) ) ) {
+      std::cerr << "fixpoint of SlocalApply rewriting as SlocalApply of fixpoint" << std::endl;
+      return localApply( fixpoint(lapp->h, true), lapp->target );
+    }
+  }
   
   return sns::Fixpoint(h,0, is_top_level);
 }
