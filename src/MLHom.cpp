@@ -24,6 +24,7 @@
 #include "UniqueTable.h"
 #include <typeinfo>
 #include "util/set.hh"
+#include "MLCache.hh" 
 
 namespace d3 { namespace util {
   template<>
@@ -42,6 +43,9 @@ static UniqueTable<_MLHom> canonical;
 /*************************************************************************/
 
 namespace nsMLHom {
+
+  typedef MLCache< MLHom, GDDD, HomNodeMap > MLHomCache;
+  static MLHomCache mlcache;
 
 /************************** Identity */
 class Identity:public _MLHom{
@@ -222,8 +226,14 @@ MLHom::MLHom (const GHom &h):concret (canonical( GHomAdapter(h))) {}
 
 MLHom::MLHom (int var, int val, const MLHom &h):concret(canonical( LeftConcat(GDDD(var,val),h))){}
 
-HomNodeMap MLHom::operator() (const GDDD & d) const {
+HomNodeMap MLHom::eval(const GDDD &d) const  {
   return concret->eval(d);
+}
+
+HomNodeMap MLHom::operator() (const GDDD & d) const {
+//   if (d == DDD::null)
+//     return HomNodeMap::null;
+  return  nsMLHom::mlcache.insert(*this,d).second;
 }
 
 /************* Class StrongMLHom ***************/
@@ -274,6 +284,8 @@ MLHom operator+(const MLHom &h1,const MLHom &h2){
 }
 
 void MLHom::garbage(){
+  // clear operation cache
+  mlcache.clear();
   // mark phase
   for(UniqueTable<_MLHom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
     if((*di)->refCounter!=0){
