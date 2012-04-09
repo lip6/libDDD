@@ -84,7 +84,7 @@ public :
   /// The computation function responsible for evaluation over a node.
   /// Users should not directly use this. Normal behavior is to use operator()
   /// that encapsulates this call with operation caching.
-  HomNodeMap eval(const GDDD &) const ;
+    HomNodeMap eval(const GDDD &d) const ;
   /// cache calls to eval
   HomNodeMap operator() (const GDDD &) const;
 
