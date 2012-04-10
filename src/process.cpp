@@ -6,6 +6,7 @@
 #include <string>
 #include <cstdio>
 #include <cstdlib>
+#include <iostream>
 
 
 using namespace std;
@@ -53,7 +54,7 @@ MemoryUsed( void )
     // struct mallinfo info = mallinfo();
     // printf("Memory in use: %d bytes\n", info.usmblks + info.uordblks);
     // printf("Total heap size: %d bytes\n", info.arena);
-    struct mallinfo meminfo;
+    struct ::mallinfo meminfo;
     meminfo = mallinfo();
   //return meminfo.arena;
     return meminfo.usmblks + meminfo.uordblks;
@@ -66,9 +67,11 @@ MemoryUsed( void )
     mach_msg_type_number_t machCount = TASK_BASIC_INFO_COUNT;
     if ( task_info( machTask, TASK_BASIC_INFO, reinterpret_cast<task_info_t>(&machInfo), &machCount ) == KERN_SUCCESS )
         return machInfo.resident_size;
-    else
+    else {
+		std::cerr << "Detected Apple OS to obtain process memory usage, but call to kernel failed. Will report 0." << std::endl;
         return 0;  // error
-
+    }
+		
 #elif OS_FREEBSD
 
     // getrusage() doesn't work right on FreeBSD and anyway it has
@@ -83,10 +86,12 @@ MemoryUsed( void )
         if ( (kp != NULL) and (procCount >= 1) )    // in case multiple threads have the same PID
             return kp->ki_rssize * getpagesize();   // success
     }
+	std::cerr << "Detected FreeBSD OS to obtain process memory usage, but call to kernel failed. Will report 0." << std::endl;
+
     return 0;  // failed
 
 #else
-
+	std::cerr << "Unsupported OS to obtain process memory usage. Will report 0." << std::endl;
     return 0;  // unsupported
 
 #endif
@@ -96,9 +101,14 @@ MemoryUsed( void )
 
 /** in kiloBytes */
 size_t getResidentMemory() {
-
-  return MemoryUsed() / 1000;	
-
+  static bool memAvailable = true;
+  if (memAvailable) {
+	unsigned long val = MemoryUsed();
+	if (val == 0) 
+		memAvailable = false;
+	return val / 1000;	
+  } 
+  return 0;
  }
 
 
