@@ -1,85 +1,104 @@
 #include "process.hpp"
 
-// for times
-#include <sys/times.h>
-// for sysconf
-#include <unistd.h>
+// for clock
+#include <time.h>
 
 #include <string>
 #include <cstdio>
 #include <cstdlib>
 
-#if defined(LINUX) || defined(linux) || defined(__CYGWIN__) || defined(cygwin) || defined(WIN32)
-#define USE_PROC_MEM
-#endif
 
 using namespace std;
 
 namespace process {
 
-#ifdef USE_PROC_MEM 
-  static size_t page_mult_ = 0;
-  static size_t page_mult () {
-    if (! page_mult_) {
-      size_t page_size = sysconf(_SC_PAGESIZE);
-      page_mult_ = page_size / 1024;
-    }
-    return page_mult_;
-  }
-#endif
 
 double getTotalTime() {
-    struct tms tbuff;
-    double m;
-    times(&tbuff);
-    m= ((double)tbuff.tms_utime+(double)tbuff.tms_stime ) / ((double) sysconf(_SC_CLK_TCK));
-    return m;
+	clock_t val = clock();
+	return val / CLOCKS_PER_SEC;
+
 }
 
 
-size_t getResidentMemory() {
-  static bool is_available = true;
-  if (! is_available) {
-    return 0;
-  }
-#ifdef USE_PROC_MEM
-  {
-    size_t total_size, rss_size;
+/** Credits to http://www.jimbrooks.org/web/c++/system_specific.php#MemoryUsed 
+ * for this portable version of getMemUsage */
 
-    FILE* file = fopen("/proc/self/statm", "r");
-    if (!file)
-      return -1;
-    int res = fscanf(file, "%zu %zu", &total_size, &rss_size);
-    (void) fclose(file);
-    if (res != 2)
-      return 0;
-    return rss_size * page_mult();
-  }
-#else
-  /// i.e. mostly MacOS target
-  size_t m;
-  char cmd [255];
-  const char * tmpff = "ps-run";
-  
-  sprintf (cmd,"ps o rss %d > %s",getpid(),tmpff);
-  int ret = ::system (cmd);
-  FILE* fd ;
-  if (ret || ((fd = fopen(tmpff,"r")) == NULL)) {
-    if (ret) {
-      perror("Execution of ps command failed.\n"); 
-      fprintf(stderr,"When attempting to system execute : %s \n",cmd);
-    } else {
-      perror(" Error opening temporary file to sample resident shared size.");
-    }
-    fprintf(stderr," Will report 0 as resident memory \nThis is a known limitation on cygwin. Please report this to ddd@lip6.fr if you have another os.");
-    is_available = false;
-    return 0;
-  }
-
-  fscanf(fd,"%s\n%zu",cmd,&m);
-  unlink(tmpff);    
-  return m;
+#if OS_APPLE
+#   include <mach/mach_init.h>
+#   include <mach/task.h>
+#elif OS_UNIX
+#   include <sstream>
+#   include <sys/time.h>
+#   include <time.h>
+#   if __GLIBC__  // GNU Linux
+#       include <malloc.h>
+#   elif OS_FREEBSD
+#       include <sys/file.h>
+#       include <sys/sysctl.h>
+#       include <sys/user.h>
+#       include <kvm.h>
+#   endif
 #endif
+
+/*****************************************************************************
+ * Return total amount of bytes allocated.
+ *****************************************************************************/
+unsigned long
+MemoryUsed( void )
+{
+#if __GLIBC__  // GNU Linux
+
+    // Per delorie.com:
+    // Example:
+    // struct mallinfo info = mallinfo();
+    // printf("Memory in use: %d bytes\n", info.usmblks + info.uordblks);
+    // printf("Total heap size: %d bytes\n", info.arena);
+    struct mallinfo meminfo;
+    meminfo = mallinfo();
+  //return meminfo.arena;
+    return meminfo.usmblks + meminfo.uordblks;
+
+#elif OS_APPLE
+
+    // Use Mach functions.
+    task_basic_info        machInfo  = { 0 };
+    mach_port_t            machTask  = mach_task_self();
+    mach_msg_type_number_t machCount = TASK_BASIC_INFO_COUNT;
+    if ( task_info( machTask, TASK_BASIC_INFO, reinterpret_cast<task_info_t>(&machInfo), &machCount ) == KERN_SUCCESS )
+        return machInfo.resident_size;
+    else
+        return 0;  // error
+
+#elif OS_FREEBSD
+
+    // getrusage() doesn't work right on FreeBSD and anyway it has
+    // a horrible convoluted interface for measuring memory.
+    // kvm is reliable but does require linking with the kvm library.
+    PERSISTENT kvm_t* kd = kvm_open( NULL, "/dev/null", NULL, O_RDONLY, "kvm_open" );  // open once
+    if ( kd != NULL )
+    {
+        // Use FreeBSD kvm function to get the size of resident pages (RSS).
+        int procCount = 0;
+        struct kinfo_proc* kp = kvm_getprocs( kd, KERN_PROC_PID, getpid(), &procCount );  // do not free returned struct
+        if ( (kp != NULL) and (procCount >= 1) )    // in case multiple threads have the same PID
+            return kp->ki_rssize * getpagesize();   // success
+    }
+    return 0;  // failed
+
+#else
+
+    return 0;  // unsupported
+
+#endif
+}
+
+
+
+/** in kiloBytes */
+size_t getResidentMemory() {
+
+  return MemoryUsed() / 1000;	
+
  }
 
 
