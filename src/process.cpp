@@ -8,38 +8,48 @@
 #include <cstdlib>
 #include <iostream>
 
+#if defined(LINUX) || defined(linux) || defined(__CYGWIN__) || defined(cygwin)
+#define USE_PROC_MEM 1
+#elif defined(WIN32) && defined (__GLIBC__)
+#define USE_MALLINFO 1 
+#else 
+#define OS_APPLE 1
+#endif
+ 
+#if OS_APPLE // use mach function
+#   include <mach/mach_init.h>
+#   include <mach/task.h>
+#elif USE_PROC_MEM
+#   include <unistd.h>
+#elif USE_MALLINFO
+#   include <malloc.h> 
+#endif
+
+
 
 using namespace std;
 
 namespace process {
 
 
+#ifdef USE_PROC_MEM 
+  static size_t page_mult_ = 0;
+  static size_t page_mult () {
+    if (! page_mult_) {
+      size_t page_size = sysconf(_SC_PAGESIZE);
+      page_mult_ = page_size / 1024;
+    }
+    return page_mult_;
+  }
+#endif
+
+
 double getTotalTime() {
-	clock_t val = clock();
-	return val / CLOCKS_PER_SEC;
+  double val = clock();
+  return (val*1000.0 / CLOCKS_PER_SEC) / 1000;
 
 }
 
-
-/** Credits to http://www.jimbrooks.org/web/c++/system_specific.php#MemoryUsed 
- * for this portable version of getMemUsage */
-
-#if OS_APPLE
-#   include <mach/mach_init.h>
-#   include <mach/task.h>
-#elif OS_UNIX
-#   include <sstream>
-#   include <sys/time.h>
-#   include <time.h>
-#   if __GLIBC__  // GNU Linux
-#       include <malloc.h>
-#   elif OS_FREEBSD
-#       include <sys/file.h>
-#       include <sys/sysctl.h>
-#       include <sys/user.h>
-#       include <kvm.h>
-#   endif
-#endif
 
 /*****************************************************************************
  * Return total amount of bytes allocated.
@@ -47,17 +57,29 @@ double getTotalTime() {
 unsigned long
 MemoryUsed( void )
 {
-#if __GLIBC__  // GNU Linux
+#ifdef USE_PROC_MEM
+  {
+    size_t total_size, rss_size;
+
+    FILE* file = fopen("/proc/self/statm", "r");
+    if (!file)
+      return 0;
+    int res = fscanf(file, "%zu %zu", &total_size, &rss_size);
+    (void) fclose(file);
+    if (res != 2)
+      return 0;
+    return rss_size * page_mult();
+  }
+#elif USE_MALLINFO
 
     // Per delorie.com:
     // Example:
     // struct mallinfo info = mallinfo();
     // printf("Memory in use: %d bytes\n", info.usmblks + info.uordblks);
     // printf("Total heap size: %d bytes\n", info.arena);
-    struct ::mallinfo meminfo;
+    struct mallinfo meminfo;
     meminfo = mallinfo();
-  //return meminfo.arena;
-    return meminfo.usmblks + meminfo.uordblks;
+    return meminfo.usmblks;
 
 #elif OS_APPLE
 
@@ -71,27 +93,9 @@ MemoryUsed( void )
 		std::cerr << "Detected Apple OS to obtain process memory usage, but call to kernel failed. Will report 0." << std::endl;
         return 0;  // error
     }
-		
-#elif OS_FREEBSD
-
-    // getrusage() doesn't work right on FreeBSD and anyway it has
-    // a horrible convoluted interface for measuring memory.
-    // kvm is reliable but does require linking with the kvm library.
-    PERSISTENT kvm_t* kd = kvm_open( NULL, "/dev/null", NULL, O_RDONLY, "kvm_open" );  // open once
-    if ( kd != NULL )
-    {
-        // Use FreeBSD kvm function to get the size of resident pages (RSS).
-        int procCount = 0;
-        struct kinfo_proc* kp = kvm_getprocs( kd, KERN_PROC_PID, getpid(), &procCount );  // do not free returned struct
-        if ( (kp != NULL) and (procCount >= 1) )    // in case multiple threads have the same PID
-            return kp->ki_rssize * getpagesize();   // success
-    }
-	std::cerr << "Detected FreeBSD OS to obtain process memory usage, but call to kernel failed. Will report 0." << std::endl;
-
-    return 0;  // failed
 
 #else
-	std::cerr << "Unsupported OS to obtain process memory usage. Will report 0." << std::endl;
+    std::cerr << "Unsupported OS to obtain process memory usage. Will report 0." << std::endl;
     return 0;  // unsupported
 
 #endif
@@ -99,14 +103,14 @@ MemoryUsed( void )
 
 
 
-/** in kiloBytes */
+/** in Bytes */
 size_t getResidentMemory() {
   static bool memAvailable = true;
   if (memAvailable) {
 	unsigned long val = MemoryUsed();
 	if (val == 0) 
 		memAvailable = false;
-	return val / 1000;	
+	return val ;	
   } 
   return 0;
  }
