@@ -10,8 +10,10 @@
 
 #if defined(LINUX) || defined(linux) || defined(__CYGWIN__) || defined(cygwin)
 #define USE_PROC_MEM 1
-#elif defined(WIN32) && defined (__GLIBC__)
+#elif defined (__GLIBC__)
 #define USE_MALLINFO 1 
+#elif defined (__MINGW32__) || defined (__MINGW64 )
+#define USE_WIN32_API 1
 #else 
 #define OS_APPLE 1
 #endif
@@ -23,6 +25,9 @@
 #   include <unistd.h>
 #elif USE_MALLINFO
 #   include <malloc.h> 
+#elif USE_WIN32_API
+#include "windows.h"     
+#include "psapi.h" 
 #endif
 
 
@@ -93,7 +98,12 @@ MemoryUsed( void )
 		std::cerr << "Detected Apple OS to obtain process memory usage, but call to kernel failed. Will report 0." << std::endl;
         return 0;  // error
     }
-
+#elif USE_WIN32_API
+	PROCESS_MEMORY_COUNTERS	pmc;     
+	GetProcessMemoryInfo(GetCurrentProcess(), &pmc, sizeof(pmc));     
+	SIZE_T physMemUsedByMe = pmc.WorkingSetSize; 
+	
+	return physMemUsedByMe / 1024 ;
 #else
     std::cerr << "Unsupported OS to obtain process memory usage. Will report 0." << std::endl;
     return 0;  // unsupported
