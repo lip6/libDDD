@@ -23,6 +23,7 @@ test -z "$CXXFLAGS" && CXXFLAGS=
 
 AC_CHECK_LIB(tcmalloc, malloc, ,AC_MSG_WARN(google perftool not detected : not using tcmalloc))
 
+
 #compile in C++
 AC_PROG_CXX
 AC_LANG(C++)
@@ -58,6 +59,22 @@ AC_ARG_ENABLE(	[stdhash],
 if test "x$stdhash" = "xtrue"; then
     AC_DEFINE([USE_STD_HASH],1,[Define if you want to use std hash instead of google sparse hash.])
 fi
+
+# Option to enable hash stats
+AC_ARG_ENABLE([mingw-native],
+				[AC_HELP_STRING([--enable-mingw-native],[build native win32 binaries for redistribution])],
+				[ case "${enable_mingw_native}" in
+					 yes) CXXFLAGS="-DPSAPI_VERSION=1  $CXXFLAGS"
+					 LDFLAGS="-all-static $LDFLAGS"
+					 LIBS="-lPSAPI $LIBS"
+					 ;;
+					 no)
+					 ;;
+					 *) AC_MSG_ERROR(Bad value ${enableval})
+					 ;;
+				esac])
+
+
 
 # Option to enable hash stats
 AC_ARG_ENABLE([hash-stat],
