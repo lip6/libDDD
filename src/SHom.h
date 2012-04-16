@@ -136,6 +136,8 @@ public:
 
   /// returns true if and only if h(d) != SDD::null
   bool has_image (const GSDD & d) const;
+  
+  GShom compose(const GShom &) const;
 
   /// \name Comparisons between GShom.
   /// Comparisons between GShom for unicity table. Both equality comparison and
@@ -451,6 +453,8 @@ public:
   }
 
 
+  virtual GShom compose(const GShom &) const;
+  
   /// The computation function responsible for evaluation over a node.
   /// Users should not directly use this. Normal behavior is to use GShom::operator()
   /// that encapsulates this call with operation caching.
