@@ -2407,6 +2407,26 @@ _GShom::eval_skip(const GSDD& d) const
   return eval(d);
 }
 
+GShom
+_GShom::compose (const GShom &r) const
+{
+  //return GHom(this) & r; 
+  
+  // Note: code duplicated unfortunately
+  GShom nullHom = GSDD::null;
+  GShom thisH (this);
+  if (thisH == nullHom || r == nullHom)
+    return nullHom;
+  
+  if( thisH == GShom::id )
+    return r;
+  
+  if( r == GShom::id )
+    return thisH;
+  
+  return sns::Compose(thisH, r);
+}
+
 /*************************************************************************/
 /*                         Class StrongShom                               */
 /*************************************************************************/
@@ -2517,7 +2537,9 @@ GShom GShom::invert (const GSDD & pot) const {
   return concret->invert(pot);
 }
 
-
+GShom GShom::compose(const GShom &o) const {
+  return concret->compose(o);
+}
 
 int GShom::refCounter() const{return concret->refCounter();}
 
@@ -3003,6 +3025,10 @@ GShom operator&(const GShom &h1,const GShom &h2){
 
 //  return sns::Compose(h1,h2);
 
+  GShom h = h1.compose(h2);
+  if (typeid(*_GShom::get_concret(h)) != typeid(sns::Compose)) {
+    return h;
+  }
   // Test commutativity of h1 and h2
   sns::And::parameters_t args;
   addCompositionParameter (h1, args);
