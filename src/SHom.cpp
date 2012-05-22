@@ -3167,6 +3167,13 @@ void GShom::pstats(bool)
   std::cout << "sizeof(_GShom):" << sizeof(_GShom) << std::endl; 
   std::cout << "sizeof(SIdentity):" << sizeof(sns::Identity) << std::endl; 
  
+#ifdef HASH_STAT
+  std::cout << std::endl << "GShom Unicity table stats :" << std::endl;
+  print_hash_stats(canonical.get_hits(), canonical.get_misses(), canonical.get_bounces());
+  
+  std::cout << "GShom cache stats : " << std::endl;
+  print_hash_stats(sns::cache.get_hits(), sns::cache.get_misses(), sns::cache.get_bounces());
+#endif // HASH_STAT
   
   /*
   std::ostream & os = std::cout;
