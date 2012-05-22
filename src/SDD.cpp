@@ -283,6 +283,11 @@ void GSDD::pstats(bool)
   std::cout << "Current/Peak number of SDD nodes in unicity table :" << canonical.size() << "/" << peak() << std::endl; 
 
   std::cout << "sizeof(_GSDD):" << sizeof(_GSDD) << std::endl;
+  
+#ifdef HASH_STAT
+  std::cout << std::endl << "SDD Unicity table stats :" << std::endl;
+  print_hash_stats(canonical.get_hits(), canonical.get_misses(), canonical.get_bounces());
+#endif // HASH_STAT
 }
 
 
