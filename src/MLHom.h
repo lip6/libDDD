@@ -45,6 +45,13 @@ class MLHom {
   /// Construction/destruction take care of ensuring concret is only instantiated once in memory.  
   const _MLHom* concret;
 
+#ifdef HASH_STAT
+  // open access to instrumented hashtable
+  template <class Value, class Key, class HashFcn,
+  class ExtractKey, class SetKey, class EqualKey, class Alloc>
+  friend class google::sparse_hashtable;
+#endif
+  
 public :
 
   /// Elementary homomorphism Identity, defined as a constant.
