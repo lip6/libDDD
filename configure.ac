@@ -6,6 +6,9 @@ AM_INIT_AUTOMAKE(-Wall)
 
 # programs used to build
 # we make static libs (use ranlib)
+if test GET_AUTOMAKE_VERSION >= 1.12; then
+	AM_PROG_AR
+fi
 LT_INIT([disable-shared])
 
 # M4 macros location
