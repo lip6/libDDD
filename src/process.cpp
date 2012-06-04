@@ -93,7 +93,8 @@ MemoryUsed( void )
     mach_port_t            machTask  = mach_task_self();
     mach_msg_type_number_t machCount = TASK_BASIC_INFO_COUNT;
     if ( task_info( machTask, TASK_BASIC_INFO, reinterpret_cast<task_info_t>(&machInfo), &machCount ) == KERN_SUCCESS )
-        return machInfo.resident_size;
+      // Return value is in bytes
+      return ((double)  machInfo.resident_size) / 1000;
     else {
 		std::cerr << "Detected Apple OS to obtain process memory usage, but call to kernel failed. Will report 0." << std::endl;
         return 0;  // error
