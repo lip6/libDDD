@@ -318,6 +318,59 @@ public:
   
 };
 
+class Inter:public _GHom{
+private:
+  GHom left;
+  GHom right;
+public:
+  /* Constructor */
+  Inter(const GHom &l,const GHom &r,int ref=0):_GHom(ref),left(l),right(r){}
+  /* Compare */
+  bool operator==(const _GHom &h) const{
+    return left==((Inter*)&h )->left && right==((Inter*)&h )->right;
+  }
+  size_t hash() const{
+    return 83*left.hash()+ 153*right.hash();
+  }
+  
+  _GHom * clone () const {  return new Inter(*this); }
+  /* Eval */
+  GDDD eval(const GDDD &d)const{
+    return left(d) * right(d);
+  }
+  
+  GHom invert (const GDDD & pot) const { 
+    // (h * h')^-1 (s) =( h^-1 ( pot ) +  h^-1 (pot) ) (s) 
+    return (left.invert(pot) + right.invert(pot)) ;
+  }
+  
+  bool is_selector () const {
+    // intersection is always a selector
+    // indeed, either left or right is a selector
+    // (h * sel)(d) = h(d) * sel(d) \subset sel(d) \subset d
+    return true;
+  }
+  
+  bool
+  skip_variable(int var) const 
+  {
+    return get_concret(left)->skip_variable(var)
+    && get_concret(right)->skip_variable(var);
+  }
+  
+  
+  /* Memory Manager */
+  void mark() const{
+    left.mark();
+    right.mark();
+  }
+  
+  void print (std::ostream & os) const {
+    os << "(Inter:" << left << "*" << right << ")";
+  }
+  
+};
+
 // negator for a selector
 
 class NotCond
@@ -1772,6 +1825,21 @@ GHom operator*(const GDDD &d,const GHom &h){
 
 GHom operator*(const GHom &h,const GDDD &d){
   return Mult(h,d);
+}
+
+GHom operator*(const GHom & h,const GHom & cond) {
+  if (! cond.is_selector() ) {
+    std::cerr << "Creating a * intersection between homomorphisms, but second argument is not a selector. " << std::endl;
+    //printCondError(cond);
+    assert(false);
+  }
+  if ( h == GDDD::null || cond == GDDD::null )
+    return GDDD::null;
+  
+  // trivial case
+  if ( h == cond )
+    return h;
+  return Inter(h,cond);
 }
 
 GHom operator^(const GDDD &d,const GHom &h){
