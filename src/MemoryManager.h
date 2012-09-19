@@ -35,12 +35,24 @@
 
 #include "process.hpp"
 
+
+class GCHook {
+ public:
+  virtual void preGarbageCollect() =0;
+  virtual void postGarbageCollect() = 0;
+
+};
+
 /// This class defines a few utility functions common to DDD.
 /// Note that all functions are declared static, so this is more of a namespace than a class.
 /// One important function is garbage(), only this MemoryManager::garbage() should be caled :
 /// avoid GHom::garbage(), DED::garbage(), GDDD::garbage() (and SDD versions of the same,
 /// they should not be called directly.
 class MemoryManager{
+  typedef std::vector<GCHook*> hooks_t;
+  typedef hooks_t::iterator hooks_it;
+  // actually defined in DDD.cpp, bottom of file.
+  static hooks_t hooks_;
 public:
   /* Mesure*/
   /// Returns the size of the unicity table for DDD.
@@ -84,6 +96,10 @@ public:
   /// Call this to reclaim intermediate nodes, unused operations and related cache.
   /// Note that this function is quite costly, and it totally destroys the cache
   static void garbage(){
+    for (hooks_it it = hooks_.begin(); it != hooks_.end() ; ++it) {
+      (*it)->preGarbageCollect();
+    }
+
     MLHom::garbage();
     // FIXME : if you dont use SDD suppress the following
     SDED::garbage();
@@ -95,6 +111,10 @@ public:
     DED::garbage();
     GHom::garbage();
     GDDD::garbage();
+
+    for (hooks_it it = hooks_.begin(); it != hooks_.end() ; ++it) {
+      (*it)->postGarbageCollect();
+    }
   };
 
   /// Prints some statistics about use of unicity tables, also reinitializes peak sizes.
@@ -120,9 +140,15 @@ public:
     should_garbage();
     return last_mem;
   }
+
+  static void addHook (GCHook * hook) {
+    hooks_.push_back(hook);
+  }
+
  private :
   // actually defined in DDD.cpp, bottom of file.
   static size_t last_mem;
+
 
 };
 #endif

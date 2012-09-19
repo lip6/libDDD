@@ -683,5 +683,7 @@ print_hash_stats(std::map<std::string, size_t> hits,
 
 // for lack of a better place to put it...
 size_t MemoryManager::last_mem = 1300000;
+// for lack of a better place to put it...
+MemoryManager::hooks_t MemoryManager::hooks_ = MemoryManager::hooks_t();
 
 
