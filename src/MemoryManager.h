@@ -38,6 +38,7 @@
 
 class GCHook {
  public:
+  virtual ~GCHook() {}
   virtual void preGarbageCollect() =0;
   virtual void postGarbageCollect() = 0;
 
