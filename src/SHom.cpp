@@ -60,7 +60,7 @@ namespace sns {
 
   extern UniqueTable<_GShom> canonical;
 
-  typedef Cache<GShom,GSDD> ShomCache;
+  typedef Cache<GShom,GSDD,GSDD> ShomCache;
 
   static ShomCache cache;
 

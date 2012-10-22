@@ -6,15 +6,16 @@
 
 template
     <
-      typename HomType
-    , typename NodeType
+      typename FuncType
+    , typename ParamType
+    , typename ResType
     >
 class Cache
 {
 private:
   mutable size_t peak_;
   
-  typedef typename  hash_map< std::pair<HomType, NodeType>, NodeType >::type 
+  typedef typename  hash_map< std::pair<FuncType, ParamType>, ResType >::type 
                     hash_map; 
   hash_map cache_;
     
@@ -39,8 +40,12 @@ public:
     return cache_.size();
   }
 
-    std::pair<bool,NodeType>
-    insert(const HomType& hom, const NodeType& node)
+  ResType eval (const  FuncType & func, const ParamType  & param) const {
+    return func.eval(param);
+  }
+
+    std::pair<bool,ResType>
+    insert(const FuncType& hom, const ParamType& node)
     {
       bool found;
       
@@ -52,7 +57,7 @@ public:
       } // end of lock on the current bucket
       
       // wasn't in cache
-      NodeType result = hom.eval(node);
+      ResType result = eval(hom, node);
       // lock on current bucket
       typename hash_map::accessor access;
       bool insertion = cache_.insert ( access, std::make_pair(hom,node));
