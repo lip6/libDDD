@@ -49,7 +49,7 @@ namespace d3 { namespace util {
 
 static UniqueTable<_GHom> canonical;
 
-typedef Cache<GHom,GDDD> HomCache;
+typedef Cache<GHom,GDDD,GDDD> HomCache;
 
 static HomCache cache;
 
