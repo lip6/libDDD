@@ -26,8 +26,8 @@
 
 #include <cassert>
 #include <vector>
-#include "util/hash_set.hh"
 #include "util/hash_support.hh"
+#include "util/hash_set.hh"
 
 
 #ifdef REENTRANT
