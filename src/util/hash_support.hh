@@ -182,6 +182,37 @@ struct equal<std::pair<T1,T2> >
     }
   };
 
+#ifdef HASH_STAT
+  template<class T>
+  struct hash_stat_get_type
+  {
+    std::string
+    operator() (const T & t) const
+    {
+      return typeid (t).name ();
+    }
+  };
+  
+  template<class T>
+  struct hash_stat_get_type<T*>
+  {
+    std::string
+    operator() (const T * t) const
+    {
+      return typeid (*t).name ();
+    }
+  };
+  
+  template<class T1, class T2>
+  struct hash_stat_get_type<std::pair<T1,T2> >
+  {
+    std::string
+    operator() (const std::pair<T1, T2> & p) const
+    {
+      return std::string ("pair ").append (hash_stat_get_type<T1> () (p.first)).append (",").append (hash_stat_get_type<T2> () (p.second));
+    }
+  };
+#endif // HASH_STAT
 
 }}
 
