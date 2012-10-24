@@ -341,60 +341,21 @@ class sparse_hashtable {
   void
   add_hit(T o, size_t i) const
   {
-    hits[typeid(o).name()] += i;
-  }
-  
-  template<class T>
-  void
-  add_hit(const T *o, size_t i) const
-  {
-    hits[typeid(*o).name()] += i;
-  }
-  
-  template<class T1, class T2>
-  void
-  add_hit(const std::pair<T1, T2> &o, size_t i) const {
-    hits[std::string("pair ").append( typeid(*o.first.concret).name() ).append(",").append( typeid(o.second).name() )] += i;
+    hits[d3::util::hash_stat_get_type<T> () (o)] += i;
   }
   
   template<class T>
   void
   add_miss(T o, size_t i) const
   {
-    misses[typeid(o).name()] += i;
-  }
-  
-  template<class T>
-  void
-  add_miss(const T *o, size_t i) const
-  {
-    misses[typeid(*o).name()] += i;
-  }
-  
-  template<class T1, class T2>
-  void
-  add_miss(const std::pair<T1, T2> &o, size_t i) const {
-    misses[std::string("pair ").append( typeid(*o.first.concret).name() ).append(",").append( typeid(o.second).name() )] += i;
+    misses[d3::util::hash_stat_get_type<T> () (o)] += i;
   }
   
   template<class T>
   void
   add_bounce(T o, size_t i) const
   {
-    bounces[typeid(o).name()] += i;
-  }
-  
-  template<class T>
-  void
-  add_bounce(const T *o, size_t i) const
-  {
-    bounces[typeid(*o).name()] += i;
-  }
-  
-  template<class T1, class T2>
-  void
-  add_bounce(const std::pair<T1, T2> &o, size_t i) const {
-    bounces[std::string("pair ").append( typeid(*o.first.concret).name() ).append(",").append( typeid(o.second).name() )] += i;
+    bounces[d3::util::hash_stat_get_type<T> () (o)] += i;
   }
 #endif // HASH_STAT
   
