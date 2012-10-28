@@ -2,8 +2,9 @@
 #define __ADDITIVEMAP_HH__
 
 #include <vector>
+#include "util/hash_support.hh"
 
-template<typename K, typename V>
+template<typename K, typename V, typename EqualKey = d3::util::equal<K> >
 class AdditiveMap {
   
   typedef std::vector<std::pair<K,V> > mapType;
@@ -23,7 +24,7 @@ public:
   iterator find (const K & key) {
     iterator res = map.begin();
     while (res != map.end()) {
-      if (res->first == key)
+      if (EqualKey () (res->first,key))
         return res;
       ++res;
     }
