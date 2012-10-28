@@ -21,6 +21,7 @@ private:
     
 public:
   Cache () : peak_ (0) {};
+  Cache (size_t s) : peak_ (0), cache_ (s) {};
     
   /** clear the cache, discarding all values. */
   void clear (bool keepstats = false) {
