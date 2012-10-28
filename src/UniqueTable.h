@@ -99,6 +99,19 @@ public:
 #endif
   }
 
+  UniqueTable(size_t s):
+#ifdef REENTRANT
+    table_mutex_(),
+#endif
+  table (s)
+  {
+#ifndef REENTRANT
+#ifndef USE_STD_HASH
+    table.set_deleted_key(NULL);
+#endif
+#endif
+  }
+
   /// Typedef helps hide implementation type (currently gnu gcc's hash_set).
     typedef typename d3::hash_set<const T*>::type  Table;
   /// The actual table, operations on the UniqueTable are delegated on this.

@@ -178,6 +178,12 @@ public:
   {
   }
 
+  ext_hash_map(size_t s)
+    :
+    map_(s)
+  {
+  }
+
   iterator
   begin()
   {
