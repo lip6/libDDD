@@ -86,8 +86,8 @@ public:
 /******************************************************************************/
 class _DED_Add:public _DED{
 private:
-  std::set<GDDD> parameters;
-  _DED_Add(const std::set<GDDD> &d):parameters(d){};
+  std::vector<GDDD> parameters;
+  _DED_Add(const std::set<GDDD> &d):parameters(d.begin(),d.end()){};
 public:
   static  _DED *create(const std::set<GDDD> &d);
   /* Compare */
@@ -105,7 +105,7 @@ public:
 /* Compare */
 size_t _DED_Add::hash() const{
   size_t res=0;
-  for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
+  for(std::vector<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
     res+= si->hash();
   }
   return res;
@@ -162,13 +162,13 @@ GDDD _DED_Add::eval() const{
     int min = -1;
     std::set<GDDD> succSet;
     // gather min
-    for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
+    for(std::vector<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
       for(GDDD::const_iterator vi=si->begin();vi!=si->end();++vi){
 	if (min == -1 || min > vi->first)
 	  min = vi->first;
       }
     }
-    for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
+    for(std::vector<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
       for(GDDD::const_iterator vi=si->begin();vi!=si->end();++vi){
 	if (vi->first == min)
 	  succSet.insert(vi->second);
@@ -194,7 +194,7 @@ GDDD _DED_Add::eval() const{
   } else {
     /// normal node canonization
 #endif  
-  for(std::set<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
+  for(std::vector<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
     for(GDDD::const_iterator vi=si->begin();vi!=si->end();++vi){
       map_set[vi->first].insert(vi->second);
     }
