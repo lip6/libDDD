@@ -52,42 +52,118 @@
 
 class _GDDD
 {
-public:
-  /* Attributs*/
-  const int variable;
-  GDDD::Valuation valuation;
+  friend class GDDD;
+  friend void saveDDD(std::ostream&, std::vector<DDD>);
 
- private :
+  /// useful typedefs
+  typedef GDDD::edge_t edge_t;
+  typedef GDDD::const_iterator const_iterator;
+
+  /// attributes
+  const int variable;
+  const size_t valuation_size;
 #ifdef REENTRANT
 	mutable tbb::atomic<unsigned long int> _refCounter;
 #else
   	mutable unsigned long int _refCounter;
 #endif
 
-public :
-  /* Constructor */
-	_GDDD(int var,int cpt=0)
-		: variable(var)
-	{
-		_refCounter = 2 * cpt;
-	//	refCounter |= marking ;
-	} 
+  /// get the address of the valuation
+  char *
+  alpha_addr () const
+  {
+    return reinterpret_cast<char *> (const_cast<_GDDD *> (this)) + sizeof (_GDDD);
+  }
 
-	_GDDD(int var,GDDD::Valuation val,int cpt=0)
-		: variable(var)
-		, valuation(val)
-	{
-		_refCounter = 2*cpt;
-		// refCounter |= false; // initially unmarked
-	}
+  /// constructor
+  _GDDD (int var, const GDDD::Valuation & val, int cpt)
+  : variable (var)
+  , valuation_size (val.size ())
+  , _refCounter (2*cpt)
+  {
+    edge_t * base = reinterpret_cast<edge_t *> (alpha_addr ());
+    size_t i = 0;
+    for (GDDD::Valuation::const_iterator it = val.begin ();
+         it != val.end (); ++it)
+    {
+      // placement new
+      new (base + i++) edge_t (*it);
+    }
+  }
 
-  /* Compare */
-  bool operator==(const _GDDD& g) const{return variable==g.variable && valuation==g.valuation;};
+  /// constructor (with iterators)
+  _GDDD (int var, const_iterator begin, const_iterator end, int cpt)
+  : variable (var)
+  , valuation_size (end-begin)
+  , _refCounter (2*cpt)
+  {
+    edge_t * base = reinterpret_cast<edge_t *> (alpha_addr ());
+    size_t i = 0;
+    while (begin != end)
+    {
+      // placement new
+      new (base + i++) edge_t (*(begin++));
+    }
+  }
 
-  /* Memory Manager */
+  /// cannot copy
+  /// these two operations are deliberately private and UNIMPLEMENTED
+  _GDDD (const _GDDD &);
+  _GDDD & operator= (const _GDDD &);
+
+  /// destructor
+  ~_GDDD ()
+  {
+    for (const_iterator it = begin ();
+         it != end (); ++it)
+    {
+      it->~edge_t ();
+    }
+  }
+public:
+  /// iterator API
+  const_iterator
+  begin () const
+  {
+    return reinterpret_cast<const_iterator> (alpha_addr ());
+  }
+
+  const_iterator
+  end () const
+  {
+    return reinterpret_cast<const_iterator> (alpha_addr ()) + valuation_size;
+  }
+
+  /// compare
+  bool
+  operator== (const _GDDD & g) const
+  {
+    if (variable != g.variable)
+      return false;
+    if (valuation_size != g.valuation_size)
+      return false;
+
+    const_iterator it = begin (), jt = g.begin ();
+    for (; it != end (); ++it, ++jt)
+    {
+      if (*it != *jt)
+        return false;
+    }
+    return true;
+  }
+
+  /// hash
+  size_t
+  hash () const
+  {
+    size_t res = ddd::wang32_hash (variable);
+    for(const_iterator vi = begin (); vi != end (); ++vi)
+      res += (size_t)(vi->first+1011) * vi->second.hash();
+    return res;
+  }
+
+  /// Memory Manager and reference counting
   void mark()const;
-
-  _GDDD * clone () const { return new _GDDD(*this); }
 
   void mark_if_refd () const {
 	if ( refCounter() ) {
@@ -119,18 +195,65 @@ public :
 		_refCounter <<= 1;		
 	}
   }
-  
-  size_t hash () const {
-    size_t res=ddd::wang32_hash(variable);
-    for(GDDD::const_iterator vi=valuation.begin();vi!=valuation.end();++vi)
-      res+=(size_t)(vi->first+1011)* vi->second.hash();
-    return res;
+
+  /// unicity table
+  static
+  UniqueTable<_GDDD> &
+  get_canonical ()
+  {
+    static UniqueTable<_GDDD> canonical = UniqueTable<_GDDD> ();
+    return canonical;
   }
 
+  /// factory operation
+  static
+  const _GDDD *
+  create_unique_GDDD (int var, const GDDD::Valuation & val, int cpt)
+  {
+    _GDDD * res = new (val.size ()) _GDDD (var, val, cpt);
+    const _GDDD * ret = get_canonical () (*res);
+    delete res;
+    return ret;
+  }
+
+  /// cloning
+  _GDDD *
+  clone () const
+  {
+    return new (valuation_size) _GDDD (variable, begin (), end (), _refCounter);
+  }
+
+private:  
+  /// custom operator new
+  /// WARNING:
+  ///     the expected arguments are not standard
+  ///         - the first one (actually sizeof(_GDDD)) is ignored
+  ///         - the second one is the number of successors
+  /// syntax: new (nb_sons) _GDDD (constructor arguments)
+  ///     it looks like a placement new, but this syntax
+  ///     is only used to pass arguments to operator new
+  /// _GDDD should only be constructed by create_unique_GDDD or clone
+  /// please refer to these two functions for invokation examples
+  static
+  void *
+  operator new (size_t, size_t length)
+  {
+    // allocate enough memory to store the successors
+    // with the global (default) operator new
+    return ::operator new (sizeof(_GDDD) + length*sizeof(edge_t));
+  }
+
+  /// custom operator delete
+  static
+  void
+  operator delete (void * addr)
+  {
+    // free the memory allocated by operator new
+    // with the global (default) operator delete
+    ::operator delete (addr);
+  }
 };
 
-
-static UniqueTable<_GDDD> canonical;
 std::map<int,std::string> mapVarName;
 
 #ifdef REENTRANT
@@ -161,7 +284,7 @@ static size_t Max_DDD = 0;
 
 /* Memory manager */
 unsigned int GDDD::statistics() {
-  return canonical.size();
+  return _GDDD::get_canonical().size();
 }
 
 // Todo
@@ -172,15 +295,15 @@ void GDDD::mark()const{
 void _GDDD::mark()const{
   if(! is_marked()){
     set_mark(true);
-    for(GDDD::Valuation::const_iterator vi=valuation.begin();vi!=valuation.end();++vi){
+    for(const_iterator vi=begin();vi!=end();++vi){
       vi->second.mark();
     }
   }
 }
 
 size_t GDDD::peak() {
-  if (canonical.size() > Max_DDD) 
-    Max_DDD=canonical.size();  
+  if (_GDDD::get_canonical().size() > Max_DDD) 
+    Max_DDD=_GDDD::get_canonical().size();  
 
   return Max_DDD;
 }
@@ -223,15 +346,14 @@ std::ostream& operator<<(std::ostream &os,const GDDD &g){
   return(os);
 }
 
-GDDD::GDDD(const _GDDD &_g):concret(canonical(_g)){}
 GDDD::GDDD(const _GDDD *_g):concret(_g){}
 
 
-GDDD::GDDD(int variable,Valuation value){
+GDDD::GDDD(int variable,const Valuation & value){
 #ifdef EVDDD
   if (variable != DISTANCE) {
 #endif
-    concret=(value.size()!=0)? canonical(_GDDD(variable,value)): null.concret;
+    concret=(value.size()!=0)? _GDDD::create_unique_GDDD(variable, value, 0): null.concret;
 #ifdef EVDDD
   } else {
     assert(value.size() == 1);
@@ -247,15 +369,15 @@ int GDDD::variable() const{
 }
 
 size_t GDDD::nbsons () const { 
-  return concret->valuation.size();
+  return concret->valuation_size;
 }
 
 GDDD::const_iterator GDDD::begin() const{
-  return concret->valuation.begin();
+  return concret->begin();
 }
 
 GDDD::const_iterator GDDD::end() const{
-  return concret->valuation.end();
+  return concret->end();
 }
 
 /* Visualisation */
@@ -365,23 +487,23 @@ long double GDDD::noSharedSize() const{
 
 void GDDD::garbage(){
   // mark phase
-  if (canonical.size() > Max_DDD) 
-    Max_DDD=canonical.size();  
+  if (_GDDD::get_canonical().size() > Max_DDD) 
+    Max_DDD=_GDDD::get_canonical().size();  
 
   MyNbStates::clear();
 
-  for(UniqueTable<_GDDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
+  for(UniqueTable<_GDDD>::Table::iterator di=_GDDD::get_canonical().table.begin();di!=_GDDD::get_canonical().table.end();++di){
     (*di)->mark_if_refd();
   }
 
   // sweep phase
   
-  for(UniqueTable<_GDDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
+  for(UniqueTable<_GDDD>::Table::iterator di=_GDDD::get_canonical().table.begin();di!=_GDDD::get_canonical().table.end();){
     if(!((*di)->is_marked())){
       UniqueTable<_GDDD>::Table::iterator ci=di;
       di++;
       const _GDDD *g=(*ci);
-      canonical.table.erase(ci);
+      _GDDD::get_canonical().table.erase(ci);
       delete g;
     }
     else{
@@ -395,9 +517,9 @@ void GDDD::garbage(){
 
 
 /* Constants */
-const GDDD GDDD::one(canonical(_GDDD(1,1)));
-const GDDD GDDD::null(canonical(_GDDD(0,1)));
-const GDDD GDDD::top(canonical(_GDDD(-1,1)));
+const GDDD GDDD::one(_GDDD::create_unique_GDDD(1,GDDD::Valuation(),1));
+const GDDD GDDD::null(_GDDD::create_unique_GDDD(0,GDDD::Valuation(),1));
+const GDDD GDDD::top(_GDDD::create_unique_GDDD(-1,GDDD::Valuation(),1));
 
 /******************************************************************************/
 /*                   class DDD:public GDDD                                    */
@@ -413,7 +535,7 @@ DDD::DDD(const GDDD &g):GDDD(g.concret){
 
 GDDD::GDDD(int var,int val,const GDDD &d):concret(null.concret){ //var-val->d
   if(d!=null){
-    _GDDD _g = _GDDD(var,0);
+    GDDD::Valuation tmp;
 #ifdef EVDDD
     GDDD succ = d;
     if (var == DISTANCE) {
@@ -423,24 +545,24 @@ GDDD::GDDD(int var,int val,const GDDD &d):concret(null.concret){ //var-val->d
 	  succ = succ.normalizeDistance(-minsucc);
 	}
     }
-    std::pair<int,GDDD> x(val,succ);
+    edge_t x(val,succ);
 #else
-    std::pair<int,GDDD> x(val,d);
+    edge_t x(val,d);
 #endif
-    _g.valuation.push_back(x);
-    concret=canonical(_g);
+    tmp.push_back(x);
+    concret=_GDDD::create_unique_GDDD(var,tmp,0);
   }
   //  concret->refCounter++;
 }
 
 GDDD::GDDD(int var,int val1,int val2,const GDDD &d):concret(null.concret){ //var-[val1,val2]->d
   if(val1<=val2 && null!=d){
-    _GDDD _g = _GDDD(var,0);
+    GDDD::Valuation tmp;
     for(int val=val1;val<=val2;++val){
-      std::pair<int,GDDD> x(val,d);
-      _g.valuation.push_back(x);
+      edge_t x(val,d);
+      tmp.push_back(x);
     }
-    concret=canonical(_g);
+    concret=_GDDD::create_unique_GDDD(var,tmp,0);
   }
   //  concret->refCounter++;
 }
@@ -580,7 +702,7 @@ void GDDD::saveNode(std::ostream& os, std::vector<const _GDDD*>& list)const {
         if (*this==top) list.push_back(concret);
         else {
             assert(concret);
-                for (GDDD::Valuation::const_iterator vi=begin();vi!=end();++vi) 
+                for (GDDD::const_iterator vi=begin();vi!=end();++vi) 
                     vi->second.saveNode(os, list);
                 list.push_back(concret);
         }
@@ -620,7 +742,7 @@ void loadDDD(std::istream& is, std::vector<DDD>& list) {
     unsigned long int index;
     int var;
     int val;
-    std::vector<std::pair<int,GDDD> > valuation;
+  GDDD::Valuation valuation;
     std::string temp;
     is>>size;
     std::vector<GDDD> nodes(size);
