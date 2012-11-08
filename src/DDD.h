@@ -61,9 +61,7 @@ private:
   GDDD(const _GDDD *_g);
   /// UNIMPLEMENTED DELIBERATELY: see SHom.h for details. 
   /// user should use version above const & or below const * into unique storage.
-  GDDD(_GDDD *_g); 
-  // call with additional canonization
-  GDDD(const _GDDD &_g);
+  GDDD(_GDDD *_g);
   /// Internal function used in recursion for textual printing of GDDD.
   void print(std::ostream& os,std::string s) const;
   /// A function for DDD serialization (beta).
@@ -79,7 +77,7 @@ public:
   typedef std::vector<edge_t > Valuation;
   /// To hide how arcs are stored. Also for more compact expressions : 
   /// use GDDD::const_iterator to iterate over the arcs of a DDD
-  typedef Valuation::const_iterator const_iterator;
+  typedef const edge_t * const_iterator;
   /// Returns a node's variable.
   int variable() const;
 
@@ -106,7 +104,7 @@ public:
   /// \e WARNING Valuation should be sorted according to arc values
   /// \param variable the variable labeling the node
   /// \param value the set of arcs of the node
-  GDDD(int variable,Valuation value);
+  GDDD(int variable,const Valuation & value);
   /// Default constructor creates the empty set DDD.
   GDDD():concret(null.concret){};
   /// The most common way for the user of creating DDD.
