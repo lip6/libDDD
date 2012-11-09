@@ -163,11 +163,13 @@ public:
   /// \param h the hom to compare to
   /// \return true if the nodes are NOT equal.  
   bool operator!=(const GHom &h) const{return concret!=h.concret;};
-  /// Total ordering function between Hom. Note that comparison is based on "concret" address in unicity table.
+  /// Total ordering function between Hom.
+  /// Note that comparison is based on chronological ordering of creation, and delegated to "concret".
+  /// Unlike comparison on addresses in unicity table, this ensures reproductible results.
   /// This ordering is necessary for hash and map storage of GHom.
   /// \param h the node to compare to
   /// \return true if argument h is greater than "this".
-  bool operator<(const GHom &h) const{return concret<h.concret;};
+  bool operator<(const GHom &h) const;
   /// This predicate is true if the homomorphism global behavior is only to prune some paths.
   bool is_selector() const;
   //@}
@@ -387,6 +389,9 @@ private:
   /// If immediat==true,  eval is called without attempting a cache hit. 
   /// Currently only the constant homomorphism has this attribute set to true.  
   mutable bool immediat;
+  /// Counter of objects created (see constructors).
+  /// This is used for the ordering between homomorphisms.
+  size_t creation_counter;
  
   GDDD eval_skip(const GDDD &) const;
   
@@ -433,7 +438,11 @@ public:
 
   /// Constructor. Note this class is abstract, so this is only used in initialization
   /// list of derived classes constructors (hard coded operations and StrongShom).
-  _GHom(int ref=0,bool im=false):refCounter(ref),marking(false),immediat(im){};
+  _GHom(int ref=0,bool im=false):refCounter(ref),marking(false),immediat(im){
+    // creation counter
+    static size_t counter = 0;
+    creation_counter = counter++;
+  }
   /// Virtual Destructor. Default behavior. 
   virtual ~_GHom(){};
 
@@ -442,6 +451,8 @@ public:
   /// Should be appropriately defined in derived classes, in particular in user defined
   /// homomorphisms.
   virtual bool operator==(const _GHom &h) const=0;
+  /// Ordering between _GHom. It is the chronological ordering of creation
+  bool operator< (const _GHom &h) const;
   /// Hash key computation. It is essential for good hash table operation that the spread
   /// of the keys be as good as possible. Also, fast hash key computation is a good design goal.
   /// Note that bad hash functions will yield more collisions, thus equality comparisons which
