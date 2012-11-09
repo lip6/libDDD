@@ -152,6 +152,29 @@ public:
     return true;
   }
 
+  bool
+  operator< (const _GDDD & g) const
+  {
+    if (variable != g.variable)
+      return variable < g.variable;
+    
+    size_t n1 = valuation_size;
+    size_t n2 = g.valuation_size;
+    if (n1 < n2) return true;
+    if (n1 > n2) return false;
+    
+    for (const_iterator it = begin (), jt = g.begin ();
+         it != end (); ++it, ++jt)
+    {
+      if (*it == *jt)
+        continue;
+      if (*it < *jt)
+        return true;
+      return false;
+    }
+    return false;
+  }
+
   /// hash
   size_t
   hash () const
@@ -362,6 +385,8 @@ GDDD::GDDD(int variable,const Valuation & value){
   }
 #endif
 }
+
+bool GDDD::operator< (const GDDD & g) const { return *concret < *g.concret; }
 
 /* Accessors */
 int GDDD::variable() const{
