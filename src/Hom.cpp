@@ -1512,6 +1512,10 @@ GHom::GHom(const GDDD& d):concret(canonical(Constant(d))){}
 
 GHom::GHom(int var, int val, const GHom &h):concret(canonical(LeftConcat(GDDD(var,val),h))){}
 
+bool GHom::operator< (const GHom & h) const {
+  return *concret < *h.concret;
+}
+
 bool GHom::skip_variable(int var) const {
   return concret->skip_variable(var);
 }
@@ -1865,6 +1869,9 @@ GHom apply2k (const GDDD & d) {
 /*                         Class MyGHom                                    */  
 /*************************************************************************/
 
+bool _GHom::operator< (const _GHom &h) const {
+  return creation_counter > h.creation_counter;
+}
 
 void GHom::pstats(bool)
 {
