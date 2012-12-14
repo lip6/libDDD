@@ -48,15 +48,6 @@ struct clone
   }
 };
 
-template<typename T>
-struct clone<T*>
-{
-  T*
-  operator()(const T* e1) const
-  {
-    return e1->clone();
-  }
-};
   
 template<>
 struct clone<std::vector<int> >
