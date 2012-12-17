@@ -47,32 +47,37 @@ class DDD;
 /// memory occurrence thanks to the unicity table.
 class GDDD 
 {
+public:
+  typedef unsigned int id_t;
 private:
   /// A textual output. 
   /// Don't use it with large number of paths as each element is printed on a different line
   friend std::ostream& operator<<(std::ostream &os,const GDDD &g);
   /// Open access to concret for reference counting in DDD.
   friend class DDD;
+
   /// The real implementation class. All true operations are delagated on this pointer.
   /// Construction/destruction take care of ensuring concret is only instantiated once in memory.
-  const _GDDD *concret;
+  id_t concret;
   /// A private constructor used in internals. 
   /// \param _g The pointer provided should point into the unicity table
-  GDDD(const _GDDD *_g);
+  GDDD(const id_t &_g);
   /// UNIMPLEMENTED DELIBERATELY: see SHom.h for details. 
   /// user should use version above const & or below const * into unique storage.
   GDDD(_GDDD *_g);
   /// Internal function used in recursion for textual printing of GDDD.
   void print(std::ostream& os,std::string s) const;
   /// A function for DDD serialization (beta).
-  void saveNode(std::ostream&, std::vector<const _GDDD*>& )const;
+  void saveNode(std::ostream&, std::vector<id_t>& )const;
   /// Another function used in serialization.
-  unsigned long int nodeIndex(const std::vector<const _GDDD*> &)const;
+  unsigned long int nodeIndex(const std::vector<id_t> &)const;
+
 public:
   /// \name Public Accessors 
   //@{
+  typedef short val_t;
   /// An edge is a pair <value,child node>
-  typedef std::pair<int,GDDD> edge_t;
+  typedef std::pair<val_t,GDDD> edge_t;
   /// To hide how arcs are actually stored. Use GDDD::Valuation to refer to arcs type
   typedef std::vector<edge_t > Valuation;
   /// To hide how arcs are stored. Also for more compact expressions : 
@@ -198,7 +203,7 @@ public:
   void mark() const;
   /// For storage in a hash table
   size_t hash () const { 
-    return ddd::knuth32_hash(reinterpret_cast<const size_t>(concret)); 
+    return ddd::knuth32_hash(concret); 
   }
   /// For garbage collection, do not call this directly, use MemoryManager::garbage() instead.
   /// \todo describe garbage collection algorithm(s) + mark usage homogeneously in one place.
