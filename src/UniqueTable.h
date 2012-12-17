@@ -35,31 +35,6 @@
 #include "tbb/mutex.h"
 #endif
 
-// the clone contract
-namespace unique {
-
-template<typename T>
-struct clone
-{
-  T*
-  operator()(const T& e1) const
-  {
-    return e1.clone();
-  }
-};
-
-  
-template<>
-struct clone<std::vector<int> >
-{
-  std::vector<int>*
-  operator()(const std::vector<int>& e1) const
-     {
-       return new std::vector<int>(e1);
-     }
-};
- 
-}
 
 
 /// This class implements a unicity table mechanism, based on an STL hash_set.
