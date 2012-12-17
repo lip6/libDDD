@@ -78,13 +78,10 @@ class _GDDD
   : variable (var)
   , valuation_size (val.size ())
   {
-    edge_t * base = alpha_addr ();
-    size_t i = 0;
-    for (GDDD::Valuation::const_iterator it = val.begin ();
-         it != val.end (); ++it)
-    {
+    GDDD::Valuation::const_iterator jt = val.begin();
+    for (edge_t * it = this->alpha_addr(); it != this->end() ; ++it, ++jt) {
       // placement new
-      new (base + i++) edge_t (*it);
+      new (it) edge_t (*jt);
     }
   }
 
@@ -129,7 +126,8 @@ public:
     return alpha_addr () + valuation_size;
   }
 
-  /// compare
+
+//   /// compare
   bool
   operator== (const _GDDD & g) const
   {
@@ -138,14 +136,14 @@ public:
     if (valuation_size != g.valuation_size)
       return false;
 
-    return ! memcmp (begin(), g.begin(), valuation_size * sizeof(edge_t));
-//    const_iterator it = begin (), jt = g.begin ();
-//     for (; it != end (); ++it, ++jt)
-//     {
-//       if (*it != *jt)
-//         return false;
-//     }
-//     return true;
+//     return ! memcmp (begin(), g.begin(), valuation_size * sizeof(edge_t));
+    const_iterator it = begin (), jt = g.begin ();
+    for (; it != end (); ++it, ++jt)
+      {
+	if (*it != *jt)
+	  return false;
+      }
+    return true;
   }
 
   bool
@@ -158,17 +156,17 @@ public:
     size_t n2 = g.valuation_size;
     if (n1 < n2) return true;
     if (n1 > n2) return false;
-    return memcmp (begin(), g.begin(), n1*sizeof(edge_t));
-//     for (const_iterator it = begin (), jt = g.begin ();
-//          it != end (); ++it, ++jt)
-//     {
-//       if (*it == *jt)
-//         continue;
-//       if (*it < *jt)
-//         return true;
-//       return false;
-//     }
-//     return false;
+//    return memcmp (begin(), g.begin(), n1*sizeof(edge_t));
+    for (const_iterator it = begin (), jt = g.begin ();
+         it != end (); ++it, ++jt)
+      {
+	if (*it == *jt)
+	  continue;
+	if (*it < *jt)
+	  return true;
+	return false;
+      }
+    return false;
   }
 
   /// hash
@@ -228,7 +226,11 @@ public:
   {
     // allocate enough memory to store the successors
     // with the global (default) operator new
-    return ::operator new (sizeof(_GDDD) + length*sizeof(edge_t));
+    size_t siz = sizeof(_GDDD) + length*sizeof(edge_t);
+    void * ret = ::operator new (siz);
+    // ensure clean memory state
+    memset(ret,0,siz);
+    return ret;
   }
 
   /// custom operator delete
@@ -292,6 +294,8 @@ void GDDD::pstats(bool)
   std::cout << "Peak number of DDD nodes in unicity table :" << peak() << std::endl; 
   std::cout << "sizeof(_GDDD):" << sizeof(_GDDD) << std::endl;
   std::cout << "sizeof(DDD::edge_t):" << sizeof(GDDD::edge_t) << std::endl;
+  std::cout << "sizeof(DDD::val_t):" << sizeof(GDDD::val_t) << std::endl;
+
   
 #ifdef HASH_STAT
   std::cout << std::endl << "DDD Unicity table stats :" << std::endl;
