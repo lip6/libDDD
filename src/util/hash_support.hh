@@ -216,6 +216,34 @@ struct equal<std::pair<T1,T2> >
 
 }}
 
+// the clone contract
+namespace unique {
+
+template<typename T>
+struct clone
+{
+  T*
+  operator()(const T& e1) const
+  {
+    return e1.clone();
+  }
+};
+
+  
+template<>
+struct clone<std::vector<int> >
+{
+  std::vector<int>*
+  operator()(const std::vector<int>& e1) const
+     {
+       return new std::vector<int>(e1);
+     }
+};
+ 
+}
+
+
+
 #ifdef HASH_STAT
 #include <map>
 #include <iostream>
