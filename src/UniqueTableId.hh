@@ -197,7 +197,7 @@ public:
       // increment
       refs.set(id,refs.get(id)+1);
     } else {
-      std::cerr << "ref " << id <<  std::endl;
+//      std::cerr << "ref " << id <<  std::endl;
       // set to 1
       refs.set(id,1);
     }
@@ -210,7 +210,7 @@ public:
     assert(refs.test(id));
     id_t refc = refs.get(id);
     if (refc==1) {
-      std::cerr << "deref " << id <<  std::endl;
+//      std::cerr << "deref " << id <<  std::endl;
       // set to 0 = erase refcount
       refs.erase(id);
     } else {
@@ -346,8 +346,8 @@ public:
     // cleanup
     table = newtable;
 
-         print_table(std::cerr);
-         print_free_list(std::cerr);
+//          print_table(std::cerr);
+//          print_free_list(std::cerr);
 
   }
 
