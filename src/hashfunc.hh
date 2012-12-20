@@ -21,10 +21,12 @@
 /*Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 /*     						                            */
 /****************************************************************************/
-#ifndef DDD_MISC_HASHFUNC_HH
-#define DDD_MISC_HASHFUNC_HH
+#ifndef __DDD_MISC_HASHFUNC_HH
+#define __DDD_MISC_HASHFUNC_HH
 
 /******************************************************************************/
+
+#include <stdint.h>
 
 namespace ddd
 {
@@ -48,6 +50,18 @@ namespace ddd
     key ^=  (key >> 16);
     return key;
   }
+
+  /// Another of Wang's fast hash with a magic number.
+  /// good for (sequence of) integers
+  inline uint32_t int32_hash(uint32_t a) {
+    a = (a ^ 61) ^ (a >> 16);
+    a = a + (a << 3);
+    a = a ^ (a >> 4);
+    a = a * 0x27d4eb2d;
+    a = a ^ (a >> 15);
+    return a;
+  }
+
 
   /// \brief Knuth's Multiplicative hash function.
   ///
