@@ -59,7 +59,7 @@ class _GDDD
   friend void saveDDD(std::ostream&, std::vector<DDD>);
 
   /// useful typedefs
-  typedef GDDD::edge_t edge_t;
+  typedef GDDD::edge_t edge_t; 
   typedef GDDD::const_iterator const_iterator;
 
   /// attributes
@@ -174,8 +174,9 @@ public:
   hash () const
   {
     size_t res = ddd::wang32_hash (variable);
+    int i=1;
     for(const_iterator vi = begin (); vi != end (); ++vi)
-      res += (size_t)(vi->first+1011) * vi->second.hash();
+      res ^= ddd::int32_hash(vi->first+1011*i++) ^ ddd::int32_hash(vi->second.hash());
     return res;
   }
 
@@ -314,7 +315,8 @@ void GDDD::print(std::ostream& os,std::string s) const{
   else if(*this == null)
       os << "[ " << s << "0 ]"<<std::endl;
   else{
-    for(GDDD::const_iterator vi=begin();vi!=end();++vi){
+    const_iterator end = this->end();
+    for(GDDD::const_iterator vi=begin();vi!=end;++vi){
       // modif strstream -> std::stringstream
       std::stringstream tmp;
       tmp << getvarName(variable())<<'('<<vi->first<<")";
@@ -381,11 +383,12 @@ private:
   {
     if( s.find(g) == s.end() )
 	{
-		s.insert(g);
-		res++;
-		for(GDDD::const_iterator gi=g.begin();gi!=g.end();++gi)
-			mysize(gi->second);
-    }
+	  s.insert(g);
+	  res++;
+	  GDDD::const_iterator end = g.end();
+	  for(GDDD::const_iterator gi=g.begin();gi!=end;++gi)
+	    mysize(gi->second);
+	}
   }
 
 public:
@@ -423,7 +426,8 @@ private:
   
 	  if( access.empty() ) {
 	    long double res=0;
-	    for(GDDD::const_iterator gi=g.begin();gi!=g.end();++gi)
+	    GDDD::const_iterator end = g.end();
+	    for(GDDD::const_iterator gi=g.begin();gi!=end;++gi)
 	      res+=nbStates(gi->second)+val;
 	    cache.insert(access,g);
 	    access->second = res;
@@ -586,7 +590,8 @@ int GDDD::getMinDistance () const {
     return begin()->first;
   } else {
     int minsucc=-1;
-    for (GDDD::const_iterator it = begin() ; it != end() ; ++it) {
+    const_iterator end = end();
+    for (GDDD::const_iterator it = begin() ; it != end ; ++it) {
       assert (it->second.nbsons() == 1);
       GDDD::const_iterator succd = it->second.begin();
       if (minsucc==-1 || succd->first < minsucc)
@@ -643,7 +648,7 @@ size_t DDD::set_hash() const {
 
 unsigned long int GDDD::nodeIndex(const std::vector<GDDD::id_t> & list) const{
     assert(this);
-    assert(concret!=-1);
+    assert(concret!=0);
     unsigned long int i=0;
     for (i=0; i<list.size();++i)
       if (concret==list[i]) return i;
@@ -663,10 +668,11 @@ void GDDD::saveNode(std::ostream& os, std::vector<GDDD::id_t>& list)const {
         else 
         if (*this==top) list.push_back(concret);
         else {
-            assert(concret);
-                for (GDDD::const_iterator vi=begin();vi!=end();++vi) 
-                    vi->second.saveNode(os, list);
-                list.push_back(concret);
+	  assert(concret);
+	  GDDD::const_iterator end = this->end();
+	  for (GDDD::const_iterator vi=begin();vi!=end;++vi) 
+	    vi->second.saveNode(os, list);
+	  list.push_back(concret);
         }
     }
 }
