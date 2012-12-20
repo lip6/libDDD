@@ -318,8 +318,8 @@ public:
     }
     //    std::cerr << "after mark ref'd : " ;  print_marked(std::cerr);
 
-    table_t newtable (table.size());
-    newtable.set_deleted_key(0);
+//    table_t newtable (table.size()*2);
+//    newtable.set_deleted_key(0);
     // sweep phase
     for(table_it di=begin() ; di!= end();/*++ done in loop*/ ){
       id_t id = *di;
@@ -339,12 +339,12 @@ public:
 	// id may be recycled to designate something else.
 	push(id);
       } else {
-	newtable.insert(id);
+//	newtable.insert(id);
       }
       marks[id] = false;
     }
     // cleanup
-    table = newtable;
+//    table = newtable;
 
 //          print_table(std::cerr);
 //          print_free_list(std::cerr);
