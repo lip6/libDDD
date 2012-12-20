@@ -218,7 +218,7 @@ public:
 
   
   size_t hash() const {
-    return 6619*(var+13)^val;
+    return 6619*(ddd::int32_hash(var) ^ ddd::int32_hash(val));
   }
   void print (std::ostream & os) const {
     os << "[ " << DDD::getvarName(var) << " = "  << val << " ]";
