@@ -159,13 +159,16 @@ public:
     // joint traversal
     GDDD::const_iterator it1 = d.begin();
     GDDD::const_iterator it2 = value.begin();
+    GDDD::const_iterator it1end = d.end();
+    GDDD::const_iterator it2end = value.end();
     d3::set<GDDD>::type toadd;
 
-    for ( ; it1 != d.end() && it2 != value.end() ; ) {
+    for ( ; it1 != it1end && it2 != it2end ; ) {
       if (it1->first == it2->first) {
 	// We have a match
 	const GDDD & son = it2->second;
-	for (GDDD::const_iterator it3 = son.begin() ; it3 != son.end() ; ++it3) {
+	GDDD::const_iterator sonend = son.end();
+	for (GDDD::const_iterator it3 = son.begin() ; it3 != sonend ; ++it3) {
 	  toadd.insert( GDDD(d.variable(),it3->first,it1->second) );
 	}
 	++it1;
@@ -240,11 +243,13 @@ public:
 
       if (d.variable() != target) {
 	// destroy/propagate
-	for ( GDDD::const_iterator it = d.begin(); it != d.end(); ++it)
+	GDDD::const_iterator dend = d.end();
+	for ( GDDD::const_iterator it = d.begin(); it != dend; ++it)
 	  sum.insert( GHom(this) (it->second) );
       } else {
 	// grab all arc values and fuse them
-	for ( GDDD::const_iterator it = d.begin(); it != d.end(); ++it)
+	GDDD::const_iterator dend = d.end();
+	for ( GDDD::const_iterator it = d.begin(); it != dend; ++it)
 	  sum.insert( GDDD (target,it->first) );
       }
 
@@ -1483,8 +1488,9 @@ StrongHom::eval(const GDDD &d) const
 
     int variable = d.variable();
     std::set<GDDD> s;
+    GDDD::const_iterator dend = d.end();
     for( GDDD::const_iterator vi = d.begin();
-         vi!=d.end();
+         vi!=dend;
          ++vi)
     {
         s.insert(phi(variable,vi->first)(vi->second));
