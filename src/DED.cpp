@@ -163,13 +163,15 @@ GDDD _DED_Add::eval() const{
     std::set<GDDD> succSet;
     // gather min
     for(std::vector<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
-      for(GDDD::const_iterator vi=si->begin();vi!=si->end();++vi){
+      GDDD::const_iterator end = si->end();
+      for(GDDD::const_iterator vi=si->begin();vi!=end;++vi){
 	if (min == -1 || min > vi->first)
 	  min = vi->first;
       }
     }
     for(std::vector<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
-      for(GDDD::const_iterator vi=si->begin();vi!=si->end();++vi){
+      GDDD::const_iterator end = si->end();
+      for(GDDD::const_iterator vi=si->begin();vi!=end;++vi){
 	if (vi->first == min)
 	  succSet.insert(vi->second);
 	else
@@ -195,7 +197,8 @@ GDDD _DED_Add::eval() const{
     /// normal node canonization
 #endif  
   for(std::vector<GDDD>::const_iterator si=parameters.begin();si!=parameters.end();++si){
-    for(GDDD::const_iterator vi=si->begin();vi!=si->end();++vi){
+    GDDD::const_iterator end = si->end();
+    for(GDDD::const_iterator vi=si->begin();vi!=end;++vi){
       map_set[vi->first].insert(vi->second);
     }
   }
@@ -315,7 +318,10 @@ GDDD _DED_Mult::eval() const{
   std::map<int,std::set<GDDD> > map_set;
   GDDD::const_iterator v1=parameter1.begin();
   GDDD::const_iterator v2=parameter2.begin();
-  while(v1!=parameter1.end()&&v2!=parameter2.end()){
+  GDDD::const_iterator v1end=parameter1.end();
+  GDDD::const_iterator v2end=parameter2.end();
+
+  while(v1!=v1end&&v2!=v2end){
     if(v1->first<v2->first)
       ++v1;
     else if(v1->first>v2->first)
@@ -399,7 +405,10 @@ GDDD _DED_Minus::eval() const{
     return GDDD(variable,v1->first,v1->second - v2->second);
   }
 #endif
-  while(v1!=parameter1.end()&&v2!=parameter2.end()){
+  GDDD::const_iterator v1end=parameter1.end();
+  GDDD::const_iterator v2end=parameter2.end();
+
+  while(v1!=v1end&&v2!=v2end){
     if(v1->first<v2->first){
       std::pair<int,GDDD> x(v1->first,v1->second);
       value.push_back(x);
@@ -477,7 +486,8 @@ GDDD _DED_Concat::eval() const{
   int variable=parameter1.variable();
   GDDD::Valuation value;
   std::map<int,std::set<GDDD> > map_set;
-  for(GDDD::const_iterator v1=parameter1.begin();v1!=parameter1.end();++v1){
+    GDDD::const_iterator v1end=parameter1.end();
+    for(GDDD::const_iterator v1=parameter1.begin();v1!=v1end;++v1){
     std::pair<int,GDDD> x(v1->first,(v1->second)^parameter2);
     value.push_back(x);
   }
