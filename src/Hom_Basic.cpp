@@ -274,7 +274,8 @@ public:
   }
   
   size_t hash() const {
-    return 9049* target^val;
+    return 9049*(ddd::int32_hash(target) ^ ddd::int32_hash(val));
+//    return 9049* target^val;
   }
   
   
