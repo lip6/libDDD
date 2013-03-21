@@ -3,7 +3,6 @@
   
 #include "util/configuration.hh"
 
-
 template
     <
       typename FuncType
@@ -45,6 +44,12 @@ public:
     return func.eval(param);
   }
 
+  bool
+  should_insert (const FuncType & h) const
+  {
+    return true;
+  }
+  
     std::pair<bool,ResType>
     insert(const FuncType& hom, const ParamType& node)
     {
@@ -59,6 +64,8 @@ public:
       
       // wasn't in cache
       ResType result = eval(hom, node);
+      if (should_insert (hom))
+      {
       // lock on current bucket
       typename hash_map::accessor access;
       bool insertion = cache_.insert ( access, std::make_pair(hom,node));
@@ -67,6 +74,9 @@ public:
 	access->second = result;
       }
       return std::make_pair(insertion,result);
+      }
+      else
+        return std::make_pair (false, result);
     }
   
 #ifdef HASH_STAT
