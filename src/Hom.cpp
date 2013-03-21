@@ -37,6 +37,7 @@
 #include "util/configuration.hh"
 #include "Cache.hh"
 #include "MemoryManager.h"
+#include "FixObserver.hh"
 
 namespace d3 { namespace util {
   template<>
@@ -1296,9 +1297,27 @@ public:
                         for (std::set<GHom>::const_iterator it = partition.second.begin() ; it != partition.second.end() ; ++it ) {
 			  d2 = (*it) (d2) + d2;
 			}
+                      if (! can_garbage && fobs::get_fixobserver ()->should_interrupt ())
+                      {
+                        return d2;
+                      }
                       if (can_garbage) {
+                        bool do_garbage = false;
+                        if (fobs::get_fixobserver ()->should_interrupt ())
+                        {
+                          fobs::get_fixobserver ()->update (d2, d1);
+                          if (fobs::get_fixobserver ()->should_interrupt ())
+                          {
+                            return d2;
+                          }
+                          else
+                          {
+                            do_garbage = true;
+                          }
+                        }
+                        
                         //		trace << "could trigger 2!!" << std::endl ;
-                        if (MemoryManager::should_garbage()) {
+                        if (do_garbage || MemoryManager::should_garbage()) {
                           //		  trace << "triggered !!" << std::endl ;
                           // ensure d1 and d2 and argument are preserved
                           d1.mark();
@@ -1324,9 +1343,26 @@ public:
             {
                 d1 = d2;
                 d2 = arg(d2);
+              if (! can_garbage && fobs::get_fixobserver ()->should_interrupt ())
+              {
+                return d2;
+              }
               if (can_garbage) {
+                bool do_garbage = false;
+                if (fobs::get_fixobserver ()->should_interrupt ())
+                {
+                  fobs::get_fixobserver ()->update (d2, d1);
+                  if (fobs::get_fixobserver ()->should_interrupt ())
+                  {
+                    return d2;
+                  }
+                  else
+                  {
+                    do_garbage = true;
+                  }
+                }
                 //		trace << "could trigger 2!!" << std::endl ;
-                if (MemoryManager::should_garbage()) {
+                if (do_garbage || MemoryManager::should_garbage()) {
                   //		  trace << "triggered !!" << std::endl ;
                   // ensure d1 and d2 and argument are preserved
                   d1.mark();
