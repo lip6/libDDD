@@ -31,6 +31,8 @@
 #include "Cache.hh"
 #include "MLSHom.h"
 
+#include "FixObserver.hh"
+
 #ifdef PARALLEL_DD
 #include <tbb/blocked_range.h>
 #include <tbb/parallel_for.h>
@@ -1998,7 +2000,10 @@ namespace sns {
 			  }
 			
 
-
+            if (! can_garbage && fobs::get_fixobserver ()->should_interrupt ())
+            {
+              return d2;
+            }
 			if (can_garbage) {
 		    	  /* Call the fixpoint Observer */
 		    	  if (sns::__fixpointObs != NULL){
@@ -2010,7 +2015,22 @@ namespace sns {
 		    	  }
 		    	  //std::cout << d1.nbStates() << std::endl;
 			  //			std::cerr << "could trigger !!" << std::endl ;
-			  if (MemoryManager::should_garbage()) {
+        
+        bool do_garbage = false;
+        if (fobs::get_fixobserver ()->should_interrupt ())
+        {
+          fobs::get_fixobserver ()->update (d2, d1);
+          if (fobs::get_fixobserver ()->should_interrupt ())
+          {
+            return d2;
+          }
+          else
+          {
+            do_garbage = true;
+          }
+        }
+        
+			  if (do_garbage || MemoryManager::should_garbage()) {
 			    //			  std::cerr << "triggered !!" << std::endl ;
 			    // ensure d1 and d2 are preserved
 			    d1.mark();
@@ -2074,6 +2094,11 @@ namespace sns {
 			  d2 =  ( (L_part &  (*G_it))(d2)) + d2;
 			}
 		      }
+        
+        if (! can_garbage && fobs::get_fixobserver ()->should_interrupt ())
+        {
+          return d2;
+        }
 		    if (can_garbage) {
 		      /* Call the fixpoint Observer */
 		      if (sns::__fixpointObs != NULL){
@@ -2085,7 +2110,22 @@ namespace sns {
 		      }
 		      //std::cout << d1.nbStates() << std::endl;
 		      //			trace << "could trigger !!" << std::endl ;
-		      if (MemoryManager::should_garbage()) {
+          
+          bool do_garbage = false;
+          if (fobs::get_fixobserver ()->should_interrupt ())
+          {
+            fobs::get_fixobserver ()->update (d2, d1);
+            if (fobs::get_fixobserver ()->should_interrupt ())
+            {
+              return d2;
+            }
+            else
+            {
+              do_garbage = true;
+            }
+          }
+          
+          if (do_garbage || MemoryManager::should_garbage()) {
 			//			  trace << "triggered !!" << std::endl ;
 			// ensure d1 and d2 are preserved
 			d1.mark();
@@ -2118,6 +2158,12 @@ namespace sns {
 	    {
 	      d1 = d2;
 	      d2 = arg(d2);
+        
+        if (! can_garbage && fobs::get_fixobserver ()->should_interrupt ())
+        {
+          return d2;
+        }
+        
 	      if (can_garbage) {
 	    	  /* Call the fixpoint Observer */
 			  if (sns::__fixpointObs != NULL){
@@ -2128,7 +2174,22 @@ namespace sns {
 					  return d1;
 			  }
 //		trace << "could trigger 2!!" << std::endl ;
-		if (MemoryManager::should_garbage()) {
+          
+          bool do_garbage = false;
+          if (fobs::get_fixobserver ()->should_interrupt ())
+          {
+            fobs::get_fixobserver ()->update (d2, d1);
+            if (fobs::get_fixobserver ()->should_interrupt ())
+            {
+              return d2;
+            }
+            else
+            {
+              do_garbage = true;
+            }
+          }
+          
+          if (do_garbage || MemoryManager::should_garbage()) {
 //		  trace << "triggered !!" << std::endl ;
 		  // ensure d1 and d2 and argument are preserved
 		  d1.mark();
