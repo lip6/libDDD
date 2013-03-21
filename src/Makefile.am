@@ -8,6 +8,7 @@ ddd_hdrs    =   DataSet.h \
                 Cache.hh \
                 DDD.h \
                 DED.h \
+                FixObserver.hh \
                 Hom.h \
                 Hom_Basic.hh \
                 MemoryManager.h \
@@ -41,6 +42,7 @@ util_HEADERS =  $(util_hdrs)
 srcs     =  DED.cpp \
             Cache.hh \
             DDD.cpp \
+            FixObserver.cpp \
             Hom.cpp \
             Hom_Basic.cpp \
             SDED.cpp \
