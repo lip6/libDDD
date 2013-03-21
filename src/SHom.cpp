@@ -62,10 +62,6 @@ namespace sns {
 
   extern UniqueTable<_GShom> canonical;
 
-  typedef Cache<GShom,GSDD,GSDD> ShomCache;
-
-  static ShomCache cache;
-
   /**
    * Static definition of the Observer Fixpoint
    */
@@ -1998,7 +1994,6 @@ namespace sns {
 			    d2 =  (*G_it)(d2) + d2;
 			    
 			  }
-			
 
             if (! can_garbage && fobs::get_fixobserver ()->should_interrupt ())
             {
@@ -2016,7 +2011,6 @@ namespace sns {
 		    	  //std::cout << d1.nbStates() << std::endl;
 			  //			std::cerr << "could trigger !!" << std::endl ;
         
-        bool do_garbage = false;
         if (fobs::get_fixobserver ()->should_interrupt ())
         {
           fobs::get_fixobserver ()->update (d2, d1);
@@ -2024,13 +2018,9 @@ namespace sns {
           {
             return d2;
           }
-          else
-          {
-            do_garbage = true;
-          }
         }
         
-			  if (do_garbage || MemoryManager::should_garbage()) {
+			  if (MemoryManager::should_garbage()) {
 			    //			  std::cerr << "triggered !!" << std::endl ;
 			    // ensure d1 and d2 are preserved
 			    d1.mark();
@@ -2111,7 +2101,6 @@ namespace sns {
 		      //std::cout << d1.nbStates() << std::endl;
 		      //			trace << "could trigger !!" << std::endl ;
           
-          bool do_garbage = false;
           if (fobs::get_fixobserver ()->should_interrupt ())
           {
             fobs::get_fixobserver ()->update (d2, d1);
@@ -2119,13 +2108,9 @@ namespace sns {
             {
               return d2;
             }
-            else
-            {
-              do_garbage = true;
-            }
           }
           
-          if (do_garbage || MemoryManager::should_garbage()) {
+          if (MemoryManager::should_garbage()) {
 			//			  trace << "triggered !!" << std::endl ;
 			// ensure d1 and d2 are preserved
 			d1.mark();
@@ -2175,7 +2160,6 @@ namespace sns {
 			  }
 //		trace << "could trigger 2!!" << std::endl ;
           
-          bool do_garbage = false;
           if (fobs::get_fixobserver ()->should_interrupt ())
           {
             fobs::get_fixobserver ()->update (d2, d1);
@@ -2183,13 +2167,9 @@ namespace sns {
             {
               return d2;
             }
-            else
-            {
-              do_garbage = true;
-            }
           }
           
-          if (do_garbage || MemoryManager::should_garbage()) {
+          if (MemoryManager::should_garbage()) {
 //		  trace << "triggered !!" << std::endl ;
 		  // ensure d1 and d2 and argument are preserved
 		  d1.mark();
@@ -2563,8 +2543,21 @@ GShom::GShom(int var,const DataSet & val, const GShom &h) {
 
 //////////////////////////////////////////////////////////////////////////////
 
+typedef Cache<GShom,GSDD,GSDD> ShomCache;
 
-
+template<>
+bool
+ShomCache::should_insert (const GShom & h) const
+{
+  if (typeid(_GShom::get_concret (h)) == typeid(sns::Fixpoint))
+  {
+    return ! fobs::get_fixobserver ()->was_interrupted ();
+  }
+  return true;
+}
+namespace sns {
+static ShomCache cache;
+}
 /* Eval */
 GSDD 
 GShom::operator()(const GSDD &d) const
