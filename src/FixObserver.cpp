@@ -8,9 +8,10 @@ class DefaultObserver : public FixObserver {
 public:
   DefaultObserver (): FixObserver () {}
   
-  virtual bool should_interrupt () { return false; }
-  virtual void update (const GSDD & after, const GSDD & before) {}
-  virtual void update (const GDDD & after, const GDDD & before) {}
+  bool should_interrupt () { return false; }
+  bool was_interrupted () const { return false; }
+  void update (const GSDD & after, const GSDD & before) {}
+  void update (const GDDD & after, const GDDD & before) {}
 };
 
 static FixObserver * obs = NULL;

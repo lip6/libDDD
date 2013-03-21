@@ -50,10 +50,6 @@ namespace d3 { namespace util {
 
 static UniqueTable<_GHom> canonical;
 
-typedef Cache<GHom,GDDD,GDDD> HomCache;
-
-static HomCache cache;
-
 
 /*************************************************************************/
 /*                         Class _GHom                                   */
@@ -1302,7 +1298,6 @@ public:
                         return d2;
                       }
                       if (can_garbage) {
-                        bool do_garbage = false;
                         if (fobs::get_fixobserver ()->should_interrupt ())
                         {
                           fobs::get_fixobserver ()->update (d2, d1);
@@ -1310,14 +1305,10 @@ public:
                           {
                             return d2;
                           }
-                          else
-                          {
-                            do_garbage = true;
-                          }
                         }
                         
                         //		trace << "could trigger 2!!" << std::endl ;
-                        if (do_garbage || MemoryManager::should_garbage()) {
+                        if (MemoryManager::should_garbage()) {
                           //		  trace << "triggered !!" << std::endl ;
                           // ensure d1 and d2 and argument are preserved
                           d1.mark();
@@ -1348,7 +1339,6 @@ public:
                 return d2;
               }
               if (can_garbage) {
-                bool do_garbage = false;
                 if (fobs::get_fixobserver ()->should_interrupt ())
                 {
                   fobs::get_fixobserver ()->update (d2, d1);
@@ -1356,13 +1346,9 @@ public:
                   {
                     return d2;
                   }
-                  else
-                  {
-                    do_garbage = true;
-                  }
                 }
                 //		trace << "could trigger 2!!" << std::endl ;
-                if (do_garbage || MemoryManager::should_garbage()) {
+                if (MemoryManager::should_garbage()) {
                   //		  trace << "triggered !!" << std::endl ;
                   // ensure d1 and d2 and argument are preserved
                   d1.mark();
@@ -1608,6 +1594,20 @@ GHom GHom::compose (const GHom &r) const {
    return concret->invert(pot);
  }
 
+typedef Cache<GHom,GDDD,GDDD> HomCache;
+
+template<>
+bool
+HomCache::should_insert (const GHom & h) const
+{
+  if (typeid(_GHom::get_concret (h)) == typeid(Fixpoint))
+  {
+    return ! fobs::get_fixobserver ()->was_interrupted ();
+  }
+  return true;
+}
+
+static HomCache cache;
 
 /* Eval */
 GDDD

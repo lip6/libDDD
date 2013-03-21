@@ -18,6 +18,7 @@ public:
   /// true only by should_interrupt and to false only by update, and
   /// is_interrupted => should_interrupt returns true
   virtual bool should_interrupt () = 0;
+  virtual bool was_interrupted () const = 0;
   virtual void update (const GSDD & after, const GSDD & before) = 0;
   virtual void update (const GDDD & after, const GDDD & before) = 0;
 };
