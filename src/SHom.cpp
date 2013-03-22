@@ -1968,7 +1968,29 @@ namespace sns {
 			d1 = d2;
 
 			d2 = F_part(d2);
+            // /!\ both F and L can have a fixpoint, and can be interrupted by the fixpoint observer
+            if (! can_garbage && fobs::get_fixobserver ()->was_interrupted ())
+            {
+              return d2;
+            }
+            if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
+            {
+              fobs::get_fixobserver ()->update (d2, d1);
+              if (fobs::get_fixobserver ()->should_interrupt ())
+                return d2;
+            }
+            
 			d2 = L_part(d2);
+            if (! can_garbage && fobs::get_fixobserver ()->was_interrupted ())
+            {
+              return d2;
+            }
+            if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
+            {
+              fobs::get_fixobserver ()->update (d2, d1);
+              if (fobs::get_fixobserver ()->should_interrupt ())
+                return d2;
+            }
 
 			// Elements in G' : not a nice l&f form : default to usual behavior
 			for( 	Add::Gset_it G_it = G_part.begin();
@@ -2056,7 +2078,28 @@ namespace sns {
 		    d1 = d2;
 
 		    d2 = F_part(d2);
+        if (! can_garbage && fobs::get_fixobserver ()->was_interrupted ())
+        {
+          return d2;
+        }
+        if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
+        {
+          fobs::get_fixobserver ()->update (d2, d1);
+          if (fobs::get_fixobserver ()->should_interrupt ())
+            return d2;
+        }
+        
 		    d2 = L_part(d2);
+        if (! can_garbage && fobs::get_fixobserver ()->was_interrupted ())
+        {
+          return d2;
+        }
+        if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
+        {
+          fobs::get_fixobserver ()->update (d2, d1);
+          if (fobs::get_fixobserver ()->should_interrupt ())
+            return d2;
+        }
 
 		    for( 	Add::Gset_it G_it = partition.G.begin();
 				G_it != partition.G.end();
