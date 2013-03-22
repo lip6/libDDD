@@ -174,9 +174,10 @@ public:
   hash () const
   {
     size_t res = ddd::wang32_hash (variable);
-    int i=1;
+//    int i=1;
     for(const_iterator vi = begin (); vi != end (); ++vi)
-      res ^= ddd::int32_hash(vi->first+1011*i++) ^ ddd::int32_hash(vi->second.hash());
+      res += (size_t)(ddd::int32_hash(vi->first)+1011) * vi->second.hash();
+//      res ^= ddd::int32_hash(vi->first+1011*i++) ^ ddd::int32_hash(vi->second.hash());
     return res;
   }
 
