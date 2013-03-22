@@ -1289,6 +1289,16 @@ public:
 			// Apply ( Id + F )* on all sons
 			d2 = F_part(d2);
                           
+                      if (! can_garbage && fobs::get_fixobserver ()->was_interrupted ())
+                      {
+                        return d2;
+                      }
+                      if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
+                      {
+                        fobs::get_fixobserver ()->update (d2, d1);
+                        if (fobs::get_fixobserver ()->should_interrupt ())
+                          return d2;
+                      }
                         // Apply ( G + Id )
                         for (std::set<GHom>::const_iterator it = partition.second.begin() ; it != partition.second.end() ; ++it ) {
 			  d2 = (*it) (d2) + d2;
