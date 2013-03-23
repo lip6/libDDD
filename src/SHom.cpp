@@ -2592,11 +2592,9 @@ template<>
 bool
 ShomCache::should_insert (const GShom & h) const
 {
-  if (typeid(_GShom::get_concret (h)) == typeid(sns::Fixpoint))
-  {
-    return ! fobs::get_fixobserver ()->was_interrupted ();
-  }
-  return true;
+  // /!\ if an interruption occured, NO result should be cached
+  // in case the interrupted fixpoint is embedded inside another hom
+  return ! fobs::get_fixobserver ()->was_interrupted ();
 }
 namespace sns {
 static ShomCache cache;
