@@ -1297,7 +1297,9 @@ public:
                       {
                         fobs::get_fixobserver ()->update (d2, d1);
                         if (fobs::get_fixobserver ()->should_interrupt ())
+                        {
                           return d2;
+                        }
                       }
                         // Apply ( G + Id )
                         for (std::set<GHom>::const_iterator it = partition.second.begin() ; it != partition.second.end() ; ++it ) {
@@ -1610,11 +1612,9 @@ template<>
 bool
 HomCache::should_insert (const GHom & h) const
 {
-  if (typeid(_GHom::get_concret (h)) == typeid(Fixpoint))
-  {
-    return ! fobs::get_fixobserver ()->was_interrupted ();
-  }
-  return true;
+  // /!\ if an interruption occured, NO result should be cached
+  // in case the interrupted fixpoint is embedded inside another hom
+  return ! fobs::get_fixobserver ()->was_interrupted ();
 }
 
 static HomCache cache;
