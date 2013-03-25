@@ -1976,7 +1976,7 @@ namespace sns {
             if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
             {
               fobs::get_fixobserver ()->update (d2, d1);
-              if (fobs::get_fixobserver ()->should_interrupt ())
+              if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
                 return d2;
             }
             
@@ -1988,7 +1988,7 @@ namespace sns {
             if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
             {
               fobs::get_fixobserver ()->update (d2, d1);
-              if (fobs::get_fixobserver ()->should_interrupt ())
+              if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
                 return d2;
             }
 
@@ -2017,7 +2017,7 @@ namespace sns {
 			    
 			  }
 
-            if (! can_garbage && fobs::get_fixobserver ()->should_interrupt ())
+            if (! can_garbage && fobs::get_fixobserver ()->should_interrupt (d2, d1))
             {
               return d2;
             }
@@ -2033,10 +2033,10 @@ namespace sns {
 		    	  //std::cout << d1.nbStates() << std::endl;
 			  //			std::cerr << "could trigger !!" << std::endl ;
         
-        if (fobs::get_fixobserver ()->should_interrupt ())
+        if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
         {
           fobs::get_fixobserver ()->update (d2, d1);
-          if (fobs::get_fixobserver ()->should_interrupt ())
+          if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
           {
             return d2;
           }
@@ -2085,7 +2085,7 @@ namespace sns {
         if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
         {
           fobs::get_fixobserver ()->update (d2, d1);
-          if (fobs::get_fixobserver ()->should_interrupt ())
+          if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
             return d2;
         }
         
@@ -2097,7 +2097,7 @@ namespace sns {
         if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
         {
           fobs::get_fixobserver ()->update (d2, d1);
-          if (fobs::get_fixobserver ()->should_interrupt ())
+          if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
             return d2;
         }
 
@@ -2128,7 +2128,7 @@ namespace sns {
 			}
 		      }
         
-        if (! can_garbage && fobs::get_fixobserver ()->should_interrupt ())
+        if (! can_garbage && fobs::get_fixobserver ()->should_interrupt (d2, d1))
         {
           return d2;
         }
@@ -2144,10 +2144,10 @@ namespace sns {
 		      //std::cout << d1.nbStates() << std::endl;
 		      //			trace << "could trigger !!" << std::endl ;
           
-          if (fobs::get_fixobserver ()->should_interrupt ())
+          if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
           {
             fobs::get_fixobserver ()->update (d2, d1);
-            if (fobs::get_fixobserver ()->should_interrupt ())
+            if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
             {
               return d2;
             }
@@ -2187,7 +2187,7 @@ namespace sns {
 	      d1 = d2;
 	      d2 = arg(d2);
         
-        if (! can_garbage && fobs::get_fixobserver ()->should_interrupt ())
+        if (! can_garbage && fobs::get_fixobserver ()->should_interrupt (d2, d1))
         {
           return d2;
         }
@@ -2203,10 +2203,10 @@ namespace sns {
 			  }
 //		trace << "could trigger 2!!" << std::endl ;
           
-          if (fobs::get_fixobserver ()->should_interrupt ())
+          if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
           {
             fobs::get_fixobserver ()->update (d2, d1);
-            if (fobs::get_fixobserver ()->should_interrupt ())
+            if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
             {
               return d2;
             }
@@ -2592,9 +2592,9 @@ template<>
 bool
 ShomCache::should_insert (const GShom & h) const
 {
-  // /!\ if an interruption occured, NO result should be cached
-  // in case the interrupted fixpoint is embedded inside another hom
-  return ! fobs::get_fixobserver ()->was_interrupted ();
+  if (fobs::get_fixobserver ()->was_interrupted () && typeid (*_GShom::get_concret (h)) == typeid (sns::Fixpoint))
+    return false;
+  return true;
 }
 namespace sns {
 static ShomCache cache;
