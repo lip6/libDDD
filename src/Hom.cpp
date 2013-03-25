@@ -1296,7 +1296,7 @@ public:
                       if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
                       {
                         fobs::get_fixobserver ()->update (d2, d1);
-                        if (fobs::get_fixobserver ()->should_interrupt ())
+                        if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
                         {
                           return d2;
                         }
@@ -1305,15 +1305,15 @@ public:
                         for (std::set<GHom>::const_iterator it = partition.second.begin() ; it != partition.second.end() ; ++it ) {
 			  d2 = (*it) (d2) + d2;
 			}
-                      if (! can_garbage && fobs::get_fixobserver ()->should_interrupt ())
+                      if (! can_garbage && fobs::get_fixobserver ()->should_interrupt (d2, d1))
                       {
                         return d2;
                       }
                       if (can_garbage) {
-                        if (fobs::get_fixobserver ()->should_interrupt ())
+                        if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
                         {
                           fobs::get_fixobserver ()->update (d2, d1);
-                          if (fobs::get_fixobserver ()->should_interrupt ())
+                          if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
                           {
                             return d2;
                           }
@@ -1346,15 +1346,15 @@ public:
             {
                 d1 = d2;
                 d2 = arg(d2);
-              if (! can_garbage && fobs::get_fixobserver ()->should_interrupt ())
+              if (! can_garbage && fobs::get_fixobserver ()->should_interrupt (d2, d1))
               {
                 return d2;
               }
               if (can_garbage) {
-                if (fobs::get_fixobserver ()->should_interrupt ())
+                if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
                 {
                   fobs::get_fixobserver ()->update (d2, d1);
-                  if (fobs::get_fixobserver ()->should_interrupt ())
+                  if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
                   {
                     return d2;
                   }
@@ -1612,9 +1612,9 @@ template<>
 bool
 HomCache::should_insert (const GHom & h) const
 {
-  // /!\ if an interruption occured, NO result should be cached
-  // in case the interrupted fixpoint is embedded inside another hom
-  return ! fobs::get_fixobserver ()->was_interrupted ();
+  if (fobs::get_fixobserver ()->was_interrupted () && typeid (*_GHom::get_concret (h)) == typeid (Fixpoint))
+    return false;
+  return true;
 }
 
 static HomCache cache;
