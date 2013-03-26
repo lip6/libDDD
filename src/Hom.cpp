@@ -1302,9 +1302,13 @@ public:
                         }
                       }
                         // Apply ( G + Id )
-                        for (std::set<GHom>::const_iterator it = partition.second.begin() ; it != partition.second.end() ; ++it ) {
-			  d2 = (*it) (d2) + d2;
-			}
+                      std::set<GDDD> tmp;
+                      for (std::set<GHom>::const_iterator it = partition.second.begin() ; it != partition.second.end() ; ++it ) {
+                        tmp.insert ((*it) (d2));
+                      }
+                      tmp.insert (d2);
+                      d2 = DED::add (tmp);
+                      
                       if (! can_garbage && fobs::get_fixobserver ()->should_interrupt (d2, d1))
                       {
                         return d2;
