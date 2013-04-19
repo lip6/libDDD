@@ -854,7 +854,8 @@ public:
 
   GHom invert  (const GDDD & pot) const {
     // (h & h')^-1  =  h'^-1 & h^-1
-    return  right.invert(pot) & left.invert(pot);
+    //return  right.invert(pot) & left.invert(pot);
+    return right.invert (pot) & left.invert (right (pot));
   }
 
 
