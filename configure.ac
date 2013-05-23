@@ -151,7 +151,6 @@ AM_CONDITIONAL([HAVE_BOOST], [test "${BOOST_DETECTED}" = "true"])
 AC_CONFIG_FILES([   Makefile
                     demo/Makefile
                     demo/hanoi/Makefile
-                    demo/expr/Makefile
                     demo/morpion/Makefile
                     src/Makefile
                     doc/Doxyfile
