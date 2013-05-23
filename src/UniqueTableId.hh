@@ -324,7 +324,7 @@ public:
     for(table_it di=begin() ; di!= end();/*++ done in loop*/ ){
       id_t id = *di;
       // to avoid corruption if deleted
-      table_it ci = di;
+//      table_it ci = di;
       ++di;
       if (id==0) {
 	continue;
