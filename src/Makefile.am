@@ -17,6 +17,7 @@ ddd_hdrs    =   DataSet.h \
                 SDED.h \
                 SHom.h \
                 UniqueTable.h \
+		UniqueTableId.hh \
                 IntDataSet.h \
                 hashfunc.hh \
                 MLHom.h \
@@ -36,7 +37,21 @@ util_hdrs   =   util/dotExporter.h \
                 util/tbb_hash_map.hh \
                 util/vector.hh \
                 util/set.hh \
-                util/map.hh
+                util/map.hh \
+		google/sparse_hash_map \
+		google/sparse_hash_set \
+		google/sparsetable \
+		google/template_util.h \
+		google/type_traits.h \
+		google/sparsehash/densehashtable.h  \
+		google/sparsehash/hashtable-common.h   \
+		google/sparsehash/libc_allocator_with_realloc.h   \
+		google/sparsehash/sparseconfig.h   \
+		google/sparsehash/sparsehashtable.h
+
+EXTRA_DIST = google/AUTHORS  google/COPYING  google/README
+
+
 util_HEADERS =  $(util_hdrs)
 
 srcs     =  DED.cpp \
