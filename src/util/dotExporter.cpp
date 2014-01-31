@@ -86,7 +86,7 @@ public :
 	tmp << "null";
       } else {
 	  seen.insert(g.variable());
-
+	  
 	  tmp << "\"" << "mod_" <<  g.variable() << "_" << nextid++ << "\"";
 //	  if (g.variable() == varP) {
 	  *out << "     " << tmp.str() << "  [label=\"" <<  "mod " << g.variable()     ;
@@ -208,7 +208,7 @@ public :
       } else if (g == GDDD::null) {
 	tmp << "null";
       } else {
-	tmp << GDDD::getvarName(g.variable()) << "_" << nextid++;
+	tmp << "\"" << "var_" <<  GDDD::getvarName(g.variable()) << "_" << nextid++ << "\"";
       }
       d3name[g] = tmp.str();
       if (g == GDDD::top||g == GDDD::null) { 
