@@ -219,6 +219,7 @@ public :
       (*D3out) << "     " << tmp.str() << "  [label=\""<< GDDD::getvarName(g.variable()) << "\"];"<<endl;
       for(GDDD::const_iterator gi=g.begin();gi!=g.end();gi++) 
 	collect(gi->second);
+
       for(GDDD::const_iterator gi=g.begin();gi!=g.end();gi++) {
 // 	if ( d3name[gi->second] != "one" )
 // 	  (*D3out) << "     " << tmp.str() << "->" << d3name[gi->second]  <<"    [label=\""<< gi->first << "\",shape=box];" <<endl; 
@@ -226,8 +227,18 @@ public :
 // 	  (*D3out) << "     " << "one_" << nextAid++ <<  " [shape=box,width=.3,height=.4,label=\"1\"];\n" ;
 // 	  (*D3out) << "     " << tmp.str() << "->" << "one_" << nextAid-1  <<"    [label=\""<< gi->first << "\"];" <<endl; 
 // 	}
-	// use  next line for only one terminal node
-		(*D3out) << "     " << tmp.str() << "->" << d3name[gi->second] << "    [label=\""<< gi->first << "\"];" <<endl;
+	int min = gi->first;
+	GDDD::const_iterator nextit = gi;
+	for ( 	nextit++; nextit != g.end() && nextit->second == gi->second && nextit->first == gi->first +1 ; nextit++) {
+	  gi++;
+	}
+	int max = gi->first;
+	if (min == max) {
+      	  // use  next line for only one terminal node
+	  (*D3out) << "     " << tmp.str() << "->" << d3name[gi->second] << "    [label=\""<< gi->first << "\"];" <<endl;
+	} else  {
+	  (*D3out) << "     " << tmp.str() << "->" << d3name[gi->second] << "    [label=\""<< min << ".." << max << "\"];" <<endl;
+	}
       }
     }
   }
