@@ -26,7 +26,6 @@ ddd_hdrs    =   DataSet.h \
                 process.hpp \
                 AdditiveMap.hpp \
                 init.hh
-ddd_HEADERS =   $(ddd_hdrs)
 
 utildir     =   $(pkgincludedir)/util
 util_hdrs   =   util/dotExporter.h \
@@ -51,8 +50,7 @@ util_hdrs   =   util/dotExporter.h \
 
 EXTRA_DIST = google/AUTHORS  google/COPYING  google/README
 
-
-util_HEADERS =  $(util_hdrs)
+nobase_ddd_HEADERS =   $(ddd_hdrs) $(util_hdrs)
 
 srcs     =  DED.cpp \
             Cache.hh \
