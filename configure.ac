@@ -61,7 +61,7 @@ if test "x$stdhash" = "xtrue"; then
     AC_DEFINE([USE_STD_HASH],1,[Define if you want to use std hash instead of google sparse hash.])
 fi
 
-
+CPPFLAGS="-Wno-unused-local-typedefs $CPPFLAGS"
 LDFLAGS="-all-static -static-libgcc -static-libstdc++ $LDFLAGS"
 
 
