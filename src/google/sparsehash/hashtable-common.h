@@ -49,9 +49,18 @@
 
 _START_GOOGLE_NAMESPACE_
 
+#define GCC_VERSION (__GNUC__ * 10000 \
+                + __GNUC_MINOR__ * 100 \
+                   + __GNUC_PATCHLEVEL__)
+
+#if ! defined(__GXX_EXPERIMENTAL_CXX0X) &&  __cplusplus < 201103L
 template <bool> struct SparsehashCompileAssert { };
 #define SPARSEHASH_COMPILE_ASSERT(expr, msg) \
   typedef SparsehashCompileAssert<(bool(expr))> msg[bool(expr) ? 1 : -1]
+#else 
+#define SPARSEHASH_COMPILE_ASSERT(expr, msg) static_assert(expr,"msg")
+#endif
+
 
 namespace sparsehash_internal {
 
