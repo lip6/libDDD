@@ -946,7 +946,7 @@ namespace sns {
     /** apply factorization rules adapted to g = l & f */
     void factorizeByLevel ( Gset_t & G, int target) const {
       typedef d3::set<GShom>::type set_t;
-      typedef set_t::iterator  set_it;
+      // typedef set_t::iterator  set_it;
       set_t ret;
       
       /** First step : for any g1 = l1 & f1 and any g2 = l2 & f2, if l1 == l2 then rewrite into g' = g1 + g2 = l1 & (f1+f2) */
