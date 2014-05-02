@@ -67,8 +67,10 @@ MemoryUsed( void )
     size_t total_size, rss_size;
 
     FILE* file = fopen("/proc/self/statm", "r");
-    if (!file)
+    if (!file) {
+      std::cerr << "Unsupported OS : Linux detected but /proc not available to obtain process memory usage. Will report 0." << std::endl;
       return 0;
+    }
     int res = fscanf(file, "%zu %zu", &total_size, &rss_size);
     (void) fclose(file);
     if (res != 2)
