@@ -1554,7 +1554,12 @@ namespace sns {
     GShom invert (const GSDD & pot) const { 
       // (h & h')^-1  =  h'^-1 & h^-1
       // return  right.invert(pot) & left.invert(pot);
-      return  right.invert(pot) & left.invert( right(pot) );
+      GSDD newpot = right(pot);
+      if (newpot != SDD::null) {
+	return  right.invert(pot) & left.invert( newpot );
+      } else {
+	return GShom(newpot);
+      }
     }
 
 
