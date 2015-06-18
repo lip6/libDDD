@@ -682,6 +682,10 @@ namespace sns {
     bool is_selector () const {
       return true;
     }
+
+    bool has_image (const GSDD &d) {
+      return ! cond_.has_image(d);
+    }
   
     GSDD eval(const GSDD &d) const {
       if (d == GSDD::one || d == GSDD::null || d == GSDD::top )
