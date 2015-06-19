@@ -396,6 +396,7 @@ private:
 
   /// The procedure responsible for propagating efficiently across "skipped" variable nodes.
     GSDD eval_skip(const GSDD &) const;
+    bool has_image_skip(const GSDD &) const;
 
   /// For operation cache management. 
   /// If immediat==true,  eval is called without attempting a cache hit. 
@@ -448,10 +449,7 @@ public:
   // for use by unique table : return new MyConcreteClassName(*this);
   virtual _GShom * clone () const =0 ;
 
-  virtual bool has_image (const GSDD & d) const {
-    return GShom(this).eval(d) != SDD::null;
-  }
-
+  virtual bool has_image (const GSDD & d) const ;
 
   virtual GShom compose(const GShom &) const;
   
