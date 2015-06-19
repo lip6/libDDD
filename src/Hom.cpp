@@ -73,7 +73,9 @@ public:
   bool is_selector () const {
     return true; 
   }
-
+  bool has_image (const GDDD & ) const {
+    return true;
+  }
  GHom invert  (const GDDD & pot) const {
    return this;
  }
@@ -106,6 +108,12 @@ public:
   GDDD eval(const GDDD &d)const{
     return d==GDDD::null?GDDD::null:value;
   }
+
+  bool has_image (const GDDD & d) const {
+    return (! (value == GDDD::null))
+      &&  (! (d == GDDD::null)) ;
+  }
+
 
  GHom invert  (const GDDD & pot) const {
    return pot;
@@ -264,6 +272,10 @@ public:
 
     _GHom * clone () const {  return new DomExtract(*this); }
 
+    bool has_image (const GDDD &) {
+      return true;
+    }
+
     void print (std::ostream & os) const {
       os << "(DomExtract:" << target << ")";
     }
@@ -359,7 +371,10 @@ public:
     return get_concret(left)->skip_variable(var)
     && get_concret(right)->skip_variable(var);
   }
-  
+
+  bool has_image (const GDDD & d) const {
+    return left.has_image(d) && right.has_image(d) && _GHom::has_image(d);
+  }
   
   /* Memory Manager */
   void mark() const{
@@ -420,6 +435,16 @@ public :
     return cond_ == ps->cond_ ;
   }  
 
+  bool has_image (const GDDD & d) const {
+    if (d==GDDD::null)
+      return false;
+    if (! cond_.has_image(d) ) {
+      return true;
+    }
+    return _GHom::has_image(d);
+  }
+
+
 
   _GHom * clone () const {  return new NotCond(*this); }
 
@@ -477,6 +502,15 @@ public:
   {
     return find(parameters.begin(), parameters.end(), GHom::id) != parameters.end();
   }
+
+  bool has_image (const GDDD & d) const {
+    for (param_it gi = parameters.begin(); gi != parameters.end(); ++gi ) 
+      if ( gi->has_image(d))
+	return true;
+      
+    return false;
+  }
+
    
   param_t &
   get_parameters()
@@ -935,6 +969,14 @@ public:
     {
 		return parameters == ((And*)&h )->parameters;	
     }
+
+  bool has_image (const GDDD & d) const {
+    for(parameters_it gi=parameters.begin();gi!=parameters.end();++gi)
+      if (! gi->has_image(d)) {
+	return false;
+      }
+    return _GHom::has_image(d);
+  }
 	
     size_t
     hash() const
@@ -1092,6 +1134,11 @@ public:
         return left ^ right(d);
     }
            
+  bool
+  has_image(const GDDD &d) const {
+    return right.has_image(d);
+  }
+
     /* Memory Manager */
     void
     mark() const
@@ -1130,6 +1177,12 @@ public:
     {
         return get_concret(left)->skip_variable(var);
     }
+
+
+  bool
+  has_image(const GDDD &d) const {
+    return left.has_image(d);
+  }
 
   /* Eval */
   GDDD eval(const GDDD &d)const{
@@ -1418,6 +1471,42 @@ GHom _GHom::compose (const GHom &r) const {
   return Compose(thisH, r);
 }
 
+bool
+_GHom::has_image(const GDDD& d) const
+{
+  return GHom(this)(d) != GDDD::null;
+}
+bool
+_GHom::has_image_skip(const GDDD& d) const
+{
+  if( d == GDDD::null ) {
+    return false;
+  } else if( d == GDDD::one ) {
+    // basic case, mustn't call d.variable()
+  } else if( d == GDDD::top ) {
+    return false;
+  } else if( this->skip_variable(d.variable()) ) {
+
+    // The homorphism propagates itself without any modification on the GDDD
+    const GHom ghom(this);
+
+    if (ghom == GHom::id) {
+      return true;
+    }
+    
+    for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
+      {
+	GDDD son = ghom(it->second);
+	if( son != GDDD::null )
+	  {
+	    return true;
+	  }
+      }
+    return false;
+  }
+
+  return has_image(d);
+}
 
 GDDD 
 _GHom::eval_skip(const GDDD& d) const
@@ -1437,10 +1526,15 @@ _GHom::eval_skip(const GDDD& d) const
     else if( this->skip_variable(d.variable()) )
     {
         // The homorphism propagates itself without any modification on the GDDD
+      const GHom ghom(this);
+      
+      if (ghom == GHom::id) {
+	return d;
+      }
         GDDD::Valuation v;
         for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
         {
-            GDDD son = GHom(this)(it->second);
+            GDDD son = ghom (it->second);
             if( son != GDDD::null )
             {
                 v.push_back(std::make_pair(it->first, son));
@@ -1510,6 +1604,39 @@ public:
 bool StrongHom::operator==(const _GHom &h) const{
   return typeid(*this)==typeid(h)?*this==*(StrongHom*)&h:false;
 }
+
+/* Eval */
+bool
+StrongHom::has_image(const GDDD &d) const
+{
+  if( d== GDDD::null)
+  {
+    return false;
+  }
+  else if( d == GDDD::one)
+  {
+    return ! (phiOne() == GDDD::null);
+  }
+  else if( d== GDDD::top)
+  {
+    return true;
+  }
+  else
+  {
+    int variable = d.variable();
+    
+    GDDD::const_iterator dend = d.end();
+    for( GDDD::const_iterator vi = d.begin();
+         vi!=dend;
+         ++vi)
+    {
+      if ( ! ( phi(variable,vi->first)(vi->second) == DDD::null) )
+	return true;
+    }
+    return false;
+  }
+}
+
 
 /* Eval */
 GDDD
@@ -1648,6 +1775,10 @@ GHom::operator()(const GDDD &d) const
             return (cache.insert(*this,d)).second;
         }
     }
+}
+
+bool GHom::has_image(const GDDD &d) const {
+  return concret->has_image_skip(d);
 }
 
 GDDD GHom::eval(const GDDD &d) const{
