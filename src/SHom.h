@@ -572,6 +572,9 @@ public:
   ///
   /// h (d) = Sum_i ( phi(var, val_i) (d_i) ) 
   GSDD eval(const GSDD &)const;  
+
+  virtual bool has_image (const GSDD & d) const ;
+
 };
 
 class MyGShom : public _GShom{};
