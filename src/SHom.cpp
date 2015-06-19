@@ -102,7 +102,7 @@ namespace sns {
       return this;
     }
 
-    bool has_image (const GSDD & d) const {
+    bool has_image (const GSDD & ) const {
       return true;
     }
 
@@ -153,7 +153,8 @@ namespace sns {
     }
 
     bool has_image (const GSDD & d) const {
-      return ! (value == SDD::null);
+      return ! (value == SDD::null) 
+	&& ! d == SDD::null;
     }
 
     bool is_selector () const {
@@ -221,9 +222,9 @@ namespace sns {
       return pot;
     }
 
-    bool has_image (const GSDD & d) const {
-      return true;
-    }
+    // bool has_image (const GSDD & d) const {
+    //   return true;
+    // }
 
     bool is_selector () const {
       // the empty set is a kind of "false" selector
@@ -367,10 +368,7 @@ namespace sns {
     }
 
     bool has_image (const GSDD & d) const {
-      if (is_selector())
-	return left.has_image(d) && right.has_image(d);
-      else
-	return _GShom::has_image(d);
+      return left.has_image(d) && right.has_image(d) && _GShom::has_image(d);
     }
 
 
@@ -497,6 +495,23 @@ namespace sns {
       GShom::range_t range;
       range.insert(target);
       return range;
+    }
+
+    bool has_image (const GSDD &d) const {
+      if (d == GSDD::one || d == GSDD::top )
+	return true;
+      if (d == GSDD::null)
+	return false;
+
+      // add application of h(arcval)
+      for( GSDD::const_iterator it = d.begin(); it != d.end(); ++it) {
+	assert( typeid(*it->first) == typeid(const DDD&) );
+	if ( h.has_image(((const DDD &)*it->first))) {
+	  return true;
+	}
+      }
+      
+      return false;
     }
   
     GSDD eval(const GSDD &d)const{
@@ -684,7 +699,12 @@ namespace sns {
     }
 
     bool has_image (const GSDD &d) {
-      return ! cond_.has_image(d);
+      if (d==SDD::null)
+	return false;
+      if (! cond_.has_image(d) ) {
+	return true;
+      }
+      return _GShom::has_image(d);
     }
   
     GSDD eval(const GSDD &d) const {
@@ -2582,7 +2602,34 @@ bool StrongShom::operator==(const _GShom &h) const{
 }
 
 
+bool
+StrongShom::has_image(const GSDD &d) const 
+{
+  if(d==GSDD::null)
+    {
+      return false;
+    }
+  else if(d==GSDD::one)
+    {
+      return ! (phiOne()== SDD::null) ;
+    }
+  else if(d==GSDD::top)
+    {
+      return true;
+    }
+  else 
+    {
+      int variable=d.variable();
+      for(GSDD::const_iterator vi=d.begin();vi!=d.end();++vi)
+	{
+	  if ( ! (phi(variable,*vi->first) (vi->second) == SDD::null) ) {
+	    return true;
+	  }
+    	}
+      return false;
+    }
 
+}
 
 /* Eval */
 GSDD 
