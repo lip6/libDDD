@@ -153,7 +153,7 @@ namespace sns {
     }
 
     bool has_image (const GSDD & d) const {
-      return true;
+      return ! (value == SDD::null);
     }
 
     bool is_selector () const {
@@ -2343,6 +2343,57 @@ public:
 
 #endif // PARALLEL_DD
 
+bool _GShom::has_image (const GSDD & d) const {
+
+  return GShom(this)(d) != SDD::null;
+
+  /// test cache
+  
+  //  if (miss)
+  // return concret->has_image(d);
+  
+}
+
+
+bool 
+_GShom::has_image_skip (const GSDD & d) const 
+{
+  if( d == GSDD::null )
+    {
+      return false;
+    }
+  else if( d == GSDD::one )
+    {
+      // basic case, mustn't call d.variable()
+    }
+  else if( d == GSDD::top )
+    {
+      return false;
+    }
+  else if( this->skip_variable(d.variable()) )
+    {
+      // build once, use many times on each son
+      const GShom gshom(this);
+      // Id replies skip true, for correct rewriting rules. But should evaluate now !
+      if (gshom == GShom::id)
+	return true;
+      
+      for( GSDD::const_iterator it = d.begin();
+	   it != d.end();
+	   ++it)
+	{
+	  GSDD son = gshom(it->second);
+	  if( son != GSDD::null && !(it->first->empty()) )
+	    {
+	      return true;
+	    }
+	}
+      return false;      
+    }
+  return has_image(d);
+}
+
+
 GSDD 
 _GShom::eval_skip(const GSDD& d) const
 {
@@ -2631,6 +2682,11 @@ GShom::operator()(const GSDD &d) const
     }
 }
 
+bool
+GShom::has_image (const GSDD & d) const {
+  return concret->has_image_skip(d);
+}
+
 GSDD 
 GShom::eval(const GSDD &d) const
 {
@@ -2654,15 +2710,6 @@ int GShom::refCounter() const{return concret->refCounter();}
 //    return(new Sum(s));
 // }
 
-bool GShom::has_image (const GSDD & d) const {
-  
-
-  /// test cache
-  
-  //  if (miss)
-  return concret->has_image(d);
-  
-}
 
 
 /* Memory Manager */
