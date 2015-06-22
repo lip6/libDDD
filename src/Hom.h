@@ -185,7 +185,7 @@ public:
   GHom invert (const GDDD & pot) const;
 
   /// returns true if and only if h(d) != SDD::null
-  bool has_image (const GDDD & d) const;
+  GDDD has_image (const GDDD & d) const;
 
   ///  Evaluation operator. Homomorphisms overload operator(), so they can be directly applied to DDD nodes.
   /// Note that evaluation through this operator uses and updates a cache.
@@ -396,7 +396,7 @@ private:
   size_t creation_counter;
  
   GDDD eval_skip(const GDDD &) const;
-  bool has_image_skip(const GDDD &) const;
+  GDDD has_image_skip(const GDDD &) const;
 public:
 
 
@@ -472,7 +472,7 @@ public:
   /// For garbage collection. Used in first phase of garbage collection.
   virtual void mark() const{};
 
-  virtual bool has_image(const GDDD &) const;
+  virtual GDDD has_image(const GDDD &) const;
 
   virtual GHom compose (const GHom &r) const ;
 
@@ -536,7 +536,7 @@ public:
   /// h (d) = Sum_i ( phi(var, val_i) (d_i) ) 
   GDDD eval(const GDDD &)const; 
 
-  virtual bool has_image (const GDDD &) const;
+  virtual GDDD has_image (const GDDD &) const;
   
 };
  
