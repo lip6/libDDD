@@ -1801,6 +1801,10 @@ GHom GHom::compose (const GHom &r) const {
    return concret->invert(pot);
  }
 
+GHom GHom::negate () const {
+  return concret->negate();
+}
+
 typedef Cache<GHom,GDDD,GDDD> HomCache;
 
 template<>
