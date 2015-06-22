@@ -541,7 +541,7 @@ public:
     for (param_it gi = parameters.begin(); gi != parameters.end(); ++gi )  {
       GDDD img = gi->has_image(d);
       if (! ( img == GDDD::null ) ) {
-	std::cerr << "Found image for " << *gi << std::endl;
+//	std::cerr << "Found image for " << *gi << std::endl;
 	return img;
       }
     }
