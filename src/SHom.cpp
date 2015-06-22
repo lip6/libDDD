@@ -102,8 +102,8 @@ namespace sns {
       return this;
     }
 
-    bool has_image (const GSDD & ) const {
-      return true;
+    GSDD has_image (const GSDD & d) const {
+      return d;
     }
 
     void print (std::ostream & os) const {
@@ -152,10 +152,8 @@ namespace sns {
       return pot;
     }
 
-    bool has_image (const GSDD & d) const {
-      return ! (value == SDD::null) 
-	&& ! d == SDD::null;
-    }
+    // default "eval != null" is fine
+    //    GSDD has_image (const GSDD & d) const {    }
 
     bool is_selector () const {
       // the empty set is a kind of "false" selector
@@ -367,8 +365,21 @@ namespace sns {
       return (left.invert(pot) + right.invert(pot)) ;
     }
 
-    bool has_image (const GSDD & d) const {
-      return left.has_image(d) && right.has_image(d) && _GShom::has_image(d);
+    GSDD has_image (const GSDD & d) const {
+      GSDD l = left.has_image(d);
+      if (l == GSDD::null)
+	return l;
+      GSDD r = right.has_image(d);
+      if (r == GSDD::null)
+	return r;
+      GSDD inter = r * l;
+      if ( inter == GSDD::null ) {
+	return _GShom::has_image(d);
+      } else {
+	return inter;
+      }
+      // bool version 
+      //      return left.has_image(d) && right.has_image(d) && _GShom::has_image(d);
     }
 
 
@@ -497,21 +508,20 @@ namespace sns {
       return range;
     }
 
-    bool has_image (const GSDD &d) const {
-      if (d == GSDD::one || d == GSDD::top )
-	return true;
-      if (d == GSDD::null)
-	return false;
+    GSDD has_image (const GSDD &d) const {
+      if (d == GSDD::one || d == GSDD::top || d == GSDD::null)
+	return d;
 
       // add application of h(arcval)
       for( GSDD::const_iterator it = d.begin(); it != d.end(); ++it) {
 	assert( typeid(*it->first) == typeid(const DDD&) );
-	if ( h.has_image(((const DDD &)*it->first))) {
-	  return true;
+	DDD img = h.has_image(((const DDD &)*it->first));
+	if ( ! ( img == GDDD::null )  ) {
+	  return GSDD(d.variable(), img, it->second );
 	}
       }
       
-      return false;
+      return GSDD::null;
     }
   
     GSDD eval(const GSDD &d)const{
@@ -644,11 +654,20 @@ namespace sns {
       return localApply ( h.invert( *  ((const SDD *) gi->first) ), target)  ;
     }
 
-    bool has_image (const GSDD & d) const {
-      for (SDD::const_iterator it = d.begin() ; it != d.end() ; ++it) 
-	if (h.has_image( * ((const SDD *) it->first)))
-	  return true;
-      return false;
+    GSDD has_image (const GSDD & d) const {
+      if (d == GSDD::one || d == GSDD::top || d == GSDD::null)
+	return d;
+
+      // add application of h(arcval)
+      for( GSDD::const_iterator it = d.begin(); it != d.end(); ++it) {
+	assert( typeid(*it->first) == typeid(const SDD&) );
+	GSDD img = h.has_image(((const SDD &)*it->first));
+	if ( ! ( img == GSDD::null )  ) {
+	  return GSDD(d.variable(), img, it->second );
+	}
+      }
+      
+      return GSDD::null;
     }
 
     bool operator==(const _GShom &s) const {
@@ -698,12 +717,16 @@ namespace sns {
       return true;
     }
 
-    bool has_image (const GSDD &d) {
+    GSDD has_image (const GSDD &d) {
       if (d==SDD::null)
-	return false;
-      if (! cond_.has_image(d) ) {
-	return true;
+	return d;
+      GSDD img = cond_.has_image(d);
+
+      if ( img == GSDD::null ) {
+	return d;
       }
+
+      // otherwise, we don't know if *all* paths in d are covered...
       return _GShom::has_image(d);
     }
   
@@ -861,13 +884,14 @@ namespace sns {
     }
 
 
-    bool has_image (const GSDD & d) const {
+    GSDD has_image (const GSDD & d) const {
       
       if( d == GSDD::null ||  d == GSDD::one || d == GSDD::top ) {	
 	return _GShom::has_image(d);
       } else {
 
 	parameters_t F;
+	parameters_t G;
 	int var = d.variable();
 	const LocalApply* ld3 = NULL;
 	const SLocalApply* l = NULL;
@@ -886,8 +910,7 @@ namespace sns {
      	    // looks good, l term identified
 	    // l = *gi;
 	  } else {
-	    std::cerr << "Bad has_image case : And containing non local " << std::endl;
-	    return _GShom::has_image(d);
+	    G.push_back(*gi);
 	  }
 	}
 
@@ -898,24 +921,48 @@ namespace sns {
 	  else 
 	    nextSel = *F.begin();
 	}
-	
 
-
-	for (SDD::const_iterator it = d.begin() ; it != d.end() ; ++it ){
-	  if (l != NULL) {
-	    if ( Slocal.has_image( *((const SDD *) it->first))  && nextSel.has_image(it->second))
-	      return true;	    
-	  } else if (ld3 != NULL) {
-	    if ( local ( *((const DDD *) it->first)) != DDD::null  && nextSel.has_image(it->second))
-	      return true;	  
-	  } else {
-	    if ( nextSel.has_image(it->second) ) {
-	      return true;
-	    }
+	// make sure there are some hits at least
+	for (parameters_it gi = G.begin() ; gi != G.end() ; ++gi) {
+	  GSDD img = gi->has_image(d);
+	  if (img == GSDD::null) {
+	    return img;
 	  }
 	}
-	return false;
 
+	// apply G, fully.
+	GSDD res = d;
+	for (parameters_it gi = G.begin() ; gi != G.end() ; ++gi) {
+	  res = (*gi)(res);
+	}
+	if (res == GSDD::null) {
+	  return res;
+	}
+
+	for (SDD::const_iterator it = res.begin() ; it != res.end() ; ++it ) {
+	  GSDD nextimg = nextSel.has_image(it->second);
+	  if (nextimg == GSDD::null) {
+	    continue ;
+	  }
+	  if (l != NULL) {	    
+	    GSDD arcimg = Slocal.has_image( *((const SDD *) it->first));
+	    if (arcimg == GSDD::null) {
+	      continue;
+	    } else {
+	      return GSDD (d.variable(), arcimg, nextimg);
+	    }
+	  } else if (ld3 != NULL) {
+	    DDD arcimg = local ( *((const DDD *) it->first)) ;
+	    if (arcimg == GDDD::null) {
+	      continue;
+	    } else {
+	      return GSDD (d.variable(), arcimg, nextimg);
+	    }
+	  } else {
+	    return GSDD (d.variable(), * it->first, nextimg);
+	  }
+	}
+	return GSDD::null;
       }
     }
 
@@ -1103,12 +1150,14 @@ namespace sns {
 
     _GShom * clone () const {  return new Add(*this); }
 
-    bool has_image (const GSDD & d) const {
-      for (parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) 
-	if ( gi->has_image(d))
-	  return true;
+    GSDD has_image (const GSDD & d) const {
+      for (parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {
+	GSDD img = gi->has_image(d);
+	if ( ! (img == GSDD::null) )
+	  return img;
+      }
       
-      return false;
+      return GSDD::null;
     }
 
 
@@ -1504,7 +1553,7 @@ namespace sns {
 // 	  trace << " Current ltermd3 :" << std::endl;
 // 	  trace << lterm << std::endl;
 
-	  if ( lterm.has_image(val)) {
+	  if ( lterm.has_image(val) != GSDD::null ) {
 	    son = Fsat(son);
 	    if (son != SDD::null) {
 	      val = Lsat (val);
@@ -1612,10 +1661,17 @@ namespace sns {
       return left(right(d));
     }
 
-    bool has_image (const GSDD & d) const {
-      if (! right.has_image(d)) {
-	return false;
+    GSDD has_image (const GSDD & d) const {
+      GSDD rimg = right.has_image(d);
+      if (rimg == GSDD::null) {
+	return GSDD::null;
       }
+      // optimistic
+      GSDD res = left.has_image(rimg);
+      if ( ! ( res == GSDD::null) ) {
+	return res ;
+      }
+
       return _GShom::has_image(d);
     }
 
@@ -1658,8 +1714,8 @@ namespace sns {
     //  not really sure how to implement this guy : default to assert(false)
     //GShom invert (const GSDD & pot) const ;
 
-    bool has_image (const GSDD & d) const {
-      return right.has_image(d);
+    GSDD has_image (const GSDD & d) const {
+      return left ^ right.has_image(d);
     }
 
 
@@ -1701,8 +1757,8 @@ namespace sns {
     //  not really sure how to implement this guy : default to assert(false)
     //GShom invert (const GSDD & pot) const ;
 
-    bool has_image (const GSDD & d) const {
-      return left.has_image(d);
+    GSDD has_image (const GSDD & d) const {
+      return left.has_image(d) ^ right;
     }
 
 
@@ -2363,24 +2419,22 @@ public:
 
 #endif // PARALLEL_DD
 
-bool _GShom::has_image (const GSDD & d) const {
+GSDD _GShom::has_image (const GSDD & d) const {
+  // default to actually computing the solutions, which is always correct
+  return GShom(this)(d);
 
-  return GShom(this)(d) != SDD::null;
+  // boolean version
+  //  return GShom(this)(d)  != SDD::null;
 
-  /// test cache
-  
-  //  if (miss)
-  // return concret->has_image(d);
-  
 }
 
 
-bool 
+GSDD 
 _GShom::has_image_skip (const GSDD & d) const 
 {
   if( d == GSDD::null )
     {
-      return false;
+      return d;
     }
   else if( d == GSDD::one )
     {
@@ -2388,7 +2442,7 @@ _GShom::has_image_skip (const GSDD & d) const
     }
   else if( d == GSDD::top )
     {
-      return false;
+      return d;
     }
   else if( this->skip_variable(d.variable()) )
     {
@@ -2396,7 +2450,7 @@ _GShom::has_image_skip (const GSDD & d) const
       const GShom gshom(this);
       // Id replies skip true, for correct rewriting rules. But should evaluate now !
       if (gshom == GShom::id)
-	return true;
+	return d;
       
       for( GSDD::const_iterator it = d.begin();
 	   it != d.end();
@@ -2405,10 +2459,10 @@ _GShom::has_image_skip (const GSDD & d) const
 	  GSDD son = gshom(it->second);
 	  if( son != GSDD::null && !(it->first->empty()) )
 	    {
-	      return true;
+	      return GSDD(d.variable(), *it->first, son);
 	    }
 	}
-      return false;      
+      return GSDD::null;      
     }
   return has_image(d);
 }
@@ -2602,31 +2656,28 @@ bool StrongShom::operator==(const _GShom &h) const{
 }
 
 
-bool
+GSDD
 StrongShom::has_image(const GSDD &d) const 
 {
-  if(d==GSDD::null)
+  if(d==GSDD::null || d==GSDD::top )
     {
-      return false;
+      return d;
     }
   else if(d==GSDD::one)
     {
-      return ! (phiOne()== SDD::null) ;
-    }
-  else if(d==GSDD::top)
-    {
-      return true;
+      return phiOne() ;
     }
   else 
     {
       int variable=d.variable();
       for(GSDD::const_iterator vi=d.begin();vi!=d.end();++vi)
 	{
-	  if ( ! (phi(variable,*vi->first) (vi->second) == SDD::null) ) {
-	    return true;
+	  GSDD img = phi(variable,*vi->first) (vi->second);
+	  if ( !( img  == SDD::null) ) {
+	    return img;
 	  }
     	}
-      return false;
+      return GSDD::null;
     }
 
 }
@@ -2729,7 +2780,7 @@ GShom::operator()(const GSDD &d) const
     }
 }
 
-bool
+GSDD
 GShom::has_image (const GSDD & d) const {
   return concret->has_image_skip(d);
 }

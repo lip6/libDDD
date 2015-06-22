@@ -135,7 +135,7 @@ public:
   GShom invert (const GSDD & pot) const;
 
   /// returns true if and only if h(d) != SDD::null
-  bool has_image (const GSDD & d) const;
+  GSDD has_image (const GSDD & d) const;
   
   GShom compose(const GShom &) const;
 
@@ -396,7 +396,7 @@ private:
 
   /// The procedure responsible for propagating efficiently across "skipped" variable nodes.
     GSDD eval_skip(const GSDD &) const;
-    bool has_image_skip(const GSDD &) const;
+    GSDD has_image_skip(const GSDD &) const;
 
   /// For operation cache management. 
   /// If immediat==true,  eval is called without attempting a cache hit. 
@@ -449,7 +449,7 @@ public:
   // for use by unique table : return new MyConcreteClassName(*this);
   virtual _GShom * clone () const =0 ;
 
-  virtual bool has_image (const GSDD & d) const ;
+  virtual GSDD has_image (const GSDD & d) const ;
 
   virtual GShom compose(const GShom &) const;
   
@@ -573,7 +573,7 @@ public:
   /// h (d) = Sum_i ( phi(var, val_i) (d_i) ) 
   GSDD eval(const GSDD &)const;  
 
-  virtual bool has_image (const GSDD & d) const ;
+  virtual GSDD has_image (const GSDD & d) const ;
 
 };
 

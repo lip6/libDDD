@@ -73,8 +73,8 @@ public:
   bool is_selector () const {
     return true; 
   }
-  bool has_image (const GDDD & ) const {
-    return true;
+  GDDD has_image (const GDDD & d) const {
+    return d;
   }
  GHom invert  (const GDDD & pot) const {
    return this;
@@ -108,12 +108,6 @@ public:
   GDDD eval(const GDDD &d)const{
     return d==GDDD::null?GDDD::null:value;
   }
-
-  bool has_image (const GDDD & d) const {
-    return (! (value == GDDD::null))
-      &&  (! (d == GDDD::null)) ;
-  }
-
 
  GHom invert  (const GDDD & pot) const {
    return pot;
@@ -272,10 +266,6 @@ public:
 
     _GHom * clone () const {  return new DomExtract(*this); }
 
-    bool has_image (const GDDD &) {
-      return true;
-    }
-
     void print (std::ostream & os) const {
       os << "(DomExtract:" << target << ")";
     }
@@ -372,8 +362,23 @@ public:
     && get_concret(right)->skip_variable(var);
   }
 
-  bool has_image (const GDDD & d) const {
-    return left.has_image(d) && right.has_image(d) && _GHom::has_image(d);
+  GDDD has_image (const GDDD & d) const {    
+    GDDD imgl = left.has_image(d);
+    if (imgl == GDDD::null) {
+      return imgl;
+    }
+    GDDD imgr = right.has_image(d);
+    if (imgr == GDDD::null) {
+      return imgr;
+    }
+    // lucky ?
+    GDDD inter = imgl * imgr ;
+    if (! ( inter == GDDD::null ) ) {
+      return inter;
+    } 
+
+    // default
+    return _GHom::has_image(d);
   }
   
   /* Memory Manager */
@@ -435,12 +440,14 @@ public :
     return cond_ == ps->cond_ ;
   }  
 
-  bool has_image (const GDDD & d) const {
+  GDDD has_image (const GDDD & d) const {
     if (d==GDDD::null)
-      return false;
-    if (! cond_.has_image(d) ) {
-      return true;
+      return d;
+
+    if ( cond_.has_image(d) == GDDD::null ) {
+      return d;
     }
+
     return _GHom::has_image(d);
   }
 
@@ -503,12 +510,17 @@ public:
     return find(parameters.begin(), parameters.end(), GHom::id) != parameters.end();
   }
 
-  bool has_image (const GDDD & d) const {
-    for (param_it gi = parameters.begin(); gi != parameters.end(); ++gi ) 
-      if ( gi->has_image(d))
-	return true;
+  GDDD has_image (const GDDD & d) const {
+
+    for (param_it gi = parameters.begin(); gi != parameters.end(); ++gi )  {
+      GDDD img = gi->has_image(d);
+      if (! ( img == GDDD::null ) ) {
+	std::cerr << "Found image for " << *gi << std::endl;
+	return img;
+      }
+    }
       
-    return false;
+    return GDDD::null;
   }
 
    
@@ -967,14 +979,22 @@ public:
     bool
     operator==(const _GHom &h) const
     {
-		return parameters == ((And*)&h )->parameters;	
+      return parameters == ((And*)&h )->parameters;	
     }
 
-  bool has_image (const GDDD & d) const {
-    for(parameters_it gi=parameters.begin();gi!=parameters.end();++gi)
-      if (! gi->has_image(d)) {
-	return false;
+  GDDD has_image (const GDDD & d) const {
+    GDDD optimist = d;
+    for(parameters_it gi=parameters.begin();gi!=parameters.end();++gi) {
+      optimist = gi->has_image(optimist);
+      if ( ! ( optimist == GDDD::null ) ) {
+	continue ;
+      } else if ( gi->has_image(d) == GDDD::null ) {
+	return GDDD::null;
       }
+    }
+    if ( ! ( optimist == GDDD::null ) ) {
+      return optimist;
+    }    
     return _GHom::has_image(d);
   }
 	
@@ -1134,9 +1154,9 @@ public:
         return left ^ right(d);
     }
            
-  bool
+  GDDD
   has_image(const GDDD &d) const {
-    return right.has_image(d);
+    return left ^ right.has_image(d);
   }
 
     /* Memory Manager */
@@ -1179,9 +1199,9 @@ public:
     }
 
 
-  bool
+  GDDD
   has_image(const GDDD &d) const {
-    return left.has_image(d);
+    return left.has_image(d) ^ right;
   }
 
   /* Eval */
@@ -1471,27 +1491,25 @@ GHom _GHom::compose (const GHom &r) const {
   return Compose(thisH, r);
 }
 
-bool
+GDDD
 _GHom::has_image(const GDDD& d) const
 {
-  return GHom(this)(d) != GDDD::null;
+  return GHom(this)(d) ; 
 }
-bool
+GDDD
 _GHom::has_image_skip(const GDDD& d) const
 {
-  if( d == GDDD::null ) {
-    return false;
+  if( d == GDDD::null ||  d == GDDD::top) {
+    return d;
   } else if( d == GDDD::one ) {
     // basic case, mustn't call d.variable()
-  } else if( d == GDDD::top ) {
-    return false;
   } else if( this->skip_variable(d.variable()) ) {
 
     // The homorphism propagates itself without any modification on the GDDD
     const GHom ghom(this);
 
     if (ghom == GHom::id) {
-      return true;
+      return d;
     }
     
     for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
@@ -1499,10 +1517,10 @@ _GHom::has_image_skip(const GDDD& d) const
 	GDDD son = ghom(it->second);
 	if( son != GDDD::null )
 	  {
-	    return true;
+	    return GDDD(d.variable(), it->first, son) ;
 	  }
       }
-    return false;
+    return GDDD::null;
   }
 
   return has_image(d);
@@ -1606,20 +1624,16 @@ bool StrongHom::operator==(const _GHom &h) const{
 }
 
 /* Eval */
-bool
+GDDD
 StrongHom::has_image(const GDDD &d) const
 {
-  if( d== GDDD::null)
+  if( d == GDDD::null || d == GDDD::top)
   {
-    return false;
+    return d;
   }
   else if( d == GDDD::one)
   {
-    return ! (phiOne() == GDDD::null);
-  }
-  else if( d== GDDD::top)
-  {
-    return true;
+    return  phiOne();
   }
   else
   {
@@ -1630,10 +1644,12 @@ StrongHom::has_image(const GDDD &d) const
          vi!=dend;
          ++vi)
     {
-      if ( ! ( phi(variable,vi->first)(vi->second) == DDD::null) )
-	return true;
+      GDDD res = phi(variable,vi->first)(vi->second);
+      if (! (res == GDDD::null ) ) {
+	return res;
+      }
     }
-    return false;
+    return GDDD::null;
   }
 }
 
@@ -1777,7 +1793,7 @@ GHom::operator()(const GDDD &d) const
     }
 }
 
-bool GHom::has_image(const GDDD &d) const {
+GDDD GHom::has_image(const GDDD &d) const {
   return concret->has_image_skip(d);
 }
 
