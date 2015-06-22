@@ -543,8 +543,6 @@ public:
   GDDD eval(const GDDD &)const; 
 
   virtual GDDD has_image (const GDDD &) const;
-  /// returns a negation of a selector homomorphism h, such that h.negate() (d) = d - h(d)
-  virtual GHom negate () const;  
 
 };
  
