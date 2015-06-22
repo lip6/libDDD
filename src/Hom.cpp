@@ -76,6 +76,11 @@ public:
   GDDD has_image (const GDDD & d) const {
     return d;
   }
+  /// returns a negation of a selector homomorphism h, such that h.negate() (d) = d - h(d)
+  GHom negate () const {
+    return GHom(GDDD::null);
+  }  
+
  GHom invert  (const GDDD & pot) const {
    return this;
  }
@@ -361,6 +366,11 @@ public:
     return get_concret(left)->skip_variable(var)
     && get_concret(right)->skip_variable(var);
   }
+  /// returns a negation of a selector homomorphism h, such that h.negate() (d) = d - h(d)
+  GHom negate () const {
+    return left.negate() + right.negate();
+  }  
+
 
   GDDD has_image (const GDDD & d) const {    
     GDDD imgl = left.has_image(d);
@@ -440,6 +450,12 @@ public :
     return cond_ == ps->cond_ ;
   }  
 
+  /// returns a negation of a selector homomorphism h, such that h.negate() (d) = d - h(d)
+  GHom negate () const {
+    return cond_;
+  }  
+
+
   GDDD has_image (const GDDD & d) const {
     if (d==GDDD::null)
       return d;
@@ -448,7 +464,7 @@ public :
       return d;
     }
 
-    return _GHom::has_image(d);
+    return cond_.negate().has_image(d);
   }
 
 
@@ -509,6 +525,16 @@ public:
   {
     return find(parameters.begin(), parameters.end(), GHom::id) != parameters.end();
   }
+
+  /// returns a negation of a selector homomorphism h, such that h.negate() (d) = d - h(d)
+  GHom negate () const {
+    GHom toadd = GHom::id ;
+    for( param_it it = parameters.begin(); it != parameters.end(); ++it) {
+      toadd = toadd & it->negate();
+    }
+    return toadd;
+  }  
+
 
   GDDD has_image (const GDDD & d) const {
 
@@ -982,6 +1008,14 @@ public:
       return parameters == ((And*)&h )->parameters;	
     }
 
+  GHom negate () const {
+    d3::set<GHom>::type toadd ;
+    for(parameters_it gi=parameters.begin();gi!=parameters.end();++gi) {
+      toadd.insert( gi->negate());
+    }
+    return GHom::add(toadd);
+  }
+
   GDDD has_image (const GDDD & d) const {
     GDDD optimist = d;
     for(parameters_it gi=parameters.begin();gi!=parameters.end();++gi) {
@@ -1153,7 +1187,8 @@ public:
     {
         return left ^ right(d);
     }
-           
+
+     
   GDDD
   has_image(const GDDD &d) const {
     return left ^ right.has_image(d);
@@ -1490,6 +1525,13 @@ GHom _GHom::compose (const GHom &r) const {
 
   return Compose(thisH, r);
 }
+
+GHom
+_GHom::negate() const
+{
+  return ! GHom(this) ; 
+}
+
 
 GDDD
 _GHom::has_image(const GDDD& d) const
