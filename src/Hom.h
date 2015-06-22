@@ -187,6 +187,9 @@ public:
   /// returns true if and only if h(d) != SDD::null
   GDDD has_image (const GDDD & d) const;
 
+  /// returns a negation of a selector homomorphism h, such that h.negate() (d) = d - h(d)
+  GHom negate () const;  
+
   ///  Evaluation operator. Homomorphisms overload operator(), so they can be directly applied to DDD nodes.
   /// Note that evaluation through this operator uses and updates a cache.
   /// \param d the DDD to apply this h to.
@@ -473,6 +476,9 @@ public:
   virtual void mark() const{};
 
   virtual GDDD has_image(const GDDD &) const;
+  /// returns a negation of a selector homomorphism h, such that h.negate() (d) = d - h(d)
+  virtual GHom negate () const;  
+
 
   virtual GHom compose (const GHom &r) const ;
 
@@ -537,7 +543,9 @@ public:
   GDDD eval(const GDDD &)const; 
 
   virtual GDDD has_image (const GDDD &) const;
-  
+  /// returns a negation of a selector homomorphism h, such that h.negate() (d) = d - h(d)
+  virtual GHom negate () const;  
+
 };
  
 
