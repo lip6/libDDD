@@ -459,11 +459,6 @@ public :
   GDDD has_image (const GDDD & d) const {
     if (d==GDDD::null)
       return d;
-
-    if ( cond_.has_image(d) == GDDD::null ) {
-      return d;
-    }
-
     return cond_.negate().has_image(d);
   }
 
