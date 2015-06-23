@@ -399,8 +399,9 @@ private:
   size_t creation_counter;
  
   GDDD eval_skip(const GDDD &) const;
-  GDDD has_image_skip(const GDDD &) const;
 public:
+  // made public ONLY for the cache, not part of normal API, use GHom has_image instead (cache etc...).
+  GDDD has_image_skip(const GDDD &) const;
 
 
     /// The skip_variable predicate indicates which variables are "don't care" with respect to this SHom.
