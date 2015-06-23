@@ -537,16 +537,49 @@ public:
 
 
   GDDD has_image (const GDDD & d) const {
-
-    for (param_it gi = parameters.begin(); gi != parameters.end(); ++gi )  {
-      GDDD img = gi->has_image(d);
-      if (! ( img == GDDD::null ) ) {
-//	std::cerr << "Found image for " << *gi << std::endl;
-	return img;
+    if( d == GDDD::null )
+      {
+	return GDDD::null;
       }
-    }
-      
-    return GDDD::null;
+    else if( d == GDDD::one || d == GDDD::top )
+      {
+	std::set<GDDD> s;
+        
+	for(param_it gi=parameters.begin();gi!=parameters.end();++gi) {
+	  GDDD img = gi->has_image(d);
+	  if (! (img == GDDD::null)) {
+	    return img;
+	  }
+	}
+	return GDDD::null; 
+      } 
+    else 
+      {
+	int var = d.variable();
+	
+	partition_cache_type::iterator part_it = partition_cache.find(var);
+	if( part_it == partition_cache.end() )
+          {
+	    this->skip_variable(var);
+	    part_it = partition_cache.find(var);
+          }              
+	
+	GHom& F = part_it->second.first;
+        std::set<GHom> & G = part_it->second.second;
+        
+	for( std::set<GHom>::iterator it = G.begin() ; it != G.end(); ++it)
+	  {
+	    GDDD img = it->has_image(d);
+	    if (! (img == GDDD::null)) {
+	      return img;
+	    }
+	  }
+	    
+	GDDD v = F.has_image(d);
+	
+	return v;
+      }
+    
   }
 
    
@@ -1015,7 +1048,7 @@ public:
     }
     return GHom::add(toadd);
   }
-
+  
   GDDD has_image (const GDDD & d) const {
     GDDD optimist = d;
     for(parameters_it gi=parameters.begin();gi!=parameters.end();++gi) {
@@ -1031,10 +1064,10 @@ public:
     }    
     return _GHom::has_image(d);
   }
-	
-    size_t
-    hash() const
-    {
+  
+  size_t
+  hash() const
+  {
 		size_t res = 40693 ;
 		for(parameters_it gi=parameters.begin();gi!=parameters.end();++gi)
 			res^=gi->hash();
