@@ -934,9 +934,9 @@ namespace sns {
 	GSDD res = d;
 	for (parameters_it gi = G.begin() ; gi != G.end() ; ++gi) {
 	  res = (*gi)(res);
-	}
-	if (res == GSDD::null) {
-	  return res;
+	  if (res == GSDD::null) {
+	    return res;
+	  }
 	}
 
 	for (SDD::const_iterator it = res.begin() ; it != res.end() ; ++it ) {
