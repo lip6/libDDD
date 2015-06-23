@@ -1845,6 +1845,14 @@ HomCache::should_insert (const GHom & h) const
 }
 
 static HomCache cache;
+typedef Cache<GHom,GDDD,GDDD,char> ImgHomCache;
+
+template <>
+GDDD ImgHomCache::eval(const GHom & func, const GDDD  & param) const {
+  return _GHom::get_concret(func)->has_image_skip(param);
+}
+
+static ImgHomCache imgcache;
 
 /* Eval */
 GDDD
@@ -1868,7 +1876,21 @@ GHom::operator()(const GDDD &d) const
 }
 
 GDDD GHom::has_image(const GDDD &d) const {
-  return concret->has_image_skip(d);
+    if(concret->immediat)
+    {
+      return concret->has_image(d);
+    }
+    else
+    {
+      if (d == GDDD::null) 
+        {
+	  return d;
+        }
+      else
+        {
+	  return (imgcache.insert(*this,d)).second;
+        }
+    }
 }
 
 GDDD GHom::eval(const GDDD &d) const{
@@ -1911,7 +1933,7 @@ void GHom::mark()const{
 
 void GHom::garbage(){
   cache.clear();
-
+  imgcache.clear();
   // mark phase
   for(UniqueTable<_GHom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
     if((*di)->refCounter!=0){
