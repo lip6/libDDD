@@ -8,7 +8,8 @@ template
       typename FuncType
     , typename ParamType
     , typename ResType
-    >
+    , typename EvalFunc=int
+  >
 class Cache
 {
 private:
