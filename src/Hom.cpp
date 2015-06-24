@@ -1584,7 +1584,7 @@ _GHom::has_image_skip(const GDDD& d) const
     
     for( GDDD::const_iterator it = d.begin() ; it != d.end() ; ++it )
       {
-	GDDD son = ghom(it->second);
+	GDDD son = ghom.has_image(it->second);
 	if( son != GDDD::null )
 	  {
 	    return GDDD(d.variable(), it->first, son) ;
