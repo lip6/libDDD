@@ -2456,7 +2456,7 @@ _GShom::has_image_skip (const GSDD & d) const
 	   it != d.end();
 	   ++it)
 	{
-	  GSDD son = gshom(it->second);
+	  GSDD son = gshom.has_image(it->second);
 	  if( son != GSDD::null && !(it->first->empty()) )
 	    {
 	      return GSDD(d.variable(), *it->first, son);
