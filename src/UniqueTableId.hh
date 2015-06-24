@@ -187,9 +187,10 @@ public:
   // refs are used as heads for mark & sweep
   void ref (const id_t & id) {
     // make sure sparse table is large enough
-    if (refs.size() < id) {
+    if (refs.size() <= id) {
       // exponential may be a bit too much
       refs.resize((3*id)/2);
+      assert( refs.size() > id);
     }
 
     // test is true if ref count  != 0
