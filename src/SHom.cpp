@@ -259,7 +259,7 @@ namespace sns {
        *  prune at current level and drop a recursive call
        *  i.e. do OTF intersection with the constant */
       int variable=d.variable();
-      if (left.skip_variable(variable)) {
+      if (left != GShom::id && left.skip_variable(variable)) {
 
 	    /** CODE COPY PASTE FROM SDED_MULT OF 2 SDD : TODO : REFACTOR THIS ALGO TO SHARE CODE */
 	    std::map<GSDD,DataSet *> res;
