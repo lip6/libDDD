@@ -485,10 +485,10 @@ public:
   typedef std::pair< GHom , std::set<GHom> > partition;
   typedef std::map<int,partition> partition_cache_type;
 
-
-private:
-
+  // public for direct manipulation in fixpoint
   param_t parameters;
+public:
+
   mutable partition_cache_type partition_cache;
   bool have_id;
        
@@ -921,8 +921,8 @@ class Compose
 	:
     public _GHom
 {
-
-private:
+public :
+    // made public for direct manipulation in Fixpoint::eval()
 
     GHom left;
     GHom right;
@@ -2011,6 +2011,87 @@ GHom fixpoint (const GHom &h, bool is_top_level) {
 	if( typeid( *_GHom::get_concret(h) ) == typeid(Fixpoint)
 	   || h == GHom::id  || h.is_selector() || h == GHom(GDDD::null))
 		return h;
+
+  
+  // is it the fixpoint of an union ?
+  if (const Add * add = dynamic_cast<const Add*> ( _GHom::get_concret(h) ) )
+    {
+      // Check if we have (sel & F + id) where sel is a selector and F is a sum
+      if (add->parameters.size() == 2) {
+	GHom other ;
+	bool haveId = false;
+	for ( Add::param_it it = add->parameters.begin() ; it != add->parameters.end() ; ++it ) {
+	  if ( *it == GHom::id )
+	    haveId = true;
+	  else
+	    other = *it;
+	}
+	if (haveId) {
+	  // This looks good, we have the form : fixpoint ( other + Id )
+	  // Check if : other = sel & F
+	  if (const Compose * comp = dynamic_cast<const Compose*> ( _GHom::get_concret(other) ) ) {
+	    // hit : we have a composition
+//	    trace << "Hit a composition! ";// comp->print(std::cerr) ; std::cerr << std::endl;
+	    bool canApply = false;
+	    bool isLeftSel = true;
+	    const Add * subadd = NULL;
+	    GHom selector;
+
+	    if ( comp->left.is_selector() ) {
+	      if (const Add * subadd2 = dynamic_cast<const Add*> ( _GHom::get_concret(comp->right) ) ) {
+		subadd = subadd2;
+		selector = comp->left;
+		isLeftSel = true;
+		canApply = true;
+	      }
+	    } else if (comp->right.is_selector() ) {
+	      if (const Add * subadd2 = dynamic_cast<const Add*> ( _GHom::get_concret(comp->left) ) ) {
+		subadd = subadd2;
+		selector = comp->right;
+		isLeftSel = false;
+		canApply = true;
+	      }
+	    }
+	    if (canApply) 
+	      {
+		// This is it !! apply rewriting strategy
+//		trace << "Hit matches second criterion sel & Add ! " << std::endl;
+		GHom::range_t selr = selector.get_range();
+		if (! selr.empty() ) {
+		  // selector concerns a subset of variables, probably we can commute with at least some of the terms in subadd
+		  d3::set<GHom>::type doC, notC;
+		  for (Add::param_it it =  subadd->parameters.begin() ; it != subadd->parameters.end() ; ++it ) {
+		    if ( commutative (selector, *it) ) {
+		      // insert into commutative operations set
+		      doC.insert(*it);
+		    } else {
+		      // insert into non commutative set
+		      notC.insert(*it);
+		    }
+		  }
+		  
+		  if (! doC.empty() ) {
+		    // Great ! successful application of the rule is possible
+		    //std::cout << "Hit Full ! " << doC.size() << "/" << notC.size() << std::endl;
+		    d3::set<GHom>::type finalU;
+		    finalU.insert(GHom::id);
+		    doC.insert(GHom::id);
+		    if (isLeftSel ) {
+		      finalU.insert( Fixpoint( (selector &  GHom::add(notC))  + GHom::id) );
+		      finalU.insert( selector & fixpoint ( GHom::add(doC) ) );
+		    } else {
+		      finalU.insert( Fixpoint( (GHom::add(notC) & selector)  + GHom::id) );
+		      finalU.insert( fixpoint ( GHom::add(doC) ) & selector );
+		    }
+		    return Fixpoint( GHom::add(finalU) ) ;
+		  }
+		}
+	      }
+	  }
+	}
+      }
+    }
+
 	
     return Fixpoint(h, 0, is_top_level);
 }
