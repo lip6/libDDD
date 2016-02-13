@@ -3224,6 +3224,9 @@ static void addCompositionParameter (const GShom & h, sns::And::parameters_t & a
 	  }	
 	}
       }
+    } else if ( const sns::Compose * comp = dynamic_cast<const sns::Compose*> ( _GShom::get_concret(h) ) ) {
+      addCompositionParameter(comp->left , args);
+      addCompositionParameter(comp->right , args);
     } else if ( const sns::SLocalApply* lh2 = dynamic_cast<const sns::SLocalApply* > ( _GShom::get_concret(h) ) ) {
       // test for local that can be nested
       for (sns::And::parameters_t::iterator it = args.begin() ; it != args.end() ; ++it ) {
@@ -3252,7 +3255,17 @@ static void addCompositionParameter (const GShom & h, sns::And::parameters_t & a
       args.push_back ( h );
     } else if ( argsNOTC.size() == 1 ) {
       GShom h1 = *argsNOTC.begin();
-      args.push_back ( sns::Compose ( h1,  h ) );
+      bool donormal = true;
+      if (const sns::Compose * comph1 = dynamic_cast<const sns::Compose*> ( _GShom::get_concret(h1) )) {
+	if (commutative (comph1->right,h) ) {
+	  args.push_back ( sns::Compose ( comph1->left, comph1->right & h ) );
+	  donormal = false;
+	}
+      } 
+      if (donormal)  {
+	// let the user-defined semantic composition apply
+	args.push_back ( sns::Compose ( h1, h ) );
+      }
     } else {
       args.push_back ( sns::Compose ( sns::And (argsNOTC), h) );    
     }
