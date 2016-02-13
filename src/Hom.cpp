@@ -2168,7 +2168,10 @@ static void addCompositionParameter (const GHom & h, And::parameters_t & args) {
 			bool donormal = true;
 			if (const Compose * comph1 = dynamic_cast<const Compose*> ( _GHom::get_concret(h1) )) {
 			  if (commutative (comph1->right,h) ) {
-			    args.push_back ( Compose ( comph1->left, comph1->right & h ) );
+			    And::parameters_t rr ;
+			    rr.push_back(comph1->right );
+			    rr.push_back(h);
+			    args.push_back ( Compose ( comph1->left, And(rr) ));
 			    donormal = false;
 			  }
 			} 

@@ -3258,7 +3258,10 @@ static void addCompositionParameter (const GShom & h, sns::And::parameters_t & a
       bool donormal = true;
       if (const sns::Compose * comph1 = dynamic_cast<const sns::Compose*> ( _GShom::get_concret(h1) )) {
 	if (commutative (comph1->right,h) ) {
-	  args.push_back ( sns::Compose ( comph1->left, comph1->right & h ) );
+	  sns::And::parameters_t rr ;
+	  rr.push_back(comph1->right );
+	  rr.push_back(h);
+	  args.push_back ( sns::Compose ( comph1->left, sns::And(rr) ));
 	  donormal = false;
 	}
       } 
