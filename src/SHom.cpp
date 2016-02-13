@@ -3212,6 +3212,9 @@ static void addCompositionParameter (const GShom & h, sns::And::parameters_t & a
      for (sns::And::parameters_it it = hAnd->parameters.begin() ; it != hAnd->parameters.end() ; ++it ) {
        addCompositionParameter (*it, args) ;
      }
+  } else if ( const sns::Compose * comp = dynamic_cast<const sns::Compose*> ( _GShom::get_concret(h) ) ) {
+      addCompositionParameter(comp->left , args);
+      addCompositionParameter(comp->right , args);
   } else {
     // first test for possible nesting of locals
     if ( const sns::LocalApply* lh2 = dynamic_cast<const sns::LocalApply* > ( _GShom::get_concret(h) ) ) {
@@ -3224,9 +3227,6 @@ static void addCompositionParameter (const GShom & h, sns::And::parameters_t & a
 	  }	
 	}
       }
-    } else if ( const sns::Compose * comp = dynamic_cast<const sns::Compose*> ( _GShom::get_concret(h) ) ) {
-      addCompositionParameter(comp->left , args);
-      addCompositionParameter(comp->right , args);
     } else if ( const sns::SLocalApply* lh2 = dynamic_cast<const sns::SLocalApply* > ( _GShom::get_concret(h) ) ) {
       // test for local that can be nested
       for (sns::And::parameters_t::iterator it = args.begin() ; it != args.end() ; ++it ) {
