@@ -2072,7 +2072,7 @@ GHom fixpoint (const GHom &h, bool is_top_level) {
 		  
 		  if (! doC.empty() ) {
 		    // Great ! successful application of the rule is possible
-		    //std::cout << "Hit Full ! " << doC.size() << "/" << notC.size() << std::endl;
+		    std::cout << "Hit Full ! " << doC.size() << "/" << notC.size() << std::endl;
 		    d3::set<GHom>::type finalU;
 		    finalU.insert(GHom::id);
 		    doC.insert(GHom::id);
@@ -2146,6 +2146,9 @@ static void addCompositionParameter (const GHom & h, And::parameters_t & args) {
 		for (And::parameters_it it = hAnd->parameters.begin() ; it != hAnd->parameters.end() ; ++it ) {
 			addCompositionParameter (*it, args) ;
 		}
+	} else 	if ( const Compose * comp = dynamic_cast<const Compose*> ( _GHom::get_concret(h) ) ) {
+	  addCompositionParameter(comp->left , args);
+	  addCompositionParameter(comp->right , args);
 	} else {
 		// partition args into elements that commute with h or not
 		And::parameters_t argsC, argsNOTC;
@@ -2162,8 +2165,17 @@ static void addCompositionParameter (const GHom & h, And::parameters_t & args) {
 			args.push_back ( h );
 		} else if ( argsNOTC.size() == 1 ) {
 			GHom h1 = *argsNOTC.begin();
-			// let the user-defined semantic composition apply
-			args.push_back ( Compose ( h1, h ) );
+			bool donormal = true;
+			if (const Compose * comph1 = dynamic_cast<const Compose*> ( _GHom::get_concret(h1) )) {
+			  if (commutative (comph1->right,h) ) {
+			    args.push_back ( Compose ( comph1->left, comph1->right & h ) );
+			    donormal = false;
+			  }
+			} 
+			if (donormal)  {
+			  // let the user-defined semantic composition apply
+			  args.push_back ( Compose ( h1, h ) );
+			}
 		} else {
 			args.push_back ( Compose ( And (argsNOTC), h) );    
 		}
