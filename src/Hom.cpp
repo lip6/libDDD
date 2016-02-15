@@ -1116,15 +1116,31 @@ public:
 			return res;
 		} else {
 			GDDD res = d;
-			parameters_t F;
+			parameters_t G,F;
 			int var = d.variable() ;
+			
+			// collect F and G sets, apply any selections that start from this level (cut branches if we can)
 			for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
 				if ( gi->skip_variable(var) ) {
 					F.push_back(*gi);
 				} else {
-					res = (*gi) (res);
+				  // used to be before selection based reordering
+				  //	res = (*gi) (res);
+
+				  if (const Compose * comp = dynamic_cast<const Compose*> ( _GHom::get_concret(*gi) ) ) {
+				    if (comp->right.is_selector()) {
+				      // std::cerr << "sel b4 ass" << *gi << std::endl;
+				      res = comp->right(res);
+				      G.push_back(comp->left);
+				    } else {
+				      G.push_back(*gi);
+				    }
+				  } else {
+				    G.push_back(*gi);
+				  }
 				}
 			}
+			// Apply F part, possibly cutting and updating subtrees below us
 			GHom nextSel = GHom::id ;
 			if (! F.empty()) {
 				if ( F.size() > 1 ) 
@@ -1132,8 +1148,14 @@ public:
 				else 
 					nextSel = *F.begin();
 			}
-			
-			return  nextSel (res)  ;	
+			res =  nextSel (res)  ;	
+			// apply what's rest of G part, i.e. typically assignments, some of which may involve queryEval
+			// because we cut as many branches as we could before this the trees passed to queryEval are smaller.
+			for(parameters_it gi = G.begin(); gi != G.end(); ++gi ) {	     
+			  res = (*gi) (res);
+			}
+
+			return  res  ;	
 		}
     }
 	
