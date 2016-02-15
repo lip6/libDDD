@@ -1126,8 +1126,12 @@ public:
 				} else {
 				  // used to be before selection based reordering
 				  //	res = (*gi) (res);
-
-				  if (const Compose * comp = dynamic_cast<const Compose*> ( _GHom::get_concret(*gi) ) ) {
+				  // locality test
+				  if (gi->get_range().size() == 1) {
+				    // local actions cannot make the situation worse, it induces unions as output values are equal
+				    // it does not depend on a queryEval, do it now
+				    res = (*gi) (res);
+				  } else if (const Compose * comp = dynamic_cast<const Compose*> ( _GHom::get_concret(*gi) ) ) {
 				    if (comp->right.is_selector()) {
 				      // std::cerr << "sel b4 ass" << *gi << std::endl;
 				      res = comp->right(res);
@@ -2099,10 +2103,10 @@ GHom fixpoint (const GHom &h, bool is_top_level) {
 		    finalU.insert(GHom::id);
 		    doC.insert(GHom::id);
 		    if (isLeftSel ) {
-		      finalU.insert( Fixpoint( (selector &  GHom::add(notC))  + GHom::id) );
+		      finalU.insert( selector &  GHom::add(notC) );
 		      finalU.insert( selector & fixpoint ( GHom::add(doC) ) );
 		    } else {
-		      finalU.insert( Fixpoint( (GHom::add(notC) & selector)  + GHom::id) );
+		      finalU.insert( (GHom::add(notC) & selector)  );
 		      finalU.insert( fixpoint ( GHom::add(doC) ) & selector );
 		    }
 		    return Fixpoint( GHom::add(finalU) ) ;
