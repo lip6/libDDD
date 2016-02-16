@@ -2196,8 +2196,23 @@ static void addCompositionParameter (const GHom & h, And::parameters_t & args) {
 			if (const Compose * comph1 = dynamic_cast<const Compose*> ( _GHom::get_concret(h1) )) {
 			  if (commutative (comph1->right,h) ) {
 			    And::parameters_t rr ;
-			    rr.push_back(comph1->right );
-			    rr.push_back(h);
+			    if ( const And * compright = dynamic_cast<const And*> ( _GHom::get_concret(comph1->right) ) ) {
+			      // recursively add each parameter
+			      for (And::parameters_it it = compright->parameters.begin() ; it != compright->parameters.end() ; ++it ) {
+				addCompositionParameter (*it, rr) ;
+			      }
+			    } else {
+			      rr.push_back(comph1->right);
+			    }
+			    if ( const And * compright = dynamic_cast<const And*> ( _GHom::get_concret(h) ) ) {
+			      // recursively add each parameter
+			      for (And::parameters_it it = compright->parameters.begin() ; it != compright->parameters.end() ; ++it ) {
+				addCompositionParameter (*it, rr) ;
+			      }
+			    } else {
+			      rr.push_back(h);
+			    }
+
 			    args.push_back ( Compose ( comph1->left, And(rr) ));
 			    donormal = false;
 			  }
