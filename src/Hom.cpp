@@ -1127,11 +1127,12 @@ public:
 				  // used to be before selection based reordering
 				  //	res = (*gi) (res);
 				  // locality test
-				  if (gi->get_range().size() == 1) {
-				    // local actions cannot make the situation worse, it induces unions as output values are equal
-				    // it does not depend on a queryEval, do it now
-				    res = (*gi) (res);
-				  } else if (const Compose * comp = dynamic_cast<const Compose*> ( _GHom::get_concret(*gi) ) ) {
+	//			  if (gi->get_range().size() == 1) {
+	//			    // local actions cannot make the situation worse, it induces unions as output values are equal
+	//			    // it does not depend on a queryEval, do it now
+	//			    res = (*gi) (res);
+	//			  } else 
+				  if (const Compose * comp = dynamic_cast<const Compose*> ( _GHom::get_concret(*gi) ) ) {
 				    if (comp->right.is_selector()) {
 				      // std::cerr << "sel b4 ass" << *gi << std::endl;
 				      res = comp->right(res);
