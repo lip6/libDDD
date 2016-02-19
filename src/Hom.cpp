@@ -459,7 +459,12 @@ public :
   GDDD has_image (const GDDD & d) const {
     if (d==GDDD::null)
       return d;
-    return cond_.negate().has_image(d);
+    GHom neg = cond_.negate();
+    if (neg != *this) {
+      return neg.has_image(d);
+    } else {
+      return d - cond_(d);
+    }
   }
 
 
