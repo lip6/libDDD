@@ -339,11 +339,11 @@ public:
 	}                   
 	
 	GHom phi(int vr, int vl) const {
-		if (vr == var1) {
-			return GHom(vr,vl,varCompState(var2,c,vl));
-		} else { // vr == var2
-			return GHom(vr,vl,varCompState(var1,invertComp(c),vl));
-		}
+	  if (vr == var1) {
+	    return GHom(vr,vl,varCompState(var2,invertComp(c),vl));
+	  } else { // vr == var2
+	    return GHom(vr,vl,varCompState(var1,c,vl));
+	  }
 	}
 	
 	GHom compose (const GHom & other) const {
