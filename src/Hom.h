@@ -217,6 +217,13 @@ public:
   /// \todo std::set not very efficient for storage, replace by a sorted vector ?
     static GHom add(const d3::set<GHom>::type & set);
 
+  /// A constructor for a commutative composition of several homomorphisms.
+  /// It's up to user to ensure pairwise commutatitivity off all arguments in the set
+  /// \param set the set of homomorphisms to put in the composition.
+  /// \todo std::set not very efficient for storage, replace by a sorted vector ?
+    static GHom ccompose(const d3::set<GHom>::type & set);
+
+
   // pretty print of homomorphisms
   friend std::ostream & operator << (std::ostream & os, const GHom & h);
 
