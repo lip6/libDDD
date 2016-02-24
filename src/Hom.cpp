@@ -1025,6 +1025,9 @@ public :
 	
 public:
 	
+  And(const std::set<GHom> & p, int ref=0):	_GHom(ref,false),	parameters(p.begin(), p.end()) {
+  }
+
 	/* Constructor */
     And(const parameters_t & p, int ref=0)
 	:
@@ -1947,6 +1950,20 @@ GHom GHom::add(const std::set<GHom>& set){
 	return *(s.begin());
       return(canonical( Add(s)));
     }
+}
+
+GHom GHom::ccompose(const std::set<GHom>& set){
+  if( set.empty() )
+    return GHom::id;
+  if( set.size() == 1 )
+    return *(set.begin());
+  else {
+    std::set<GHom> s = set;
+    s.erase(GHom::id);
+    if( s.size() == 1 )
+      return *(s.begin());
+    return(canonical( And(s)));
+  }
 }
 
 
