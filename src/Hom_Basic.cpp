@@ -22,6 +22,27 @@ std::string to_string (comparator comp) {
     }
 }
 
+static comparator negateComp(comparator comp) {
+  switch (comp) {
+  case EQ :
+    return NEQ;
+  case NEQ :
+    return EQ;
+  case LT :
+    return GEQ;
+  case GT :
+    return LEQ;
+  case GEQ :
+    return LT;
+  case LEQ :
+    return GT;
+  default :
+    assert(false);
+    return EQ;
+  }
+}
+
+
 class _VarCompState:public StrongHom {
 
   int var;
@@ -123,7 +144,10 @@ public:
     }
     return _GHom::compose(other);
   }
-	 
+
+  GHom negate() const {
+    return _VarCompState(var, negateComp(comp) , val);
+  }
   
   size_t hash() const {
     //return 8097*(var+2)^val * comp;
