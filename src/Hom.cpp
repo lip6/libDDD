@@ -2126,11 +2126,11 @@ GHom fixpoint (const GHom &h, bool is_top_level) {
 		    d3::set<GHom>::type finalU;
 		    finalU.insert(GHom::id);
 		    doC.insert(GHom::id);
-		    if (isLeftSel ) {
-		      finalU.insert( (selector & GHom::add(notC)) );
-		    } else {
-		      finalU.insert( (GHom::add(notC) & selector) );
-		    }
+		    // if (isLeftSel ) {
+		    //   finalU.insert( (selector & GHom::add(notC)) );
+		    // } else {
+		    //   finalU.insert( (GHom::add(notC) & selector) );
+		    // }
 		    for (d3::set<GHom>::type::const_iterator kt=notC.begin() ; kt != notC.end() ; ++kt) {
 		      if (isLeftSel ) {
 			doC.insert( Compose( selector, *kt) );
