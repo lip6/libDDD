@@ -529,11 +529,11 @@ public:
 
   /// returns a negation of a selector homomorphism h, such that h.negate() (d) = d - h(d)
   GHom negate () const {
-    GHom toadd = GHom::id ;
-    for( param_it it = parameters.begin(); it != parameters.end(); ++it) {
-      toadd = toadd & it->negate();
+    d3::set<GHom>::type toadd ;
+    for(param_it gi=parameters.begin();gi!=parameters.end();++gi) {
+      toadd.insert( gi->negate());
     }
-    return toadd;
+    return GHom::ccompose(toadd);
   }  
 
 
