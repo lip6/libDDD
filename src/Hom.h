@@ -325,6 +325,10 @@ GHom apply2k (const GDDD &);
 /// Useful for invert computations.
 GDDD computeDomain (int var, const GDDD& );
 
+/// return true if the provided operations are commutative
+bool commutative (const GHom & h1, const GHom & h2);
+
+
 //@}
 
 

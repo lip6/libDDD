@@ -432,6 +432,7 @@ public :
   GDDD eval(const GDDD &d) const {
    if (d == GDDD::one || d == GDDD::null || d == GDDD::top )
       return d;
+
    
    GDDD condtrue = cond_ (d);
    return (d - condtrue);
@@ -1592,7 +1593,7 @@ GHom _GHom::compose (const GHom &r) const {
 GHom
 _GHom::negate() const
 {
-  return ! GHom(this) ; 
+  return NotCond(GHom(this)) ; 
 }
 
 
@@ -1844,7 +1845,7 @@ static bool notInRange (const GHom::range_t & h1r, const GHom & h2) {
 	return true;
 }
 
-static bool commutative (const GHom & h1, const GHom & h2) {
+bool commutative (const GHom & h1, const GHom & h2) {
 	if ( h1.is_selector() && h2.is_selector() ) 
 		return true;
 	
@@ -2126,12 +2127,18 @@ GHom fixpoint (const GHom &h, bool is_top_level) {
 		    finalU.insert(GHom::id);
 		    doC.insert(GHom::id);
 		    if (isLeftSel ) {
-		      finalU.insert( selector &  GHom::add(notC) );
-		      finalU.insert( selector & fixpoint ( GHom::add(doC) ) );
+		      finalU.insert( (selector & GHom::add(notC)) );
 		    } else {
-		      finalU.insert( (GHom::add(notC) & selector)  );
-		      finalU.insert( fixpoint ( GHom::add(doC) ) & selector );
+		      finalU.insert( (GHom::add(notC) & selector) );
 		    }
+		    for (d3::set<GHom>::type::const_iterator kt=notC.begin() ; kt != notC.end() ; ++kt) {
+		      if (isLeftSel ) {
+			doC.insert( Compose( selector, *kt) );
+		      } else {
+			doC.insert( Compose( *kt, selector) );
+		      }
+		    } 
+		    finalU.insert( Compose( fixpoint ( GHom::add(doC) ), selector ));
 		    return Fixpoint( GHom::add(finalU) ) ;
 		  }
 		}
@@ -2183,8 +2190,8 @@ GHom operator! (const GHom & cond) {
     } else if (const NotCond * hNot = dynamic_cast<const NotCond *> ( _GHom::get_concret(cond) )) {
         std::cerr << "double not simplification" << std::endl;
         return hNot->cond_;
-    }
-  return NotCond(cond);
+    } 
+    return cond.negate();
 }
 
 // add an operand to a commutative composition of hom
