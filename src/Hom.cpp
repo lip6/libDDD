@@ -2110,37 +2110,66 @@ GHom fixpoint (const GHom &h, bool is_top_level) {
 		if (! selr.empty() ) {
 		  // selector concerns a subset of variables, probably we can commute with at least some of the terms in subadd
 		  d3::set<GHom>::type doC, notC;
+		  int doc = 0;
+		  int notc =0;
+		  int partc =0;
 		  for (Add::param_it it =  subadd->parameters.begin() ; it != subadd->parameters.end() ; ++it ) {
 		    if ( commutative (selector, *it) ) {
 		      // insert into commutative operations set
 		      doC.insert(*it);
+		      doc++;
 		    } else {
-		      // insert into non commutative set
 		      notC.insert(*it);
+		      if (const And * seland = dynamic_cast<const And*> ( _GHom::get_concret(selector) ) ) {
+			GHom cur = *it;
+			int pc =0;
+			for (And::parameters_it jt = seland->parameters.begin() ; jt != seland->parameters.end() ; ++jt ) {
+			   if (! commutative (*jt, *it) ) {
+			     if (isLeftSel ) {
+			       cur =   *jt & cur;
+			     } else {
+			       cur =  cur & *jt;
+			     }
+			   } else {
+			     pc++;
+			   }
+			}
+			if (pc) {
+			  partc++;
+			} else {
+			  notc++;
+			}
+			doC.insert( cur );
+		      } else {
+			// distribute selector on non commutative elements
+			notc++;
+			if (isLeftSel ) {
+			  doC.insert( Compose( selector, *it) );
+			} else {
+			  doC.insert( Compose( *it, selector) );
+			}
+		      }
 		    }
 		  }
 		  
-		  if (! doC.empty() ) {
+		  // if (! doC.empty() ) {
 		    // Great ! successful application of the rule is possible
-		    std::cout << "Hit Full ! " << doC.size() << "/" << notC.size() << std::endl;
+		    std::cout << "Hit Full ! " << doc << "/" << partc << "/" << notc << std::endl;
 		    d3::set<GHom>::type finalU;
 		    finalU.insert(GHom::id);
 		    doC.insert(GHom::id);
-		    // if (isLeftSel ) {
-		    //   finalU.insert( (selector & GHom::add(notC)) );
-		    // } else {
-		    //   finalU.insert( (GHom::add(notC) & selector) );
-		    // }
-		    for (d3::set<GHom>::type::const_iterator kt=notC.begin() ; kt != notC.end() ; ++kt) {
-		      if (isLeftSel ) {
-			doC.insert( Compose( selector, *kt) );
-		      } else {
-			doC.insert( Compose( *kt, selector) );
-		      }
-		    } 
-		    finalU.insert( Compose( fixpoint ( GHom::add(doC) ), selector ));
-		    return Fixpoint( GHom::add(finalU) ) ;
-		  }
+
+		    if (isLeftSel ) {
+		      finalU.insert( fixpoint ( GHom::add(doC) ));
+		      GHom tofix = Fixpoint( GHom::add(finalU) );
+		      notC.insert(GHom::id);
+		      // final form : s & ( s&C1 + s&C2 + c1 + c2 + id )^* & s & ( C1 + C2  + id )
+		      return tofix & selector & GHom::add(notC) ;
+		    } else {
+		      finalU.insert( Compose( fixpoint ( GHom::add(doC) ), selector ));
+		      return Fixpoint( GHom::add(finalU) );
+		    }
+		  
 		}
 	      }
 	  }
