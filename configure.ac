@@ -2,7 +2,7 @@
 AC_INIT(DDD,1.8.1,[Yann.Thierry-Mieg@lip6.fr])
 
 # We use automake to build makefiles
-AM_INIT_AUTOMAKE(-Wall)
+AM_INIT_AUTOMAKE([-Wall, subdir-objects])
 
 # programs used to build
 # we make static libs (use ranlib)
