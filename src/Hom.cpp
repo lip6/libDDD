@@ -117,6 +117,10 @@ public:
  GHom invert  (const GDDD & pot) const {
    return pot;
  }
+
+  GHom negate () const {
+    if (value==GDDD::null) return GHom::id;
+  }
   
   bool is_selector () const {
     // in any other case, it might return a value outside the entry set, but empty set is always a legal subset of any DDD
