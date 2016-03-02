@@ -2161,21 +2161,24 @@ GHom fixpoint (const GHom &h, bool is_top_level) {
 		  // if (! doC.empty() ) {
 		    // Great ! successful application of the rule is possible
 		    std::cout << "Hit Full ! " << doc << "/" << partc << "/" << notc << std::endl;
-		    d3::set<GHom>::type finalU;
-		    finalU.insert(GHom::id);
+		    //		    std::cout << "Fixpoint of " << h << std::endl ;
 		    doC.insert(GHom::id);
 
+		    GHom res;
 		    if (isLeftSel ) {
-		      finalU.insert( fixpoint ( GHom::add(doC) ));
-		      GHom tofix = Fixpoint( GHom::add(finalU) );
+		      GHom tofix = Fixpoint( GHom::add(doC) );
 		      notC.insert(GHom::id);
-		      // final form : s & ( s&C1 + s&C2 + c1 + c2 + id )^* & s & ( C1 + C2  + id )
-		      return tofix & selector & GHom::add(notC) ;
+		      // final form : ( s&C1 + s&C2 + c1 + c2 + id )^* & s & ( C1 + C2  + id )
+		      res = ITE( selector, tofix , GHom::id) &  GHom::add(notC)  ;
+		      //std::cerr << "left ";
 		    } else {
+		      d3::set<GHom>::type finalU;
+		      finalU.insert(GHom::id);
 		      finalU.insert( Compose( fixpoint ( GHom::add(doC) ), selector ));
-		      return Fixpoint( GHom::add(finalU) );
+		      res = Fixpoint( GHom::add(finalU), 0, is_top_level );
 		    }
-		  
+		    // std::cout << "Rewritten to " << res << std::endl ;
+		    return res;
 		}
 	      }
 	  }
