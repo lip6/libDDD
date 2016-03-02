@@ -6,20 +6,22 @@ endif
 DDD_SRCDIR = $(top_srcdir)/src
 DDD_BUILDDIR = $(top_builddir)/src
 
-BASE = hom
 AM_CPPFLAGS =  -I $(DDD_SRCDIR) $(BOOST_CPPFLAGS) -g -Wall $(TBBINC_FLAGS)
 LDADD = $(DDD_BUILDDIR)/libDDD_d.a
 
 
-morpionv2_SOURCES = 	$(BASE)/notew.cpp \
-			$(BASE)/play.cpp $(BASE)/winner.cpp \
-			$(BASE)/general_v2.cpp \
-			$(BASE)/const.cpp \
+morpionv2_SOURCES = \
+      hom/notew.cpp \
+			hom/play.cpp \
+			hom/winner.cpp \
+			hom/general_v2.cpp \
+			hom/const.cpp \
 			morpionv2.cpp
 
 
-noinst_HEADERS = 	$(BASE)/notew.hpp \
-			$(BASE)/play.hpp \
-			$(BASE)/winner.hpp \
-			$(BASE)/general_v2.hpp \
-			$(BASE)/const.hpp
+noinst_HEADERS = \
+      hom/notew.hpp \
+			hom/play.hpp \
+			hom/winner.hpp \
+			hom/general_v2.hpp \
+			hom/const.hpp
