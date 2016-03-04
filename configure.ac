@@ -23,6 +23,8 @@ test -z "$CXXFLAGS" && CXXFLAGS=
 
 # we compile C++11
 CXXFLAGS="-std=c++11 -flto $CXXFLAGS"
+AR=gcc-ar
+RANLIB=gcc-ranlib
 
 # AC_CHECK_LIB(tcmalloc, malloc, ,AC_MSG_WARN(google perftool not detected : not using tcmalloc))
 
