@@ -29,16 +29,7 @@
 
 #include "hashfunc.hh"
 
-#define GCC_VERSION (__GNUC__ * 10000 \
-                + __GNUC_MINOR__ * 100 \
-                   + __GNUC_PATCHLEVEL__)
-
-
-#if GCC_VERSION < 40300
-#include <ext/hash_map>
-#else
-#include <tr1/unordered_map>
-#endif
+#include <unordered_map>
 
 
 namespace d3 { namespace util {
@@ -167,11 +158,7 @@ struct equal<std::pair<T1,T2> >
   template<>
   struct hash<std::string> {
     size_t operator()(const std::string & string) const{
-#if GCC_VERSION < 40300
-    return __gnu_cxx::hash<const char*>()(string.c_str());
-#else
-    return std::tr1::hash<std::string>() (string);
-#endif
+    return std::hash<std::string>() (string);
     }
   };
 
