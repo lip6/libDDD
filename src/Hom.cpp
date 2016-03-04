@@ -2168,8 +2168,8 @@ GHom fixpoint (const GHom &h, bool is_top_level) {
 		    if (isLeftSel ) {
 		      GHom tofix = Fixpoint( GHom::add(doC) );
 		      notC.insert(GHom::id);
-		      // final form : ITE( s , ( s&C1 + s&C2 + c1 + c2 + id )^* & s & ( C1 + C2  + id ), id) 
-		      res = ITE( selector, tofix & selector  &  GHom::add(notC), GHom::id)  ;
+		      // final form : ( s&C1 + s&C2 + c1 + c2 + id )^* & s & ( C1 + C2  + id ) + id 
+		      res =  ( tofix & selector  &  GHom::add(notC) ) + GHom::id ;
 		      //std::cerr << "left ";
 		    } else {
 		      d3::set<GHom>::type finalU;
