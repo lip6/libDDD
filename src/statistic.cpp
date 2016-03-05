@@ -31,8 +31,8 @@ std::string remove_bad_latex (const std::string & s) {
   std::string news;
   for (std::string::const_iterator it = s.begin() ; it != s.end(); ++it) {
     if (*it == '_')
-      news.push_back('\\');
-    news.push_back(*it);
+      news.emplace_back('\\');
+    news.emplace_back(*it);
   }
   return news;
 }
