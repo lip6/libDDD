@@ -22,7 +22,11 @@ test -z "$CFLAGS" && CFLAGS=
 test -z "$CXXFLAGS" && CXXFLAGS=
 
 # we compile C++11
-CXXFLAGS="-std=c++11 -flto $CXXFLAGS"
+# or not : pass it in CXXFLAGS to configure
+# CXXFLAGS="-std=c++11 $CXXFLAGS"
+
+# link time opt
+CXXFLAGS="-flto $CXXFLAGS"
 AR=gcc-ar
 RANLIB=gcc-ranlib
 
