@@ -56,7 +56,7 @@ public:
       it->second = it->second + value ;
       return true;
     } else {
-      map.emplace_back(key,value);
+      map.push_back(std::make_pair(key,value));
       return false;
     }
   }
