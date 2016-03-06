@@ -17,7 +17,6 @@
 #  endif
 #endif
 
-#endif
 
 #include "util/configuration.hh"
 
