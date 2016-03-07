@@ -5,10 +5,25 @@ AC_INIT(DDD,1.8.1,[Yann.Thierry-Mieg@lip6.fr])
 AM_INIT_AUTOMAKE([-Wall, subdir-objects])
 
 # link time opt, set AR and RANLIB before LT_INIT call, unless configure overrides them.
-CXXFLAGS="-flto $CXXFLAGS"
-test -z "$AR" && AR=gcc-ar
-test -z "$RANLIB" && RANLIB=gcc-ranlib
+# also Options for disabling LTO on Darwin since binutils sucks big time on that platform.
+nolto=false
 
+AC_ARG_ENABLE(	[nolto],
+        [AC_HELP_STRING([--enable-nolto],[avoid using LTO flags, mostly for Darwin])],
+        [  case "${enable_nolto}" in
+            yes) nolto=true
+                ;;
+            no)
+                ;;
+            *)  AC_MSG_ERROR(Bad value ${enableval})
+                ;;
+            esac])
+
+if test "x$nolto" = "xfalse"; then
+   CXXFLAGS="-flto $CXXFLAGS"
+   test -z "$AR" && AR=gcc-ar
+   test -z "$RANLIB" && RANLIB=gcc-ranlib
+fi
 
 # programs used to build
 # we make static libs (use ranlib)
@@ -30,9 +45,6 @@ test -z "$CXXFLAGS" && CXXFLAGS=
 # we compile C++11
 # or not : pass it in CXXFLAGS to configure
 # CXXFLAGS="-std=c++11 $CXXFLAGS"
-
-# link time opt
-CXXFLAGS="-flto $CXXFLAGS"
 
 # AC_CHECK_LIB(tcmalloc, malloc, ,AC_MSG_WARN(google perftool not detected : not using tcmalloc))
 
@@ -75,7 +87,6 @@ fi
 
 CPPFLAGS="-Wno-unused-local-typedefs $CPPFLAGS"
 LDFLAGS="-all-static -static-libgcc -static-libstdc++ $LDFLAGS"
-
 
 # Option to enable hash stats
 AC_ARG_ENABLE([mingw-native],
