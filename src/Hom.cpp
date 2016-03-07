@@ -2150,11 +2150,12 @@ GHom fixpoint (const GHom &h, bool is_top_level) {
 		      } else {
 			// distribute selector on non commutative elements
 			notc++;
-			if (isLeftSel ) {
-			  doC.insert( Compose( selector, *it) );
-			} else {
-			  doC.insert( Compose( *it, selector) );
-			}
+			// if (isLeftSel ) {
+			// We compose to the left, even for right sel case
+			doC.insert( Compose( selector, *it) );
+			  //} else {
+			  //doC.insert( Compose( *it, selector) );
+			  //}
 		      }
 		    }
 		  }
@@ -2173,11 +2174,11 @@ GHom fixpoint (const GHom &h, bool is_top_level) {
 		      res =  ( tofix & selector  &  GHom::add(notC) ) + GHom::id ;
 		      // std::cerr << "left ";
 		    } else {
-		      d3::set<GHom>::type finalU;
-		      finalU.insert(GHom::id);
-		      finalU.insert( Compose( fixpoint ( GHom::add(doC) ), selector ));
-		      res = Fixpoint( GHom::add(finalU), 0, is_top_level );
-		      // std::cerr << "right ";
+		      GHom tofix = Fixpoint( GHom::add(doC) );
+		      notC.insert(GHom::id);
+		      // final form : (id + C) & ( c + s & C1 + s&C2... + id  ) & s + id		      
+		      res = ( GHom::add(notC) & tofix & selector ) + GHom::id;
+		      //		      std::cerr << "right ";
 		    }
 		    // std::cout << "Rewritten to " << res << std::endl ;
 		    return res;
