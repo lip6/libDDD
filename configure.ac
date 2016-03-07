@@ -4,6 +4,12 @@ AC_INIT(DDD,1.8.1,[Yann.Thierry-Mieg@lip6.fr])
 # We use automake to build makefiles
 AM_INIT_AUTOMAKE([-Wall, subdir-objects])
 
+# link time opt, set AR and RANLIB before LT_INIT call, unless configure overrides them.
+CXXFLAGS="-flto $CXXFLAGS"
+test -z "$AR" && AR=gcc-ar
+test -z "$RANLIB" && RANLIB=gcc-ranlib
+
+
 # programs used to build
 # we make static libs (use ranlib)
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
@@ -27,8 +33,6 @@ test -z "$CXXFLAGS" && CXXFLAGS=
 
 # link time opt
 CXXFLAGS="-flto $CXXFLAGS"
-AR=gcc-ar
-RANLIB=gcc-ranlib
 
 # AC_CHECK_LIB(tcmalloc, malloc, ,AC_MSG_WARN(google perftool not detected : not using tcmalloc))
 
