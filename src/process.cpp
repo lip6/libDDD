@@ -8,7 +8,7 @@
 #include <cstdlib>
 #include <iostream>
 
-#if defined(LINUX) || defined(linux) || defined(__CYGWIN__) || defined(cygwin)
+#if defined(__linux__) || defined(LINUX) || defined(linux) || defined(__CYGWIN__) || defined(cygwin)
 #define USE_PROC_MEM 1
 #elif defined (__GLIBC__)
 #define USE_MALLINFO 1 
