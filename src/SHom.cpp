@@ -717,7 +717,7 @@ namespace sns {
       return true;
     }
 
-    GSDD has_image (const GSDD &d) {
+    GSDD has_image (const GSDD &d) const {
       if (d==SDD::null)
 	return d;
       GSDD img = cond_.has_image(d);
