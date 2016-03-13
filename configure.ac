@@ -43,8 +43,7 @@ test -z "$CFLAGS" && CFLAGS=
 test -z "$CXXFLAGS" && CXXFLAGS=
 
 # we compile C++11
-# or not : pass it in CXXFLAGS to configure
-# CXXFLAGS="-std=c++11 $CXXFLAGS"
+CXXFLAGS="-std=c++11 $CXXFLAGS"
 
 # AC_CHECK_LIB(tcmalloc, malloc, ,AC_MSG_WARN(google perftool not detected : not using tcmalloc))
 
