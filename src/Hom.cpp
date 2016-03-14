@@ -2127,7 +2127,7 @@ GHom fixpoint (const GHom &h, bool is_top_level) {
 		      doc++;
 		    } else {
 		      notC.insert(*it);
-		      if (seland != NULL) {
+		      if (seland != NULL && isLeftSel) {
 			GHom cur = *it;
 			int pc =0;
 			for (And::parameters_it jt = seland->parameters.begin() ; jt != seland->parameters.end() ; ++jt ) {
