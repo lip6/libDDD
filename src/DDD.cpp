@@ -106,11 +106,11 @@ public:
   /// destructor
   ~_GDDD ()
   {
-//     for (const_iterator it = begin ();
-//          it != end (); ++it)
-//     {
-//       it->~edge_t ();
-//     }
+     for (const_iterator it = begin ();
+          it != end (); ++it)
+     {
+       it->~edge_t ();
+     }
   }
 
   /// iterator API
