@@ -193,9 +193,31 @@ public:
   GDDD::id_t
   create_unique_GDDD (int var, const GDDD::Valuation & val)
   {
-    _GDDD * res = new (val.size ()) _GDDD (var, val);
+    // a memory cell to store the temporary _GDDD to check unicity in unique table
+    // this is reallocated only if it is too small (see maxsize)
+    // this avoids repeated allocation/deallocation
+    static _GDDD * res = new (custom_new_t (), 0) _GDDD (var, {});
+    static size_t maxsize = 0;
+
+    // if the arguments is too large for the memory cell
+    if (val.size () > maxsize)
+    {
+      // deallocate
+      delete res;
+      // update size
+      maxsize = val.size ();
+      // reallocate to the appropriate size
+      res = new (custom_new_t (), maxsize) _GDDD (var, val);
+    }
+    else // there is already enough room
+    {
+      // an object built with a placement new should be explicitly deleted
+      res->~_GDDD ();
+      // placement new
+      new (res) _GDDD (var, val);
+    }
+
     GDDD::id_t ret = DDDutable::instance() (*res);
-    delete res;
     return ret;
   }
 
@@ -208,33 +230,46 @@ public:
   _GDDD *
   clone () const
   {
-    return new (valuation_size) _GDDD (variable, begin (), end ());
+    return new (custom_new_t (), valuation_size) _GDDD (variable, begin (), end ());
   }
 
-
+private:
+  /// an empty struct tag type used to disambiguate between different variants of the operator new
+  /// for _GDDD. The overload that do not use 'custom_new_t' is the classical placement new.
+  struct custom_new_t {};
   /// custom operator new
   /// WARNING:
   ///     the expected arguments are not standard
   ///         - the first one (actually sizeof(_GDDD)) is ignored
-  ///         - the second one is the number of successors
-  /// syntax: new (nb_sons) _GDDD (constructor arguments)
+  ///         - the second one is 'custom_new_t', for disambiguation
+  ///         - the third one is the number of successors
+  /// syntax: new (custom_new_t(), nb_sons) _GDDD (constructor arguments)
   ///     it looks like a placement new, but this syntax
   ///     is only used to pass arguments to operator new
   /// _GDDD should only be constructed by create_unique_GDDD or clone
   /// please refer to these two functions for invokation examples
   static
   void *
-  operator new (size_t, size_t length)
+  operator new (size_t, custom_new_t, size_t length)
   {
     // allocate enough memory to store the successors
     // with the global (default) operator new
     size_t siz = sizeof(_GDDD) + length*sizeof(edge_t);
-    void * ret = ::operator new (siz);
-    // ensure clean memory state
-    memset(ret,0,siz);
-    return ret;
+    return ::operator new (siz);
   }
 
+  /// classical placement new
+  /// NB: it is the responsibility of the caller that there is enough room to build the _GDDD.
+  ///   e.g.    new (ad) _GDDD(v, val)
+  ///     the memory chunk at 'ad' must be of size at least sizeof(_GDDD)+sizeof(edge_t)*val.size()
+  static
+  void *
+  operator new (size_t, void * addr)
+  {
+    return addr;
+  }
+
+public:
   /// custom operator delete
   static
   void
