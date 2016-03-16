@@ -75,32 +75,24 @@ class _GDDD
 
   /// constructor
   _GDDD (int var, const GDDD::Valuation & val)
-  : variable (var)
-  , valuation_size (val.size ())
-  {
-    GDDD::Valuation::const_iterator jt = val.begin();
-    for (edge_t * it = this->alpha_addr(); it != this->end() ; ++it, ++jt) {
-      // placement new
-      new (it) edge_t (*jt);
-    }
-  }
+  : _GDDD (var, val.begin(), val.end())
+  {}
 
   /// constructor (with iterators)
-  _GDDD (int var, const_iterator begin, const_iterator end)
+  template<class Iterator>
+  _GDDD (int var, Iterator begin, Iterator end)
   : variable (var)
   , valuation_size (end-begin)
   {
-    const_iterator jt = begin;
-    for (edge_t * it = this->alpha_addr(); it != this->end() ; ++it, ++jt) {
-      // placement new
-      new (it) edge_t (*jt);
-    }
+    std::copy (begin, end, alpha_addr());
   }
 
-  /// cannot copy
-  /// these two operations are deliberately private and UNIMPLEMENTED
-  _GDDD (const _GDDD &);
-  _GDDD & operator= (const _GDDD &);
+  /// cannot copy or move
+  /// these four operations are deliberately private and UNIMPLEMENTED
+  _GDDD (const _GDDD &) = delete;
+  _GDDD & operator= (const _GDDD &) = delete;
+  _GDDD (_GDDD &&) = delete;
+  _GDDD & operator= (_GDDD &&) = delete;
 
 public:
   /// destructor
@@ -136,7 +128,6 @@ public:
     if (valuation_size != g.valuation_size)
       return false;
 
-//     return ! memcmp (begin(), g.begin(), valuation_size * sizeof(edge_t));
     const_iterator it = begin (), jt = g.begin ();
     for (; it != end (); ++it, ++jt)
       {
@@ -156,7 +147,7 @@ public:
     size_t n2 = g.valuation_size;
     if (n1 < n2) return true;
     if (n1 > n2) return false;
-//    return memcmp (begin(), g.begin(), n1*sizeof(edge_t));
+
     for (const_iterator it = begin (), jt = g.begin ();
          it != end (); ++it, ++jt)
       {
@@ -174,10 +165,8 @@ public:
   hash () const
   {
     size_t res = ddd::wang32_hash (variable);
-//    int i=1;
     for(const_iterator vi = begin (); vi != end (); ++vi)
       res += (size_t)(ddd::int32_hash(vi->first)+1011) * vi->second.hash();
-//      res ^= ddd::int32_hash(vi->first+1011*i++) ^ ddd::int32_hash(vi->second.hash());
     return res;
   }
 
@@ -353,7 +342,6 @@ void GDDD::print(std::ostream& os,std::string s) const{
   else{
     const_iterator end = this->end();
     for(GDDD::const_iterator vi=begin();vi!=end;++vi){
-      // modif strstream -> std::stringstream
       std::stringstream tmp;
       tmp << getvarName(variable())<<'('<<vi->first<<")";
       vi->second.print(os,s+tmp.str() +" ");
