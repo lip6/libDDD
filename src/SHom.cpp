@@ -3422,6 +3422,15 @@ GShom operator*(const GShom & h,const GShom & cond) {
   // trivial case
   if ( h == cond )
     return h;
+
+  if (cond == GShom::id ) {
+    if ( const sns::SLocalApply* lh1 = dynamic_cast<const sns::SLocalApply* > ( _GShom::get_concret(h) ) )  {
+      return localApply ( lh1->h * GShom::id , lh1->target ); 
+    } else if ( const sns::LocalApply* lh1 = dynamic_cast<const sns::LocalApply* > ( _GShom::get_concret(h) ) )  {
+      return localApply ( lh1->h * GHom::id , lh1->target ); 
+    }
+  }
+
   return sns::Inter(h,cond);
 }
 
