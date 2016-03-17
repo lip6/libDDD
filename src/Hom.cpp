@@ -335,6 +335,7 @@ public:
 
 class Inter:public _GHom{
 private:
+  friend class Fixpoint ;
   GHom left;
   GHom right;
 public:
@@ -362,8 +363,9 @@ public:
   bool is_selector () const {
     // intersection is always a selector
     // indeed, either left or right is a selector
-    // (h * sel)(d) = h(d) * sel(d) \subset sel(d) \subset d
-    return true;
+    // HOWEVER, this does not imply linearity over the input, due to intersection !
+    // hence we are selector iff. both left and right are selector.
+    return left.is_selector() && right.is_selector();
   }
   
   bool
@@ -608,7 +610,7 @@ public:
     }
 	
   partition
-  get_partition(int var)
+  get_partition(int var) const
   {
         this->skip_variable(var);
         return partition_cache.find(var)->second;
@@ -1427,6 +1429,35 @@ public:
     return arg.is_selector();
   }
 
+  GDDD has_image (const GDDD & d) const {
+     if( d == GDDD::null ) {
+       return GDDD::null;
+     } else if( d == GDDD::one or d == GDDD::top ) {
+       return arg(d);
+     } else {
+       // std::cout << " Test with has image at level " << d.variable() << std::endl;
+       if (const Inter * inter = dynamic_cast<const Inter*> ( _GHom::get_concret(arg) ) ) {
+	 if (inter->right == GHom::id) {
+	   if (const Add * add = dynamic_cast<const Add*> ( _GHom::get_concret(inter->left) ) ) {
+
+	     const Add::partition & partition = add->get_partition(d.variable());
+	     
+	     GHom topropagate = fixpoint ( partition.first * GHom::id );
+	     if (can_garbage) {
+	       std::cerr << "Using saturation style SCC detection" << std::endl;
+	     }
+	     GDDD img = topropagate.has_image(d); 
+	     if (img != GDDD::null) {
+	       // std::cout << " Found an SCC at level " << d.variable() << std::endl;
+	       return img;
+	     }	   
+	   }
+	 }
+       } 
+     }
+     return _GHom::has_image(d);     
+  }
+
  
     /* Eval */
     GDDD
@@ -1454,7 +1485,7 @@ public:
                 
                 // Rewrite ( Id + F + G )*
                 // into ( (G + Id) o (F + Id)* )* 
-                Add* add = ((Add*)get_concret(arg));
+	      Add* add = ((Add*)get_concret(arg));
 
                 if( add->get_have_id() )
                 {
