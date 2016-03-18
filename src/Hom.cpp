@@ -2150,50 +2150,73 @@ GHom fixpoint (const GHom &h, bool is_top_level) {
 		  int doc = 0;
 		  int notc =0;
 		  int partc =0;
-		  const And * seland = dynamic_cast<const And*> ( _GHom::get_concret(selector) ) ;
-		  for (Add::param_it it =  subadd->parameters.begin() ; it != subadd->parameters.end() ; ++it ) {
-		    if ( commutative (selector, *it) ) {
-		      // insert into commutative operations set
-		      doC.insert(*it);
-		      doc++;
-		    } else {
-		      notC.insert(*it);
-		      if (seland != NULL && isLeftSel) {
-			GHom cur = *it;
-			int pc =0;
-			for (And::parameters_it jt = seland->parameters.begin() ; jt != seland->parameters.end() ; ++jt ) {
-			   if (! commutative (*jt, *it) ) {
-			     if (isLeftSel ) {
-			       cur =   *jt & cur;
-			     } else {
-			       cur =  cur & *jt;
-			     }
-			   } else {
-			     pc++;
-			   }
-			}
-			if (pc) {
-			  partc++;
-			} else {
-			  notc++;
-			}
-			doC.insert( cur );
-		      } else {
-			// distribute selector on non commutative elements
+		  if (const And * seland = dynamic_cast<const And*> ( _GHom::get_concret(selector) )) {
+		    // first extract all fully commutative
+		    d3::set<GHom>::type partC;
+		    for (Add::param_it it =  subadd->parameters.begin() ; it != subadd->parameters.end() ; ++it ) {
+		      // test commutativity without repeatedly computing selr
+		      if ( notInRange (selr , *it) ) {
+			// insert into commutative operations set
+			doC.insert(*it);
+			// this one is accounted for as fully commutative
+			doc++;			
+		      } else { 
+			// accounted for not fully commutative
 			notc++;
-			// if (isLeftSel ) {
-			// We compose to the left, even for right sel case
-			doC.insert( Compose( selector, *it) );
-			  //} else {
-			  //doC.insert( Compose( *it, selector) );
-			  //}
+			// insert into both notC for final equation 
+			notC.insert(*it);
+			// insert to partC for distributivity part.
+			partC.insert(*it);
 		      }
 		    }
+		    // We are going to see if we can split the and to distribute only parts on the components of the sum
+		    // We work with partC, which do not commute with selector but hopefully do commute with parts of it
+		    for (And::parameters_it jt = seland->parameters.begin() ; jt != seland->parameters.end() ; ++jt ) {
+		      // compute range once
+		      GHom::range_t selp = jt->get_range();
+		      // to sort into part Commutes with *jt or part not Commute
+		      d3::set<GHom>::type ppC,pnC;
+		      // traverse current partially commutative candidates
+		      for (auto it =  partC.begin() ; it != partC.end() ; ++it ) {			
+			if ( notInRange(selp, *it) ) {
+			  // this one is commutative with this part of sel, count one point for that.
+			  partc++;
+			  ppC.insert(*it);
+			} else {
+			  // tough luck, store temporarily
+			  pnC.insert(*it);
+			}
+		      }
+		      // initialize for next part of sel with current ppC
+		      partC = std::move (ppC) ;
+		      // Left compose regardless of original direction, add this to partC for next part of sel
+		      partC.insert( Compose( *jt, GHom::add(pnC) ) );
+		    }
+		    // partC now holds all non commutative stuff, correctly protected against going out of states satisfying "sel".
+		    doC.insert(partC.begin(), partC.end());
+
+		  } else {
+		    // simple case : selector is a block.
+		    for (Add::param_it it =  subadd->parameters.begin() ; it != subadd->parameters.end() ; ++it ) {
+		      // test commutativity without repeatedly computing selr
+		      if ( notInRange (selr , *it) ) {
+			// insert into commutative operations set
+			doC.insert(*it);
+			doc++;			
+		      } else { 
+			notC.insert(*it);
+			notc++;
+		      }
+		    }
+		    if (! notC.empty()) {
+		      // a single  compose, to avoid blowing up the sum, this ensures elements in doC cannot take us out of "sel" states.
+		      doC.insert( Compose(selector, GHom::add(notC))); 
+		    }
 		  }
-		  
+
 		  // if (! doC.empty() ) {
 		    // Great ! successful application of the rule is possible
-		    std::cout << "Hit Full ! " << doc << "/" << partc << "/" << notc << std::endl;
+		    std::cout << "Hit Full ! (commute/partial/dont) " << doc << "/" << partc << "/" << notc << std::endl;
 		    //	    std::cout << "Fixpoint of " << h << std::endl ;
 		    doC.insert(GHom::id);
 
