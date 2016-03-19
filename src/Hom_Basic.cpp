@@ -277,8 +277,18 @@ public:
 		return ret;
     }
 	
-  GHom invert (const GDDD & pot) const { 
-    return incVar(target, -val);
+  GHom invert (const GDDD & potall) const { 
+    GDDD pot = computeDomain(target,potall);
+    GHom bound ;
+    if (val > 0) {
+      // min value
+      bound = varGeqState( target, pot.begin()->first);
+    } else {
+      // max value
+      int max =  (pot.begin() + (pot.nbsons()-1))->first;
+      bound = varLeqState( target, max );
+    }
+    return bound &  incVar(target, -val);
    }
 
 
