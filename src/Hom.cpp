@@ -2190,7 +2190,14 @@ GHom fixpoint (const GHom &h, bool is_top_level) {
 		      // initialize for next part of sel with current ppC
 		      partC = std::move (ppC) ;
 		      // Left compose regardless of original direction, add this to partC for next part of sel
-		      partC.insert( Compose( *jt, GHom::add(pnC) ) );
+		      if (selp.size() == 1) {
+			// develop if selp range is small enough
+			for (const auto & elt: pnC) {
+			  partC.insert( Compose( *jt, elt ) );
+			}
+		      } else {
+			partC.insert( Compose( *jt, GHom::add(pnC) ) );
+		      }
 		    }
 		    // partC now holds all non commutative stuff, correctly protected against going out of states satisfying "sel".
 		    doC.insert(partC.begin(), partC.end());
