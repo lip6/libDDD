@@ -83,7 +83,8 @@ public:
       size_t mem = process::getResidentMemory();
       if (mem == 0)
 	return true;
-      if (mem > last_mem) {
+      // add ten percent growth
+      if (mem > last_mem + last_mem / 10 ) {
 /* 	std::cerr << "GC triggered at mem=" << mem << std::endl; */
 	last_mem = mem;
 	return true;
