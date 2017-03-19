@@ -10,7 +10,7 @@ matrix:
       addons: &clang38
         apt:
           sources: ['llvm-toolchain-precise', 'ubuntu-toolchain-r-test']
-          packages: ['clang-3.8']
+          packages: ['clang-3.8','binutils']
       env: CXX_COMPILER='clang++-3.8' C_COMPILER='clang-3.8'
 
 
@@ -20,7 +20,7 @@ matrix:
       addons: &gcc49
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-4.9', 'gcc-4.9']
+          packages: ['g++-4.9', 'gcc-4.9','binutils']
       env: CXX_COMPILER='g++-4.9' C_COMPILER='gcc-4.9' 
 
     - os: linux
@@ -28,7 +28,7 @@ matrix:
       addons: &gcc5
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-5', 'gcc-5']
+          packages: ['g++-5', 'gcc-5','binutils']
       env: CXX_COMPILER='g++-5' C_COMPILER='gcc-5'
 
     # 4/ OSX GCC5 Builds
