@@ -61,6 +61,7 @@ script :
   - which $CC 
   - which $AR 
   - which $RANLIB 
+  - ld --version
   - autoreconf -vfi && ./configure && make 
   
   
