@@ -62,6 +62,6 @@ script :
   - which $AR 
   - which $RANLIB 
   - ld --version
-  - autoreconf -vfi && ./configure && make 
+  - autoreconf -vfi && ./configure --enable-nolto && make 
   
   
