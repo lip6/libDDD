@@ -1,6 +1,6 @@
 addons:
   apt:
-	sources:
+    sources:
     - ubuntu-precise
     packages:
     - g++-4.9
