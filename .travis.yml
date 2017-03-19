@@ -53,6 +53,6 @@ before_script:
 
 
 
-script : autoreconf -vfi && ./configure && make -j
+script : which ar && which gcc-ar && autoreconf -vfi && ./configure && make -j
   
   
