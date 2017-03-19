@@ -21,7 +21,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.9', 'gcc-4.9','binutils']
-      env: CXX_COMPILER='g++-4.9' C_COMPILER='gcc-4.9' 
+      env: CXX_COMPILER='g++-4.9' C_COMPILER='gcc-4.9' AR='gcc-ar-4.9'
 
     - os: linux
       compiler: gcc
@@ -49,7 +49,7 @@ before_script:
   - cd ${TRAVIS_BUILD_DIR}
   - export CXX=${CXX_COMPILER}
   - export CC=${C_COMPILER}
-#  - export PATH=$HOME/.local/bin:/usr/local/bin:/usr/bin:$PATH
+#   - export PATH=$HOME/.local/bin:/usr/local/bin:/usr/bin:$PATH
 
 
 
