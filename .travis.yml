@@ -51,8 +51,8 @@ before_script:
   - export CC=${C_COMPILER}
   - export AR=gcc-ar-${GCCVER}
   - export RANLIB=gcc-ranlib-${GCCVER}
-  
-#   - export PATH=$HOME/.local/bin:/usr/local/bin:/usr/bin:$PATH
+  - export NM=gcc-nm-${GCCVER}
+# - export PATH=$HOME/.local/bin:/usr/local/bin:/usr/bin:$PATH
 
 
 
