@@ -20,7 +20,7 @@ matrix:
       addons: &gcc49
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-4.9', 'gcc-4.9']
+          packages: ['g++-4.9', 'gcc-4.9', 'binutils-gold']
       env: GCCVER='4.9' CXX_COMPILER='g++-4.9' C_COMPILER='gcc-4.9'
 
     - os: linux
@@ -28,7 +28,7 @@ matrix:
       addons: &gcc5
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-5', 'gcc-5','binutils']
+          packages: ['g++-5', 'gcc-5','binutils-gold']
       env: GCCVER='5' CXX_COMPILER='g++-5' C_COMPILER='gcc-5'
 
     # 4/ OSX GCC5 Builds
