@@ -11,7 +11,7 @@ matrix:
         apt:
           sources: ['llvm-toolchain-precise', 'ubuntu-toolchain-r-test']
           packages: ['clang-3.8','binutils']
-      env: CXX_COMPILER='clang++-3.8' C_COMPILER='clang-3.8'
+      env: CXX_COMPILER='clang++-3.8' C_COMPILER='clang-3.8' AR='clang-ar-3.8' RANLIB='clang-ranlib-3.8'
 
 
     # 2/ Linux GCC Builds
@@ -21,7 +21,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-4.9', 'gcc-4.9','binutils']
-      env: CXX_COMPILER='g++-4.9' C_COMPILER='gcc-4.9' AR='gcc-ar-4.9'
+      env: CXX_COMPILER='g++-4.9' C_COMPILER='gcc-4.9' AR='gcc-ar-4.9' RANLIB='gcc-ranlib-4.9'
 
     - os: linux
       compiler: gcc
@@ -29,7 +29,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-5', 'gcc-5','binutils']
-      env: CXX_COMPILER='g++-5' C_COMPILER='gcc-5'
+      env: CXX_COMPILER='g++-5' C_COMPILER='gcc-5' AR='gcc-ar-5' RANLIB='gcc-ranlib-5'
 
     # 4/ OSX GCC5 Builds
     - os: osx
