@@ -57,9 +57,10 @@ before_script:
 
 
 script : 
-  - which gcc 
-  - which ar 
-  - which gcc-ar 
+  - which $CXX 
+  - which $CC 
+  - which $AR 
+  - which $RANLIB 
   - autoreconf -vfi && ./configure && make 
   
   
