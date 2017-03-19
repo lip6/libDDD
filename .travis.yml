@@ -57,6 +57,6 @@ script :
   - which gcc 
   - which ar 
   - which gcc-ar 
-  - autoreconf -vfi && ./configure && make -j
+  - autoreconf -vfi && ./configure && make 
   
   
