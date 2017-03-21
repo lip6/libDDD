@@ -62,6 +62,16 @@ script :
   - which $AR 
   - which $RANLIB 
   - ld --version
-  - autoreconf -vfi && ./configure --enable-nolto && make 
+  - /bin/sh ./tag.sh
+  - autoreconf -vfi && ./configure --enable-nolto && make
+  - make dist
+  - mv ddd*.tgz website/ 
   
+deploy:
+  provider: pages
+  skip_cleanup: true
+  github_token: $GITHUB_TOKEN # Set in travis-ci.org dashboard
+  local_dir: website/
+  on:
+    branch: master
   
