@@ -60,7 +60,7 @@ script :
   - /bin/sh ./tag.sh
   - autoreconf -vfi && ./configure --enable-nolto && make
   - make dist
-  - mv ddd*.tgz website/ 
+  - mv ddd*.tar.gz website/ 
   
 deploy:
   provider: pages
