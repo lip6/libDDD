@@ -12,3 +12,4 @@
 /configure
 /depcomp
 **/Makefile.in
+/ddd-*.tar.gz
