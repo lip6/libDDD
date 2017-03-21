@@ -58,7 +58,9 @@ before_script:
 
 script : 
   - /bin/sh ./tag.sh
-  - autoreconf -vfi && ./configure --enable-nolto && make
+  - autoreconf -vfi 
+  - ./configure --enable-nolto || cat config.log
+  - make -j
   - make dist
   - mv ddd*.tar.gz website/ 
   
