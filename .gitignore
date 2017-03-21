@@ -1,4 +1,6 @@
 **/*.o
+**/*.a
+**/*.Po
 /install-sh
 /libtool
 /ltmain.sh
@@ -13,3 +15,5 @@
 /depcomp
 **/Makefile.in
 /ddd-*.tar.gz
+m4/*.m4
+**/autom4te.cache/
