@@ -1,0 +1,14 @@
+**/*.o
+/install-sh
+/libtool
+/ltmain.sh
+/Makefile
+/missing
+/compile
+/config.guess
+/config.log
+/config.status
+/config.sub
+/configure
+/depcomp
+/Makefile.in
