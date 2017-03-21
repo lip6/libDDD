@@ -11,4 +11,4 @@
 /config.sub
 /configure
 /depcomp
-/Makefile.in
+**/Makefile.in
