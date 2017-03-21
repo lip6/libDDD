@@ -35,7 +35,7 @@ matrix:
     - os: osx
       osx_image: xcode7
       compiler: gcc
-      env: CXX_COMPILER='g++-5' C_COMPILER='gcc-5'
+      env: GCCVER='5' CXX_COMPILER='g++-5' C_COMPILER='gcc-5'
 
 
     # 5/ Linux GCC5 Coverage build
@@ -57,11 +57,6 @@ before_script:
 
 
 script : 
-  - which $CXX 
-  - which $CC 
-  - which $AR 
-  - which $RANLIB 
-  - ld --version
   - /bin/sh ./tag.sh
   - autoreconf -vfi && ./configure --enable-nolto && make
   - make dist
