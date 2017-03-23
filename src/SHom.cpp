@@ -98,7 +98,7 @@ namespace sns {
 		return d;
     }
 
-    GShom invert (const GSDD & pot) const { 
+    GShom invert (const GSDD & ) const {
       return this;
     }
 
@@ -428,7 +428,7 @@ namespace sns {
 
 
     // this hom is a heavy modifier
-    bool skip_variable (int var) const {
+    bool skip_variable (int ) const {
       return false;
     }
 
