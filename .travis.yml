@@ -59,10 +59,15 @@ before_script:
 script : 
   - /bin/sh ./tag.sh
   - autoreconf -vfi 
-  - ./configure --enable-nolto || cat config.log
+  - mkdir install
+  - ./configure --enable-nolto --prefix=$PWD/install || cat config.log
   - make -j
+  - make install
+  - tar cvzf $TRAVIS_OS_NAME.tgz install/
+  - mv $TRAVIS_OS_NAME.tgz website/
   - make dist
   - mv ddd*.tar.gz website/ 
+  
   
 deploy:
   provider: pages
