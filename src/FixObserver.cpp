@@ -11,8 +11,8 @@ public:
   bool should_interrupt (const GSDD &, const GSDD &) { return false; }
   bool should_interrupt (const GDDD &, const GDDD &) { return false; }
   bool was_interrupted () const { return false; }
-  void update (const GSDD & after, const GSDD & before) {}
-  void update (const GDDD & after, const GDDD & before) {}
+  void update (const GSDD & , const GSDD & ) {}
+  void update (const GDDD & , const GDDD & ) {}
 };
 
 static FixObserver * obs = NULL;

@@ -46,7 +46,7 @@ public:
   }
 
   bool
-  should_insert (const FuncType & h) const
+  should_insert (const FuncType & ) const
   {
     return true;
   }
