@@ -15,13 +15,13 @@ matrix:
 
 
     # 2/ Linux GCC Builds
-    - os: linux
-      compiler: gcc
-      addons: &gcc49
-        apt:
-          sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-4.9', 'gcc-4.9', 'binutils-gold']
-      env: GCCVER='4.9' CXX_COMPILER='g++-4.9' C_COMPILER='gcc-4.9'
+#    - os: linux
+#      compiler: gcc
+#      addons: &gcc49
+#        apt:
+#          sources: ['ubuntu-toolchain-r-test']
+#          packages: ['g++-4.9', 'gcc-4.9', 'binutils-gold']
+#      env: GCCVER='4.9' CXX_COMPILER='g++-4.9' C_COMPILER='gcc-4.9'
 
     - os: linux
       compiler: gcc
