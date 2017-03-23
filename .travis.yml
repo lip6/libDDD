@@ -59,7 +59,7 @@ before_script:
 script : 
   - /bin/sh ./tag.sh
   - autoreconf -vfi 
-  - mkdir usr/local
+  - mkdir usr && mkdir usr/local
   - ./configure --enable-nolto --prefix=$PWD/usr/local/ || cat config.log
   - make -j
   - make install
