@@ -28,7 +28,7 @@ using namespace std;
 #include "ddd/DDD.h"
 #include "ddd/Hom.h"
 #include "ddd/MemoryManager.h"
-#include "ddd/PlusPlus.hh"
+#include "PlusPlus.hh"
 #include "ddd/statistic.hpp"
 
 typedef enum {A, B, C, D,E, F, G} var;
