@@ -24,11 +24,11 @@
 #ifndef SHOM_H_
 #define SHOM_H_
 
-#include "SDD.h"
-#include "Hom.h"
-#include "Cache.hh"
+#include "ddd/SDD.h"
+#include "ddd/Hom.h"
+#include "ddd/Cache.hh"
 
-#include "util/set.hh"
+#include "ddd/util/set.hh"
 
 /**********************************************************************/
 

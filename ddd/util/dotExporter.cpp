@@ -19,14 +19,14 @@
 /*Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 /*     						                            */
 /****************************************************************************/
-#include "dotExporter.h"
+#include "ddd/dotExporter.h"
 #include <typeinfo>
 #include <map>
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include "util/hash_support.hh"
-#include "util/hash_set.hh"
+#include "ddd/util/hash_support.hh"
+#include "ddd/util/hash_set.hh"
 using namespace std;
     
 class dotExporter{

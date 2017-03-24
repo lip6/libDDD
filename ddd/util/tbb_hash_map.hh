@@ -6,7 +6,7 @@
 #include <tbb/concurrent_hash_map.h>
 #include <tbb/mutex.h>
 
-#include "util/hash_support.hh"
+#include "ddd/util/hash_support.hh"
 
 template
 <

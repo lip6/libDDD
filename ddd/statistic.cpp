@@ -20,9 +20,9 @@
 /*     						                            */
 /****************************************************************************/
 
-#include "statistic.hpp"
-#include "process.hpp"
-#include "MemoryManager.h"
+#include "ddd/statistic.hpp"
+#include "ddd/process.hpp"
+#include "ddd/MemoryManager.h"
 
 static const char * const value_sep[] = {","," & "};
 static const char * const line_sep[] = {"\n","\\\\ \n \\hline \n"};

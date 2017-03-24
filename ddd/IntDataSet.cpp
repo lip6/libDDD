@@ -21,7 +21,7 @@
 /****************************************************************************/
 
 
-#include "IntDataSet.h"
+#include "ddd/IntDataSet.h"
 
 
 // static initialization

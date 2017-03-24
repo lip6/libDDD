@@ -28,8 +28,8 @@
 #include <string>
 #include <vector>
 
-#include "DataSet.h"
-#include "hashfunc.hh"
+#include "ddd/DataSet.h"
+#include "ddd/hashfunc.hh"
 
 /// pre-declaration of concrete (private) class implemented in .cpp file
 class _GDDD;

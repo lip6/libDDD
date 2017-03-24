@@ -35,10 +35,10 @@
 #include <sstream>
 #include <limits>
 
-#include "util/configuration.hh"
-#include "DDD.h"
-#include "UniqueTableId.hh"
-#include "DED.h"
+#include "ddd/util/configuration.hh"
+#include "ddd/DDD.h"
+#include "ddd/UniqueTableId.hh"
+#include "ddd/DED.h"
 
 #ifdef REENTRANT
 #include "tbb/atomic.h"

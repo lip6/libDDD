@@ -29,11 +29,11 @@
 #include <typeinfo>
 // ajout
 
-#include "util/configuration.hh"
-#include "util/set.hh"
-#include "DDD.h"
-#include "DED.h"
-#include "Hom.h"
+#include "ddd/util/configuration.hh"
+#include "ddd/util/set.hh"
+#include "ddd/DDD.h"
+#include "ddd/DED.h"
+#include "ddd/Hom.h"
 
 #ifdef REENTRANT
 #include "tbb/atomic.h"

@@ -27,7 +27,7 @@
 #include <typeinfo>
 #include <string>
 
-#include "hashfunc.hh"
+#include "ddd/hashfunc.hh"
 
 #include <unordered_map>
 

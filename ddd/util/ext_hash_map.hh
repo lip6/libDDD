@@ -2,12 +2,12 @@
 #define _EXT_HASH_MAP_HH_
 
 #ifndef USE_STD_HASH
-#include <google/sparse_hash_map>
+#include <ddd/google/sparse_hash_map>
 #else
 #include <unordered_map>
 #endif
 
-#include "util/hash_support.hh"
+#include "ddd/util/hash_support.hh"
 #include <utility>
 
 template

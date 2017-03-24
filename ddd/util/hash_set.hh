@@ -2,7 +2,7 @@
 #define _HASH_SET_HH_
 
 #ifndef USE_STD_HASH
-#include <google/sparse_hash_set>
+#include <ddd/google/sparse_hash_set>
 #else
 #include <unordered_set>
 #endif

@@ -40,7 +40,7 @@
 #ifndef UTIL_GTL_HASHTABLE_COMMON_H_
 #define UTIL_GTL_HASHTABLE_COMMON_H_
 
-#include <google/sparsehash/sparseconfig.h>
+#include <ddd/google/sparsehash/sparseconfig.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stddef.h>                  // for size_t

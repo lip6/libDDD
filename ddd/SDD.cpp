@@ -24,20 +24,20 @@
 #include <string>
 #include <iostream>
 #include <vector>
-#include "util/set.hh"
+#include "ddd/util/set.hh"
 #include <map>
 #include <sstream>
 #include <cassert>
 #include <typeinfo>
 
-#include "SDED.h"
-#include "SDD.h"
-#include "UniqueTable.h"
-#include "IntDataSet.h"
-#include "DDD.h"
-#include "SHom.h"
-#include "util/hash_support.hh"
-#include "util/ext_hash_map.hh"
+#include "ddd/SDED.h"
+#include "ddd/SDD.h"
+#include "ddd/UniqueTable.h"
+#include "ddd/IntDataSet.h"
+#include "ddd/DDD.h"
+#include "ddd/SHom.h"
+#include "ddd/util/hash_support.hh"
+#include "ddd/util/ext_hash_map.hh"
 
 
 #ifdef REENTRANT

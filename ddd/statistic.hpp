@@ -22,8 +22,8 @@
  
 #include <iostream>
 #include <string>
-#include "SDD.h"
-#include "DDD.h"
+#include "ddd/SDD.h"
+#include "ddd/DDD.h"
 
 
 
