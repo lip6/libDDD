@@ -23,11 +23,11 @@
 #include <iostream>
 using namespace std;
 
-#include "DDD.h"
-#include "DED.h"
-#include "Hom.h"
-#include "MemoryManager.h"
-#include "statistic.hpp"
+#include "ddd/DDD.h"
+#include "ddd/DED.h"
+#include "ddd/Hom.h"
+#include "ddd/MemoryManager.h"
+#include "ddd/statistic.hpp"
 
 typedef enum {A, B, C, D,E, F, G} var;
 var variables;

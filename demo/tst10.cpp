@@ -25,11 +25,11 @@ using namespace std;
 // for ::hash functions
 // using namespace __gnu_cxx;
 
-#include "DDD.h"
-#include "Hom.h"
-#include "MemoryManager.h"
-#include "PlusPlus.hh"
-#include "statistic.hpp"
+#include "ddd/DDD.h"
+#include "ddd/Hom.h"
+#include "ddd/MemoryManager.h"
+#include "ddd/PlusPlus.hh"
+#include "ddd/statistic.hpp"
 
 typedef enum {A, B, C, D,E, F, G} var;
 var variables;

@@ -23,9 +23,9 @@
 #include <iostream>
 using namespace std;
 
-#include "DDD.h"
-#include "MemoryManager.h"
-#include "statistic.hpp"
+#include "ddd/DDD.h"
+#include "ddd/MemoryManager.h"
+#include "ddd/statistic.hpp"
 
 
 typedef enum {A, B, C, D,E, F, G} var;

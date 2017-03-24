@@ -23,10 +23,10 @@
 #include <iostream>
 using namespace std;
 
-#include "DDD.h"
-#include "DED.h"
-#include "MemoryManager.h"
-#include "dotExporter.h"
+#include "ddd/DDD.h"
+#include "ddd/DED.h"
+#include "ddd/MemoryManager.h"
+#include "ddd/dotExporter.h"
 
 
 typedef enum {A, B, C} var;

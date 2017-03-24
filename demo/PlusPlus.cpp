@@ -1,5 +1,5 @@
 #include "PlusPlus.hh"
-#include "hashfunc.hh"
+#include "ddd/hashfunc.hh"
 
 // Increment the first value of var
 class _plusplus:public StrongHom {

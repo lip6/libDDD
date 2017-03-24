@@ -3,9 +3,9 @@
 
 #include <string>
 #include <cstdlib>
-#include "Hom.h"
-#include "SHom.h"
-#include "statistic.hpp"
+#include "ddd/Hom.h"
+#include "ddd/SHom.h"
+#include "ddd/statistic.hpp"
 
 // Global constants.
 // we use one DDD variable per ring, ring 0 is the topmost, 
