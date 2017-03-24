@@ -10,7 +10,7 @@
 //
 //
 
-#include "winner.hpp"
+#include "hom/winner.hpp"
 #include <boost/functional/hash.hpp>
 
 /**

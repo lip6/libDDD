@@ -2,13 +2,13 @@
 #include <vector>
 #include <map>
 
-#include "IntDataSet.h"
-#include "DDD.h"
-#include "SDD.h"
-#include "SDED.h"
-#include "MemoryManager.h"
+#include "ddd/IntDataSet.h"
+#include "ddd/DDD.h"
+#include "ddd/SDD.h"
+#include "ddd/SDED.h"
+#include "ddd/MemoryManager.h"
 
-#include "statistic.hpp"
+#include "ddd/statistic.hpp"
 
 int
 main(int argc, char** argv)

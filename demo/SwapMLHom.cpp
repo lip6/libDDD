@@ -1,6 +1,6 @@
 #include "SwapMLHom.hh"
-#include "MLHom.h"
-#include "Hom_Basic.hh"
+#include "ddd/MLHom.h"
+#include "ddd/Hom_Basic.hh"
 
 class _SwapQuery : public StrongMLHom {
   int var;

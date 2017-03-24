@@ -33,9 +33,9 @@
 #include <iostream>
 using namespace std;
 
-#include "DDD.h"
-#include "DED.h"
-#include "MemoryManager.h"
+#include "ddd/DDD.h"
+#include "ddd/DED.h"
+#include "ddd/MemoryManager.h"
 #include "hanoiHom.hh"  
   
 int main(int argc, char **argv){

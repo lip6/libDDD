@@ -174,7 +174,7 @@ AC_CONFIG_FILES([   Makefile
                     demo/Makefile
                     demo/hanoi/Makefile
                     demo/morpion/Makefile
-                    src/Makefile
+                    ddd/Makefile
                     doc/Doxyfile
                     doc/Makefile])
 

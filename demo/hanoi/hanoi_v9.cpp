@@ -31,11 +31,11 @@
 #include <cstdio>
   using namespace std;
 
-#include "IntDataSet.h"
-#include "DDD.h"
-#include "DED.h"
-#include "MemoryManager.h"
-#include "statistic.hpp"
+#include "ddd/IntDataSet.h"
+#include "ddd/DDD.h"
+#include "ddd/DED.h"
+#include "ddd/MemoryManager.h"
+#include "ddd/statistic.hpp"
 
 // int -> string
 std::string toString (int i) {
