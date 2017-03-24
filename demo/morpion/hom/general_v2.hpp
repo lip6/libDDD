@@ -2,8 +2,8 @@
 // date : Jan 2009
 #pragma once
 
-#include "DDD.h"
-#include "Hom.h"
+#include "ddd/DDD.h"
+#include "ddd/Hom.h"
 #include "hom/const.hpp"
 
 

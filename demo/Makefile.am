@@ -11,7 +11,7 @@ if WITH_LIBTBBBIN_PATH
 TBBBIN_FLAGS=-L $(LIBTBB_BIN)
 endif
 
-DDD_SRCDIR = $(top_srcdir)/src
+DDD_SRCDIR = $(top_srcdir)
 DDD_BUILDDIR = $(top_builddir)/src
 
 AM_CPPFLAGS =  -I $(DDD_SRCDIR) -g -Wall $(TBBINC_FLAGS)

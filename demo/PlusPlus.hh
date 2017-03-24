@@ -1,7 +1,7 @@
 #ifndef __PLUSPLUS_HH
 #define __PLUSPLUS_HH
 
-#include "Hom.h"
+#include "ddd/Hom.h"
 // User function : Construct a Hom for a Strong Hom _plusplus
 // Increments the value of the first occurrence of var
 GHom plusplus(int vr);

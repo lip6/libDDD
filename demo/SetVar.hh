@@ -1,7 +1,7 @@
 #ifndef __SET_VAR_HH__
 #define __SET_VAR_HH__
 
-#include "Hom.h"
+#include "ddd/Hom.h"
 // User functions : Construct hom
 
 // Assign val to the first occurrence of variable var

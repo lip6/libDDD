@@ -10,7 +10,7 @@ noinst_PROGRAMS =   hanoi_v1 \
                     hanoi_v8 \
                     hanoi_v9
 
-DDD_SRCDIR      =   $(top_srcdir)/src
+DDD_SRCDIR      =   $(top_srcdir)
 DDD_BUILDDIR    =   $(top_builddir)/src
 
 # Flags for TBB
