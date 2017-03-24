@@ -23,8 +23,8 @@
 #ifndef __MLHOM__H__
 #define __MLHOM__H__
 
-#include "Hom.h"
-#include "AdditiveMap.hpp"
+#include "ddd/Hom.h"
+#include "ddd/AdditiveMap.hpp"
 
 class MLHom;
 

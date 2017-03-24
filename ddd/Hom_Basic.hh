@@ -1,10 +1,10 @@
 #ifndef __HOM_BASIC__H_
 #define __HOM_BASIC__H_
 
-#include "DDD.h"
-#include "Hom.h"
-#include "SDD.h"
-#include "SHom.h"
+#include "ddd/DDD.h"
+#include "ddd/Hom.h"
+#include "ddd/SDD.h"
+#include "ddd/SHom.h"
 
 
 // keep paths where variable var is equal to val

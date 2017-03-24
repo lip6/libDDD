@@ -1,7 +1,7 @@
 #ifndef _CACHE_HH_
 #define _CACHE_HH_
   
-#include "util/configuration.hh"
+#include "ddd/util/configuration.hh"
 
 template
     <

@@ -20,11 +20,11 @@
 /*     						                            */
 /****************************************************************************/
 
-#include "MLHom.h"
-#include "UniqueTable.h"
+#include "ddd/MLHom.h"
+#include "ddd/UniqueTable.h"
 #include <typeinfo>
-#include "util/set.hh"
-#include "MLCache.hh" 
+#include "ddd/util/set.hh"
+#include "ddd/MLCache.hh"
 
 namespace d3 { namespace util {
   template<>

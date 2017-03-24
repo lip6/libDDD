@@ -1,7 +1,7 @@
 #ifndef _MLCACHE_HH_
 #define _MLCACHE_HH_
   
-#include "util/configuration.hh"
+#include "ddd/util/configuration.hh"
 
 
 template

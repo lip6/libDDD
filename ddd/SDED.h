@@ -25,10 +25,10 @@
 #define SDED_H
 
 #include <map>
-#include "util/set.hh"
+#include "ddd/util/set.hh"
 
-#include "DataSet.h"
-#include "util/hash_support.hh"
+#include "ddd/DataSet.h"
+#include "ddd/util/hash_support.hh"
 
 class _SDED;
 class GSDD;

@@ -23,8 +23,8 @@
 #define __DOTEXPORTER__H__
 
 
-#include "SDD.h"
-#include "DDD.h"
+#include "ddd/SDD.h"
+#include "ddd/DDD.h"
 using namespace std;
 
 

@@ -25,19 +25,18 @@
 #include <cassert>
 #include <map>
 #include <algorithm>
-#include "util/set.hh"
 
-
-#include "Hom.h"
-#include "DDD.h"
-#include "DED.h"
-#include "UniqueTable.h"
-#include "MLHom.h"
-#include "util/hash_support.hh"
-#include "util/configuration.hh"
-#include "Cache.hh"
-#include "MemoryManager.h"
-#include "FixObserver.hh"
+#include "ddd/util/set.hh"
+#include "ddd/Hom.h"
+#include "ddd/DDD.h"
+#include "ddd/DED.h"
+#include "ddd/UniqueTable.h"
+#include "ddd/MLHom.h"
+#include "ddd/util/hash_support.hh"
+#include "ddd/util/configuration.hh"
+#include "ddd/Cache.hh"
+#include "ddd/MemoryManager.h"
+#include "ddd/FixObserver.hh"
 
 namespace d3 { namespace util {
   template<>

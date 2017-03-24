@@ -26,9 +26,9 @@
 
 #include <cassert>
 #include <vector>
-#include "util/configuration.hh"
-#include "util/hash_support.hh"
-#include "util/hash_set.hh"
+#include "ddd/util/configuration.hh"
+#include "ddd/util/hash_support.hh"
+#include "ddd/util/hash_set.hh"
 
 // the clone contract
 

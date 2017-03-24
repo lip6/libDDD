@@ -7,9 +7,9 @@
 #endif
 #endif
 
-#include "util/hash_support.hh"
-#include "util/ext_hash_map.hh"
-#include "util/tbb_hash_map.hh"
+#include "ddd/util/hash_support.hh"
+#include "ddd/util/ext_hash_map.hh"
+#include "ddd/util/tbb_hash_map.hh"
 
 
 template

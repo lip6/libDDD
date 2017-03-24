@@ -27,8 +27,8 @@
 
 #include <string>
 
-#include "UniqueTable.h"
-#include "DataSet.h"
+#include "ddd/UniqueTable.h"
+#include "ddd/DataSet.h"
 
 
 // #define HEIGHTSDD

@@ -25,9 +25,9 @@
 #define DED_H
 
 #include <set>
-#include "DDD.h"
-#include "Hom.h"
-#include "util/hash_support.hh"
+#include "ddd/DDD.h"
+#include "ddd/Hom.h"
+#include "ddd/util/hash_support.hh"
 
 class _DED;
 class GDDD;

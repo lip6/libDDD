@@ -2,7 +2,7 @@
 #define __ADDITIVEMAP_HH__
 
 #include <vector>
-#include "util/hash_support.hh"
+#include "ddd/util/hash_support.hh"
 
 template<typename K, typename V, typename EqualKey = d3::util::equal<K> >
 class AdditiveMap {

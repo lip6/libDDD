@@ -24,9 +24,9 @@
 #ifndef HOM_H_
 #define HOM_H_
 
-#include "DDD.h"
-#include "util/hash_support.hh"
-#include "util/set.hh"
+#include "ddd/DDD.h"
+#include "ddd/util/hash_support.hh"
+#include "ddd/util/set.hh"
 
 #include <map>
 #include <cassert>

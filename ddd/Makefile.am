@@ -76,8 +76,8 @@ endif
 
 # standard version
 libDDD_a_SOURCES    =   $(ddd_hdrs) $(util_hdrs) $(srcs)
-libDDD_a_CPPFLAGS =   -g -O3 -Wall -DNDEBUG $(TBBINC_FLAGS) -I $(MYSRCDIR)
+libDDD_a_CPPFLAGS =   -g -O3 -Wall -DNDEBUG $(TBBINC_FLAGS) -I $(abs_top_srcdir)
 
 # debug version
 libDDD_d_a_SOURCES  =   $(ddd_hdrs) $(util_hdrs) $(srcs)
-libDDD_d_a_CPPFLAGS =   -g -O0 -Wall $(TBBINC_FLAGS) -I $(MYSRCDIR)
+libDDD_d_a_CPPFLAGS =   -g -O0 -Wall $(TBBINC_FLAGS) -I $(abs_top_srcdir)

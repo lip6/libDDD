@@ -23,17 +23,17 @@
 /* -*- C++ -*- */
 #ifndef MEMORYMANAGER_H
 #define MEMORYMANAGER_H
-#include "DDD.h"
-#include "DED.h"
-#include "Hom.h"
-#include "SDD.h"
-#include "SDED.h"
-#include "SHom.h"
-#include "MLHom.h"
-#include "IntDataSet.h"
+#include "ddd/DDD.h"
+#include "ddd/DED.h"
+#include "ddd/Hom.h"
+#include "ddd/SDD.h"
+#include "ddd/SDED.h"
+#include "ddd/SHom.h"
+#include "ddd/MLHom.h"
+#include "ddd/IntDataSet.h"
 
 
-#include "process.hpp"
+#include "ddd/process.hpp"
 
 
 class GCHook {

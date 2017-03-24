@@ -1,8 +1,8 @@
 #ifndef __MLSHOM__H__
 #define __MLSHOM__H__
 
-#include "AdditiveMap.hpp"
-#include "SHom.h"
+#include "ddd/AdditiveMap.hpp"
+#include "ddd/SHom.h"
 
 class MLShom;
 

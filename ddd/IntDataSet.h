@@ -29,9 +29,9 @@
 #include <cassert>
 #include <iostream>
 
-#include "DataSet.h"
-#include "UniqueTable.h"
-#include "util/hash_support.hh"
+#include "ddd/DataSet.h"
+#include "ddd/UniqueTable.h"
+#include "ddd/util/hash_support.hh"
 
 /// This class is a very basic implementation of DataSet interface
 /// based on std::std::vector<int> and a unicity table

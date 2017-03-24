@@ -27,12 +27,12 @@
 #include <cassert>
 #include <iostream>
 
-#include "util/configuration.hh"
-#include "DataSet.h"
-#include "DED.h"
-#include "SDD.h"
-#include "SDED.h"
-#include "SHom.h"
+#include "ddd/util/configuration.hh"
+#include "ddd/DataSet.h"
+#include "ddd/DED.h"
+#include "ddd/SDD.h"
+#include "ddd/SDED.h"
+#include "ddd/SHom.h"
 
 #ifdef REENTRANT
 # include "tbb/atomic.h"

@@ -24,14 +24,14 @@
 #include <cassert>
 #include <iostream>
 
-#include "MemoryManager.h"
-#include "util/configuration.hh"
-#include "util/hash_support.hh"
-#include "util/ext_hash_map.hh"
-#include "Cache.hh"
-#include "MLSHom.h"
+#include "ddd/MemoryManager.h"
+#include "ddd/util/configuration.hh"
+#include "ddd/util/hash_support.hh"
+#include "ddd/util/ext_hash_map.hh"
+#include "ddd/Cache.hh"
+#include "ddd/MLSHom.h"
 
-#include "FixObserver.hh"
+#include "ddd/FixObserver.hh"
 
 #ifdef PARALLEL_DD
 #include <tbb/blocked_range.h>
@@ -98,7 +98,7 @@ namespace sns {
 		return d;
     }
 
-    GShom invert (const GSDD & ) const {
+    GShom invert (const GSDD & pot) const { 
       return this;
     }
 

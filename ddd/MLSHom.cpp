@@ -1,6 +1,6 @@
-#include "MLSHom.h"
+#include "ddd/MLSHom.h"
 
-#include "UniqueTable.h"
+#include "ddd/UniqueTable.h"
 #include <typeinfo>
 
 namespace d3 { namespace util {
