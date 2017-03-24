@@ -7,7 +7,7 @@
 #include <unordered_set>
 #endif
 
-#include "util/configuration.hh"
+#include "ddd/util/configuration.hh"
 
 namespace d3 {
 
