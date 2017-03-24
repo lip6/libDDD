@@ -1,7 +1,7 @@
 lib_LIBRARIES = libDDD.a \
                 libDDD_d.a
 
-MYSRCDIR= $(abs_top_srcdir)/src
+MYSRCDIR= $(abs_top_srcdir)/ddd
 
 ddddir      =   $(pkgincludedir)
 ddd_hdrs    =   DataSet.h \
