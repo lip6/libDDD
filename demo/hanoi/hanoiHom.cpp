@@ -21,7 +21,7 @@
 
 
 #include "hanoiHom.hh"
-#include "IntDataSet.h"
+#include "ddd/IntDataSet.h"
 #include <vector>
 #include <cstdio>
 

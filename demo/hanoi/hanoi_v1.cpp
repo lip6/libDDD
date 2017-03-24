@@ -28,10 +28,10 @@
 #include <iostream>
 using namespace std;
 
-#include "DDD.h"
-#include "DED.h"
-#include "MemoryManager.h"
-#include "init.hh"
+#include "ddd/DDD.h"
+#include "ddd/DED.h"
+#include "ddd/MemoryManager.h"
+#include "ddd/init.hh"
 #include "hanoiHom.hh"
 // #include "tbb/task_scheduler_init.h"
 

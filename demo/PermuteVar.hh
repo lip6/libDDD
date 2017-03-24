@@ -1,7 +1,7 @@
 #ifndef __PERMUTE_HH__
 #define __PERMUTE_HH__
 
-#include "Hom.h"
+#include "ddd/Hom.h"
 
 // User function : Construct a Hom 
 // Will permute or swap the value of var1 and var2

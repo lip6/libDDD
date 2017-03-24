@@ -23,10 +23,10 @@
 #include <iostream>
 using namespace std;
 
-#include "SDD.h"
-#include "DED.h"
-#include "MemoryManager.h"
-#include "statistic.hpp"
+#include "ddd/SDD.h"
+#include "ddd/DED.h"
+#include "ddd/MemoryManager.h"
+#include "ddd/statistic.hpp"
 
 
 int main(){

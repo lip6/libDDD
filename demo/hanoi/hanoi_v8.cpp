@@ -31,11 +31,11 @@
 #include <iostream>
 using namespace std;
 
-#include "IntDataSet.h"
-#include "DDD.h"
-#include "DED.h"
-#include "MemoryManager.h"
-#include "init.hh"
+#include "ddd/IntDataSet.h"
+#include "ddd/DDD.h"
+#include "ddd/DED.h"
+#include "ddd/MemoryManager.h"
+#include "ddd/init.hh"
 #include "hanoiHom.hh"
  
   

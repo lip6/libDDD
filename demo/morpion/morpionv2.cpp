@@ -15,8 +15,8 @@
 
 
 // SDD utilities to output stats and dot graphs
-#include "util/dotExporter.h"
-#include "statistic.hpp"
+#include "ddd/util/dotExporter.h"
+#include "ddd/statistic.hpp"
 
 /* A Modifier avec les standard de Boost */
 void usage() {
