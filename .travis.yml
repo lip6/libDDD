@@ -67,8 +67,9 @@ script :
   - mv $TRAVIS_OS_NAME.tgz website/
   - make dist
   - mv ddd*.tar.gz website/ 
-  
-  
+
+
+
 deploy:
   provider: pages
   skip_cleanup: true
@@ -77,5 +78,3 @@ deploy:
   upload-dir: build/$TRAVIS_BUILD_NUMBER
   on:
     branch: master
-
-  
