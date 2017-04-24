@@ -50,7 +50,7 @@ namespace process {
 
 
 double getTotalTime() {
-  double val = clock();
+  double val = (double) clock();
   return (val*1000.0 / CLOCKS_PER_SEC) / 1000;
 
 }
