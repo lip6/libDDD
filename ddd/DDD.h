@@ -119,7 +119,7 @@ public:
   /// \param var the variable labeling the node
   /// \param val the value labeling the arc
   /// \param d the successor node or defaults to terminal GDDD::one if none provided
-  GDDD(int var,int val,const GDDD &d=one );
+  GDDD(int var,val_t val,const GDDD &d=one );
   /// To create a DDD with arcs covering a range of values.
   /// This interface creates nodes with a set of arcs bearing the values in the interval 
   /// [val1,var2] that point to the same successor node d.
@@ -127,7 +127,7 @@ public:
   /// \param val1 lowest value labeling an arc
   /// \param val2 highest value labeling an arc
   /// \param d the successor node or defaults to terminal GDDD::one if none provided
-  GDDD(int var,int val1,int val2,const GDDD &d=one); //var-[val1,var2]->d
+  GDDD(int var,val_t val1,val_t val2,const GDDD &d=one); //var-[val1,var2]->d
   //@}
 
 
@@ -267,7 +267,7 @@ public:
   /// \param var the variable labeling the node
   /// \param val the value labeling the arc
   /// \param d the successor node or defaults to terminal GDDD::one if none provided
-  DDD(int var,int val,const GDDD &d=one ); 
+  DDD(int var,val_t val,const GDDD &d=one ); 
   /// To create a DDD with arcs covering a range of values.
   /// This interface creates nodes with a set of arcs bearing the values in the interval 
   /// [val1,var2] that point to the same successor node d.
@@ -275,7 +275,7 @@ public:
   /// \param val1 lowest value labeling an arc
   /// \param val2 highest value labeling an arc
   /// \param d the successor node or defaults to terminal GDDD::one if none provided  
-  DDD(int var,int val1,int val2,const GDDD &d=one); 
+  DDD(int var,val_t val1,val_t val2,const GDDD &d=one); 
   /// Destructor, maintains refCount. Note that destroying a DDD does not actually destroy
   /// any data, it decrements reference count, so that subsequent MemoryManager::garbage call
   /// may truly clear the data.
