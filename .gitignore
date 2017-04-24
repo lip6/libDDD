@@ -1,6 +1,7 @@
 **/*.o
 **/*.a
 **/*.Po
+**/.dirstamp
 /install-sh
 /libtool
 /ltmain.sh
