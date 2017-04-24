@@ -524,7 +524,7 @@ DDD::DDD(const GDDD &g):GDDD(g.concret){
   DDDutable::instance().ref(concret);
 }
 
-GDDD::GDDD(int var,int val,const GDDD &d):concret(null.concret){ //var-val->d
+GDDD::GDDD(int var,val_t val,const GDDD &d):concret(null.concret){ //var-val->d
   if(d!=null){
     GDDD::Valuation tmp;
 #ifdef EVDDD
@@ -546,10 +546,10 @@ GDDD::GDDD(int var,int val,const GDDD &d):concret(null.concret){ //var-val->d
   //  concret->refCounter++;
 }
 
-GDDD::GDDD(int var,int val1,int val2,const GDDD &d):concret(null.concret){ //var-[val1,val2]->d
+GDDD::GDDD(int var,val_t val1,val_t val2,const GDDD &d):concret(null.concret){ //var-[val1,val2]->d
   if(val1<=val2 && null!=d){
     GDDD::Valuation tmp;
-    for(int val=val1;val<=val2;++val){
+    for(val_t val=val1;val<=val2;++val){
       edge_t x(val,d);
       tmp.push_back(x);
     }
@@ -558,11 +558,11 @@ GDDD::GDDD(int var,int val1,int val2,const GDDD &d):concret(null.concret){ //var
   //  concret->refCounter++;
 }
 
-DDD::DDD(int var,int val,const GDDD &d):GDDD(var,val,d){
+DDD::DDD(int var,val_t val,const GDDD &d):GDDD(var,val,d){
   DDDutable::instance().ref(concret);
 }
 
-DDD::DDD(int var,int val1,int val2,const GDDD &d):GDDD(var,val1,val2,d){
+DDD::DDD(int var,val_t val1,val_t val2,const GDDD &d):GDDD(var,val1,val2,d){
     DDDutable::instance().ref(concret);
 }
 
@@ -735,7 +735,7 @@ void loadDDD(std::istream& is, std::vector<DDD>& list) {
     unsigned long int size;
     unsigned long int index;
     int var;
-    int val;
+    DDD::val_t val;
     GDDD::Valuation valuation;
     std::string temp;
     is>>size;
