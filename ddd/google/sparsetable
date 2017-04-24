@@ -246,6 +246,8 @@
 #include <ddd/google/sparsehash/hashtable-common.h>
 #include <ddd/google/sparsehash/libc_allocator_with_realloc.h>
 
+#pragma GCC diagnostic ignored "-Wconversion"
+
 // A lot of work to get a type that's guaranteed to be 16 bits...
 #ifndef HAVE_U_INT16_T
 # if defined HAVE_UINT16_T

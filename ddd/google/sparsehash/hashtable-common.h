@@ -47,6 +47,8 @@
 #include <iosfwd>
 #include <stdexcept>                 // For length_error
 
+#pragma GCC diagnostic ignored "-Wconversion"
+
 _START_GOOGLE_NAMESPACE_
 
 #define GCC_VERSION (__GNUC__ * 10000 \
