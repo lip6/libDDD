@@ -19,3 +19,4 @@
 m4/*.m4
 **/autom4te.cache/
 /ar-lib
+/aclocal.m4
