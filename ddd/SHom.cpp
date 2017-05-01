@@ -895,18 +895,17 @@ namespace sns {
 	int var = d.variable();
 	const LocalApply* ld3 = NULL;
 	const SLocalApply* l = NULL;
-
-	GHom local;
-	GShom Slocal;
+	
+	GShom loc = GShom::id;
 	for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
 	  if ( gi->skip_variable(var) ) {
 	    F.push_back(*gi);
 	  } else if ( (ld3 = dynamic_cast<const LocalApply*> ( get_concret(*gi) ) ))  {
-	    local = ld3->h;
+	    loc = *gi;
 	    // looks good, l term identified
 	    // l = *gi;
 	  } else if (( l = dynamic_cast<const SLocalApply*> ( get_concret(*gi) )) )  {
-	    Slocal = l->h;
+	    loc = *gi;
      	    // looks good, l term identified
 	    // l = *gi;
 	  } else {
@@ -938,26 +937,17 @@ namespace sns {
 	    return res;
 	  }
 	}
-
+	// test some local hits ?
+	if ( loc.has_image(res) == GSDD::null) {
+	  return GSDD::null;
+	}
+	// apply locals, fully
+	res = loc (res);
+	
 	for (SDD::const_iterator it = res.begin() ; it != res.end() ; ++it ) {
 	  GSDD nextimg = nextSel.has_image(it->second);
 	  if (nextimg == GSDD::null) {
 	    continue ;
-	  }
-	  if (l != NULL) {	    
-	    GSDD arcimg = Slocal.has_image( *((const SDD *) it->first));
-	    if (arcimg == GSDD::null) {
-	      continue;
-	    } else {
-	      return GSDD (d.variable(), arcimg, nextimg);
-	    }
-	  } else if (ld3 != NULL) {
-	    DDD arcimg = local ( *((const DDD *) it->first)) ;
-	    if (arcimg == GDDD::null) {
-	      continue;
-	    } else {
-	      return GSDD (d.variable(), arcimg, nextimg);
-	    }
 	  } else {
 	    return GSDD (d.variable(), * it->first, nextimg);
 	  }
