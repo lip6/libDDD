@@ -78,3 +78,9 @@ deploy:
   upload-dir: build/$TRAVIS_BUILD_NUMBER
   on:
     branch: master
+
+    
+after_deploy:
+  - body="{ \"request\": { \"branch\":\"master\" }}"
+  - curl -s -X POST -H "Content-Type: application/json"    -H "Accept: application/json"   -H "Travis-API-Version: 3"  -H "Authorization: token $APITOKEN" -d $body https://api.travis-ci.org/repo/lip6%2FlibITS/requests
+
