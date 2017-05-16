@@ -660,8 +660,8 @@ namespace sns {
 
       // add application of h(arcval)
       for( GSDD::const_iterator it = d.begin(); it != d.end(); ++it) {
-	assert( typeid(*it->first) == typeid(const SDD&) );
-	GSDD img = h.has_image(((const SDD &)*it->first));
+	assert( typeid(*it->first) == typeid(const GSDD&) );
+	GSDD img = h.has_image(((const GSDD &)*it->first));
 	if ( ! ( img == GSDD::null )  ) {
 	  return GSDD(d.variable(), img, it->second );
 	}
@@ -885,34 +885,29 @@ namespace sns {
 
 
     GSDD has_image (const GSDD & d) const {
-      
-      if( d == GSDD::null ||  d == GSDD::one || d == GSDD::top ) {	
-	return _GShom::has_image(d);
-      } else {
+      if( d == GSDD::null ) {
+	  return GSDD::null;
 
+      } else if (  d == GSDD::one || d == GSDD::top ) {
+	GSDD res = d;
+	// simply apply composition semantics
+	for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
+	  res = (*gi) (res);
+	}
+	return res;
+      } else {
+	GSDD res = d;
 	parameters_t F;
-	parameters_t G;
-	int var = d.variable();
-	const LocalApply* ld3 = NULL;
-	const SLocalApply* l = NULL;
-	
-	GShom loc = GShom::id;
+	int var = d.variable() ;
 	for(parameters_it gi = parameters.begin(); gi != parameters.end(); ++gi ) {	     
 	  if ( gi->skip_variable(var) ) {
 	    F.push_back(*gi);
-	  } else if ( (ld3 = dynamic_cast<const LocalApply*> ( get_concret(*gi) ) ))  {
-	    loc = *gi;
-	    // looks good, l term identified
-	    // l = *gi;
-	  } else if (( l = dynamic_cast<const SLocalApply*> ( get_concret(*gi) )) )  {
-	    loc = *gi;
-     	    // looks good, l term identified
-	    // l = *gi;
 	  } else {
-	    G.push_back(*gi);
+	    if ( gi->has_image(res) != GSDD::null) {
+	      res = (*gi) (res);
+	    }
 	  }
 	}
-
 	GShom nextSel = GShom::id ;
 	if (! F.empty()) {
 	  if ( F.size() > 1 ) 
@@ -921,38 +916,7 @@ namespace sns {
 	    nextSel = *F.begin();
 	}
 
-	// make sure there are some hits at least
-	for (parameters_it gi = G.begin() ; gi != G.end() ; ++gi) {
-	  GSDD img = gi->has_image(d);
-	  if (img == GSDD::null) {
-	    return img;
-	  }
-	}
-
-	// apply G, fully.
-	GSDD res = d;
-	for (parameters_it gi = G.begin() ; gi != G.end() ; ++gi) {
-	  res = (*gi)(res);
-	  if (res == GSDD::null) {
-	    return res;
-	  }
-	}
-	// test some local hits ?
-	if ( loc.has_image(res) == GSDD::null) {
-	  return GSDD::null;
-	}
-	// apply locals, fully
-	res = loc (res);
-	
-	for (SDD::const_iterator it = res.begin() ; it != res.end() ; ++it ) {
-	  GSDD nextimg = nextSel.has_image(it->second);
-	  if (nextimg == GSDD::null) {
-	    continue ;
-	  } else {
-	    return GSDD (d.variable(), * it->first, nextimg);
-	  }
-	}
-	return GSDD::null;
+	return  nextSel.has_image (res)  ;	
       }
     }
 
@@ -2748,6 +2712,19 @@ ShomCache::should_insert (const GShom & h) const
 namespace sns {
 static ShomCache cache;
 }
+
+
+typedef Cache<GShom,GSDD,GSDD,char> ImgShomCache;
+
+template <>
+GSDD ImgShomCache::eval(const GShom & func, const GSDD  & param) const {
+  return _GShom::get_concret(func)->has_image_skip(param);
+}
+
+namespace sns {
+static ImgShomCache imgcache;
+}
+
 /* Eval */
 GSDD 
 GShom::operator()(const GSDD &d) const
@@ -2772,7 +2749,14 @@ GShom::operator()(const GSDD &d) const
 
 GSDD
 GShom::has_image (const GSDD & d) const {
-  return concret->has_image_skip(d);
+  if (d == GSDD::null)
+    {
+      return d;
+    }
+  else
+    {
+      return (sns::imgcache.insert(*this,d)).second;
+    }
 }
 
 GSDD 
@@ -2824,6 +2808,7 @@ static addCache_t addCache;
 void GShom::garbage(){
   addCache.clear();
   sns::cache.clear();
+  sns::imgcache.clear();
   
   // mark phase
   for(UniqueTable<_GShom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();++di){
