@@ -81,5 +81,5 @@ deploy:
 
     
 after_deploy:
-  -curl -s -X POST -H "Content-Type:{{ ' ' }}application/json" -H "Accept:{{ ' ' }}application/json"   -H "Travis-API-Version:{{ ' ' }}3" -H "Authorization:{{ ' ' }}{{ token $APITOKEN }}" -d "\\{\\"request\\":\\{\\"message\\":\\"Triggered by libDDD build.\\",\\"branch\\":\\"master\\"\\}\\}" https://api.travis-ci.org/repo/lip6%2FlibITS/requests
+  -curl -s -X POST -H "Content-Type:{{ ' ' }}application/json" -H "Accept:{{ ' ' }}application/json"   -H "Travis-API-Version:{{ ' ' }}3" -H "Authorization:{{ ' ' }}{{ token $APITOKEN }}" -d "\\{\\"request\\":\\{\\"branch\\":\\"master\\"\\}\\}" https://api.travis-ci.org/repo/lip6%2FlibITS/requests
 
