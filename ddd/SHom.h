@@ -396,7 +396,7 @@ private:
 
   /// The procedure responsible for propagating efficiently across "skipped" variable nodes.
     GSDD eval_skip(const GSDD &) const;
-    GSDD has_image_skip(const GSDD &) const;
+
 
   /// For operation cache management. 
   /// If immediat==true,  eval is called without attempting a cache hit. 
@@ -405,6 +405,8 @@ private:
   virtual bool immediat () const {return false;}
 	
 public:
+  // made public ONLY for the cache, not part of normal API, use GShom has_image instead (cache etc...).
+    GSDD has_image_skip(const GSDD &) const;
 
     /// The skip_variable predicate indicates which variables are "don't care" with respect to this SHom.
     /// This is defined as a StrongHom with :
