@@ -905,6 +905,8 @@ namespace sns {
 	  } else {
 	    if ( gi->has_image(res) != GSDD::null) {
 	      res = (*gi) (res);
+	    } else {
+	      return GSDD::null;
 	    }
 	  }
 	}
