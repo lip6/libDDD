@@ -1948,20 +1948,13 @@ GHom::operator()(const GDDD &d) const
 }
 
 GDDD GHom::has_image(const GDDD &d) const {
-    if(concret->immediat)
+  if (d == GDDD::null) 
     {
-      return concret->has_image(d);
+      return d;
     }
-    else
+  else
     {
-      if (d == GDDD::null) 
-        {
-	  return d;
-        }
-      else
-        {
-	  return (imgcache.insert(*this,d)).second;
-        }
+      return (imgcache.insert(*this,d)).second;
     }
 }
 
