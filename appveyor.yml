@@ -1,6 +1,3 @@
 build:
   verbosity: minimal
   
-script :
- - g++ --version
- 
