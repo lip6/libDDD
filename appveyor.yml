@@ -3,7 +3,7 @@ build:
   
 build_script :
  - autoreconf -vfi
- - ./configure --enable-nolto
+ - ./configure --enable-nolto --enable-mingw-native
  - make
 
  
