@@ -2,10 +2,19 @@ build:
   verbosity: minimal
   
 build_script :
- - '%BASH_PATH% -lc "cd $APPVEYOR_BUILD_FOLDER; autoreconf -vfi && ./configure --enable-nolto --enable-mingw-native && make'
-
+ - '%BASH_PATH% -lc "cd $APPVEYOR_BUILD_FOLDER; autoreconf -vfi && ./configure --prefix=$APPVEYOR_BUILD_FOLDER/usr/local/ --enable-nolto --enable-mingw-native && make && make install'
 
 environment :
  MSYSTEM: MINGW64 
  BASH_PATH: C:\msys64\usr\bin\bash
 
+
+artifacts:
+  - path: usr
+    name: windows
+    type: zip
+  
+  - path: 'ddd*.tar.gz'
+    name: ddd windows
+
+    
