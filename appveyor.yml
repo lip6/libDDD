@@ -1,3 +1,9 @@
 build:
   verbosity: minimal
   
+build_script :
+ - autoreconf -vfi
+ - ./configure --enable-nolto
+ - make
+
+ 
