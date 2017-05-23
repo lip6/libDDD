@@ -2,8 +2,10 @@ build:
   verbosity: minimal
   
 build_script :
- - autoreconf -vfi
- - ./configure --enable-nolto --enable-mingw-native
- - make
+ - '%BASH_PATH% -lc "cd $APPVEYOR_BUILD_FOLDER; autoreconf -vfi && ./configure --enable-nolto --enable-mingw-native && make'
 
- 
+
+environment :
+ - MSYSTEM: MINGW64
+   BASH_PATH: C:\msys64\usr\bin\bash
+
