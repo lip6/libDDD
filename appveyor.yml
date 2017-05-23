@@ -6,6 +6,6 @@ build_script :
 
 
 environment :
- - MSYSTEM: MINGW64 
- - BASH_PATH: C:\msys64\usr\bin\bash
+ - MSYSTEM:MINGW64 
+ - BASH_PATH:C:\msys64\usr\bin\bash
 
