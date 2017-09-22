@@ -19,7 +19,9 @@ matrix:
       compiler: gcc
       env: GCCVER='7' CXX_COMPILER='g++-7' C_COMPILER='gcc-7'
 
-
+cache:
+  directories:
+    - /var/cache/apt/archives
 
 before_script:
 ## OSX
