@@ -2,11 +2,10 @@
 // date : Jan 2009
 #pragma once
 
-#include <boost/multi_array.hpp>
 #include <cmath>
 
 extern size_t NBCELL;
-extern size_t STATE_SYSTEM_CELL;
+extern int STATE_SYSTEM_CELL;
 extern size_t LINE;
 extern size_t COLUMN;
 
@@ -24,4 +23,4 @@ enum game_status_type
 };
 
 // Type definition
-typedef boost::multi_array<int, 2> array_type;
+typedef int** array_type;

@@ -11,7 +11,6 @@
 //
 
 #include "hom/notew.hpp"
-#include <boost/functional/hash.hpp>
 
 /**
  * An inductive homomorphism
@@ -87,9 +86,7 @@ class _NoteWinner: public StrongHom
         hash() const
     {
       // hash function should exhibit reasonable spread and involve as many parameters as possible.
-      std::size_t seed = 4423;
-      boost::hash_combine ( seed, player );
-      return seed ;
+      return 4123 * (player + 2) ;
     }
 
     /**

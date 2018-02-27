@@ -11,9 +11,7 @@
 //
 
 #include "hom/play.hpp"
-#include <boost/functional/hash.hpp>
 #include <cassert>
-
 
 
 /**
@@ -117,8 +115,7 @@ class _Play: public StrongHom
     {
       // hash function should exhibit reasonable spread and involve as many parameters as possible.
       std::size_t seed = 3863;
-      boost::hash_combine ( seed, cell );
-      boost::hash_combine ( seed, player );
+      seed ^=  cell + (34527* (player+2));
       return seed ;
     }
 

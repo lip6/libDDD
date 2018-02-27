@@ -5,8 +5,6 @@
 #include <map>
 #include <vector>
 #include <utility>
-#include <boost/shared_ptr.hpp>
-
 
 #include "hom/general_v2.hpp"
 #include "hom/const.hpp"
