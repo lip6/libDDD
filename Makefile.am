@@ -1,4 +1,4 @@
-SUBDIRS = ddd demo doc
+SUBDIRS = ddd demo 
 
 EXTRA_DIST = doc
 
