@@ -1,10 +1,8 @@
-noinst_PROGRAMS =
-if HAVE_BOOST
-  noinst_PROGRAMS += morpionv2
-endif
+noinst_PROGRAMS = morpionv2
+
 
 DDD_SRCDIR = $(top_srcdir)
-DDD_BUILDDIR = $(top_builddir)/src
+DDD_BUILDDIR = $(top_builddir)/ddd
 
 AM_CPPFLAGS =  -I $(DDD_SRCDIR) $(BOOST_CPPFLAGS) -g -Wall $(TBBINC_FLAGS)
 LDADD = $(DDD_BUILDDIR)/libDDD_d.a
