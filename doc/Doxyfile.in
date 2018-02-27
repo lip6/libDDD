@@ -114,7 +114,7 @@ FULL_PATH_NAMES        = YES
 # If left blank the directory from which doxygen is run is used as the 
 # path to strip.
 
-STRIP_FROM_PATH        = @top_srcdir@/src/ \
+STRIP_FROM_PATH        = @top_srcdir@/ddd/ \
                          @srcdir@
 
 # The STRIP_FROM_INC_PATH tag can be used to strip a user-defined part of 
@@ -124,7 +124,7 @@ STRIP_FROM_PATH        = @top_srcdir@/src/ \
 # definition is used. Otherwise one should specify the include paths that 
 # are normally passed to the compiler using the -I flag.
 
-STRIP_FROM_INC_PATH    = @top_srcdir@/src/
+STRIP_FROM_INC_PATH    = @top_srcdir@/ddd/
 
 # If the SHORT_NAMES tag is set to YES, doxygen will generate much shorter 
 # (but less readable) file names. This can be useful is your file systems 
@@ -566,8 +566,8 @@ WARN_LOGFILE           =
 # with spaces.
 
 INPUT                  = @srcdir@/mainpage.dox \
-                         @top_srcdir@/src/ \
-                         @top_srcdir@/src/util/ \
+                         @top_srcdir@/ddd/ \
+                         @top_srcdir@/ddd/util/ \
 
 
 
