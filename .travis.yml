@@ -52,6 +52,8 @@ script :
   - tar cvzf $TRAVIS_OS_NAME.tgz usr/
   - mv $TRAVIS_OS_NAME.tgz website/
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make dist ;  mv ddd*.tar.gz website/ ; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then mv doc/libddd.html/ website/ ; fi
+
 
 deploy:
   provider: pages
