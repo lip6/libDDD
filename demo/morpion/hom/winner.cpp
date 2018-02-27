@@ -11,7 +11,6 @@
 //
 
 #include "hom/winner.hpp"
-#include <boost/functional/hash.hpp>
 
 /**
  * An inductive homomorphism
@@ -89,8 +88,7 @@ class _CheckCellWinner: public StrongHom
     {
       // hash function should exhibit reasonable spread and involve as many parameters as possible.
       std::size_t seed = 4789;
-      boost::hash_combine ( seed, player );
-      boost::hash_combine ( seed, cell );
+      seed ^= (player +3)*9874 + cell*3123;
       return seed ;
     }
 
