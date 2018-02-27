@@ -163,13 +163,6 @@ if test "x${with_libtbbbin}" != x; then
     AC_SUBST([LIBTBB_BIN],["${with_libtbbbin}"])
 fi
 
-
-
-
-# Enable boost if found:
-AX_CHECK_BOOST([1.31], [103100])
-AM_CONDITIONAL([HAVE_BOOST], [test "${BOOST_DETECTED}" = "true"])
-
 AC_CONFIG_FILES([   Makefile
                     demo/Makefile
                     demo/hanoi/Makefile
