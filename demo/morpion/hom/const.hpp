@@ -3,6 +3,7 @@
 #pragma once
 
 #include <cmath>
+#include <cstddef>
 
 extern size_t NBCELL;
 extern int STATE_SYSTEM_CELL;
