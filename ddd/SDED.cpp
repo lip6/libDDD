@@ -34,20 +34,36 @@
 #include "ddd/SDED.h"
 #include "ddd/SHom.h"
 
+#include "ddd/UniqueTable.h"
+
 #ifdef REENTRANT
 # include "tbb/atomic.h"
 #endif
 
 /******************************************************************************/
+/******************************************************************************/
+class _SDED{
+public:
+  GSDD result;
+  /* Destructor */
+  virtual ~_SDED(){};
+
+  /* Compare */
+  virtual size_t hash() const =0;
+  virtual bool operator==(const _SDED &) const=0;
+  virtual _SDED * clone () const =0;
+  /* Transform */
+  virtual GSDD eval() const  = 0; 
+
+};
+
+typedef UniqueTable<_SDED> SDEDtable;
+
+static SDEDtable uniqueSDED;
+
 
 namespace namespace_SDED {
-
-  typedef hash_map< SDED,
-                    GSDD>::type Cache;
-  
-  static Cache cache;
-  static Cache recentCache;
-  
+    
 #ifdef REENTRANT
 
   static tbb::atomic<int> Hits;
@@ -79,20 +95,9 @@ static size_t Max_SDED=0;
 
 } //namespace namespace_SDED 
 
-/******************************************************************************/
-class _SDED_GSDD:public _SDED{
-private:
-  GSDD parameter;
-public:
-  _SDED_GSDD(const GSDD& g):parameter(g){};
-  size_t hash()const {return 1433*parameter.hash();};
-  bool  operator==(const _SDED &e)const{
-    return (parameter==((_SDED_GSDD*)&e)->parameter);
-  };
-  _SDED * clone () const { return new _SDED_GSDD(*this); }
-  GSDD eval() const{return parameter;};
-};
-
+static GSDD compute (const _SDED & op) {
+  return uniqueSDED(op)->result;  
+}
 
 /******************** BASIS FOR CANONIZATION OPERATIONS **********************/
 void square_union (std::map<GSDD,DataSet *> &res,const GSDD & s, DataSet * d) {
@@ -150,12 +155,12 @@ private:
   parameters_t parameters;
   _SDED_Add(const d3::set<GSDD>::type &d):parameters(d.begin(),d.end()){};
 public:
-  static  _SDED *create(const GSDD &g1,const GSDD &g2);
-  static  _SDED *create(const d3::set<GSDD>::type &d);
+  static GSDD create(const GSDD &g1,const GSDD &g2);
+  static GSDD create(const d3::set<GSDD>::type &d);
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
-  _SDED * clone () const { return new _SDED_Add(*this); }
+  _SDED * clone () const { auto res = new _SDED_Add(*this); res->result = res->eval() ; return res; }
 
   /* Transform */
   GSDD eval() const;
@@ -335,44 +340,44 @@ GSDD _SDED_Add::eval() const{
 };
 
 /* constructor*/
-_SDED *_SDED_Add::create(const GSDD &g1,const GSDD &g2){
+GSDD _SDED_Add::create(const GSDD &g1,const GSDD &g2){
   if (g1 == g2)
-    return new _SDED_GSDD(g1);
+    return g1;
   
   if(g1 == GSDD::null)
-    return new _SDED_GSDD(g2);
+    return g2;
   if (g2 == GSDD::null)
-    return new _SDED_GSDD(g1);
+    return g1;
 
   if (g1 == GSDD::one || g2 == GSDD::one || g1 == GSDD::top || g2 == GSDD::top || g1.variable() != g2.variable() ) 
-    return new _SDED_GSDD(GSDD::top);
+    return GSDD::top;
 
   d3::set<GSDD>::type parameters;
   parameters.insert(g1);
   parameters.insert(g2);
 
-  return new _SDED_Add(parameters);
+  return compute(_SDED_Add(parameters));
 }
 /* constructor*/
-_SDED *_SDED_Add::create(const d3::set<GSDD>::type &s){
+GSDD _SDED_Add::create(const d3::set<GSDD>::type &s){
   assert(s.size()!=0); // s is not empty
   d3::set<GSDD>::type parameters=s;
   parameters.erase(GSDD::null);
   if(parameters.size()==1)
-    return new _SDED_GSDD(*parameters.begin());  
+    return *parameters.begin();  
   else { 
     if(parameters.size()==0)
-      return new _SDED_GSDD(GSDD::null);
+      return GSDD::null;
     else if(parameters.find(GSDD::top)!=parameters.end()||parameters.find(GSDD::one)!=parameters.end()){  
-      return new _SDED_GSDD(GSDD::top);
+      return GSDD::top;
     }
     else{ 
       d3::set<GSDD>::type::const_iterator si=parameters.begin();
       int variable = si->variable();
       for(;(si!=parameters.end())?(variable == si->variable()):false;++si){}
       if(si!=parameters.end())// s contains at least 2 GDDDs with different variables
-	return new _SDED_GSDD(GSDD::top);
-      return new _SDED_Add(parameters);    
+	return GSDD::top;
+      return compute(_SDED_Add(parameters));    
     }
   }
 
@@ -389,11 +394,11 @@ private:
   GSDD parameter2;
   _SDED_Mult(const GSDD &g1,const GSDD &g2):parameter1(g1),parameter2(g2){};
 public:
-  static  _SDED *create(const GSDD &g1,const GSDD &g2);
+  static  GSDD create(const GSDD &g1,const GSDD &g2);
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
-  _SDED * clone () const { return new _SDED_Mult(*this); }
+  _SDED * clone () const { auto res = new _SDED_Mult(*this); res->result = res->eval() ; return res; }
 
   /* Transform */
   GSDD eval() const;
@@ -466,19 +471,19 @@ GSDD _SDED_Mult::eval() const{
 };
 
 /* constructor*/
-_SDED *_SDED_Mult::create(const GSDD &g1,const GSDD &g2){
+GSDD _SDED_Mult::create(const GSDD &g1,const GSDD &g2){
   if(g1==g2)
-    return new _SDED_GSDD(g1);
+    return g1;
   else if(g1==GSDD::null||g2==GSDD::null)
-    return new _SDED_GSDD(GSDD::null);
+    return GSDD::null;
   else if(g1==GSDD::one||g2==GSDD::one||g1==GSDD::top||g2==GSDD::top)
-    return new _SDED_GSDD(GSDD::top);
+    return GSDD::top;
   else if(g1.variable()!=g2.variable())
-    return new _SDED_GSDD(GSDD::null);
+    return GSDD::null;
   else if(g1.hash() < g2.hash())
-    return new _SDED_Mult(g1,g2);
+    return compute(_SDED_Mult(g1,g2));
   else
-    return new _SDED_Mult(g2,g1);
+    return compute(_SDED_Mult(g2,g1));
 };
 
 /******************************************************************************/
@@ -490,11 +495,11 @@ private:
   GSDD parameter2;
   _SDED_Minus(const GSDD &g1,const GSDD &g2):parameter1(g1),parameter2(g2){};
 public:
-  static  _SDED *create(const GSDD &g1,const GSDD &g2);
+  static  GSDD create(const GSDD &g1,const GSDD &g2);
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
-  _SDED * clone () const { return new _SDED_Minus(*this); }
+  _SDED * clone () const { auto res = new _SDED_Minus(*this);  res->result = res->eval() ; return res;}
   /* Transform */
   GSDD eval() const;
 
@@ -572,17 +577,17 @@ GSDD _SDED_Minus::eval() const{
 };
 
 /* constructor*/
-_SDED *_SDED_Minus::create(const GSDD &g1,const GSDD &g2){
+GSDD _SDED_Minus::create(const GSDD &g1,const GSDD &g2){
   if(g1==g2||g1==GSDD::null)
-    return new _SDED_GSDD(GSDD::null);
+    return GSDD::null;
   else if(g2==GSDD::null)
-    return new _SDED_GSDD(g1);
+    return g1;
   else if(g1==GSDD::one||g2==GSDD::one||g1==GSDD::top||g2==GSDD::top)
-    return new _SDED_GSDD(GSDD::top);
+    return GSDD::top;
   else if(g1.variable()!=g2.variable())
-    return new _SDED_GSDD(g1);
+    return g1;
   else
-    return new _SDED_Minus(g1,g2);
+    return compute(_SDED_Minus(g1,g2));
 };
 
 /******************************************************************************/
@@ -594,11 +599,11 @@ private:
   GSDD parameter2;
   _SDED_Concat(const GSDD &g1,const GSDD &g2):parameter1(g1),parameter2(g2){};
 public:
-  static _SDED *create(const GSDD &g1,const GSDD &g2);
+  static GSDD create(const GSDD &g1,const GSDD &g2);
   /* Compare */
   size_t hash() const;
   bool operator==(const _SDED &e)const;
-  _SDED * clone () const { return new _SDED_Concat(*this); }
+  _SDED * clone () const { auto res = new _SDED_Concat(*this);  res->result = res->eval() ; return res;}
   /* Transform */
   GSDD eval() const;
 
@@ -643,62 +648,17 @@ GSDD _SDED_Concat::eval() const{
 };
 
 /* constructor*/
-_SDED * _SDED_Concat::create(const GSDD &g1,const GSDD &g2){
+GSDD _SDED_Concat::create(const GSDD &g1,const GSDD &g2){
   if(g1==GSDD::null||g2==GSDD::null)
-    return new _SDED_GSDD(GSDD::null);
+    return GSDD::null;
   else if(g1==GSDD::one)
-    return new _SDED_GSDD(g2);
+    return g2;
   else if(g1==GSDD::top)
-    return new _SDED_GSDD(GSDD::top);
+    return GSDD::top;
   else
-    return new _SDED_Concat(g1,g2);
+    return compute(_SDED_Concat(g1,g2));
 };
 
-/******************************************************************************/
-/*                    class _Shom_Concat:public _SDED                           */
-/******************************************************************************/
-class _SDED_Shom:public _SDED{
-private:
-  GShom shom;
-  GSDD parameter;
-  _SDED_Shom(const GShom &h,const GSDD &d):shom(h),parameter(d){};
-public: 
-  static _SDED *create(const GShom &h,const GSDD &d);
-
-  /* Compare */
-  size_t hash() const;
-  bool operator==(const _SDED &e)const;
-  _SDED * clone () const { return new _SDED_Shom(*this); }
-  /* Transform */
-  GSDD eval() const;
-
-  /* constructor*/
-  ~_SDED_Shom(){};
-};
-
-/*********/
-/* Compare */
-size_t _SDED_Shom::hash() const{
-  return 1451*shom.hash()+1399*parameter.hash();
-}
-
-bool _SDED_Shom::operator==(const _SDED &e)const{
-  return ((shom==((_SDED_Shom*)&e)->shom)&&(parameter==((_SDED_Shom*)&e)->parameter));
-}
-
-/* Transform */
-GSDD _SDED_Shom::eval() const{
-  GSDD res = shom.eval(parameter);
-  return  res;
-}
-
-/* constructor*/
-_SDED * _SDED_Shom::create(const GShom &g,const GSDD &d){
-  if(d==GSDD::null)
-    return new _SDED_GSDD(GSDD::null);
-  else 
-    return new _SDED_Shom(g,d);
-}
 
 /******************************************************************************/
 /*                           class SDED                                        */
@@ -706,7 +666,7 @@ _SDED * _SDED_Shom::create(const GShom &g,const GSDD &d){
 
   /* Memory Manager */
 unsigned int SDED::statistics() {
-  return namespace_SDED::cache.size();
+  return uniqueSDED.size();
 }
 
 
@@ -726,107 +686,23 @@ void SDED::pstats(bool reinit)
 
 
 size_t SDED::peak() {
-  if (namespace_SDED::cache.size() > namespace_SDED::Max_SDED)
-    namespace_SDED::Max_SDED = namespace_SDED::cache.size();
+  if (uniqueSDED.size() > namespace_SDED::Max_SDED)
+    namespace_SDED::Max_SDED = uniqueSDED.size();
   return namespace_SDED::Max_SDED;
 }
 
 void SDED::garbage(){
-
-	if (namespace_SDED::cache.size() > namespace_SDED::Max_SDED)
-	{
-		namespace_SDED::Max_SDED=namespace_SDED::cache.size();
-	}
-
-	std::vector<_SDED *> todel;
-	todel.reserve(namespace_SDED::cache.size());
-	for(namespace_SDED::Cache::iterator di=namespace_SDED::cache.begin();di!=namespace_SDED::cache.end();di++)
-	{
-	  todel.push_back(di->first.concret);
-	} 
-	namespace_SDED::cache.clear();
-	for (std::vector<_SDED *>::iterator it =todel.begin() ; it != todel.end() ; ++it) {
-	  delete *it;
-	}
+  if (uniqueSDED.size() > namespace_SDED::Max_SDED)
+    {
+      namespace_SDED::Max_SDED= uniqueSDED.size();
+    }
+  for (auto ded : uniqueSDED.table ){
+    delete ded;
+  }
+  uniqueSDED.table.clear();
 }; 
 
-bool SDED::operator==(const SDED& e) const{
-  if (concret == NULL)
-    return e.concret==NULL;
-  if(typeid(*concret)!=typeid(*(e.concret)))
-    return false;
-  else 
-    return (*concret==*(e.concret));
-};
-
-// eval and std::set to NULL the DED
-GSDD SDED::eval(){
-  if (concret == NULL) {
-    return GSDD::null;
-  }
-
-   if(typeid(*concret)==typeid(_SDED_GSDD)){
-     GSDD res=concret->eval();
-     delete concret;
-     return res;
-   }  else {
-
-
-
-	// search in long term cache
-	// namespace_SDED::Cache::const_iterator
-	namespace_SDED::Cache::accessor access;
-	
-	// ci=namespace_SDED::cache.find(*this); // search e in the long term storage cache
-	namespace_SDED::cache.find(access,*this);
-
-	// if (ci==namespace_SDED::cache.end()){ // *this is not in the long term storage cache
-	//   namespace_SDED::Misses++;  // this constitutes a cache miss (double truly) !!
-	//   GSDD res=concret->eval(); // compute the result
-
-    if( access.empty() )
-      { 
-        namespace_SDED::Misses++;
-        GSDD res = concret->eval();
-
-
- 	    // eligible
- 	    // namespace_SDED::cache[*this]=res;
-
-          {
-            namespace_SDED::Cache::accessor access;
-            namespace_SDED::cache.insert(access,*this);
-            access->second = res;
-          }
-
-
-	  concret=NULL;
-	  return res;
-	} else {
-	  // found in long term cache
-	  namespace_SDED::Hits++;
-	  delete concret;
-
-          return access->second;
-	}
-   } // end else : not a constant GSDD
-};
-
-
-size_t SDED::hash () const {
-  if (concret == NULL)
-    return 0;
-  return concret->hash();
-}
-
-
 /* binary operators */
-
-GSDD SDED::Shom(const GShom &h,const GSDD&g){
-  SDED e(_SDED_Shom::create(h,g));
-  return e.eval();
-};
-
 
 GSDD SDED::add(const d3::set<GSDD>::type &s){
   if (s.empty()) {
@@ -834,29 +710,24 @@ GSDD SDED::add(const d3::set<GSDD>::type &s){
   } else if (s.size() == 1) {
     return *s.begin();
   } else {
-    SDED e(_SDED_Add::create(s));
-    return e.eval();
+    return _SDED_Add::create(s);
   }
 };
 
 GSDD operator+(const GSDD &g1,const GSDD &g2){
-  SDED e(_SDED_Add::create(g1,g2));
-  return e.eval();
+  return _SDED_Add::create(g1,g2);
 };
 
 GSDD operator*(const GSDD &g1,const GSDD &g2){
-  SDED e(_SDED_Mult::create(g1,g2));
-  return e.eval();
+  return _SDED_Mult::create(g1,g2);
 };
 
 GSDD operator^(const GSDD &g1,const GSDD &g2){
-  SDED e(_SDED_Concat::create(g1,g2));
-  return e.eval();
+  return _SDED_Concat::create(g1,g2);
 };
 
 GSDD operator-(const GSDD &g1,const GSDD &g2){
-  SDED e(_SDED_Minus::create(g1,g2));
-  return e.eval();
+  return _SDED_Minus::create(g1,g2);
 };
 
 /******************************************************************************/
