@@ -34,12 +34,14 @@
 #include "ddd/DDD.h"
 #include "ddd/DED.h"
 #include "ddd/Hom.h"
+#include "ddd/UniqueTable.h"
 
 #ifdef REENTRANT
 #include "tbb/atomic.h"
 #endif
 /******************************************************************************/
 
+//typedef UniqueTable<_DED> Cache;
 typedef hash_map< DED, GDDD>::type Cache;
 
 static Cache cache;
@@ -66,6 +68,27 @@ static int Hits=0;
 static int Misses=0;
 
 #endif
+
+/******************************************************************************/
+class _DED{
+  
+public:
+  /* Destructor */
+  virtual ~_DED(){};
+
+//  virtual bool shouldCache() { return true;}
+
+  /* Compare */
+  virtual size_t hash() const =0;
+  virtual bool operator==(const _DED &) const=0;
+  virtual _DED * clone () const=0;
+
+  /* Transform */
+  virtual GDDD eval() const=0; 
+
+
+};
+
 
 /******************************************************************************/
 class _DED_GDDD:public _DED{
