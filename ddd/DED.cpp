@@ -609,13 +609,15 @@ static DEDpeak_parallel_init DEDpeak_init;
 static size_t DEDpeak = 0;
 #endif
 
-size_t DED::peak() {
+namespace DED {
+
+size_t peak() {
   if (uniqueDED.table.size() > DEDpeak)
     DEDpeak = uniqueDED.table.size();
   return DEDpeak;
 }
 // Todo
-void DED::garbage(){
+void garbage(){
   if (uniqueDED.size() > DEDpeak)
     DEDpeak = uniqueDED.size();
   for (auto ded : uniqueDED.table ){
@@ -631,7 +633,7 @@ void DED::garbage(){
 //  return h(g);
 //};
 
-GDDD DED::add(const std::set<GDDD> &s){
+GDDD add(const std::set<GDDD> &s){
   if (s.empty()) {
     return GDDD::null;
   } else if (s.size() == 1) {
@@ -641,6 +643,8 @@ GDDD DED::add(const std::set<GDDD> &s){
   }
 };
 
+} // namespace DED
+  
 GDDD operator+(const GDDD &g1,const GDDD &g2){
   d3::set<GDDD>::type s;
   s.insert(g1);

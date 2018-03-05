@@ -34,28 +34,14 @@ class GDDD;
 class GHom;
 
 /******************************************************************************/
-class DED{
-  //private:
-  //  friend struct std::equal_to<DED>;
-  //  _DED *concret;
-public:
-  // GDDD eval();
-  // DED(_DED *c):concret(c){};
-  // ctor necessary for google sparse hash
-  // DED():concret(NULL){};
-  // bool operator==(const DED&) const; 
-  /// For storage in a hash table
-  // size_t hash () const ;
-
-
-  static GDDD add(const d3::set<GDDD>::type &);
-  //static GDDD hom(const GHom &,const GDDD&);
+namespace DED {
+  GDDD add(const d3::set<GDDD>::type &);
 
   /* Memory Manager */
-  static  unsigned int statistics();
-  static void pstats(bool reinit=true);
-  static size_t peak();
-  static void garbage(); 
+  unsigned int statistics();
+  void pstats(bool reinit=true);
+  size_t peak();
+  void garbage(); 
 };
 
 
