@@ -41,10 +41,9 @@
 #endif
 /******************************************************************************/
 
-//typedef UniqueTable<_DED> Cache;
-typedef hash_map< DED, GDDD>::type Cache;
+typedef UniqueTable<_DED> DEDtable;
 
-static Cache cache;
+static DEDtable uniqueDED;
 
 #ifdef REENTRANT
 
@@ -69,40 +68,28 @@ static int Misses=0;
 
 #endif
 
+
 /******************************************************************************/
 class _DED{
-  
 public:
+  mutable GDDD result;
   /* Destructor */
   virtual ~_DED(){};
-
-//  virtual bool shouldCache() { return true;}
 
   /* Compare */
   virtual size_t hash() const =0;
   virtual bool operator==(const _DED &) const=0;
+  // NB :clone in DED should also assign result.
   virtual _DED * clone () const=0;
 
   /* Transform */
-  virtual GDDD eval() const=0; 
-
-
+  virtual GDDD eval() const=0;
 };
 
+static GDDD compute (const _DED & op) {
+  return uniqueDED(op)->result;  
+}
 
-/******************************************************************************/
-class _DED_GDDD:public _DED{
-private:
-  GDDD parameter;
-public:
-  _DED_GDDD(const GDDD& g):parameter(g){};
-  size_t hash()const {return 1433* parameter.hash();};
-  bool  operator==(const _DED &e)const{
-    return (parameter==((_DED_GDDD*)&e)->parameter);
-  };
-  _DED * clone () const { return new _DED_GDDD(*this); }
-  GDDD eval() const{return parameter;};
-};
 
 /******************************************************************************/
 /*                    class _DED_Add:public _DED                              */
@@ -112,11 +99,11 @@ private:
   std::vector<GDDD> parameters;
   _DED_Add(const std::set<GDDD> &d):parameters(d.begin(),d.end()){};
 public:
-  static  _DED *create(const std::set<GDDD> &d);
+  static  GDDD create(const std::set<GDDD> &d);
   /* Compare */
   size_t hash() const;
   bool operator==(const _DED &e)const;
-  _DED * clone () const { return new _DED_Add(*this); }
+  _DED * clone () const { auto res =  new _DED_Add(*this); res->result = res->eval() ; return res; }
   /* Transform */
   GDDD eval() const;
 
@@ -164,7 +151,7 @@ public:
     return dist == ((const _pushEVDDD &)s).dist;
   }
 
-  _GHom * clone () const { return new _pushEVDDD(*this); }
+  _GHom * clone () const { auto res = new _pushEVDDD(*this); res->result = res->eval() ; return res;}
 };
 /// User function : Construct a Hom for a Strong Hom _plusplus
 GHom pushEVDDD(int v){return new _pushEVDDD(v);};
@@ -242,25 +229,25 @@ GDDD _DED_Add::eval() const{
 };
 
 /* constructor*/
-_DED *_DED_Add::create(const std::set<GDDD> &s){
+GDDD _DED_Add::create(const std::set<GDDD> &s){
   assert(s.size()!=0); // s is not empty
   std::set<GDDD> parameters=s;
   parameters.erase(GDDD::null);
   if(parameters.size()==1)
-    return new _DED_GDDD(*parameters.begin());  
+    return *parameters.begin();  
   else { 
     if(parameters.size()==0)
-      return new _DED_GDDD(GDDD::null);
+      return GDDD::null;
     else if(parameters.find(GDDD::top)!=parameters.end()||parameters.find(GDDD::one)!=parameters.end()){ // 
-      return new _DED_GDDD(GDDD::top);
+      return GDDD::top;
     }
     else{ 
       std::set<GDDD>::const_iterator si=parameters.begin();
       int variable = si->variable();
       for(;(si!=parameters.end())?(variable == si->variable()):false;++si){}
       if(si!=parameters.end())// s contains at least 2 GDDDs with different variables
-	return new _DED_GDDD(GDDD::top);
-      return new _DED_Add(parameters);    
+	return GDDD::top;
+      return compute(_DED_Add(parameters));    
     }
   }
 };
@@ -274,11 +261,11 @@ private:
   GDDD parameter2;
   _DED_Mult(const GDDD &g1,const GDDD &g2):parameter1(g1),parameter2(g2){};
 public:
-  static  _DED *create(const GDDD &g1,const GDDD &g2);
+  static GDDD create(const GDDD &g1,const GDDD &g2);
   /* Compare */
   size_t hash() const;
   bool operator==(const _DED &e)const;
-  _DED * clone () const { return new _DED_Mult(*this); }
+  _DED * clone () const { auto res= new _DED_Mult(*this);res->result = res->eval() ; return res; }
   /* Transform */
   GDDD eval() const;
 
@@ -365,19 +352,19 @@ GDDD _DED_Mult::eval() const{
 };
 
 /* constructor*/
-_DED *_DED_Mult::create(const GDDD &g1,const GDDD &g2){
+GDDD _DED_Mult::create(const GDDD &g1,const GDDD &g2){
   if(g1==g2)
-    return new _DED_GDDD(g1);
+    return g1;
   else if(g1==GDDD::null||g2==GDDD::null)
-    return new _DED_GDDD(GDDD::null);
+    return GDDD::null;
   else if(g1==GDDD::one||g2==GDDD::one||g1==GDDD::top||g2==GDDD::top)
-    return new _DED_GDDD(GDDD::top);
+    return GDDD::top;
   else if(g1.variable()!=g2.variable())
-    return new _DED_GDDD(GDDD::null);
+    return GDDD::null;
   else if(g1.hash() < g2.hash())
-    return new _DED_Mult(g1,g2);
+    return compute(_DED_Mult(g1,g2));
   else
-    return new _DED_Mult(g2,g1);
+    return compute(_DED_Mult(g2,g1));
 };
 
 
@@ -390,11 +377,11 @@ private:
   GDDD parameter2;
   _DED_Minus(const GDDD &g1,const GDDD &g2):parameter1(g1),parameter2(g2){};
 public:
-  static  _DED *create(const GDDD &g1,const GDDD &g2);
+  static GDDD create(const GDDD &g1,const GDDD &g2);
   /* Compare */
   size_t hash() const;
   bool operator==(const _DED &e)const;
-  _DED * clone () const { return new _DED_Minus(*this); }
+  _DED * clone () const { auto res = new _DED_Minus(*this); res->result = res->eval() ; return res;}
   /* Transform */
   GDDD eval() const;
 
@@ -458,19 +445,19 @@ GDDD _DED_Minus::eval() const{
 };
 
 /* constructor*/
-_DED *_DED_Minus::create(const GDDD &g1,const GDDD &g2){
+GDDD _DED_Minus::create(const GDDD &g1,const GDDD &g2){
   if(g1 == GDDD::top && g2 == GDDD::top)
-    return new _DED_GDDD(GDDD::top);
+    return GDDD::top;
   if(g1==g2||g1==GDDD::null)
-    return new _DED_GDDD(GDDD::null);
+    return GDDD::null;
   else if(g2==GDDD::null)
-    return new _DED_GDDD(g1);
+    return g1;
   else if(g1==GDDD::one||g2==GDDD::one||g1==GDDD::top||g2==GDDD::top)
-    return new _DED_GDDD(GDDD::top);
+    return GDDD::top;
   else if(g1.variable()!=g2.variable())
-    return new _DED_GDDD(g1);
+    return g1;
   else
-    return new _DED_Minus(g1,g2);
+    return compute(_DED_Minus(g1,g2));
 };
 
 /******************************************************************************/
@@ -482,11 +469,11 @@ private:
   GDDD parameter2;
   _DED_Concat(const GDDD &g1,const GDDD &g2):parameter1(g1),parameter2(g2){};
 public:
-  static _DED *create(const GDDD &g1,const GDDD &g2);
+  static GDDD create(const GDDD &g1,const GDDD &g2);
   /* Compare */
   size_t hash() const;
   bool operator==(const _DED &e)const;
-  _DED * clone () const { return new _DED_Concat(*this); }
+  _DED * clone () const { auto res = new _DED_Concat(*this); res->result = res->eval() ; return res; }
   /* Transform */
   GDDD eval() const;
 
@@ -518,15 +505,15 @@ GDDD _DED_Concat::eval() const{
 };
 
 /* constructor*/
-_DED * _DED_Concat::create(const GDDD &g1,const GDDD &g2){
+GDDD _DED_Concat::create(const GDDD &g1,const GDDD &g2){
   if(g1==GDDD::null||g2==GDDD::null)
-    return new _DED_GDDD(GDDD::null);
+    return GDDD::null;
   else if(g1==GDDD::one)
-    return new _DED_GDDD(g2);
+    return g2;
   else if(g1==GDDD::top)
-    return new _DED_GDDD(GDDD::top);
+    return GDDD::top;
   else
-    return new _DED_Concat(g1,g2);
+    return compute(_DED_Concat(g1,g2));
 };
 
 /******************************************************************************/
@@ -538,14 +525,14 @@ private:
   GDDD parameter;
   _DED_Hom(const GHom &h,const GDDD &d):hom(h),parameter(d){};
 public: 
-  static _DED *create(const GHom &h,const GDDD &d);
+  static GDDD create(const GHom &h,const GDDD &d);
 
 //  virtual bool shouldCache() { return /*parameter.refCounter()>1 ||*/ parameter.nbsons() > 1 ; }
 
   /* Compare */
   size_t hash() const;
   bool operator==(const _DED &e)const;
-  _DED * clone () const { return new _DED_Hom(*this); }
+  _DED * clone () const { auto res = new _DED_Hom(*this); res->result = res->eval() ; return res;}
 
   /* Transform */
   GDDD eval() const;
@@ -570,11 +557,11 @@ GDDD _DED_Hom::eval() const{
 }
 
 /* constructor*/
-_DED * _DED_Hom::create(const GHom &g,const GDDD &d){
+GDDD _DED_Hom::create(const GHom &g,const GDDD &d){
   if(d==GDDD::null)
-    return new _DED_GDDD(GDDD::null);
+    return GDDD::null;
   else 
-    return new _DED_Hom(g,d);
+    return compute(_DED_Hom(g,d));
 }
 
 /******************************************************************************/
@@ -584,12 +571,12 @@ _DED * _DED_Hom::create(const GHom &g,const GDDD &d){
 
   /* Memory Manager */
 unsigned int DED::statistics() {
-  return cache.size();
+  return uniqueDED.table.size();
 }
 
 void DED::pstats(bool reinit)
 {
-  std::cout << "*\nCache Stats : size=" << cache.size() << std::endl;  
+  std::cout << "*\nCache Stats : size=" << uniqueDED.size() << std::endl;  
   std::cout << "\nCache hit ratio : " << double (Hits*100) / double(Misses+1+Hits) << "%" << std::endl;
   
 #ifdef HASH_STAT
@@ -623,88 +610,26 @@ static size_t DEDpeak = 0;
 #endif
 
 size_t DED::peak() {
-  if (cache.size() > DEDpeak)
-    DEDpeak = cache.size();
+  if (uniqueDED.table.size() > DEDpeak)
+    DEDpeak = uniqueDED.table.size();
   return DEDpeak;
 }
 // Todo
 void DED::garbage(){
-  if (cache.size() > DEDpeak)
-    DEDpeak = cache.size();
-  std::vector<_DED *> todel;
-  todel.reserve(cache.size());
-  for(Cache::iterator di=cache.begin();di!=cache.end();di++)
-    {
-      todel.push_back(di->first.concret);
-    } 
-  cache.clear();
-  for (std::vector<_DED *>::iterator it =todel.begin() ; it != todel.end() ; ++it) {
-    delete *it;
+  if (uniqueDED.size() > DEDpeak)
+    DEDpeak = uniqueDED.size();
+  for (auto ded : uniqueDED.table ){
+    delete ded;
   }
-
-  //cache.clear();
+  uniqueDED.table.clear();
 }; 
 
-
-bool DED::operator==(const DED& e) const{
-  if (concret==NULL)
-    return e.concret == NULL;
-  else if(typeid(*concret)!=typeid(*(e.concret)))
-    return false;
-  else 
-    return (*concret==*(e.concret));
-};
-
 // eval and std::set to NULL the DED
-GDDD
-DED::eval()
-{
-  if (concret == NULL) {
-    return GDDD::null;
-  }
-  if( typeid(*concret) == typeid(_DED_GDDD) )
-    {
-      GDDD res=concret->eval();
-      delete concret;
-      return res;
-    }
-
-  //Cache::const_iterator ci = cache.find(*this);
-  // there should be a way to promote a const_accessor to an accessor...
-  Cache::accessor access;  
-  cache.find(access,*this);
-  
-  if( access.empty() )
-    {
-      // *this is not in the cache
-		Misses++;
-		GDDD res = concret->eval(); 
-        cache.insert(access,*this);
-        access->second = res;
-		concret = NULL;
-		return res;
-    }
-  else
-    {
-      Hits++;
-      delete concret;
-      return access->second;
-    }
-
-}
-
-size_t DED::hash () const {
-  if (concret == NULL)
-    return 0;
-  return concret->hash();
-}
 
 /* binary operators */
-
-GDDD DED::hom(const GHom &h,const GDDD&g){
-  DED e(_DED_Hom::create(h,g));
-  return e.eval();
-};
+//GDDD DED::hom(const GHom &h,const GDDD&g){
+//  return h(g);
+//};
 
 GDDD DED::add(const std::set<GDDD> &s){
   if (s.empty()) {
@@ -712,8 +637,7 @@ GDDD DED::add(const std::set<GDDD> &s){
   } else if (s.size() == 1) {
     return *s.begin();
   } else {
-    DED e(_DED_Add::create(s));
-    return e.eval();
+    return _DED_Add::create(s);
   }
 };
 
@@ -725,18 +649,15 @@ GDDD operator+(const GDDD &g1,const GDDD &g2){
 }
 
 GDDD operator*(const GDDD &g1,const GDDD &g2){
-  DED e(_DED_Mult::create(g1,g2));
-  return e.eval();
+  return _DED_Mult::create(g1,g2);
 }
 
 GDDD operator^(const GDDD &g1,const GDDD &g2){
-  DED e(_DED_Concat::create(g1,g2));
-  return e.eval();
+  return _DED_Concat::create(g1,g2);
 }
 
 GDDD operator-(const GDDD &g1,const GDDD &g2){
-  DED e(_DED_Minus::create(g1,g2));
-  return e.eval();
+  return _DED_Minus::create(g1,g2);
 }
 
 /******************************************************************************/
