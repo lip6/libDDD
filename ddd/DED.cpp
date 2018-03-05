@@ -72,7 +72,7 @@ static int Misses=0;
 /******************************************************************************/
 class _DED{
 public:
-  mutable GDDD result;
+  GDDD result;
   /* Destructor */
   virtual ~_DED(){};
 
