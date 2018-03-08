@@ -341,6 +341,7 @@ namespace sns {
 
   class Inter:public _GShom{
   private:
+    friend class Fixpoint;
     GShom left;
     GShom right;
   public:
@@ -1868,6 +1869,51 @@ namespace sns {
       return arg.is_selector();
     }
 
+    GSDD has_image (const GSDD & d) const {
+      if( d == GSDD::null ) {
+	return GSDD::null;
+      } else if( d == GSDD::one or d == GSDD::top ) {
+	return arg(d);
+      } else {
+	// std::cout << " Test with has image at level " << d.variable() << std::endl;
+	if (const sns::Inter * inter = dynamic_cast<const sns::Inter*> ( _GShom::get_concret(arg) ) ) {
+	  if (inter->right == GShom::id) {
+	    if (const sns::Add * add = dynamic_cast<const sns::Add*> ( _GShom::get_concret(inter->left) ) ) {
+	      
+	      const sns::Add::partition & partition = add->get_partition(d.variable());
+	      
+	      GShom topropagate = fixpoint ( partition.F * GShom::id );
+	      if (can_garbage) {
+		std::cerr << "Using saturation style SCC detection" << std::endl;
+	      }
+	      GSDD img = topropagate.has_image(d); 
+	      if (img != GSDD::null) {
+		std::cerr << "Fast SCC detection found an SCC at level " << d.variable() << std::endl;
+		return img;
+	      }
+	      Shom L_part = GShom(GSDD::null);
+	      if (partition.has_local) {
+		if (const LocalApply * loc = dynamic_cast<const LocalApply*> (partition.L)) {
+		  // Hom/DDD case
+		  GHom hh = fixpoint(GHom(loc->h)*GHom::id, true);
+		  L_part =  localApply( hh ,d.variable());
+		} else {	
+		  GShom hh = fixpoint(GShom( ((const SLocalApply*)partition.L) ->h) * GShom::id, true);
+		  L_part =  localApply( hh ,d.variable());
+		}
+	      }
+	      img = L_part.has_image(d);
+	      if (img != GSDD::null) {
+		std::cerr << "Fast SCC detection found a local SCC at level " << d.variable() << std::endl;
+		return img;
+	      }
+	    }
+	  }
+	} 
+      }
+      return _GShom::has_image(d);
+    }
+    
     GShom invert (const GSDD & pot) const {
       // No correct solution here : many solutions may exist.
       // simply add states that go to the target states (e.g. prefixes of cycles)
