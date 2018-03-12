@@ -1,6 +1,9 @@
 lib_LIBRARIES = libDDD.a \
                 libDDD_d.a
 
+lib_LTLIBRARIES = libDDD.la \
+				  libDDD_d.la
+
 MYSRCDIR= $(abs_top_srcdir)/ddd
 
 ddddir      =   $(pkgincludedir)
@@ -77,6 +80,9 @@ endif
 # standard version
 libDDD_a_SOURCES    =   $(ddd_hdrs) $(util_hdrs) $(srcs)
 libDDD_a_CPPFLAGS =   -g -O3 -Wall -DNDEBUG $(TBBINC_FLAGS) -I $(abs_top_srcdir)
+
+libDDD_la_SOURCES    =   $(ddd_hdrs) $(util_hdrs) $(srcs)
+libDDD_la_CPPFLAGS =   -g -O3 -Wall -DNDEBUG $(TBBINC_FLAGS) -I $(abs_top_srcdir) -fPIC
 
 # debug version
 libDDD_d_a_SOURCES  =   $(ddd_hdrs) $(util_hdrs) $(srcs)
