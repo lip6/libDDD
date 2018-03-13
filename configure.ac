@@ -28,7 +28,14 @@ fi
 # programs used to build
 # we make static libs (use ranlib)
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
-LT_INIT([disable-shared])
+# boot libtool, no special flags
+LT_INIT
+
+# no dynamic libs unless --enable-shared is passed to configure
+AC_DISABLE_SHARED
+# build static libs by default
+AC_ENABLE_STATIC
+
 
 # M4 macros location
 AC_CONFIG_MACRO_DIR([m4])
