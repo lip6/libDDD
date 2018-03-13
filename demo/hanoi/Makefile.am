@@ -10,6 +10,18 @@ noinst_PROGRAMS =   hanoi_v1 \
                     hanoi_v8 \
                     hanoi_v9
 
+hanoi_v1_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+hanoi_v1_bis_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+hanoi_v1_ter_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+hanoi_v2_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+hanoi_v3_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+hanoi_v4_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+hanoi_v5_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+hanoi_v6_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+hanoi_v7_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+hanoi_v8_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+hanoi_v9_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+
 DDD_SRCDIR      =   $(top_srcdir)
 DDD_BUILDDIR    =   $(top_builddir)/ddd
 

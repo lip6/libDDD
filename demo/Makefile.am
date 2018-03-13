@@ -2,6 +2,22 @@ SUBDIRS = hanoi morpion
 
 noinst_PROGRAMS = tst1 tst2 tst3 tst4 tst5 tst6 tst7 tst8 tst9 tst10 tst11 tst12 tst14 tst15 #tst13
 
+tst1_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+tst2_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+tst3_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+tst4_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+tst5_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+tst6_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+tst7_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+tst8_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+tst9_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+tst10_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+tst11_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+tst12_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+#tst13_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+tst14_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+tst15_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
+
 # Flags for TBB
 if WITH_LIBTBBINC_PATH
 TBBINC_FLAGS=-I $(LIBTBB_INC)
