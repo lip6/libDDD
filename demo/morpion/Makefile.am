@@ -1,5 +1,6 @@
 noinst_PROGRAMS = morpionv2
 
+morpionv2_LDFLAGS=-all-static -static-libgcc -static-libstdc++ $(LDFLAGS)
 
 DDD_SRCDIR = $(top_srcdir)
 DDD_BUILDDIR = $(top_builddir)/ddd

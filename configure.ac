@@ -1,5 +1,5 @@
 # AC_INIT (package, version, [bug-report], [tarname])
-AC_INIT(DDD,1.9.0,[Yann.Thierry-Mieg@lip6.fr])
+AC_INIT(DDD,1.9.0.20180308145113,[Yann.Thierry-Mieg@lip6.fr])
 
 # We use automake to build makefiles
 AM_INIT_AUTOMAKE([-Wall, subdir-objects])
@@ -28,7 +28,7 @@ fi
 # programs used to build
 # we make static libs (use ranlib)
 m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
-LT_INIT([disable-shared])
+LT_INIT([])
 
 # M4 macros location
 AC_CONFIG_MACRO_DIR([m4])
@@ -85,7 +85,7 @@ if test "x$stdhash" = "xtrue"; then
 fi
 
 CPPFLAGS="-Wno-unused-local-typedefs $CPPFLAGS"
-LDFLAGS="-all-static -static-libgcc -static-libstdc++ $LDFLAGS"
+#LDFLAGS="-all-static -static-libgcc -static-libstdc++ $LDFLAGS"
 
 # Option to enable hash stats
 AC_ARG_ENABLE([mingw-native],
