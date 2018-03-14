@@ -15,9 +15,12 @@ DDD_SRCDIR = $(top_srcdir)
 DDD_BUILDDIR = $(top_builddir)/ddd
 
 AM_CPPFLAGS =  -I $(DDD_SRCDIR) -g -Wall $(TBBINC_FLAGS)
+AM_LDFLAGS = $(LDFLAGS)
+AM_LDFLAGS += $(STATICFLAGS)
 LDADD = $(DDD_BUILDDIR)/libDDD_d.a
+
 if REENTRANT
-AM_LDFLAGS = -ltbb $(TBBBIN_FLAGS)
+AM_LDFLAGS += -ltbb $(TBBBIN_FLAGS)
 endif
 
 PLUSPLUS = PlusPlus.hh PlusPlus.cpp

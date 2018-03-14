@@ -92,7 +92,7 @@ if test "x$stdhash" = "xtrue"; then
 fi
 
 CPPFLAGS="-Wno-unused-local-typedefs $CPPFLAGS"
-LDFLAGS="-all-static -static-libgcc -static-libstdc++ $LDFLAGS"
+AC_SUBST([STATICFLAGS],["-all-static -static-libgcc -static-libstdc++"])
 
 # Option to enable hash stats
 AC_ARG_ENABLE([mingw-native],
