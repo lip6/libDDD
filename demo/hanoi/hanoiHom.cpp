@@ -35,7 +35,7 @@ int NB_POLES = 3;
 
 void initName()
 {
-  char buff [12];
+  char buff [64];
   for (int i=0; i< NB_RINGS; i++) {
     sprintf(buff,"ring %d",i);
     DDD::varName(i,buff);
