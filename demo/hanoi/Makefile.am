@@ -25,10 +25,10 @@ endif
 AM_CPPFLAGS     =  -I $(DDD_SRCDIR) -Wall -Wextra -O3 $(TBBINC_FLAGS)
 AM_LDFLAGS = $(LDFLAGS)
 AM_LDFLAGS += $(STATICFLAGS)
-LDADD           =   $(DDD_BUILDDIR)/libDDD.a
+LDADD = $(DDD_BUILDDIR)/libDDD.la
 
 if REENTRANT
-    AM_LDFLAGS = -ltbb $(TBBBIN_FLAGS)
+    AM_LDFLAGS += -ltbb $(TBBBIN_FLAGS)
 endif
 
 HOMFILE = hanoiHom.hh hanoiHom.cpp
