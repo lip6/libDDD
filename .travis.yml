@@ -47,6 +47,9 @@ script :
   - autoreconf -vfi 
   - mkdir usr && mkdir usr/local
   - ./configure --enable-nolto --prefix=$PWD/usr/local/ || cat config.log
+  - cd ddd 
+  - make -j 
+  - cd ..
   - make -j
   - make install
   - tar cvzf $TRAVIS_OS_NAME.tgz usr/
