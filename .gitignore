@@ -1,6 +1,9 @@
 **/*.o
 **/*.a
 **/*.Po
+**/*.lo
+**/*.la
+**/.libs/
 **/.dirstamp
 /install-sh
 /libtool
