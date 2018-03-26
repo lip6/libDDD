@@ -1884,7 +1884,7 @@ namespace sns {
 	      
 	      GShom topropagate = fixpoint ( partition.F * GShom::id );
 	      if (can_garbage) {
-		std::cerr << "Using saturation style SCC detection" << std::endl;
+		// std::cerr << "Using saturation style SCC detection" << std::endl;
 	      }
 	      GSDD img = topropagate.has_image(d); 
 	      if (img != GSDD::null) {
@@ -3051,11 +3051,11 @@ GShom fixpoint (const GShom &h, bool is_top_level) {
     }
   if (is_top_level) {
     if (const sns::LocalApply * lapp = dynamic_cast<const sns::LocalApply *>( _GShom::get_concret(h) ) ) {
-      std::cerr << "fixpoint of localApply rewriting as localApply of fixpoint" << std::endl;
+      // std::cerr << "fixpoint of localApply rewriting as localApply of fixpoint" << std::endl;
       return localApply( fixpoint(lapp->h, true), lapp->target );
     }
     else if (const sns::SLocalApply * lapp = dynamic_cast<const sns::SLocalApply *>( _GShom::get_concret(h) ) ) {
-      std::cerr << "fixpoint of SlocalApply rewriting as SlocalApply of fixpoint" << std::endl;
+      // std::cerr << "fixpoint of SlocalApply rewriting as SlocalApply of fixpoint" << std::endl;
       return localApply( fixpoint(lapp->h, true), lapp->target );
     }
   }
