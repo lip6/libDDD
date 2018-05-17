@@ -17,7 +17,7 @@ matrix:
     - os: osx
       osx_image: xcode8.3
       compiler: gcc
-      env: GCCVER='7' CXX_COMPILER='g++-7' C_COMPILER='gcc-7'
+      env: GCCVER='8' CXX_COMPILER='g++-8' C_COMPILER='gcc-8'
 
 cache:
   directories:
