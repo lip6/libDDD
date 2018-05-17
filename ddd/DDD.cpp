@@ -64,7 +64,7 @@ class _GDDD
 
   /// attributes
   const int variable;
-  const unsigned short valuation_size;
+  const GDDD::valsz_t valuation_size;
 
   /// get the address of the valuation
   edge_t *

@@ -75,7 +75,10 @@ private:
 public:
   /// \name Public Accessors 
   //@{
+  /// The type used as values of variables in a DDD.
   typedef short val_t;
+  /// A type wide enough to count how many outgoing edges a DDD node has, should be congruent to val_t.
+  typedef unsigned short valsz_t;
   /// An edge is a pair <value,child node>
   typedef std::pair<val_t,GDDD> edge_t;
   /// To hide how arcs are actually stored. Use GDDD::Valuation to refer to arcs type
