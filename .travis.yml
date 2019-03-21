@@ -26,7 +26,7 @@ cache:
 before_script:
 ## OSX
 #  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update    ; fi  
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then rm -f /usr/local/include/c++         ; fi
+#- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then rm -f /usr/local/include/c++         ; fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gcc         ; fi  
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export TARGETBRANCH=osx ; fi
   - cd ${TRAVIS_BUILD_DIR}
