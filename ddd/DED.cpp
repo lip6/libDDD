@@ -422,7 +422,7 @@ GDDD _DED_Minus::eval() const{
     if(v1->first<v2->first){
       std::pair<int,GDDD> x(v1->first,v1->second);
       value.push_back(x);
-      v1++;
+      ++v1;
     }
     else if(v1->first>v2->first)
       v2++;
@@ -432,8 +432,8 @@ GDDD _DED_Minus::eval() const{
         std::pair<int,GDDD> x(v1->first,g);
 	value.push_back(x);
       }
-      v1++;
-      v2++;
+      ++v1;
+      ++v2;
     }
   }
 
