@@ -2866,14 +2866,14 @@ void GShom::garbage(){
   for(UniqueTable<_GShom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
     if(!(*di)->is_marked()){
       UniqueTable<_GShom>::Table::iterator ci=di;
-      di++;
+      ++di;
       const _GShom *g=*ci;
       canonical.table.erase(ci);
       delete g;
     }
     else{
       (*di)->set_mark(false);
-      di++;
+      ++di;
     }
   }
 }
