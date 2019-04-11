@@ -221,7 +221,8 @@ GSDD _SDED_Add::eval() const{
 	  sums.push_back( std::make_pair(resit->first + arc->second , a) );
 	  // no more need to test against this element
 	  std::map<GSDD,DataSet *>::iterator jt = resit;
-	  resit++;
+	  res
+		  ;
 	  delete jt->second;
 	  res.erase(jt);
 	  //  break to next arc of this operand, a has been emptied
@@ -281,11 +282,11 @@ GSDD _SDED_Add::eval() const{
     } // end foreach arc in operand
     
     // Now process remainders and sums
-    for (std::vector< std::pair <GSDD,DataSet *> >::iterator it=sums.begin(); it != sums.end(); it++ ) {
+    for (std::vector< std::pair <GSDD,DataSet *> >::iterator it=sums.begin(); it != sums.end(); ++it ) {
       square_union(res,it->first,it->second);
       delete it->second;
     }
-    for (std::vector< std::pair <GSDD,DataSet *> >::iterator it=rems.begin(); it != rems.end(); it++ ) {
+    for (std::vector< std::pair <GSDD,DataSet *> >::iterator it=rems.begin(); it != rems.end(); ++it ) {
       square_union(res,it->first,it->second);
       delete it->second;
     }
