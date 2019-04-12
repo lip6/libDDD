@@ -108,7 +108,7 @@ public :
 
 			string myname =  tmp.str();
 			name[g] =  myname;
-			for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++) {
+			for(GSDD::const_iterator gi=g.begin();gi!=g.end();++gi) {
 				if(typeid(*gi->first)==typeid(DDD) ) {
 					// only one level of depth, referenced value is DDD type
 					DDD & arc = (DDD &) *gi->first;
@@ -158,10 +158,10 @@ public :
 				}
 			}
 
-			for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++) {
+			for(GSDD::const_iterator gi=g.begin();gi!=g.end();++gi) {
 				collect(gi->second);
 			}
-			for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++) {
+			for(GSDD::const_iterator gi=g.begin();gi!=g.end();++gi) {
 				// 	stringstream arctmp ;
 				// 	arctmp << "Arc_" << nextAid++;
 				// 	os << "     " << arctmp.str() <<  "  [shape=point,label=\"\"];\n" ;
@@ -217,10 +217,10 @@ public :
 			} else if (g== GDDD::one ) /* g== GDDD::one  -> suppress output we use square boxes*/
 				return;
 			(*D3out) << "     " << tmp.str() << "  [label=\""<< GDDD::getvarName(g.variable()) << "\"];"<<endl;
-			for(GDDD::const_iterator gi=g.begin();gi!=g.end();gi++)
+			for(GDDD::const_iterator gi=g.begin();gi!=g.end();++gi)
 				collect(gi->second);
 
-			for(GDDD::const_iterator gi=g.begin();gi!=g.end();gi++) {
+			for(GDDD::const_iterator gi=g.begin();gi!=g.end();++gi) {
 				// 	if ( d3name[gi->second] != "one" )
 				// 	  (*D3out) << "     " << tmp.str() << "->" << d3name[gi->second]  <<"    [label=\""<< gi->first << "\",shape=box];" <<endl;
 				// 	else {
@@ -229,8 +229,8 @@ public :
 				// 	}
 				int min = gi->first;
 				GDDD::const_iterator nextit = gi;
-				for ( 	nextit++; nextit != g.end() && nextit->second == gi->second && nextit->first == gi->first +1 ; nextit++) {
-					gi++;
+				for ( 	++nextit; nextit != g.end() && nextit->second == gi->second && nextit->first == gi->first +1 ; ++nextit) {
+					++gi;
 				}
 				int max = gi->first;
 				if (min == max) {
@@ -252,7 +252,7 @@ public :
 		if (visited.find(g) == visited.end() ) {
 			*out << "     " << name.find(g)->second << " [color=\""<< color << "\"];"<<endl;
 			visited.insert(g);
-			for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++) {
+			for(GSDD::const_iterator gi=g.begin();gi!=g.end();++gi) {
 				printColor(gi->second,color,visited);
 			}
 		}
@@ -330,12 +330,12 @@ public :
 		if (isAligned)
 			printLevels();
 
-		for (map<GDDD,string>::iterator it = entryd3Name.begin() ; it != entryd3Name.end() ; it++ ) {
+		for (map<GDDD,string>::iterator it = entryd3Name.begin() ; it != entryd3Name.end() ; ++it ) {
 			*D3out <<  "     \"" << it->second   << "\"  [shape=invhouse];\n";
 			*D3out <<  "     \"" << it->second   << "\"  [label=\"" << it->second << "\"];\n";
 			*D3out <<  "     \"" << it->second   <<  "\" ->" <<  d3name[it->first] << "    [label=\""<< entryd3Nb[it->first] << "\"];" <<endl;
 		}
-		for (map<GSDD,string>::iterator it = entryName.begin() ; it != entryName.end() ; it++ ) {
+		for (map<GSDD,string>::iterator it = entryName.begin() ; it != entryName.end() ; ++it ) {
 			*out <<  "     \"" << it->second   << "\"  [shape=invhouse];\n";
 			*out <<  "     \"" << it->second   << "\"  [label=\"" << it->second << "\"];\n";
 			*out <<  "     \"" << it->second   <<  "\" ->" <<  name[it->first] << "    [label=\""<< entryNb[it->first] << "\"];" <<endl;
@@ -386,7 +386,7 @@ public :
 
 			string myname =  tmp.str();
 			name[g] =  myname;
-			for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++) {
+			for(GSDD::const_iterator gi=g.begin();gi!=g.end();++gi) {
 				if (g.variable() >= 0) {
 					// in DDD level description
 
@@ -416,10 +416,10 @@ public :
 				}
 			}
 
-			for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++) {
+			for(GSDD::const_iterator gi=g.begin();gi!=g.end();++gi) {
 				collect(gi->second);
 			}
-			for(GSDD::const_iterator gi=g.begin();gi!=g.end();gi++) {
+			for(GSDD::const_iterator gi=g.begin();gi!=g.end();++gi) {
 				if (g.variable() >= 0 )
 					*out <<  "     " << myname << "->" << name[gi->second] << "    [label=\""<< entryd3Name[(DDD &)*gi->first] << "\"];" << endl;
 				//"[style=dotted,minlen=2,constraint=false];\n" ;//constraint=false];\n" ;// minlen=2];\n" ;
