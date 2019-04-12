@@ -297,14 +297,14 @@ void MLHom::garbage(){
   for(UniqueTable<_MLHom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
     if(!(*di)->marking){
       UniqueTable<_MLHom>::Table::iterator ci=di;
-      di++;
+      ++di;
       const _MLHom *g=*ci;
       canonical.table.erase(ci);
       delete g;
     }
     else{
       (*di)->marking=false;
-      di++;
+      ++di;
     }
   }
 }

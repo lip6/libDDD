@@ -204,13 +204,13 @@ GSDD _SDED_Add::eval() const{
 
   // main loop
   // Foreach  opit in (operands)
-  for (opit++ ; opit != parameters.end() ; ++opit) {
+  for (++opit ; opit != parameters.end() ; ++opit) {
     // To store non empty intersection results and remainders;
     std::vector< std::pair <GSDD,DataSet *> > sums;
     std::vector< std::pair <GSDD,DataSet *> > rems;
     
     // Foreach arc in current operand  : e-a->A
-    for (GSDD::Valuation::const_iterator arc = opit->begin() ; arc != opit->end() ; arc++ ) {      
+    for (GSDD::Valuation::const_iterator arc = opit->begin() ; arc != opit->end() ; ++arc ) {
       DataSet * a = arc->first->newcopy();
       // foreach value already in result : e-b->B
       for (std::map<GSDD,DataSet *>::iterator resit = res.begin() ; resit != res.end() ;  ) {
@@ -315,7 +315,7 @@ GSDD _SDED_Add::eval() const{
       delete jt->second;
       res.erase(jt);
     } else {
-      resit++;
+      ++resit;
     }
   }
 #endif

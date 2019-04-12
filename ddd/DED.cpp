@@ -425,7 +425,7 @@ GDDD _DED_Minus::eval() const{
       ++v1;
     }
     else if(v1->first>v2->first)
-      v2++;
+      ++v2;
     else{
       GDDD g=(v1->second)-(v2->second);
       if(g!=GDDD::null){

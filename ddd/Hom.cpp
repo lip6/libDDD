@@ -2024,14 +2024,14 @@ void GHom::garbage(){
   for(UniqueTable<_GHom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
     if(!((*di)->marking)){
       UniqueTable<_GHom>::Table::iterator ci=di;
-      di++;
+      ++di;
       const _GHom *g=(*ci);
       canonical.table.erase(ci);
       delete g;
     }
     else{
       (*di)->marking=false;
-      di++;
+      ++di;
     }
   }
 }

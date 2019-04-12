@@ -127,7 +127,7 @@ public:
     if (variable!=g.variable || valuation.size()!= g.valuation.size()) 
       return false;  
    
-    for (GSDD::const_iterator it = valuation.begin(),jt=g.valuation.begin(); it != valuation.end() && jt != g.valuation.end() ; it++,jt++ )
+    for (GSDD::const_iterator it = valuation.begin(),jt=g.valuation.begin(); it != valuation.end() && jt != g.valuation.end() ; ++it,++jt )
       if (!(it->first->set_equal(*jt->first) && it->second == jt->second))
 	return false;
     return true;
@@ -571,14 +571,14 @@ void GSDD::garbage(){
   for(UniqueTable<_GSDD>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
     if(! (*di)->is_marked()){
       UniqueTable<_GSDD>::Table::iterator ci=di;
-      di++;
+      ++di;
       const _GSDD *g=(*ci);
       canonical.table.erase(ci);
       delete g;
     }
     else{
       (*di)->set_mark(false);
-      di++;
+      ++di;
     }
   }
 }
