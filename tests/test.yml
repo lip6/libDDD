@@ -1,7 +1,0 @@
----
-DDD test suite: !S::Iterate
-  over: !pathlist <<pwd>>/(*)/(*).yml
-  iter: [it_file, it_name]
-  test:
-    Test <<it_name>>: !S::Import
-      import: <<it_file>>

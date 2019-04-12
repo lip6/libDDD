@@ -1,9 +1,0 @@
----
-Misc: !S::Suite
-  attributes: !S::Cmd
-    exit: 0
-  contents: 
-
-######  
-    - Unicity test:
-        command: f1=`mktemp` && f2=`mktemp` && ./tst <<pwd>>/e1alpha1.ddd <<pwd>>/e2alpha2.ddd ^ > $f1 && ./tst <<pwd>>/e3alpha3.ddd <<pwd>>/e4alpha4.ddd + > $f2 && diff $f1 $f2
