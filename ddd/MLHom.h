@@ -86,7 +86,7 @@ public :
   /// of the keys be as good as possible. Also, fast hash key computation is a good design goal.
   /// Note that bad hash functions will yield more collisions, thus equality comparisons which
   /// may be quite costly.
-  size_t hash() const { return ddd::knuth32_hash(reinterpret_cast<const size_t>(concret)); };
+  size_t hash() const { return ddd::knuth32_hash(reinterpret_cast<size_t>(concret)); };
   
   /// The computation function responsible for evaluation over a node.
   /// Users should not directly use this. Normal behavior is to use operator()

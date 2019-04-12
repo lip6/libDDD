@@ -197,7 +197,7 @@ public:
   void mark() const;
   /// For storage in a hash table
   size_t hash () const { 
-    return ddd::knuth32_hash(reinterpret_cast<const size_t>(concret)); 
+    return ddd::knuth32_hash(reinterpret_cast<size_t>(concret));
   }
   /// Collects and destroys unused homomorphisms. Do not call this directly but through 
   /// MemoryManager::garbage() as order of calls (among GSDD::garbage(), GShom::garbage(), 

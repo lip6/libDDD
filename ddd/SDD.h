@@ -202,7 +202,7 @@ public:
   void mark()const;
   /// For storage in a hash table
   size_t hash () const { 
-    return ddd::knuth32_hash(reinterpret_cast<const size_t>(concret)); 
+    return ddd::knuth32_hash(reinterpret_cast<size_t>(concret));
   }
   /// For garbage collection, do not call this directly, use MemoryManager::garbage() instead.
   /// \todo describe garbage collection algorithm(s) + mark usage homogeneously in one place.
