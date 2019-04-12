@@ -70,7 +70,7 @@ int main(int argc, char **argv){
 //   DDD ss, tmp = M0;
 //   do {
 //     ss = tmp;
-//     for (vector<Hom>::reverse_iterator it = events.rbegin(); it != events.rend(); it++) {
+//     for (vector<Hom>::reverse_iterator it = events.rbegin(); it != events.rend(); ++it) {
 //       tmp = tmp + (*it) (tmp);
 //     }
 //   } while (ss != tmp);
