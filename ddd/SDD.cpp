@@ -468,16 +468,7 @@ public:
 
 	SddSize()
 		:
-		firstError(true)
-#ifdef REENTRANT
-			,
-			s(),
-			sd3(),
-			res(0),
-			d3res(0)
-
-
-#endif	
+		firstError(true), res(0), d3res(0)
 	{
 	};
 //  pair<unsigned long int,unsigned long int> operator()(const GSDD& g){
