@@ -221,8 +221,7 @@ GSDD _SDED_Add::eval() const{
 	  sums.push_back( std::make_pair(resit->first + arc->second , a) );
 	  // no more need to test against this element
 	  std::map<GSDD,DataSet *>::iterator jt = resit;
-	  res
-		  ;
+	  ++resit;
 	  delete jt->second;
 	  res.erase(jt);
 	  //  break to next arc of this operand, a has been emptied
@@ -235,7 +234,7 @@ GSDD _SDED_Add::eval() const{
 	// if a*b = 0, skip
 	if (ainterb->empty()) {
 	  delete ainterb;
-	  resit++;
+	  ++resit;
 	  // skip to next arc of res
 	  continue;
 	}
