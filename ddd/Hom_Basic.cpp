@@ -480,3 +480,47 @@ GHom varLtVar (int var, int var2) {
 	}
   return varCompVar (var,LT,var2);
 }
+
+
+// iteration code
+// For recursion, expose prefix argument
+void iterateDDD (const GDDD & node, callback_t * cb, std::vector<DDD::val_t> & prefix) {
+	if (node == DDD::one || node == DDD::top || node == DDD::null) {
+		// do it
+		(*cb)(prefix);
+	} else {
+		for (auto & edge : node) {
+			prefix.push_back(edge.first);
+			iterateDDD (edge.second, cb, prefix);
+			prefix.pop_back();
+		}
+	}
+}
+
+
+// For recursion, expose prefix argument
+void iterateSDD (const GSDD & node, callback_t * cb, std::vector<GDDD::val_t> & prefix) {
+	if (node == SDD::one || node == SDD::top || node == SDD::null) {
+		// do it
+		(*cb)(prefix);
+	} else {
+		using namespace std::placeholders;    // adds visibility of _1, _2, _3,...
+		for (auto & edge : node) {
+			if ( typeid(*edge.first) == typeid(const DDD&) ) {
+				callback_t ncb = std::bind(iterateSDD,edge.second,cb,_1);
+				iterateDDD( GDDD((const DDD &)*edge.first), &ncb,prefix);
+			} else {
+				callback_t ncb = std::bind(*iterateSDD,edge.second,cb,_1);
+				iterateSDD( GSDD((const SDD &)*edge.first), &ncb,prefix);
+			}
+		}
+	}
+}
+
+
+/// Explicit conversion : visit every path in the DDD (variable ids are removed)
+inline void iterate (const GDDD & node, callback_t *cb) { std::vector<GDDD::val_t> pre; iterateDDD(node,cb,pre) ; }
+/// Explicit conversion : visit every path in the DDD (variable ids are removed)
+inline void iterate (const GSDD & node, callback_t *cb) { std::vector<GDDD::val_t> pre; iterateSDD(node,cb,pre) ; }
+
+
