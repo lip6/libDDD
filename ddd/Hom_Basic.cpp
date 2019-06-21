@@ -519,8 +519,8 @@ void iterateSDD (const GSDD & node, callback_t * cb, std::vector<GDDD::val_t> & 
 
 
 /// Explicit conversion : visit every path in the DDD (variable ids are removed)
-inline void iterate (const GDDD & node, callback_t *cb) { std::vector<GDDD::val_t> pre; iterateDDD(node,cb,pre) ; }
+void iterate (const GDDD & node, callback_t *cb) { std::vector<GDDD::val_t> pre; iterateDDD(node,cb,pre) ; }
 /// Explicit conversion : visit every path in the DDD (variable ids are removed)
-inline void iterate (const GSDD & node, callback_t *cb) { std::vector<GDDD::val_t> pre; iterateSDD(node,cb,pre) ; }
+void iterate (const GSDD & node, callback_t *cb) { std::vector<GDDD::val_t> pre; iterateSDD(node,cb,pre) ; }
 
 
