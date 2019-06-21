@@ -128,6 +128,25 @@ struct hash<std::vector<int> > {
   };
 };
 
+// Specialized version for std::vector<int>.
+template <>
+struct hash<const std::vector<short> > {
+  size_t operator() (const std::vector<short> &p)const {
+    size_t res = 2473;
+    std::vector<short>::const_iterator it;
+    for ( it = p.begin() ; it != p.end() ; ++it )
+      res ^= (ddd::wang32_hash(*it)* res);
+    return res;
+  };
+};
+// could this be removed somehow ??
+template <>
+struct hash<std::vector<short> > {
+  size_t operator() (const std::vector<short> &p)const {
+    return hash<const std::vector<short> > () (p);
+  };
+};
+
 
 template <>
 struct hash<std::vector<int>* > {
