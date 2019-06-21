@@ -508,10 +508,10 @@ void iterateSDD (const GSDD & node, callback_t * cb, std::vector<GDDD::val_t> & 
 		for (auto & edge : node) {
 			if ( typeid(*edge.first) == typeid(const DDD&) ) {
 				callback_t ncb = std::bind(iterateSDD,edge.second,cb,_1);
-				iterateDDD( GDDD((const DDD &)*edge.first), &ncb,prefix);
+				iterateDDD( (const DDD &)*edge.first, &ncb,prefix);
 			} else {
-				callback_t ncb = std::bind(*iterateSDD,edge.second,cb,_1);
-				iterateSDD( GSDD((const SDD &)*edge.first), &ncb,prefix);
+				callback_t ncb = std::bind(iterateSDD,edge.second,cb,_1);
+				iterateSDD( (const SDD &)*edge.first, &ncb,prefix);
 			}
 		}
 	}
