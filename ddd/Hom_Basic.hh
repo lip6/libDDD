@@ -38,12 +38,15 @@ GHom varLeqVar (int var, int var2) ;
 GHom varGeqVar (int var, int var2) ;
 
 #include <functional>
+
+/// an explicit representation of a state
+typedef std::vector<DDD::val_t> state_t;
 /// A visitor callback function
-typedef std::function<void(std::vector<GDDD::val_t> &)> callback_t;
+typedef std::function<void(state_t &)> callback_t;
 /// Explicit conversion : visit every path in the DDD (variable ids are removed)
-inline void iterate (const GDDD & node, callback_t * cb);
+void iterate (const GDDD & node, callback_t * cb);
 /// Explicit conversion : visit every path in the DDD (variable ids are removed)
-inline void iterate (const GSDD & node, callback_t * cb);
+void iterate (const GSDD & node, callback_t * cb);
 
 
 #endif
