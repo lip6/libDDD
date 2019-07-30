@@ -54,6 +54,41 @@ static UniqueTable<_GHom> canonical;
 /*                         Class _GHom                                   */
 /*************************************************************************/
 
+bool testWasInterrupt(bool can_garbage, const GDDD & d1, const GDDD & d2) {
+	bool test = false;
+	if (! can_garbage && fobs::get_fixobserver ()->was_interrupted ())
+	{
+		test = true;
+	}
+	if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
+	{
+		fobs::get_fixobserver ()->update (d2, d1);
+		if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
+		{
+			test = true;
+		}
+	}
+	return test;
+}
+
+bool testShouldInterrupt(bool can_garbage, const GDDD & d1, const GDDD & d2) {
+	bool test = false;
+	if (! can_garbage && fobs::get_fixobserver ()->should_interrupt(d2,d1))
+	{
+		test = true;
+	}
+	if (can_garbage && fobs::get_fixobserver ()->should_interrupt (d2,d1))
+	{
+		fobs::get_fixobserver ()->update (d2, d1);
+		if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
+		{
+			test = true;
+		}
+	}
+	return test;
+}
+
+
 /************************** Identity */
 class Identity:public _GHom{
 public:
@@ -1502,19 +1537,10 @@ public:
 
 			// Apply ( Id + F )* on all sons
 			d2 = F_part(d2);
-                          
-                      if (! can_garbage && fobs::get_fixobserver ()->was_interrupted ())
-                      {
-                        return d2;
-                      }
-                      if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
-                      {
-                        fobs::get_fixobserver ()->update (d2, d1);
-                        if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-                        {
-                          return d2;
-                        }
-                      }
+
+			if (testWasInterrupt(can_garbage,d1,d2)) {
+				return d2;
+			}
                         // Apply ( G + Id )
                       std::set<GDDD> tmp;
                       for (std::set<GHom>::const_iterator it = partition.second.begin() ; it != partition.second.end() ; ++it ) {
@@ -1523,19 +1549,10 @@ public:
                       tmp.insert (d2);
                       d2 = DED::add (tmp);
                       
-                      if (! can_garbage && fobs::get_fixobserver ()->should_interrupt (d2, d1))
-                      {
-                        return d2;
+                      if (testShouldInterrupt(can_garbage, d1, d2)) {
+                    	  return d2;
                       }
                       if (can_garbage) {
-                        if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-                        {
-                          fobs::get_fixobserver ()->update (d2, d1);
-                          if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-                          {
-                            return d2;
-                          }
-                        }
                         
                         //		trace << "could trigger 2!!" << std::endl ;
                         if (MemoryManager::should_garbage()) {
@@ -1564,19 +1581,10 @@ public:
             {
                 d1 = d2;
                 d2 = arg(d2);
-              if (! can_garbage && fobs::get_fixobserver ()->should_interrupt (d2, d1))
-              {
-                return d2;
-              }
-              if (can_garbage) {
-                if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-                {
-                  fobs::get_fixobserver ()->update (d2, d1);
-                  if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-                  {
-                    return d2;
-                  }
+                if (testShouldInterrupt(can_garbage, d1, d2)) {
+                	return d2;
                 }
+              if (can_garbage) {
                 //		trace << "could trigger 2!!" << std::endl ;
                 if (MemoryManager::should_garbage()) {
                   //		  trace << "triggered !!" << std::endl ;
