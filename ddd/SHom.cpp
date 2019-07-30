@@ -60,6 +60,40 @@ typedef std::map<GSDD,DataSet*> GSDD_DataSet_map;
 // Shom NameSpace
 namespace sns {
 
+
+bool testWasInterrupt(bool can_garbage, const GSDD & d1, const GSDD & d2) {
+	bool test = false;
+	if (! can_garbage && fobs::get_fixobserver ()->was_interrupted ())
+	{
+		test = true;
+	}
+	if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
+	{
+		fobs::get_fixobserver ()->update (d2, d1);
+		if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
+		{
+			test = true;
+		}
+	}
+	return test;
+}
+
+bool testShouldInterrupt(bool can_garbage, const GSDD & d1, const GSDD & d2) {
+	bool test = false;
+	if (d2 == d1) {
+		test = false;
+	} else 	if (! can_garbage && fobs::get_fixobserver ()->should_interrupt(d2,d1))	{
+		test = true;
+	} else if (can_garbage && fobs::get_fixobserver ()->should_interrupt (d2,d1)) {
+		fobs::get_fixobserver ()->update (d2, d1);
+		if (fobs::get_fixobserver ()->should_interrupt (d2, d1)) {
+			test = true;
+		}
+	}
+	return test;
+}
+
+
   extern UniqueTable<_GShom> canonical;
 
   /************************** Identity */
@@ -2051,27 +2085,13 @@ namespace sns {
 
 			d2 = F_part(d2);
             // /!\ both F and L can have a fixpoint, and can be interrupted by the fixpoint observer
-            if (! can_garbage && fobs::get_fixobserver ()->was_interrupted ())
-            {
-              return d2;
-            }
-            if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
-            {
-              fobs::get_fixobserver ()->update (d2, d1);
-              if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-                return d2;
+            if (testWasInterrupt(can_garbage, d1, d2)) {
+            	return d2;
             }
             
-			d2 = L_part(d2);
-            if (! can_garbage && fobs::get_fixobserver ()->was_interrupted ())
-            {
-              return d2;
-            }
-            if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
-            {
-              fobs::get_fixobserver ()->update (d2, d1);
-              if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-                return d2;
+            d2 = L_part(d2);
+            if (testWasInterrupt(can_garbage, d1, d2)) {
+            	return d2;
             }
 
 			// Elements in G' : not a nice l&f form : default to usual behavior
@@ -2099,22 +2119,10 @@ namespace sns {
 			    
 			  }
 
-            if (! can_garbage && fobs::get_fixobserver ()->should_interrupt (d2, d1))
-            {
-              return d2;
-            }
+			if (testShouldInterrupt(can_garbage, d1, d2)) {
+				return d2;
+			}
 			if (can_garbage) {
-		    	
-        
-        if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-        {
-          fobs::get_fixobserver ()->update (d2, d1);
-          if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-          {
-            return d2;
-          }
-        }
-        
 			  if (MemoryManager::should_garbage()) {
 			    //			  std::cerr << "triggered !!" << std::endl ;
 			    // ensure d1 and d2 are preserved
@@ -2151,28 +2159,14 @@ namespace sns {
 		    d1 = d2;
 
 		    d2 = F_part(d2);
-        if (! can_garbage && fobs::get_fixobserver ()->was_interrupted ())
-        {
-          return d2;
-        }
-        if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
-        {
-          fobs::get_fixobserver ()->update (d2, d1);
-          if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-            return d2;
-        }
+		    if (testWasInterrupt(can_garbage, d1, d2)) {
+		    	return d2;
+		    }
         
 		    d2 = L_part(d2);
-        if (! can_garbage && fobs::get_fixobserver ()->was_interrupted ())
-        {
-          return d2;
-        }
-        if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
-        {
-          fobs::get_fixobserver ()->update (d2, d1);
-          if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-            return d2;
-        }
+		    if (testWasInterrupt(can_garbage, d1, d2)) {
+		    	return d2;
+		    }
 
 		    for( 	Add::Gset_it G_it = partition.G.begin();
 				G_it != partition.G.end();
@@ -2200,21 +2194,10 @@ namespace sns {
 			  d2 =  ( (L_part &  (*G_it))(d2)) + d2;
 			}
 		      }
-        
-        if (! can_garbage && fobs::get_fixobserver ()->should_interrupt (d2, d1))
-        {
-          return d2;
-        }
+		    if (testShouldInterrupt(can_garbage, d1, d2)) {
+		    	return d2;
+		    }
 		    if (can_garbage) {
-
-          if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-          {
-            fobs::get_fixobserver ()->update (d2, d1);
-            if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-            {
-              return d2;
-            }
-          }
           
           if (MemoryManager::should_garbage()) {
 			//			  trace << "triggered !!" << std::endl ;
@@ -2249,23 +2232,12 @@ namespace sns {
 	    {
 	      d1 = d2;
 	      d2 = arg(d2);
-        
-        if (! can_garbage && fobs::get_fixobserver ()->should_interrupt (d2, d1))
-        {
-          return d2;
-        }
+
+	      if (testShouldInterrupt(can_garbage, d1, d2)) {
+	    	  return d2;
+	      }
         
 	      if (can_garbage) {
-          
-          if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-          {
-            fobs::get_fixobserver ()->update (d2, d1);
-            if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-            {
-              return d2;
-            }
-          }
-          
           if (MemoryManager::should_garbage()) {
 //		  trace << "triggered !!" << std::endl ;
 		  // ensure d1 and d2 and argument are preserved

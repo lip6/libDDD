@@ -73,15 +73,13 @@ bool testWasInterrupt(bool can_garbage, const GDDD & d1, const GDDD & d2) {
 
 bool testShouldInterrupt(bool can_garbage, const GDDD & d1, const GDDD & d2) {
 	bool test = false;
-	if (! can_garbage && fobs::get_fixobserver ()->should_interrupt(d2,d1))
-	{
+	if (d2==d1) {
+		test = false;
+	} else if (! can_garbage && fobs::get_fixobserver ()->should_interrupt(d2,d1)) {
 		test = true;
-	}
-	if (can_garbage && fobs::get_fixobserver ()->should_interrupt (d2,d1))
-	{
+	} else if (can_garbage && fobs::get_fixobserver ()->should_interrupt (d2,d1)) {
 		fobs::get_fixobserver ()->update (d2, d1);
-		if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-		{
+		if (fobs::get_fixobserver ()->should_interrupt (d2, d1)) {
 			test = true;
 		}
 	}
