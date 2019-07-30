@@ -62,12 +62,6 @@ namespace sns {
 
   extern UniqueTable<_GShom> canonical;
 
-  /**
-   * Static definition of the Observer Fixpoint
-   */
-  static const IFixpointObserver* __fixpointObs = NULL;
-
-
   /************************** Identity */
   class Identity:public _GShom{
   public:
@@ -2110,16 +2104,7 @@ namespace sns {
               return d2;
             }
 			if (can_garbage) {
-		    	  /* Call the fixpoint Observer */
-		    	  if (sns::__fixpointObs != NULL){
-			    sns::__fixpointObs->update(d2,d1);
-			    /* We must continue */
-			    if (sns::__fixpointObs->shouldInterrupt())
-			      /* BREAK THE LOOP and return result */
-			      return d1;
-		    	  }
-		    	  //std::cout << d1.nbStates() << std::endl;
-			  //			std::cerr << "could trigger !!" << std::endl ;
+		    	
         
         if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
         {
@@ -2221,17 +2206,7 @@ namespace sns {
           return d2;
         }
 		    if (can_garbage) {
-		      /* Call the fixpoint Observer */
-		      if (sns::__fixpointObs != NULL){
-			sns::__fixpointObs->update(d2,d1);
-			/* We must continue */
-			if (sns::__fixpointObs->shouldInterrupt())
-			  /* BREAK THE LOOP and return result */
-			  return d1;
-		      }
-		      //std::cout << d1.nbStates() << std::endl;
-		      //			trace << "could trigger !!" << std::endl ;
-          
+
           if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
           {
             fobs::get_fixobserver ()->update (d2, d1);
@@ -2264,7 +2239,7 @@ namespace sns {
 		while (d1 != d2);
 		//__cpt += d1.nbStates();
 		//std::cout << d1.nbStates()  << " : " << __cpt << std::endl;
-		return d1;
+		return d2;
 	      }
 		  
 	    }
@@ -2281,15 +2256,6 @@ namespace sns {
         }
         
 	      if (can_garbage) {
-	    	  /* Call the fixpoint Observer */
-			  if (sns::__fixpointObs != NULL){
-				  sns::__fixpointObs->update(d2,d1);
-				  /* We must continue */
-				  if (sns::__fixpointObs->shouldInterrupt())
-					  /* BREAK THE LOOP and return result */
-					  return d1;
-			  }
-//		trace << "could trigger 2!!" << std::endl ;
           
           if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
           {
@@ -3490,9 +3456,4 @@ void GShom::pstats(bool)
 std::ostream & operator << (std::ostream & os, const GShom & h) {
   h.concret->print(os);
   return os;
-}
-
-// Implementation of setter Observer
-void fixpointObserver(const IFixpointObserver& obs){
-	sns::__fixpointObs = &obs;
 }

@@ -580,49 +580,5 @@ public:
 };
 
 class MyGShom : public _GShom{};
-
-
-
-/**
- * Fixpoint Observer
- * At each Fixpoint pass, Shom Homomorphism will trigger the update function by passing
- * the SDD before fixpoint pass and the SDD after fixpoint pass
- */
-class IFixpointObserver{
-
-protected:
-	/**
-	 * Must be implemented for use it
-	 */
-	IFixpointObserver(){}
-public:
-	/**
-	 * Virtual destructor
-	 * Triggering the SON destructor
-	 */
-	virtual ~IFixpointObserver(){}
-	/**
-	 * Update Obsever function
-	 * \param before : The SDD before Fixpoint pass
-	 * \param after  : The SDD after Fixpoint pass
-	 */
-	virtual void update(const GSDD before,const GSDD after) const = 0;
-	/**
-	 * Would you stop the Fixpoint ?
-	 */
-	virtual bool shouldInterrupt() const {
-		/* By default return FALSE */
-		return false;
-	}
-};
-
-/**
- * Class for fix the Observer Update function
- * The update function are triggering at each Fixpoint pass
- */
-void fixpointObserver(const IFixpointObserver& obs);
-
-
-
  
 #endif /* SHOM_H_ */
