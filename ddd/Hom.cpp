@@ -1510,6 +1510,7 @@ public:
             GDDD d1 = d;
             GDDD d2 = d;
             
+            bool wasInterrupted = false;
             // is it the fixpoint of an union ?
             if( typeid( *get_concret(arg) ) == typeid(Add) )
             {
@@ -1532,10 +1533,10 @@ public:
                     do
                     {
                         d1 = d2;
-
+                        wasInterrupted = false;
 			// Apply ( Id + F )* on all sons
 			d2 = F_part(d2);
-
+			if (fobs::get_fixobserver ()->was_interrupted ()) 	wasInterrupted = true;
 			if (testWasInterrupt(can_garbage,d1,d2)) {
 				return d2;
 			}
@@ -1547,6 +1548,7 @@ public:
                       tmp.insert (d2);
                       d2 = DED::add (tmp);
                       
+                      if (fobs::get_fixobserver ()->was_interrupted ()) 	wasInterrupted = true;
                       if (testShouldInterrupt(can_garbage, d1, d2)) {
                     	  return d2;
                       }
@@ -1570,15 +1572,16 @@ public:
                       }
                       
                     }
-                    while (d1 != d2);
+                    while (d1 != d2 || (wasInterrupted && can_garbage));
                     return d1;
                 }
             }
             
             do
-            {
+            {	wasInterrupted = false;
                 d1 = d2;
                 d2 = arg(d2);
+                if (fobs::get_fixobserver ()->was_interrupted ()) 	wasInterrupted = true;
                 if (testShouldInterrupt(can_garbage, d1, d2)) {
                 	return d2;
                 }
@@ -1596,7 +1599,7 @@ public:
                 }
               }
             } 
-            while (d1 != d2);
+            while (d1 != d2 || (wasInterrupted && can_garbage));
 
             return d1;
         }

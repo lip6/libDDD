@@ -2078,18 +2078,21 @@ bool testShouldInterrupt(bool can_garbage, const GSDD & d1, const GSDD & d2) {
 		      }
 		    }
 
-
+		    bool wasInterrupted = false;
 		    do
 		      {
+		    	wasInterrupted = false;
 			d1 = d2;
 
 			d2 = F_part(d2);
             // /!\ both F and L can have a fixpoint, and can be interrupted by the fixpoint observer
+			 if (fobs::get_fixobserver ()->was_interrupted ()) 	wasInterrupted = true;
             if (testWasInterrupt(can_garbage, d1, d2)) {
             	return d2;
             }
             
             d2 = L_part(d2);
+            if (fobs::get_fixobserver ()->was_interrupted ()) 	wasInterrupted = true;
             if (testWasInterrupt(can_garbage, d1, d2)) {
             	return d2;
             }
@@ -2118,7 +2121,7 @@ bool testShouldInterrupt(bool can_garbage, const GSDD & d1, const GSDD & d2) {
 			    d2 =  (*G_it)(d2) + d2;
 			    
 			  }
-
+			if (fobs::get_fixobserver ()->was_interrupted ()) 	wasInterrupted = true;
 			if (testShouldInterrupt(can_garbage, d1, d2)) {
 				return d2;
 			}
@@ -2143,7 +2146,7 @@ bool testShouldInterrupt(bool can_garbage, const GSDD & d1, const GSDD & d2) {
 			}
 
 		      }
-		    while (d1 != d2);
+		    while (d1 != d2|| (wasInterrupted && can_garbage));
 		    //__cpt += d1.nbStates();
 		    //std::cout << d1.nbStates()  << " : " << __cpt << std::endl;
 		    return d1;
@@ -2153,17 +2156,20 @@ bool testShouldInterrupt(bool can_garbage, const GSDD & d1, const GSDD & d2) {
 		  ///END RECFIREANDSAT CASE
 		} else {
 
-				
+		bool wasInterrupted = false;
 		do
 		  {
+			wasInterrupted = false;
 		    d1 = d2;
 
 		    d2 = F_part(d2);
+		    if (fobs::get_fixobserver ()->was_interrupted ()) 	wasInterrupted = true;
 		    if (testWasInterrupt(can_garbage, d1, d2)) {
 		    	return d2;
 		    }
         
 		    d2 = L_part(d2);
+		    if (fobs::get_fixobserver ()->was_interrupted ()) 	wasInterrupted = true;
 		    if (testWasInterrupt(can_garbage, d1, d2)) {
 		    	return d2;
 		    }
@@ -2194,6 +2200,7 @@ bool testShouldInterrupt(bool can_garbage, const GSDD & d1, const GSDD & d2) {
 			  d2 =  ( (L_part &  (*G_it))(d2)) + d2;
 			}
 		      }
+		    if (fobs::get_fixobserver ()->was_interrupted ()) 	wasInterrupted = true;
 		    if (testShouldInterrupt(can_garbage, d1, d2)) {
 		    	return d2;
 		    }
@@ -2219,7 +2226,7 @@ bool testShouldInterrupt(bool can_garbage, const GSDD & d1, const GSDD & d2) {
 		    }
 
 		  }
-		while (d1 != d2);
+		while (d1 != d2|| (wasInterrupted && can_garbage));
 		//__cpt += d1.nbStates();
 		//std::cout << d1.nbStates()  << " : " << __cpt << std::endl;
 		return d2;
@@ -2227,12 +2234,13 @@ bool testShouldInterrupt(bool can_garbage, const GSDD & d1, const GSDD & d2) {
 		  
 	    }
 	}                                                                                               
-
+	  bool wasInterrupted = false;
 	  do
 	    {
+		  wasInterrupted = false;
 	      d1 = d2;
 	      d2 = arg(d2);
-
+	      if (fobs::get_fixobserver ()->was_interrupted ()) 	wasInterrupted = true;
 	      if (testShouldInterrupt(can_garbage, d1, d2)) {
 	    	  return d2;
 	      }
@@ -2251,7 +2259,7 @@ bool testShouldInterrupt(bool can_garbage, const GSDD & d1, const GSDD & d2) {
 	      }
 
 	    }
-	  while (d1 != d2);
+	  while (d1 != d2 || (wasInterrupted && can_garbage));
 		
 	  return d1;
 	}
