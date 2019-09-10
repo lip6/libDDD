@@ -1,5 +1,4 @@
 language: cpp
-dist: trusty
 sudo: false
 
 matrix:
@@ -7,11 +6,11 @@ matrix:
    # Linux GCC Builds
     - os: linux
       compiler: gcc
-      addons: &gcc7
+      addons: &gcc9
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-7', 'gcc-7', 'doxygen', 'graphviz']
-      env: GCCVER='7' CXX_COMPILER='g++-7' C_COMPILER='gcc-7'
+          packages: ['g++-9', 'gcc-9', 'doxygen', 'graphviz']
+      env: GCCVER='9' CXX_COMPILER='g++-9' C_COMPILER='gcc-9'
 
     # 4/ OSX GCC Builds
     - os: osx
