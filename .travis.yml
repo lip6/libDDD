@@ -14,8 +14,12 @@ matrix:
 
     # 4/ OSX GCC Builds
     - os: osx
-      osx_image: xcode8.3
       compiler: gcc
+      addons:
+        homebrew:
+          packages:
+           - gcc
+          update: true
       env: GCCVER='9' CXX_COMPILER='g++-9' C_COMPILER='gcc-9'
 
 cache:
@@ -23,10 +27,6 @@ cache:
     - /var/cache/apt/archives
 
 before_script:
-## OSX
-#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update    ; fi  
-#- if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then rm -f /usr/local/include/c++         ; fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew install gcc         ; fi  
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export TARGETBRANCH=osx ; fi
   - cd ${TRAVIS_BUILD_DIR}
   - export CXX=${CXX_COMPILER}
@@ -36,10 +36,6 @@ before_script:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export RANLIB=gcc-ranlib-${GCCVER} ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export NM=gcc-nm-${GCCVER} ; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then export TARGETBRANCH=gh-pages ; fi
-  
-# - export PATH=$HOME/.local/bin:/usr/local/bin:/usr/bin:$PATH
-
-
 
 script : 
   - /bin/sh ./tag.sh
@@ -69,4 +65,3 @@ deploy:
     
 after_deploy:
  - curl -s -X POST -H "Content-Type:application/json" -H "Accept:application/json"   -H "Travis-API-Version:3" -H "Authorization:token $APITOKEN" -d '{"request":{"message":"Triggered by LibDDD build.","branch":"master"}}' https://api.travis-ci.org/repo/lip6%2FlibITS/requests
-
