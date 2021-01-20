@@ -37,13 +37,6 @@
 #include "ddd/MemoryManager.h"
 #include "ddd/statistic.hpp"
 
-// int -> string
-std::string toString (int i) {
-  char buff [16];
-  sprintf (buff,"%d",i);
-  return buff;
-}
-
 // we use one DDD variable per ring, ring 0 is the topmost,
 // and is stored at the bottom of the DDD
 static int NB_RINGS= 3;
@@ -56,7 +49,7 @@ static int NB_POLES= 3;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void initName() {
-  char buff [12];
+  char buff [1024];
   for (int i=0; i< NB_RINGS; i++) {
     sprintf(buff,"ring %d",i);
     DDD::varName(i,buff);
@@ -190,7 +183,7 @@ GShom move_ring (int i, int j ) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // "saturate" fires all events that can be fired from a given node to
-//  the leaves and returns a saturated node (à la Ciardo's RecFireAndSat).
+//  the leaves and returns a saturated node (Ã  la Ciardo's RecFireAndSat).
 GShom saturate () {
   GShom moves = GShom::id ;
   for (int i=0; i < NB_POLES ; i++) {
@@ -228,7 +221,7 @@ int main(int argc, char **argv){
   SDD ss =  saturate() (M0) ;
 
  // stats
-  Statistic S = Statistic(ss,"hanoiv9." + toString(pow((double)2,(double)NB_RINGS)) + "." + toString(NB_POLES),CSV);
+  Statistic S = Statistic(ss,"hanoiv9." + std::to_string(pow((double)2,(double)NB_RINGS)) + "." + std::to_string(NB_POLES),CSV);
   S.print_header(std::cout);
   S.print_line(std::cout);
 }
