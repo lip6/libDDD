@@ -1,5 +1,6 @@
 language: cpp
 sudo: false
+dist: focal
 
 matrix:
   include:
@@ -10,7 +11,7 @@ matrix:
         apt:
           sources: ['ubuntu-toolchain-r-test']
           packages: ['g++-10', 'gcc-10', 'doxygen', 'graphviz']
-      env: GCCVER='9' CXX_COMPILER='g++-9' C_COMPILER='gcc-9'
+      env: GCCVER='10' CXX_COMPILER='g++-10' C_COMPILER='gcc-10'
 
     # 4/ OSX GCC Builds
     - os: osx
