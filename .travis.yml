@@ -6,10 +6,10 @@ matrix:
    # Linux GCC Builds
     - os: linux
       compiler: gcc
-      addons: &gcc9
+      addons: &gcc10
         apt:
           sources: ['ubuntu-toolchain-r-test']
-          packages: ['g++-9', 'gcc-9', 'doxygen', 'graphviz']
+          packages: ['g++-10', 'gcc-10', 'doxygen', 'graphviz']
       env: GCCVER='9' CXX_COMPILER='g++-9' C_COMPILER='gcc-9'
 
     # 4/ OSX GCC Builds
