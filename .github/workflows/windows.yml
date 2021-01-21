@@ -16,7 +16,7 @@ jobs:
     - name: test setup
       run:  C:\msys64\usr\bin\bash -lc "ls ; pwd ; env"
     - name: test setup
-      run:  C:\msys64\usr\bin\bash -lc "cd $GITHUB_WORKSPACE ; pwd ; ls"
+      run:  cd $GITHUB_WORKSPACE ; C:\msys64\usr\bin\bash -lc  "pwd ; ls"
     - name: configure and make
       run:  C:\msys64\usr\bin\bash -lc "cd $GITHUB_WORKSPACE ; autoreconf -vfi && ./configure --prefix=$(pwd)/usr/local/ --enable-nolto --enable-mingw-native && make && make install || cat config.log"
     - name: package zip
