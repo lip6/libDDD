@@ -19,6 +19,8 @@ jobs:
       run:  C:\msys64\usr\bin\bash -lc "cd /D/a/libDDD/libDDD ; autoreconf -vfi && ./configure --prefix=/D/a/libDDD/libDDD/usr/local/ --enable-nolto --enable-mingw-native && make && make install || cat config.log"
     - name: package zip
       run:  C:\msys64\usr\bin\bash -lc "cd /D/a/libDDD/libDDD ; tar -a -c -f windows.zip usr/ ; mv windows.zip website/"
+    - name: Grab rsync on windows
+      run: wget https://itefix.net/dl/free-software/cwrsync_6.2.1_x64_free.zip ; tar.exe -x -f cwrsync_6.2.1_x64_free.zip ; move bin\* . ; dir
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@3.7.1
       with:
