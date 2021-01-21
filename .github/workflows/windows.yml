@@ -16,7 +16,7 @@ jobs:
     - name: add msys to path
       run: set 'PATH=%PATH%;C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin'
     - name: install gcc
-      run: C:\msys64\usr\bin\bash -lc "export PATH=$PATH:/mingw64/bin ; which autoconf ; which ls ; which g++; pacman -Qe ; pacman -Syuu --noconfirm ; pacman --noconfirm -Sy mingw-w64-x86_64-gcc ; which g++ ; g++ --version"
+      run: C:\msys64\usr\bin\bash -lc "PATH=/mingw64/bin:$PATH ; export PATH ; which autoconf ; which ls ; which g++; pacman -Qe ; pacman -Syuu --noconfirm ; pacman --noconfirm -Sy mingw-w64-x86_64-gcc ; which g++ ; g++ --version"
     - name: install gcc
       run: C:\msys64\usr\bin\bash -lc "pacman -Syuu ; g++ --version"
     - name: test it
