@@ -16,7 +16,7 @@ jobs:
     - name: test setup
       run:  C:\msys64\usr\bin\bash -lc "ls ; pwd ; cd /D/a/libDDD/libDDD ; pwd ; ls ; env"
     - name: configure and make
-      run:  C:\msys64\usr\bin\bash -lc "cd /D/a/libDDD/libDDD ; autoreconf -vfi && ./configure --prefix=$(pwd)/usr/local/ --enable-nolto --enable-mingw-native && make && make install || cat config.log"
+      run:  C:\msys64\usr\bin\bash -lc "cd /D/a/libDDD/libDDD ; autoreconf -vfi && ./configure --prefix=/D/a/libDDD/libDDD/usr/local/ --enable-nolto --enable-mingw-native && make && make install || cat config.log"
     - name: package zip
       run:  C:\msys64\usr\bin\bash -lc "cd /D/a/libDDD/libDDD ; 7z a -tzip windows.zip usr/ ; mv windows.zip website/"
     - name: Deploy to GitHub Pages
