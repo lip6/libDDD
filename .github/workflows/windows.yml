@@ -13,20 +13,36 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    - name: install rsync
-      run: C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm rsync ; which rsync "
-    - name: non official add path version for windows
-      run: echo "##[add-path]C:\msys64\usr\bin"
-      env:
-        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'       
     - name: configure and make
       run:  C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; cd /D/a/libDDD/libDDD ; autoreconf -vfi && ./configure --prefix=/D/a/libDDD/libDDD/usr/local/ --enable-nolto --enable-mingw-native && make -j 4 && make install || cat config.log"
     - name: package zip
       run:  C:\msys64\usr\bin\bash -lc "cd /D/a/libDDD/libDDD ; tar -a -c -f windows.zip usr/ ; mv windows.zip website/"
-    - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@3.7.1
+    - name: Upload Artifacts 🔺 # The project is then uploaded as an artifact named 'site'.
+      uses: actions/upload-artifact@v1
       with:
+        name: site
+        path: website/
+    
+  deploy:
+    needs: [build] # The second job must depend on the first one to complete before running, and uses ubuntu-latest instead of windows.
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🛎️
+        uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Download Artifacts 🔻 # The built project is downloaded into the 'site' folder.
+        uses: actions/download-artifact@v1
+        with:
+          name: site
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: ${{ runner.os }} # The branch the action should deploy to.
-          FOLDER: website/ # The folder the action should deploy.
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          BRANCH: Windows
+          FOLDER: "site" # The deployment folder should match the name of the artifact. Even though our project builds into the 'build' folder the artifact name of 'site' must be placed here.
           CLEAN: true # Automatically remove deleted files from the deploy branch 
