@@ -1,0 +1,44 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: tag version date
+      run: /bin/sh ./tag.sh
+    - name: autoreconf
+      run: autoreconf -vfi
+    - name: Prepare install folder
+      run: mkdir usr && mkdir usr/local
+    - name: configure
+      run: ./configure --prefix=$PWD/usr/local/ || cat config.log
+    - name: make lib
+      run: cd ddd ; make -j ; cd ..
+    - name: make demo
+      run: make -j
+    - name: make install
+      run: make install
+    - name: prepare artefact
+      run: tar cvzf env.ImageOS.tgz usr/ ; mv env.ImageOS.tgz website/
+    - name: make dist
+      if: runner.os = 'Linux'
+      run: make dist ;  mv ddd*.tar.gz website/ ;
+    - name: make doc
+      if: runner.os = 'Linux'
+      run: cd doc ; make ; cd .. ; mv doc/libddd.html/ website/ ;
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@3.7.1
+      with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: website/ # The folder the action should deploy.
+          CLEAN: true # Automatically remove deleted files from the deploy branch 
