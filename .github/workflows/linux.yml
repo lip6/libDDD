@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: Linux Build
 
 on:
   push:
@@ -9,31 +9,20 @@ on:
 jobs:
   build:
     
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+    runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v2
     - name: tag version date
       run: /bin/sh ./tag.sh
     - name: Install packages
-      if: startsWith(runner.os, 'Linux')
       run: sudo apt-get install doxygen graphviz ;
-    - name: Install packages
-      if: startsWith(runner.os, 'macOS')
-      run: brew install gcc autoconf automake libtool ;
     - name: autoreconf
       run: autoreconf -vfi
     - name: Prepare install folder
       run: mkdir usr && mkdir usr/local
     - name: configure
-      if: startsWith(runner.os, 'Linux') || startsWith(runner.os, 'macOS')
       run: ./configure --prefix=$PWD/usr/local/ || cat config.log
-    - name: configure
-      if: startsWith(runner.os, 'Windows')
-      run: ./configure --prefix=$(pwd)/usr/local/ --enable-mingw-native || cat config.log
     - name: make lib
       run: cd ddd ; make -j ; cd ..
     - name: make demo
@@ -41,12 +30,10 @@ jobs:
     - name: make install
       run: make install
     - name: prepare artefact      
-      run: tar cvzf env.ImageOS.tgz usr/ ; mv env.ImageOS.tgz website/
+      run: tar cvzf runner.os.tgz usr/ ; mv runner.os.tgz website/
     - name: make dist
-      if: startsWith(runner.os, 'Linux')
       run: make dist ;  mv ddd*.tar.gz website/ ;
     - name: make doc
-      if: startsWith(runner.os, 'Linux')
       run: cd doc ; make ; cd .. ; mv doc/libddd.html/ website/ ;
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@3.7.1
