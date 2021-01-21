@@ -1,4 +1,4 @@
-name: C/C++ CI
+name: windows build
 
 on:
   push:
@@ -13,10 +13,6 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    - name: autoreconf
-      run: autoreconf -vfi
-    - name: Prepare install folder
-      run: mkdir usr && mkdir usr/local
     - name: configure and make
       run:  C:\msys64\usr\bin\bash -lc "autoreconf -vfi && ./configure --prefix=$(pwd)/usr/local/ --enable-nolto --enable-mingw-native && make && make install || cat config.log"
     - name: package zip
