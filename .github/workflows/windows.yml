@@ -20,7 +20,7 @@ jobs:
     - name: add msys to env
       run: $ENV:PATH="$ENV:PATH;C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin" 
     - name: add msys to env by gh action
-      run: echo "C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin" >> $GITHUB_PATH
+      run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
     - name: print path 2
       run: $Env:Path
     - name: install rsync
