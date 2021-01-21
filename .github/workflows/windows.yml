@@ -13,8 +13,12 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+    - name: print path
+      run: $Env:Path
     - name: add msys to powershell path
       run: $oldpath = (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).path ; $newpath = "$oldpath;C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin" ; Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $newpath
+    - name: print path 2
+      run: $Env:Path
     - name: install rsync
       run: C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm rsync ; which rsync "
     - name: test setup powershell
