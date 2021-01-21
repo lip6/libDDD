@@ -24,7 +24,7 @@ jobs:
     - name: print path 2
       run: $Env:Path
     - name: install rsync
-      run: C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm rsync ; which rsync "
+      run: C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm rsync ; which rsync ; cp /usr/bin/rsync /usr/bin/rsync.exe"
     - name: test setup powershell
       run:  where rsync ; rsync --help 
     - name: test setup
