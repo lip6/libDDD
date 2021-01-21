@@ -13,6 +13,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+    - name: test setup
+      run:  C:\msys64\usr\bin\bash -lc "ls ; pwd ; env"
     - name: configure and make
       run:  C:\msys64\usr\bin\bash -lc "cd $GITHUB_WORKSPACE ; autoreconf -vfi && ./configure --prefix=$(pwd)/usr/local/ --enable-nolto --enable-mingw-native && make && make install || cat config.log"
     - name: package zip
