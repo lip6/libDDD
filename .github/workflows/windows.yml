@@ -16,7 +16,7 @@ jobs:
     - name: add msys to path
       run: set 'PATH=%PATH%;C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin'
     - name: test path
-      run: C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; which autoconf ; which ls ; which g++ ; which rsync "
+      run: C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; which autoconf ; which ls ; which g++ ; pacman -S rsync ; which rsync "
     - name: test setup
       run:  C:\msys64\usr\bin\bash -lc "ls ; pwd ; cd /D/a/libDDD/libDDD ; pwd ; ls ; env"
     - name: configure and make
