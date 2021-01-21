@@ -19,6 +19,8 @@ jobs:
       run: C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; which autoconf ; which ls ; which g++ ; pacman -S --noconfirm rsync ; which rsync "
     - name: test setup
       run:  C:\msys64\usr\bin\bash -lc "ls ; pwd ; cd /D/a/libDDD/libDDD ; pwd ; ls ; env"
+    - name: test setup powershell
+      run:  rsync --help
     - name: configure and make
       run:  C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; cd /D/a/libDDD/libDDD ; autoreconf -vfi && ./configure --prefix=/D/a/libDDD/libDDD/usr/local/ --enable-nolto --enable-mingw-native && make -j && make install || cat config.log"
     - name: package zip
