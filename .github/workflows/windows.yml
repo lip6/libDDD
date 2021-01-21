@@ -20,7 +20,9 @@ jobs:
     - name: add msys to env
       run: $ENV:PATH="$ENV:PATH;C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin"
     - name: non official add path
-      run: echo "##[add-path]C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin"       
+      run: echo "##[add-path]C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin"
+      env:
+        ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'       
     - name: add msys to env by gh action
       run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
     - name: print path 2
