@@ -30,10 +30,10 @@ jobs:
     - name: prepare artefact
       run: tar cvzf env.ImageOS.tgz usr/ ; mv env.ImageOS.tgz website/
     - name: make dist
-      if: runner.os = 'Linux'
+      if: startsWith(runner.os, 'Linux')
       run: make dist ;  mv ddd*.tar.gz website/ ;
     - name: make doc
-      if: runner.os = 'Linux'
+      if: startsWith(runner.os, 'Linux')
       run: cd doc ; make ; cd .. ; mv doc/libddd.html/ website/ ;
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@3.7.1
