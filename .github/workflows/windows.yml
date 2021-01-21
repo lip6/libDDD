@@ -15,6 +15,10 @@ jobs:
     - uses: actions/checkout@v2
     - name: install gcc
       run: C:\msys64\usr\bin\bash -lc "pacman -Sy mingw-w64-x86_64-toolchain"
+    - name: add msys to path
+      run: set PATH=%PATH%;C:\msys64\mingw64\bin;C:\msys64\usr\bin
+    - name: test it
+      run: rsync --help
     - name: Grab rsync on windows
       run: curl.exe -o cwsync.zip https://itefix.net/dl/free-software/cwrsync_6.2.1_x64_free.zip ; tar.exe -x -f cwsync.zip ; move bin\* C:\Program Files\Git\bin\ ; rsync --help
     - name: test setup
