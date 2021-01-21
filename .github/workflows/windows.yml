@@ -13,30 +13,18 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
-    - name: print path
-      run: $Env:Path
-    - name: add msys to powershell path
-      run: $oldpath = (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).path ; $newpath = "$oldpath;C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin" ; Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $newpath
-    - name: add msys to env
-      run: $ENV:PATH="$ENV:PATH;C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin"
-    - name: non official add path
+    - name: install rsync
+      run: C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm rsync ; which rsync "
+    - name: non official add path version for windows
       run: echo "##[add-path]C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin"
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'       
-    - name: add msys to env by gh action
-      run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
-    - name: print path 2
-      run: $Env:Path
-    - name: print path 3
-      run: echo "$PATH"
-    - name: install rsync
-      run: C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm rsync ; which rsync "
     - name: test setup powershell
-      run:  where rsync ; rsync --help 
+      run:  where rsync 
     - name: test setup
       run:  C:\msys64\usr\bin\bash -lc "ls ; pwd ; cd /D/a/libDDD/libDDD ; pwd ; ls ; env"
     - name: configure and make
-      run:  C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; cd /D/a/libDDD/libDDD ; autoreconf -vfi && ./configure --prefix=/D/a/libDDD/libDDD/usr/local/ --enable-nolto --enable-mingw-native && make -j && make install || cat config.log"
+      run:  C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; cd /D/a/libDDD/libDDD ; autoreconf -vfi && ./configure --prefix=/D/a/libDDD/libDDD/usr/local/ --enable-nolto --enable-mingw-native && make -j 4 && make install || cat config.log"
     - name: package zip
       run:  C:\msys64\usr\bin\bash -lc "cd /D/a/libDDD/libDDD ; tar -a -c -f windows.zip usr/ ; mv windows.zip website/"
     - name: Deploy to GitHub Pages
