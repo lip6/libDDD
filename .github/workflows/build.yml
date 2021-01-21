@@ -32,6 +32,9 @@ jobs:
     - name: make dist
       if: startsWith(runner.os, 'Linux')
       run: make dist ;  mv ddd*.tar.gz website/ ;
+    - name: Install packages
+      if: startsWith(runner.os, 'Linux')
+      run: sudo apt-get install doxygen ;
     - name: make doc
       if: startsWith(runner.os, 'Linux')
       run: cd doc ; make ; cd .. ; mv doc/libddd.html/ website/ ;
