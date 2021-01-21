@@ -23,7 +23,7 @@ jobs:
     - name: Prepare install folder
       run: mkdir usr && mkdir usr/local
     - name: configure
-      run: ./configure --prefix=$PWD/usr/local/ --enable-nolto || cat config.log
+      run: ./configure --prefix=$PWD/usr/local/ --enable-nolto CXX_COMPILER='g++-9' C_COMPILER='gcc-9' || cat config.log
     - name: make lib
       run: cd ddd ; make -j ; cd ..
     - name: make demo
