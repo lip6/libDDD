@@ -13,12 +13,12 @@ jobs:
     
     steps:
     - uses: actions/checkout@v2
+    - name: add msys to path
+      run: set PATH=%PATH%;C:\msys64\mingw64\bin;C:\msys64\usr\bin
     - name: install gcc
       run: C:\msys64\usr\bin\bash -lc "g++ --version"
     - name: install gcc
       run: C:\msys64\usr\bin\bash -lc "pacman -Syuu ; g++ --version"
-    - name: add msys to path
-      run: set PATH=%PATH%;C:\msys64\mingw64\bin;C:\msys64\usr\bin
     - name: test it
       run: rsync --help
     - name: Grab rsync on windows
