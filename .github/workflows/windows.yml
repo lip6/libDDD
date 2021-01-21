@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: add msys to path
-      run: set 'PATH=%PATH%;C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin'
+      run: pathman /au C:\msys64\mingw64\bin; pathman /au C:\msys64\usr\bin; pathman /au C:\mingw64\bin'
     - name: test path
       run: C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; which autoconf ; which ls ; which g++ ; pacman -S --noconfirm rsync ; which rsync "
     - name: test setup
