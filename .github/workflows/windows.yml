@@ -17,6 +17,8 @@ jobs:
       run: $Env:Path
     - name: add msys to powershell path
       run: $oldpath = (Get-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH).path ; $newpath = "$oldpath;C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin" ; Set-ItemProperty -Path 'Registry::HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager\Environment' -Name PATH -Value $newpath
+    - name: add msys to env
+      run: $ENV:PATH="$ENV:PATH;C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin" 
     - name: print path 2
       run: $Env:Path
     - name: install rsync
