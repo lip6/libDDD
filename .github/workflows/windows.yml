@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: install gcc
-      run: C:\msys64\usr\bin\bash -lc "pacman -Sy mingw-w64-x86_64-toolchain"
+      run: C:\msys64\usr\bin\bash -lc "pacman -Sy mingw-w64-x86_64-gcc"
     - name: add msys to path
       run: set PATH=%PATH%;C:\msys64\mingw64\bin;C:\msys64\usr\bin
     - name: test it
