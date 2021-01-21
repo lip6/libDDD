@@ -30,7 +30,7 @@ jobs:
     - name: print path 3
       run: echo "$PATH"
     - name: install rsync
-      run: C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm rsync ; which rsync ; cp /usr/bin/rsync /usr/bin/rsync.exe"
+      run: C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm rsync ; which rsync "
     - name: test setup powershell
       run:  where rsync ; rsync --help 
     - name: test setup
