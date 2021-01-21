@@ -23,6 +23,8 @@ jobs:
       run: echo "C:\msys64\usr\bin" >> $GITHUB_PATH
     - name: print path 2
       run: $Env:Path
+    - name: print path 3
+      run: echo "$PATH"
     - name: install rsync
       run: C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm rsync ; which rsync ; cp /usr/bin/rsync /usr/bin/rsync.exe"
     - name: test setup powershell
