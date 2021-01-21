@@ -16,13 +16,11 @@ jobs:
     - name: install rsync
       run: C:\msys64\usr\bin\bash -lc "pacman -S --noconfirm rsync ; which rsync "
     - name: non official add path version for windows
-      run: echo "##[add-path]C:\msys64\mingw64\bin;C:\msys64\usr\bin;C:\mingw64\bin"
+      run: echo "##[add-path]C:\msys64\usr\bin"
       env:
         ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'       
     - name: test setup powershell
       run:  where rsync 
-    - name: test setup
-      run:  C:\msys64\usr\bin\bash -lc "ls ; pwd ; cd /D/a/libDDD/libDDD ; pwd ; ls ; env"
     - name: configure and make
       run:  C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; cd /D/a/libDDD/libDDD ; autoreconf -vfi && ./configure --prefix=/D/a/libDDD/libDDD/usr/local/ --enable-nolto --enable-mingw-native && make -j 4 && make install || cat config.log"
     - name: package zip
