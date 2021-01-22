@@ -4,7 +4,7 @@ noinst_PROGRAMS = morpionv2
 DDD_SRCDIR = $(top_srcdir)
 DDD_BUILDDIR = $(top_builddir)/ddd
 
-AM_CPPFLAGS =  -I $(DDD_SRCDIR) $(BOOST_CPPFLAGS) -g -Wall $(TBBINC_FLAGS) -fvisibility=hidden
+AM_CPPFLAGS =  -I $(DDD_SRCDIR) $(BOOST_CPPFLAGS) -g -Wall $(TBBINC_FLAGS)
 AM_LDFLAGS = $(LDFLAGS)
 AM_LDFLAGS += $(STATICFLAGS)
 LDADD = $(DDD_BUILDDIR)/libDDD_d.la

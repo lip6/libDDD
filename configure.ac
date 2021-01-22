@@ -23,6 +23,8 @@ if test "x$nolto" = "xfalse"; then
    CXXFLAGS="-flto -fuse-linker-plugin $CXXFLAGS"
    test -z "$AR" && AR=gcc-ar
    test -z "$RANLIB" && RANLIB=gcc-ranlib
+else
+   CXXFLAGS="-fnolto $CXXFLAGS"
 fi
 
 # programs used to build
