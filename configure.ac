@@ -24,7 +24,7 @@ if test "x$nolto" = "xfalse"; then
    test -z "$AR" && AR=gcc-ar
    test -z "$RANLIB" && RANLIB=gcc-ranlib
 else
-   CXXFLAGS="-fnolto $CXXFLAGS"
+   CXXFLAGS="-fno-lto $CXXFLAGS"
 fi
 
 # programs used to build
