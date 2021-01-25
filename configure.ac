@@ -20,7 +20,7 @@ AC_ARG_ENABLE(	[nolto],
             esac])
 
 if test "x$nolto" = "xfalse"; then
-   CXXFLAGS="-flto -fuse-linker-plugin $CXXFLAGS"
+   CXXFLAGS="-flto $CXXFLAGS"
    test -z "$AR" && AR=gcc-ar
    test -z "$RANLIB" && RANLIB=gcc-ranlib
 else
