@@ -17,7 +17,7 @@ jobs:
     - name: tag version date
       run: /bin/sh ./tag.sh
     - name: Install packages
-      run: brew install gcc autoconf automake libtool ;
+      run: brew install gcc autoconf automake libtool binutils ;
     - name: autoreconf
       run: autoreconf -vfi
     - name: Prepare install folder
