@@ -46,3 +46,11 @@ jobs:
           BRANCH: Windows
           FOLDER: "site" # The deployment folder should match the name of the artifact. Even though our project builds into the 'build' folder the artifact name of 'site' must be placed here.
           CLEAN: true # Automatically remove deleted files from the deploy branch 
+      - name: Trigger libITS
+        uses: mvasigh/dispatch-action@main
+        with:
+          # You should create a personal access token and store it in your repository
+          token: ${{ secrets.NOTIF_PAT }}
+          repo: libITS
+          owner: lip6
+          event_type: Windows
