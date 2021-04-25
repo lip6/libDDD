@@ -41,4 +41,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ runner.os }} # The branch the action should deploy to.
           FOLDER: website/ # The folder the action should deploy.
-          CLEAN: true # Automatically remove deleted files from the deploy branch 
+          CLEAN: true # Automatically remove deleted files from the deploy branch   
+    - name: Trigger libITS
+      uses: mvasigh/dispatch-action@main
+      with:
+          # You should create a personal access token and store it in your repository
+          token: ${{ secrets.NOTIF_PAT }}
+          repo: libITS
+          owner: lip6
+          event_type: ${{ runner.os }}
