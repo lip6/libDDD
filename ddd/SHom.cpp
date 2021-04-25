@@ -2164,13 +2164,13 @@ bool testShouldInterrupt(bool can_garbage, const GSDD & d1, const GSDD & d2) {
 
 		    d2 = F_part(d2);
 		    if (fobs::get_fixobserver ()->was_interrupted ()) 	wasInterrupted = true;
-		    if (testWasInterrupt(can_garbage, d1, d2)) {
+		    if (d1 != d2 && testWasInterrupt(can_garbage, d1, d2)) {
 		    	return d2;
 		    }
         
 		    d2 = L_part(d2);
 		    if (fobs::get_fixobserver ()->was_interrupted ()) 	wasInterrupted = true;
-		    if (testWasInterrupt(can_garbage, d1, d2)) {
+		    if (d1 != d2 && testWasInterrupt(can_garbage, d1, d2)) {
 		    	return d2;
 		    }
 
