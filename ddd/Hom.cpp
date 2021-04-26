@@ -55,32 +55,30 @@ static UniqueTable<_GHom> canonical;
 /*************************************************************************/
 
 bool testWasInterrupt(bool can_garbage, const GDDD & d1, const GDDD & d2) {
-	bool test = false;
-	if (! can_garbage && fobs::get_fixobserver ()->was_interrupted ())
-	{
-		test = true;
-	}
-	if (can_garbage && fobs::get_fixobserver ()->was_interrupted ())
-	{
-		fobs::get_fixobserver ()->update (d2, d1);
-		if (fobs::get_fixobserver ()->should_interrupt (d2, d1))
-		{
-			test = true;
+	if (fobs::get_fixobserver()->was_interrupted()) {
+		if (!can_garbage) {
+			return true;
+		} else {
+			fobs::get_fixobserver()->update(d2, d1);
+			return fobs::get_fixobserver()->should_interrupt(d2, d1);
 		}
+	} else {
+		return false;
 	}
-	return test;
 }
 
 bool testShouldInterrupt(bool can_garbage, const GDDD & d1, const GDDD & d2) {
 	bool test = false;
-	if (d2==d1) {
+	if (d2 == d1) {
 		test = false;
-	} else if (! can_garbage && fobs::get_fixobserver ()->should_interrupt(d2,d1)) {
-		test = true;
-	} else if (can_garbage && fobs::get_fixobserver ()->should_interrupt (d2,d1)) {
-		fobs::get_fixobserver ()->update (d2, d1);
-		if (fobs::get_fixobserver ()->should_interrupt (d2, d1)) {
+	} else if (fobs::get_fixobserver()->should_interrupt(d2, d1)) {
+		if (!can_garbage) {
 			test = true;
+		} else {
+			fobs::get_fixobserver()->update(d2, d1);
+			if (fobs::get_fixobserver()->should_interrupt(d2, d1)) {
+				test = true;
+			}
 		}
 	}
 	return test;
@@ -1540,6 +1538,8 @@ public:
 			if (testWasInterrupt(can_garbage,d1,d2)) {
 				return d2;
 			}
+
+			if (!wasInterrupted) {
                         // Apply ( G + Id )
                       std::set<GDDD> tmp;
                       for (std::set<GHom>::const_iterator it = partition.second.begin() ; it != partition.second.end() ; ++it ) {
@@ -1552,6 +1552,7 @@ public:
                       if (testShouldInterrupt(can_garbage, d1, d2)) {
                     	  return d2;
                       }
+			}
                       if (can_garbage) {
                         
                         //		trace << "could trigger 2!!" << std::endl ;
@@ -1920,7 +1921,7 @@ template<>
 bool
 HomCache::should_insert (const GHom & h) const
 {
-  if (fobs::get_fixobserver ()->was_interrupted () && typeid (*_GHom::get_concret (h)) == typeid (Fixpoint))
+  if (fobs::get_fixobserver ()->was_interrupted () /* && typeid (*_GHom::get_concret (h)) == typeid (Fixpoint)*/)
     return false;
   return true;
 }

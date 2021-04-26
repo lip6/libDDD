@@ -63,31 +63,30 @@ typedef std::map<GSDD, DataSet*> GSDD_DataSet_map;
 namespace sns {
 
 bool testWasInterrupt(bool can_garbage, const GSDD &d1, const GSDD &d2) {
-	bool test = false;
-	if (!can_garbage && fobs::get_fixobserver()->was_interrupted()) {
-		test = true;
-	}
-	if (can_garbage && fobs::get_fixobserver()->was_interrupted()) {
-		fobs::get_fixobserver()->update(d2, d1);
-		if (fobs::get_fixobserver()->should_interrupt(d2, d1)) {
-			test = true;
+	if (fobs::get_fixobserver()->was_interrupted()) {
+		if (!can_garbage) {
+			return true;
+		} else {
+			fobs::get_fixobserver()->update(d2, d1);
+			return fobs::get_fixobserver()->should_interrupt(d2, d1);
 		}
+	} else {
+		return false;
 	}
-	return test;
 }
 
 bool testShouldInterrupt(bool can_garbage, const GSDD &d1, const GSDD &d2) {
 	bool test = false;
 	if (d2 == d1) {
 		test = false;
-	} else if (!can_garbage
-			&& fobs::get_fixobserver()->should_interrupt(d2, d1)) {
-		test = true;
-	} else if (can_garbage
-			&& fobs::get_fixobserver()->should_interrupt(d2, d1)) {
-		fobs::get_fixobserver()->update(d2, d1);
-		if (fobs::get_fixobserver()->should_interrupt(d2, d1)) {
+	} else if (fobs::get_fixobserver()->should_interrupt(d2, d1)) {
+		if (!can_garbage) {
 			test = true;
+		} else {
+			fobs::get_fixobserver()->update(d2, d1);
+			if (fobs::get_fixobserver()->should_interrupt(d2, d1)) {
+				test = true;
+			}
 		}
 	}
 	return test;
@@ -2132,7 +2131,7 @@ public:
 							d2 = F_part(d2);
 							if (fobs::get_fixobserver()->was_interrupted())
 								wasInterrupted = true;
-							if (testWasInterrupt(can_garbage, d1, d2)) {
+							if (wasInterrupted && !can_garbage) {
 								return d2;
 							}
 
@@ -2140,42 +2139,50 @@ public:
 								d2 = L_part(d2);
 								if (fobs::get_fixobserver()->was_interrupted())
 									wasInterrupted = true;
-								if (testWasInterrupt(can_garbage, d1, d2)) {
+								if (wasInterrupted && !can_garbage) {
 									return d2;
 								}
 							}
 
 
-							if (!wasInterrupted)
-							for (Add::Gset_it G_it = partition.G.begin();
-									G_it != partition.G.end(); ++G_it) {
+							if (!wasInterrupted) {
+								for (Add::Gset_it G_it = partition.G.begin();
+										G_it != partition.G.end(); ++G_it) {
 
-								// d2 = F_part(d2);
-								// 						d2 = L_part(d2);
+									// d2 = F_part(d2);
+									// 						d2 = L_part(d2);
 
-								// apply local part
-								// d2 = L_part(d2);
+									// apply local part
+									// d2 = L_part(d2);
 
-								if (GShom::getFixpointStrategy()
-										== GShom::DFS) {
-									// saturate firings of each transition (for non deterministic : one to many transitions).
-									// do an internal fixpoint on every g \in G, i.e.
-									// (\sum_i (g_i + id)\star) \star
-									GSDD d3 = d2;
-									do {
-										d2 = d3;
-										d3 = ((L_part & (*G_it))(d2)) + d2;
-									} while (d3 != d2);
-								} else {
-									// BFS
-									// chain application of Shom of this level
-									d2 = ((L_part & (*G_it))(d2)) + d2;
+									if (GShom::getFixpointStrategy()
+											== GShom::DFS) {
+										// saturate firings of each transition (for non deterministic : one to many transitions).
+										// do an internal fixpoint on every g \in G, i.e.
+										// (\sum_i (g_i + id)\star) \star
+										GSDD d3 = d2;
+										do {
+											d2 = d3;
+											d3 = ((L_part & (*G_it))(d2)) + d2;
+										} while (d3 != d2);
+									} else {
+										// BFS
+										// chain application of Shom of this level
+										d2 = ((L_part & (*G_it))(d2)) + d2;
+									}
+								}
+
+								if (fobs::get_fixobserver()->was_interrupted())
+									wasInterrupted = true;
+								if (wasInterrupted && !can_garbage) {
+									return d2;
 								}
 							}
-							if (fobs::get_fixobserver()->was_interrupted())
-								wasInterrupted = true;
-							if (testShouldInterrupt(can_garbage, d1, d2)) {
-								return d2;
+							if (wasInterrupted && can_garbage) {
+								fobs::get_fixobserver()->update(d2,d1);
+								if (fobs::get_fixobserver()->should_interrupt(d2, d1)) {
+									return d2;
+								}
 							}
 							if (can_garbage) {
 
@@ -2621,7 +2628,7 @@ typedef Cache<GShom, GSDD, GSDD> ShomCache;
 template<>
 bool ShomCache::should_insert(const GShom &h) const {
 	if (fobs::get_fixobserver()->was_interrupted()
-			&& typeid (*_GShom::get_concret(h)) == typeid(sns::Fixpoint))
+			/* && typeid (*_GShom::get_concret(h)) == typeid(sns::Fixpoint)*/)
 		return false;
 	return true;
 }
