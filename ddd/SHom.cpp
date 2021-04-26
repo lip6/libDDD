@@ -2132,19 +2132,21 @@ public:
 							d2 = F_part(d2);
 							if (fobs::get_fixobserver()->was_interrupted())
 								wasInterrupted = true;
-							if (d1 != d2
-									&& testWasInterrupt(can_garbage, d1, d2)) {
+							if (testWasInterrupt(can_garbage, d1, d2)) {
 								return d2;
 							}
 
-							d2 = L_part(d2);
-							if (fobs::get_fixobserver()->was_interrupted())
-								wasInterrupted = true;
-							if (d1 != d2
-									&& testWasInterrupt(can_garbage, d1, d2)) {
-								return d2;
+							if (!wasInterrupted) {
+								d2 = L_part(d2);
+								if (fobs::get_fixobserver()->was_interrupted())
+									wasInterrupted = true;
+								if (testWasInterrupt(can_garbage, d1, d2)) {
+									return d2;
+								}
 							}
 
+
+							if (!wasInterrupted)
 							for (Add::Gset_it G_it = partition.G.begin();
 									G_it != partition.G.end(); ++G_it) {
 
