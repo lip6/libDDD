@@ -33,7 +33,7 @@ jobs:
     - name: prepare artefact      
       run: tar cvzf ${{ runner.os }}.tgz usr/ ; mv ${{ runner.os }}.tgz website/
     - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@4.1.1
+      uses: JamesIves/github-pages-deploy-action@4.1.2
       with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ runner.os }} # The branch the action should deploy to.
