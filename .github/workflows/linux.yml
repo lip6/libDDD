@@ -36,7 +36,7 @@ jobs:
     - name: make doc
       run: cd doc ; make ; cd .. ; mv doc/libddd.html/ website/ ;
     - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@4.1.1
+      uses: JamesIves/github-pages-deploy-action@4.1.3
       with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ runner.os }} # The branch the action should deploy to.
