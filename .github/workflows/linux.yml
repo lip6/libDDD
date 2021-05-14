@@ -38,10 +38,9 @@ jobs:
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@4.1.3
       with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: ${{ runner.os }} # The branch the action should deploy to.
-          FOLDER: website/ # The folder the action should deploy.
-          CLEAN: true # Automatically remove deleted files from the deploy branch   
+          branch: ${{ runner.os }} # The branch the action should deploy to.
+          folder: website/ # The folder the action should deploy.
+          clean: true # Automatically remove deleted files from the deploy branch   
     - name: Trigger libITS
       uses: mvasigh/dispatch-action@main
       with:
