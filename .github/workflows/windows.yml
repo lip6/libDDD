@@ -41,11 +41,11 @@ jobs:
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@4.1.3
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          BRANCH: Windows
-          FOLDER: "site" # The deployment folder should match the name of the artifact. Even though our project builds into the 'build' folder the artifact name of 'site' must be placed here.
-          CLEAN: true # Automatically remove deleted files from the deploy branch 
+          access-token: ${{ secrets.ACCESS_TOKEN }}
+          branch: Windows
+          folder: "site" # The deployment folder should match the name of the artifact. Even though our project builds into the 'build' folder the artifact name of 'site' must be placed here.
+          clean: true # Automatically remove deleted files from the deploy branch
+          single-commit: true 
       - name: Trigger libITS
         uses: mvasigh/dispatch-action@main
         with:
