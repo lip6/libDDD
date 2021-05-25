@@ -17,13 +17,13 @@ jobs:
     - name: tag version date
       run: /bin/sh ./tag.sh
     - name: Install packages
-      run: brew install gcc autoconf automake libtool binutils ;
+      run: brew install gcc@9 autoconf automake libtool binutils ;
     - name: autoreconf
       run: autoreconf -vfi
     - name: Prepare install folder
       run: mkdir usr && mkdir usr/local
     - name: configure
-      run: ./configure --prefix=$PWD/usr/local/ AR='gcc-ar-10' NM='gcc-nm-10' RANLIB='gcc-ranlib-10' CXX='g++-10' CC='gcc-10' || cat config.log
+      run: ./configure --prefix=$PWD/usr/local/ AR='gcc-ar-9' NM='gcc-nm-9' RANLIB='gcc-ranlib-9' CXX='g++-9' CC='gcc-9' || cat config.log
     - name: make lib
       run: cd ddd ; make -j ; cd ..
     - name: make demo
@@ -35,10 +35,10 @@ jobs:
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@4.1.3
       with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: ${{ runner.os }} # The branch the action should deploy to.
-          FOLDER: website/ # The folder the action should deploy.
-          CLEAN: true # Automatically remove deleted files from the deploy branch 
+          branch: ${{ runner.os }}  # The branch the action should deploy to.
+          folder: website/  # The folder the action should deploy.
+          clean: true # Automatically remove deleted files from the deploy branch
+          single-commit: true 
     - name: Trigger libITS
       uses: mvasigh/dispatch-action@main
       with:
