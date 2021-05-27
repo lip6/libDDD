@@ -44,7 +44,7 @@ jobs:
         with:
           token: ${{ secrets.ACCESS_TOKEN }}
           branch: Windows
-          folder: 'site' # The deployment folder should match the name of the artifact. Even though our project builds into the 'build' folder the artifact name of 'site' must be placed here.
+          folder: 'website' # The deployment folder should match the name of the artifact. Even though our project builds into the 'build' folder the artifact name of 'site' must be placed here.
           clean: true # Automatically remove deleted files from the deploy branch
           single-commit: true 
       - name: Trigger libITS
