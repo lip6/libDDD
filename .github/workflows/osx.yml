@@ -31,11 +31,11 @@ jobs:
     - name: make install
       run: make install
     - name: prepare artefact      
-      run: tar cvzf ${{ runner.os }}.tgz usr/ ; mv ${{ runner.os }}.tgz website/
+      run: tar cvzf osx.tgz usr/ ; mv osx.tgz website/
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@4.1.3
       with:
-          branch: ${{ runner.os }}  # The branch the action should deploy to.
+          branch: osx  # The branch the action should deploy to.
           folder: website/  # The folder the action should deploy.
           clean: true # Automatically remove deleted files from the deploy branch
           single-commit: true 
