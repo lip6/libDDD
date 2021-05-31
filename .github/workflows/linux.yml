@@ -40,7 +40,8 @@ jobs:
       with:
           branch: ${{ runner.os }} # The branch the action should deploy to.
           folder: website/ # The folder the action should deploy.
-          clean: true # Automatically remove deleted files from the deploy branch   
+          clean: true # Automatically remove deleted files from the deploy branch
+          single-commit: true    
     - name: Trigger libITS
       uses: mvasigh/dispatch-action@main
       with:
