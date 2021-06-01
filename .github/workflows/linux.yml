@@ -30,7 +30,7 @@ jobs:
     - name: make install
       run: make install
     - name: prepare artefact      
-      run: tar cvzf linux.tgz usr/ ; mv linux.tgz website/
+      run: rm usr/lib/libDDD_d* ; tar cvzf linux.tgz usr/ ; mv linux.tgz website/
     - name: make dist
       run: make dist ;  mv ddd*.tar.gz website/ ;
     - name: make doc
