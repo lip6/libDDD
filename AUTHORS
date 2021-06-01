@@ -1,7 +1,8 @@
 Authors :
 Yann Thierry-Mieg <LIP6, Yann.Thierry-Mieg@lip6fr > (2003-), Jean-Michel Couvreur <LaBRi > (2001), and Denis Poitrenaud (2001) <LIP6>
 Contributors :
-Alexandre Hamez < LIP6 and LRDE (EPITA), Alexandre.Hamez@lip6.fr > (2006-): maintenance, multi-threading, rewrite rules
+Maximilien Colange (2009-2012) : split-equiv, arithmetic manipulation
+Alexandre Hamez < LIP6 and LRDE (EPITA), Alexandre.Hamez@lip6.fr > (2006-2009): maintenance, multi-threading, rewrite rules
 Vincent Beaudenon < LIP6 > (2004-2005) : serialisation, user (not strong) homomorphisms
-François Bréant < LIP6 > (2004) : INST_STL, multi-target build
+Franï¿½ois Brï¿½ant < LIP6 > (2004) : INST_STL, multi-target build
 Samuel Charron < LRDE (EPITA) > (2005-2006) : tests
