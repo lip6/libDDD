@@ -14,8 +14,8 @@ Main features include:
 
 libDDD is distributed under the terms of LGPL.
 
-Please see website http://ddd.lip6.fr for more details.
+Please see [our main website](https://lip6.github.io/ITSTools-web/libddd.html) for more details.
 
-The [distribution for libDDD by itself is here](https://lip6.github.io/libDDD/)
+The [distribution for libDDD by itself is here](https://lip6.github.io/libDDD/index.html)
 
 [Documentation for libDDD](https://lip6.github.io/libDDD/libddd.html/index.html) is available here
