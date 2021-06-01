@@ -31,7 +31,7 @@ jobs:
     - name: make install
       run: make install
     - name: prepare artefact      
-      run: rm usr/lib/libDDD_d* ; tar cvzf osx.tgz usr/ ; mv osx.tgz website/
+      run: rm usr/local/lib/libDDD_d* ; tar cvzf osx.tgz usr/ ; mv osx.tgz website/
     - name: Deploy to GitHub Pages
       uses: JamesIves/github-pages-deploy-action@4.1.3
       with:
