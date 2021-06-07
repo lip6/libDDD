@@ -33,7 +33,7 @@ jobs:
     - name: prepare artefact      
       run: rm usr/local/lib/libDDD_d* ; tar cvzf osx.tgz usr/ ; mv osx.tgz website/
     - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@4.1.3
+      uses: JamesIves/github-pages-deploy-action@4.1.4
       with:
           branch: osx  # The branch the action should deploy to.
           folder: website/  # The folder the action should deploy.
