@@ -36,7 +36,7 @@ jobs:
     - name: make doc
       run: cd doc ; make ; cd .. ; mv doc/libddd.html/ website/ ;
     - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@4.1.8
+      uses: JamesIves/github-pages-deploy-action@4.1.9
       with:
           branch: gh-pages # The branch the action should deploy to.
           folder: website/ # The folder the action should deploy.
