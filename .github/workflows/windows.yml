@@ -39,7 +39,7 @@ jobs:
       - name: move to website
         run: ls -lah ; mkdir -p windows ; cp windows.zip windows/ ; ls -lah windows/
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@4.1.8
+        uses: JamesIves/github-pages-deploy-action@4.2.0
         with:
           branch: Windows
           folder: windows/ # The deployment folder should match the name of the artifact. Even though our project builds into the 'build' folder the artifact name of 'site' must be placed here.
