@@ -18,7 +18,7 @@ jobs:
     - name: package zip
       run:  C:\msys64\usr\bin\bash -lc "cd /D/a/libDDD/libDDD ; rm usr/local/lib/libDDD_d* ; tar -a -c -f windows.zip usr/ ; mkdir site ; mv windows.zip site/"
     - name: Upload Artifacts 🔺 # The project is then uploaded as an artifact named 'site'.
-      uses: actions/upload-artifact@v2.2.4
+      uses: actions/upload-artifact@v2.3.1
       with:
         name: site
         path: site/
@@ -33,13 +33,13 @@ jobs:
         with:
           persist-credentials: false
       - name: Download Artifacts 🔻 # The built project is downloaded into the 'site' folder.
-        uses: actions/download-artifact@v2.0.10
+        uses: actions/download-artifact@v2.1.0
         with:
           name: site
       - name: move to website
         run: ls -lah ; mkdir -p windows ; cp windows.zip windows/ ; ls -lah windows/
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@4.1.5
+        uses: JamesIves/github-pages-deploy-action@v4.2.2
         with:
           branch: Windows
           folder: windows/ # The deployment folder should match the name of the artifact. Even though our project builds into the 'build' folder the artifact name of 'site' must be placed here.
