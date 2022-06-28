@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3.0.2
     - name: install packages
-      run:  C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; pacman --noconfirm -S base-devel gcc autoconf automake libtool "
+      run:  C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; pacman --noconfirm -S base-devel mingw-w64-x86_64-gcc mingw-w64-x86_64-autotools p7zip"
     - name: configure and make
       run:  C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; cd /D/a/libDDD/libDDD ; autoreconf -vfi && ./configure --prefix=/D/a/libDDD/libDDD/usr/local/ --enable-nolto --enable-mingw-native && make -j 4 && make install || cat config.log"
     - name: package zip
