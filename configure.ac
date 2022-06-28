@@ -1,5 +1,5 @@
 # AC_INIT (package, version, [bug-report], [tarname])
-AC_INIT(DDD,1.9.0,[Yann.Thierry-Mieg@lip6.fr])
+AC_INIT([DDD],[1.9.0],[Yann.Thierry-Mieg@lip6.fr])
 
 # We use automake to build makefiles
 AM_INIT_AUTOMAKE([-Wall, subdir-objects])
@@ -9,7 +9,7 @@ AM_INIT_AUTOMAKE([-Wall, subdir-objects])
 nolto=false
 
 AC_ARG_ENABLE(	[nolto],
-        [AC_HELP_STRING([--enable-nolto],[avoid using LTO flags, mostly for Darwin])],
+        [AS_HELP_STRING([--enable-nolto],[avoid using LTO flags, mostly for Darwin])],
         [  case "${enable_nolto}" in
             yes) nolto=true
                 ;;
@@ -72,19 +72,17 @@ parallel=false
 
 # option to indicate libtbb folder
 AC_ARG_WITH([libtbbinc],
-            [AC_HELP_STRING([--with-libtbbinc=/include/path/libtbb],
-                            [specify the include path of libtbb])])
+            [AS_HELP_STRING([--with-libtbbinc=/include/path/libtbb],[specify the include path of libtbb])])
 
 AC_ARG_WITH([libtbbbin],
-            [AC_HELP_STRING([--with-libtbbbin=/path/to/libtbb.a],
-                            [specify the library linker path of libtbb])])
+            [AS_HELP_STRING([--with-libtbbbin=/path/to/libtbb.a],[specify the library linker path of libtbb])])
 
 
 #Options for disabling google hash
 stdhash=false
 
 AC_ARG_ENABLE(	[stdhash],
-        [AC_HELP_STRING([--enable-stdhash],[revert std lib hash map(default uses google sparse hash)])],
+        [AS_HELP_STRING([--enable-stdhash],[revert std lib hash map(default uses google sparse hash)])],
         [  case "${enable_stdhash}" in
             yes) stdhash=true
                 ;;
@@ -103,7 +101,7 @@ AC_SUBST([STATICFLAGS],["-all-static -static-libgcc -static-libstdc++"])
 
 # Option to enable hash stats
 AC_ARG_ENABLE([mingw-native],
-				[AC_HELP_STRING([--enable-mingw-native],[build native win32 binaries for redistribution])],
+				[AS_HELP_STRING([--enable-mingw-native],[build native win32 binaries for redistribution])],
 				[ case "${enable_mingw_native}" in
 					 yes) CXXFLAGS="-DPSAPI_VERSION=1  $CXXFLAGS"
 					 LIBS="-lPSAPI $LIBS"
@@ -118,7 +116,7 @@ AC_ARG_ENABLE([mingw-native],
 
 # Option to enable hash stats
 AC_ARG_ENABLE([hash-stat],
-				[AC_HELP_STRING([--enable-hash-stat],[collect stats on hash])],
+				[AS_HELP_STRING([--enable-hash-stat],[collect stats on hash])],
 				[ case "${enable_hash_stat}" in
 					 yes) CFLAGS="-DHASH_STAT $CFLAGS"
 					 CXXFLAGS="-DHASH_STAT $CXXFLAGS"
@@ -130,7 +128,7 @@ AC_ARG_ENABLE([hash-stat],
 				esac])
 
 AC_ARG_ENABLE(	[reentrant],
-        [AC_HELP_STRING([--enable-reentrant],[turn on on thread-safe mode])],
+        [AS_HELP_STRING([--enable-reentrant],[turn on on thread-safe mode])],
         [  case "${enable_reentrant}" in
             yes) reentrant=true
                 ;;
@@ -142,7 +140,7 @@ AC_ARG_ENABLE(	[reentrant],
 
 
 AC_ARG_ENABLE(	[parallel],
-        [AC_HELP_STRING([--enable-parallel],[turn on on parallel mode])],
+        [AS_HELP_STRING([--enable-parallel],[turn on on parallel mode])],
         [  case "${enable_parallel}" in
             yes) parallel=true
                  reentrant=true
