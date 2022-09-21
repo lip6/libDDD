@@ -255,14 +255,14 @@ void MLShom::garbage(){
   for(UniqueTable<_MLShom>::Table::iterator di=canonical.table.begin();di!=canonical.table.end();){
     if(!(*di)->marking){
       UniqueTable<_MLShom>::Table::iterator ci=di;
-      di++;
+      ++di;
       const _MLShom *g=*ci;
       canonical.table.erase(ci);
       delete g;
     }
     else{
       (*di)->marking=false;
-      di++;
+      ++di;
     }
   }
 }

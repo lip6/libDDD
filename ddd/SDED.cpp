@@ -248,7 +248,7 @@ GSDD _SDED_Add::eval() const{
 	  // a contains b (STRICTLY, equality tested above)
 	  // remove the b mapping from the test set
 	  std::map<GSDD,DataSet *>::iterator jt = resit;
-	  resit++;
+	  ++resit;
 	  delete jt->second;
 	  res.erase(jt);	  
 	} else {
@@ -256,7 +256,7 @@ GSDD _SDED_Add::eval() const{
 	  tofree = resit->second;
 	  resit->second = resit->second->set_minus(*ainterb);
 	  delete tofree;
-	  resit++;
+	  ++resit;
 	}
 
 	// update a (sieve b values) 
