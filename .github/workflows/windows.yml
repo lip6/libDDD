@@ -20,7 +20,7 @@ jobs:
     - name: package zip
       run:  C:\msys64\usr\bin\bash -lc "cd /D/a/libDDD/libDDD ; rm usr/local/lib/libDDD_d* ; tar -a -c -f windows.zip usr/ ; mkdir site ; mv windows.zip site/"
     - name: Upload Artifacts 🔺 # The project is then uploaded as an artifact named 'site'.
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: site
         path: site/
