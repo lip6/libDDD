@@ -12,15 +12,15 @@ jobs:
     runs-on: windows-latest
     
     steps:
-    - uses: actions/checkout@v3.3.0
+    - uses: actions/checkout@v4
     - name: install packages
-      run:  C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; pacman --noconfirm -S base-devel mingw-w64-x86_64-gcc mingw-w64-x86_64-autotools p7zip"
+      run:  C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; pacman --noconfirm -S mingw-w64-x86_64-gcc mingw-w64-x86_64-autotools mingw-w64-x86_64-pkg-config p7zip base-devel libtool"
     - name: configure and make
       run:  C:\msys64\usr\bin\bash -lc "PATH+=:/mingw64/bin ; cd /D/a/libDDD/libDDD ; autoreconf -vfi && ./configure --prefix=/D/a/libDDD/libDDD/usr/local/ --enable-nolto --enable-mingw-native && make -j 4 && make install || cat config.log"
     - name: package zip
       run:  C:\msys64\usr\bin\bash -lc "cd /D/a/libDDD/libDDD ; rm usr/local/lib/libDDD_d* ; tar -a -c -f windows.zip usr/ ; mkdir site ; mv windows.zip site/"
-    - name: Upload Artifacts 🔺 # The project is then uploaded as an artifact named 'site'.
-      uses: actions/upload-artifact@v3
+    - name: Upload Artifacts # The project is then uploaded as an artifact named 'site'.
+      uses: actions/upload-artifact@v4
       with:
         name: site
         path: site/
@@ -30,18 +30,18 @@ jobs:
 
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v3.3.0
+      - name: Checkout 
+        uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Download Artifacts 🔻 # The built project is downloaded into the 'site' folder.
-        uses: actions/download-artifact@v3
+      - name: Download Artifacts # The built project is downloaded into the 'site' folder.
+        uses: actions/download-artifact@v4
         with:
           name: site
       - name: move to website
         run: ls -lah ; mkdir -p windows ; cp windows.zip windows/ ; ls -lah windows/
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.4.1
+      - name: Deploy 
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: Windows
           folder: windows/ # The deployment folder should match the name of the artifact. Even though our project builds into the 'build' folder the artifact name of 'site' must be placed here.
