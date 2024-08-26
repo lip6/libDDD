@@ -58,6 +58,9 @@ CXXFLAGS="-std=c++11 $CXXFLAGS"
 # to be compatible with Spot
 CXXFLAGS="-fvisibility=hidden -fvisibility-inlines-hidden $CXXFLAGS"
 
+# to be nice to DLL users
+CXXFLAGS="-fPIC $CXXFLAGS"
+
 
 # AC_CHECK_LIB(tcmalloc, malloc, ,AC_MSG_WARN(google perftool not detected : not using tcmalloc))
 
