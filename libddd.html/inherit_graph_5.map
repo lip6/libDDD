@@ -1,0 +1,24 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="node1" href="$class__GShom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,512,81,539"/>
+<area shape="rect" id="node2" href="$classMyGShom.html" title=" " alt="" coords="164,5,253,32"/>
+<area shape="rect" id="node3" href="$classStrongShom.html" title="The abstract base class for user defined operations." alt="" coords="158,56,259,83"/>
+<area shape="rect" id="node4" href="$classsns_1_1Add.html" title=" " alt="" coords="170,107,247,133"/>
+<area shape="rect" id="node5" href="$classsns_1_1And.html" title="A commutative composition of n homomorphisms." alt="" coords="170,157,247,184"/>
+<area shape="rect" id="node6" href="$classsns_1_1Compose.html" title=" " alt="" coords="152,208,265,235"/>
+<area shape="rect" id="node7" href="$classsns_1_1Constant.html" title=" " alt="" coords="153,259,264,285"/>
+<area shape="rect" id="node8" href="$classsns_1_1Fixpoint.html" title=" " alt="" coords="157,309,261,336"/>
+<area shape="rect" id="node9" href="$classsns_1_1HomMinus.html" title=" " alt="" coords="147,360,270,387"/>
+<area shape="rect" id="node10" href="$classsns_1_1Identity.html" title=" " alt="" coords="157,411,260,437"/>
+<area shape="rect" id="node11" href="$classsns_1_1Inter.html" title=" " alt="" coords="167,461,250,488"/>
+<area shape="rect" id="node12" href="$classsns_1_1LeftConcat.html" title=" " alt="" coords="148,512,269,539"/>
+<area shape="rect" id="node13" href="$classsns_1_1LocalApply.html" title=" " alt="" coords="147,563,270,589"/>
+<area shape="rect" id="node14" href="$classsns_1_1MLShomAdapter.html" title=" " alt="" coords="129,613,288,640"/>
+<area shape="rect" id="node15" href="$classsns_1_1Minus.html" title=" " alt="" coords="163,664,254,691"/>
+<area shape="rect" id="node16" href="$classsns_1_1Mult.html" title=" " alt="" coords="168,715,249,741"/>
+<area shape="rect" id="node17" href="$classsns_1_1RecFireSat.html" title=" " alt="" coords="148,765,269,792"/>
+<area shape="rect" id="node18" href="$classsns_1_1RightConcat.html" title=" " alt="" coords="143,816,274,843"/>
+<area shape="rect" id="node19" href="$classsns_1_1SApply2k.html" title=" " alt="" coords="151,867,266,893"/>
+<area shape="rect" id="node20" href="$classsns_1_1SDomExtract.html" title="Extractor of variable domains for invert computations." alt="" coords="140,917,277,944"/>
+<area shape="rect" id="node21" href="$classsns_1_1SLocalApply.html" title=" " alt="" coords="143,968,274,995"/>
+<area shape="rect" id="node22" href="$classsns_1_1SNotCond.html" title=" " alt="" coords="151,1019,267,1045"/>
+</map>

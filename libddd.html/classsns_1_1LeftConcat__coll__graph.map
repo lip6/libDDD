@@ -1,0 +1,8 @@
+<map id="sns::LeftConcat" name="sns::LeftConcat">
+<area shape="rect" id="node1" title=" " alt="" coords="116,1473,240,1653"/>
+<area shape="rect" id="node2" href="$class__GShom.html" title="The concrete data class for Homomorphisms." alt="" coords="25,27,177,295"/>
+<area shape="rect" id="node3" href="$classGShom.html" title="This class is the base class for Homomorphisms over SDD." alt="" coords="85,490,272,1301"/>
+<area shape="rect" id="node4" href="$classGSDD.html" title="This class is the base class representing a hierarchical Set Decision Diagram." alt="" coords="348,380,484,1411"/>
+<area shape="rect" id="node5" href="$classDataSet.html" title="This class is an abstraction of a set of data." alt="" coords="222,35,358,288"/>
+<area shape="rect" id="node6" href="$class__GSDD.html" title=" " alt="" coords="382,5,513,317"/>
+</map>
