@@ -1,0 +1,8 @@
+<map id="Constant" name="Constant">
+<area shape="rect" id="Node000001" title=" " alt="" coords="41,1093,157,1339"/>
+<area shape="rect" id="Node000002" href="$class__GHom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,335,149,701"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="86,715,98,1093,92,1093,81,715"/>
+<area shape="rect" id="Node000003" href="$classGDDD.html" title="This class is the base class representing a Data Decision Diagram." alt="" coords="174,5,301,1031"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="177,976,164,1031,151,1078,146,1077,159,1030,171,974"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="303,417,313,429,321,450,326,480,327,518,324,571,314,605,308,604,318,570,322,518,320,480,315,452,308,432,299,421"/>
+</map>

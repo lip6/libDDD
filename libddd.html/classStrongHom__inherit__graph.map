@@ -1,0 +1,13 @@
+<map id="StrongHom" name="StrongHom">
+<area shape="rect" id="Node000001" title="The abstract base class for user defined operations." alt="" coords="244,419,367,644"/>
+<area shape="rect" id="Node000003" href="$class__VarCompState.html" title=" " alt="" coords="5,692,144,1017"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="236,602,196,646,158,694,146,711,142,708,154,690,192,642,232,598"/>
+<area shape="rect" id="Node000004" href="$class__VarCompVar.html" title=" " alt="" coords="168,702,293,1007"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="279,658,269,703,263,701,274,657"/>
+<area shape="rect" id="Node000005" href="$class__incVar.html" title=" " alt="" coords="317,722,443,987"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="337,657,352,721,347,722,332,658"/>
+<area shape="rect" id="Node000006" href="$class__setVarConst.html" title=" " alt="" coords="467,722,592,987"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="379,597,419,642,457,690,475,721,471,723,452,694,415,645,375,601"/>
+<area shape="rect" id="Node000002" href="$class__GHom.html" title="The concrete data class for Homomorphisms." alt="" coords="233,5,377,371"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="308,385,308,419,303,419,303,385"/>
+</map>

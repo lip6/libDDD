@@ -1,0 +1,7 @@
+<map id="_VarCompState" name="_VarCompState">
+<area shape="rect" id="Node000001" title=" " alt="" coords="8,692,147,1017"/>
+<area shape="rect" id="Node000002" href="$classStrongHom.html" title="The abstract base class for user defined operations." alt="" coords="16,419,139,644"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,658,80,692,75,692,75,658"/>
+<area shape="rect" id="Node000003" href="$class__GHom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,5,149,371"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="80,385,80,419,75,419,75,385"/>
+</map>

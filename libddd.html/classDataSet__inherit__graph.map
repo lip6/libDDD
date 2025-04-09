@@ -1,0 +1,11 @@
+<map id="DataSet" name="DataSet">
+<area shape="rect" id="Node000001" title="This class is an abstraction of a set of data." alt="" coords="157,5,285,311"/>
+<area shape="rect" id="Node000002" href="$classDDD.html" title="This class is the public interface for manipulating Data Decision Diagrams." alt="" coords="5,749,133,1454"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="157,324,148,359,128,455,111,554,89,749,84,748,106,554,122,455,143,358,152,323"/>
+<area shape="rect" id="Node000003" href="$classGSDD.html" title="This class is the base class representing a hierarchical Set Decision Diagram." alt="" coords="157,359,285,1844"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="224,325,224,359,219,359,219,325"/>
+<area shape="rect" id="Node000005" href="$classIntDataSet.html" title="This class is a very basic implementation of DataSet interface based on std::std::vector&lt;int&gt; and a u..." alt="" coords="309,919,432,1284"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="290,323,300,358,328,504,348,652,361,793,369,918,363,919,356,794,343,652,323,504,295,359,285,324"/>
+<area shape="rect" id="Node000004" href="$classSDD.html" title="This class is the public interface for manipulating Data Decision Diagrams." alt="" coords="169,1892,274,2137"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="224,1858,224,1892,219,1892,219,1858"/>
+</map>

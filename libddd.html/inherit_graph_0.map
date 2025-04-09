@@ -1,0 +1,13 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$class__DED.html" title=" " alt="" coords="5,104,63,129"/>
+<area shape="rect" id="Node000001" href="$class__DED__Add.html" title=" " alt="" coords="121,5,210,31"/>
+<area shape="poly" id="edge1_Node000000_Node000001" title=" " alt="" coords="53,92,78,65,109,40,130,28,132,33,112,44,82,69,57,95"/>
+<area shape="rect" id="Node000002" href="$class__DED__Concat.html" title=" " alt="" coords="111,55,220,80"/>
+<area shape="poly" id="edge2_Node000000_Node000002" title=" " alt="" coords="75,99,130,78,132,83,77,104"/>
+<area shape="rect" id="Node000003" href="$class__DED__Hom.html" title=" " alt="" coords="118,104,213,129"/>
+<area shape="poly" id="edge3_Node000000_Node000003" title=" " alt="" coords="77,114,118,114,118,119,77,119"/>
+<area shape="rect" id="Node000004" href="$class__DED__Minus.html" title=" " alt="" coords="114,153,217,179"/>
+<area shape="poly" id="edge4_Node000000_Node000004" title=" " alt="" coords="77,130,132,151,130,156,75,135"/>
+<area shape="rect" id="Node000005" href="$class__DED__Mult.html" title=" " alt="" coords="119,203,212,228"/>
+<area shape="poly" id="edge5_Node000000_Node000005" title=" " alt="" coords="57,138,82,163,112,188,134,200,131,205,109,192,79,167,53,142"/>
+</map>

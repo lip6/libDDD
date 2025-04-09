@@ -1,0 +1,10 @@
+<map id="sns::LocalApply" name="sns::LocalApply">
+<area shape="rect" id="Node000001" title=" " alt="" coords="36,1001,161,1307"/>
+<area shape="rect" id="Node000002" href="$class__GShom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,523,149,849"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,862,94,1001,89,1001,83,862"/>
+<area shape="rect" id="Node000003" href="$classGHom.html" title="This class is the base class representing a homomorphism over DDD." alt="" coords="174,433,290,939"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="177,895,164,939,150,986,145,985,159,938,171,894"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="292,632,302,638,310,649,315,665,317,686,314,712,306,729,301,727,309,710,311,686,310,666,305,651,298,642,289,636"/>
+<area shape="rect" id="Node000004" href="$class__GHom.html" title="The concrete data class for Homomorphisms." alt="" coords="160,5,304,371"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="235,371,235,417,229,417,229,371"/>
+</map>

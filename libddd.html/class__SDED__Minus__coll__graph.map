@@ -1,0 +1,13 @@
+<map id="_SDED_Minus" name="_SDED_Minus">
+<area shape="rect" id="Node000001" title=" " alt="" coords="69,2076,208,2261"/>
+<area shape="rect" id="Node000002" href="$class__SDED.html" title=" " alt="" coords="233,1881,349,2027"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="233,2040,207,2077,202,2074,229,2037"/>
+<area shape="rect" id="Node000003" href="$classGSDD.html" title="This class is the base class representing a hierarchical Set Decision Diagram." alt="" coords="80,453,208,1819"/>
+<area shape="poly" id="edge6_Node000001_Node000003" title=" " alt="" coords="139,1819,139,1881,139,2027,139,2060,134,2060,133,2027,133,1881,134,1819"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="211,1493,278,1865,272,1866,205,1494"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="210,1005,220,1021,228,1048,233,1086,235,1136,231,1208,220,1252,215,1251,225,1207,229,1136,228,1087,223,1049,215,1023,206,1008"/>
+<area shape="rect" id="Node000004" href="$classDataSet.html" title="This class is an abstraction of a set of data." alt="" coords="5,45,133,351"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="85,365,92,453,87,453,80,365"/>
+<area shape="rect" id="Node000005" href="$class__GSDD.html" title=" " alt="" coords="158,5,279,391"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="206,391,202,437,197,437,201,391"/>
+</map>

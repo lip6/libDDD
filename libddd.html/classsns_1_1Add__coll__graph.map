@@ -1,0 +1,9 @@
+<map id="sns::Add" name="sns::Add">
+<area shape="rect" id="Node000001" title=" " alt="" coords="25,536,173,901"/>
+<area shape="rect" id="Node000002" href="$class__GShom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,148,149,473"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="89,487,92,536,86,536,84,487"/>
+<area shape="rect" id="Node000003" href="$structhash__map.html" title=" " alt="" coords="174,278,365,343"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="259,345,182,527,177,525,254,342"/>
+<area shape="rect" id="Node000004" href="$structhash__map.html" title=" " alt="" coords="188,5,351,85"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="272,99,272,278,267,278,267,99"/>
+</map>

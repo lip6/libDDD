@@ -1,0 +1,5 @@
+<map id="IntDataSet" name="IntDataSet">
+<area shape="rect" id="Node000001" title="This class is a very basic implementation of DataSet interface based on std::std::vector&lt;int&gt; and a u..." alt="" coords="8,359,131,724"/>
+<area shape="rect" id="Node000002" href="$classDataSet.html" title="This class is an abstraction of a set of data." alt="" coords="5,5,133,311"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="72,324,72,358,67,358,67,324"/>
+</map>

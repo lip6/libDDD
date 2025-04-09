@@ -1,0 +1,6 @@
+<map id="GHom" name="GHom">
+<area shape="rect" id="Node000001" title="This class is the base class representing a homomorphism over DDD." alt="" coords="19,433,135,939"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="137,632,147,638,155,649,160,665,162,686,159,712,151,729,146,727,154,710,157,686,155,666,150,651,143,642,134,636"/>
+<area shape="rect" id="Node000002" href="$class__GHom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,5,149,371"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,371,80,417,75,417,75,371"/>
+</map>

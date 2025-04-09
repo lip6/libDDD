@@ -1,0 +1,16 @@
+<map id="sns::Mult" name="sns::Mult">
+<area shape="rect" id="Node000001" title=" " alt="" coords="127,1881,243,2107"/>
+<area shape="rect" id="Node000002" href="$class__GShom.html" title="The concrete data class for Homomorphisms." alt="" coords="41,35,185,361"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="93,374,87,454,70,662,50,840,30,997,14,1144,8,1289,15,1443,25,1527,40,1616,60,1713,87,1818,105,1866,130,1912,125,1914,100,1869,82,1819,55,1714,35,1617,20,1527,10,1444,3,1289,9,1143,24,997,45,840,65,662,81,453,88,374"/>
+<area shape="rect" id="Node000003" href="$classGShom.html" title="This class is the base class for Homomorphisms over SDD." alt="" coords="97,603,274,1669"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="129,361,146,586,141,587,123,361"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="188,1669,188,1865,183,1865,183,1669"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="277,1012,286,1030,294,1057,299,1092,301,1136,297,1201,285,1245,280,1244,291,1201,295,1136,294,1093,289,1058,282,1032,272,1014"/>
+<area shape="rect" id="Node000004" href="$classGSDD.html" title="This class is the base class representing a hierarchical Set Decision Diagram." alt="" coords="351,453,479,1819"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="353,1788,340,1820,323,1851,303,1881,257,1934,253,1930,299,1878,319,1849,335,1818,348,1786"/>
+<area shape="poly" id="edge8_Node000004_Node000004" title=" " alt="" coords="481,1005,491,1021,499,1048,504,1086,505,1136,501,1208,491,1252,485,1251,496,1207,500,1136,498,1087,493,1049,486,1023,477,1008"/>
+<area shape="rect" id="Node000005" href="$classDataSet.html" title="This class is an abstraction of a set of data." alt="" coords="232,45,360,351"/>
+<area shape="poly" id="edge6_Node000004_Node000005" title=" " alt="" coords="327,364,340,453,353,553,348,554,335,454,322,365"/>
+<area shape="rect" id="Node000006" href="$class__GSDD.html" title=" " alt="" coords="385,5,506,391"/>
+<area shape="poly" id="edge7_Node000004_Node000006" title=" " alt="" coords="442,391,440,437,435,437,437,391"/>
+</map>

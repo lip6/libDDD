@@ -1,0 +1,8 @@
+<map id="Hom" name="Hom">
+<area shape="rect" id="Node000001" title="This is the user interface class to manipulate homomorphisms." alt="" coords="25,988,130,1313"/>
+<area shape="rect" id="Node000002" href="$classGHom.html" title="This class is the base class representing a homomorphism over DDD." alt="" coords="19,433,135,939"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,952,80,988,75,988,75,952"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="137,633,147,639,155,650,160,666,162,686,159,711,151,729,146,726,154,710,157,686,155,667,150,652,143,643,134,637"/>
+<area shape="rect" id="Node000003" href="$class__GHom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,5,149,371"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="80,371,80,417,75,417,75,371"/>
+</map>
