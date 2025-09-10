@@ -1,0 +1,10 @@
+<map id="SDD" name="SDD">
+<area shape="rect" id="Node000001" title="This class is the public interface for manipulating Data Decision Diagrams." alt="" coords="91,1868,197,2113"/>
+<area shape="rect" id="Node000002" href="$classGSDD.html" title="This class is the base class representing a hierarchical Set Decision Diagram." alt="" coords="80,453,208,1819"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="147,1832,147,1868,141,1868,141,1832"/>
+<area shape="poly" id="edge4_Node000002_Node000002" title=" " alt="" coords="210,1006,220,1021,228,1048,233,1087,235,1136,231,1207,220,1251,215,1250,225,1206,229,1136,228,1087,223,1050,215,1024,206,1009"/>
+<area shape="rect" id="Node000003" href="$classDataSet.html" title="This class is an abstraction of a set of data." alt="" coords="5,45,133,351"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="85,365,92,453,87,453,80,365"/>
+<area shape="rect" id="Node000004" href="$class__GSDD.html" title=" " alt="" coords="158,5,279,391"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="206,391,202,437,197,437,201,391"/>
+</map>

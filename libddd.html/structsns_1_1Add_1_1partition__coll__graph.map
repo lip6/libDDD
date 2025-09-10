@@ -1,0 +1,9 @@
+<map id="sns::Add::partition" name="sns::Add::partition">
+<area shape="rect" id="Node000001" title=" " alt="" coords="34,1521,166,1607"/>
+<area shape="rect" id="Node000002" href="$classGShom.html" title="This class is the base class for Homomorphisms over SDD." alt="" coords="103,393,281,1459"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="118,1459,111,1505,106,1505,112,1458"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="283,827,293,842,301,863,306,891,307,926,303,976,293,1010,288,1009,298,975,302,926,300,892,295,864,288,844,279,830"/>
+<area shape="rect" id="Node000003" href="$class__GShom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,5,149,331"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="72,331,71,393,65,556,57,694,41,928,37,1041,40,1161,50,1298,71,1458,82,1505,77,1507,65,1459,45,1298,34,1161,32,1041,35,928,51,693,60,556,65,393,67,331"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="104,331,112,377,106,378,99,331"/>
+</map>

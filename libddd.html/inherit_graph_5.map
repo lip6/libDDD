@@ -1,0 +1,45 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$class__GShom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,499,81,524"/>
+<area shape="rect" id="Node000001" href="$classMyGShom.html" title=" " alt="" coords="164,5,253,31"/>
+<area shape="poly" id="edge28_Node000000_Node000001" title=" " alt="" coords="43,485,50,387,65,255,76,187,89,126,107,75,127,40,144,28,163,20,165,25,146,32,131,44,111,78,95,128,81,188,70,255,55,388,49,485"/>
+<area shape="rect" id="Node000002" href="$classStrongShom.html" title="The abstract base class for user defined operations." alt="" coords="158,55,259,80"/>
+<area shape="poly" id="edge29_Node000000_Node000002" title=" " alt="" coords="44,485,52,397,68,279,92,165,108,121,127,90,141,79,157,72,159,76,144,83,131,93,113,123,97,167,73,280,57,397,49,485"/>
+<area shape="rect" id="Node000003" href="$classsns_1_1Add.html" title=" " alt="" coords="170,104,247,129"/>
+<area shape="poly" id="edge30_Node000000_Node000003" title=" " alt="" coords="45,484,54,406,71,303,95,204,110,166,127,139,147,125,169,118,171,123,149,130,131,143,115,168,100,206,76,304,60,406,50,485"/>
+<area shape="rect" id="Node000004" href="$classsns_1_1And.html" title="A commutative composition of n homomorphisms." alt="" coords="170,153,247,179"/>
+<area shape="poly" id="edge31_Node000000_Node000004" title=" " alt="" coords="41,485,43,425,53,345,64,303,79,262,100,223,128,188,147,175,169,167,171,172,149,179,131,192,105,226,84,264,69,305,59,346,48,425,46,485"/>
+<area shape="rect" id="Node000005" href="$classsns_1_1Compose.html" title=" " alt="" coords="152,203,265,228"/>
+<area shape="poly" id="edge32_Node000000_Node000005" title=" " alt="" coords="42,485,47,433,60,367,71,332,85,298,104,266,128,237,151,223,153,227,131,241,108,269,90,300,76,334,65,368,52,434,48,485"/>
+<area shape="rect" id="Node000006" href="$classsns_1_1Constant.html" title=" " alt="" coords="153,252,264,277"/>
+<area shape="poly" id="edge33_Node000000_Node000006" title=" " alt="" coords="45,485,52,442,67,389,91,334,108,309,128,287,152,272,154,277,131,291,112,312,96,337,72,390,57,443,50,485"/>
+<area shape="rect" id="Node000007" href="$classsns_1_1Fixpoint.html" title=" " alt="" coords="157,301,261,327"/>
+<area shape="poly" id="edge34_Node000000_Node000007" title=" " alt="" coords="48,484,58,451,74,411,97,371,128,336,155,321,158,325,131,340,101,374,79,413,63,452,53,486"/>
+<area shape="rect" id="Node000008" href="$classsns_1_1HomMinus.html" title=" " alt="" coords="147,351,270,376"/>
+<area shape="poly" id="edge35_Node000000_Node000008" title=" " alt="" coords="53,485,82,434,103,408,128,385,149,374,151,378,131,390,107,411,87,437,58,487"/>
+<area shape="rect" id="Node000009" href="$classsns_1_1Identity.html" title=" " alt="" coords="157,400,260,425"/>
+<area shape="poly" id="edge36_Node000000_Node000009" title=" " alt="" coords="64,486,93,459,128,434,156,422,158,427,131,439,96,464,67,490"/>
+<area shape="rect" id="Node000010" href="$classsns_1_1Inter.html" title=" " alt="" coords="167,449,250,475"/>
+<area shape="poly" id="edge37_Node000000_Node000010" title=" " alt="" coords="94,494,166,472,168,477,96,499"/>
+<area shape="rect" id="Node000011" href="$classsns_1_1LeftConcat.html" title=" " alt="" coords="148,499,269,524"/>
+<area shape="poly" id="edge38_Node000000_Node000011" title=" " alt="" coords="95,509,148,509,148,514,95,514"/>
+<area shape="rect" id="Node000012" href="$classsns_1_1LocalApply.html" title=" " alt="" coords="147,548,270,573"/>
+<area shape="poly" id="edge39_Node000000_Node000012" title=" " alt="" coords="95,524,166,545,165,551,94,529"/>
+<area shape="rect" id="Node000013" href="$classsns_1_1MLShomAdapter.html" title=" " alt="" coords="129,597,288,623"/>
+<area shape="poly" id="edge40_Node000000_Node000013" title=" " alt="" coords="68,532,96,558,131,582,159,595,157,600,128,587,93,562,64,536"/>
+<area shape="rect" id="Node000014" href="$classsns_1_1Minus.html" title=" " alt="" coords="163,647,254,672"/>
+<area shape="poly" id="edge41_Node000000_Node000014" title=" " alt="" coords="58,535,87,584,107,610,131,632,164,648,162,653,128,636,103,614,82,587,53,538"/>
+<area shape="rect" id="Node000015" href="$classsns_1_1Mult.html" title=" " alt="" coords="168,696,249,721"/>
+<area shape="poly" id="edge42_Node000000_Node000015" title=" " alt="" coords="53,537,63,570,79,609,101,648,131,681,149,693,169,700,167,705,146,697,128,685,97,651,74,611,58,571,48,538"/>
+<area shape="rect" id="Node000016" href="$classsns_1_1RecFireSat.html" title=" " alt="" coords="148,745,269,771"/>
+<area shape="poly" id="edge43_Node000000_Node000016" title=" " alt="" coords="50,538,58,580,72,632,96,685,112,709,131,731,150,743,147,747,128,735,108,712,91,687,67,634,52,581,45,539"/>
+<area shape="rect" id="Node000017" href="$classsns_1_1RightConcat.html" title=" " alt="" coords="143,795,274,820"/>
+<area shape="poly" id="edge44_Node000000_Node000017" title=" " alt="" coords="48,537,53,588,65,653,90,721,109,752,131,780,149,792,146,797,128,784,104,756,86,724,60,655,47,589,43,538"/>
+<area shape="rect" id="Node000018" href="$classsns_1_1SApply2k.html" title=" " alt="" coords="151,844,266,869"/>
+<area shape="poly" id="edge45_Node000000_Node000018" title=" " alt="" coords="46,538,48,597,59,675,70,717,85,757,105,796,131,829,153,844,150,848,128,833,101,799,80,760,65,718,54,676,43,597,41,538"/>
+<area shape="rect" id="Node000019" href="$classsns_1_1SDomExtract.html" title="Extractor of variable domains for invert computations." alt="" coords="140,893,277,919"/>
+<area shape="poly" id="edge46_Node000000_Node000019" title=" " alt="" coords="50,538,60,616,77,718,101,815,115,853,131,879,148,891,144,895,127,882,110,856,95,817,71,719,54,617,45,538"/>
+<area shape="rect" id="Node000020" href="$classsns_1_1SLocalApply.html" title=" " alt="" coords="143,943,274,968"/>
+<area shape="poly" id="edge47_Node000000_Node000020" title=" " alt="" coords="49,537,57,625,73,742,98,855,113,898,131,928,148,941,144,945,127,932,109,901,93,856,68,743,52,626,44,538"/>
+<area shape="rect" id="Node000021" href="$classsns_1_1SNotCond.html" title=" " alt="" coords="151,992,267,1017"/>
+<area shape="poly" id="edge48_Node000000_Node000021" title=" " alt="" coords="49,538,55,634,70,766,81,833,95,894,112,944,131,978,152,992,149,997,127,981,107,946,90,895,76,834,65,767,50,635,43,538"/>
+</map>

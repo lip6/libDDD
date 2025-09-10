@@ -1,0 +1,16 @@
+<map id="sns::LeftConcat" name="sns::LeftConcat">
+<area shape="rect" id="Node000001" title=" " alt="" coords="131,1881,247,2087"/>
+<area shape="rect" id="Node000002" href="$class__GShom.html" title="The concrete data class for Homomorphisms." alt="" coords="45,35,189,361"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,374,90,454,73,662,52,840,31,998,15,1144,8,1290,10,1365,15,1444,26,1527,41,1617,62,1713,90,1818,108,1864,133,1907,128,1909,103,1866,85,1819,57,1714,36,1618,20,1528,10,1445,4,1365,3,1290,10,1144,26,997,47,840,68,662,85,453,91,374"/>
+<area shape="rect" id="Node000006" href="$classGShom.html" title="This class is the base class for Homomorphisms over SDD." alt="" coords="100,603,277,1669"/>
+<area shape="poly" id="edge7_Node000006_Node000002" title=" " alt="" coords="132,361,149,586,144,587,127,361"/>
+<area shape="rect" id="Node000003" href="$classGSDD.html" title="This class is the base class representing a hierarchical Set Decision Diagram." alt="" coords="354,453,482,1819"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="357,1789,343,1820,327,1850,306,1878,261,1927,257,1924,302,1875,322,1847,338,1817,352,1787"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="484,1005,494,1021,502,1048,507,1086,509,1136,505,1208,494,1252,489,1251,499,1207,503,1136,502,1087,497,1049,489,1023,480,1008"/>
+<area shape="rect" id="Node000004" href="$classDataSet.html" title="This class is an abstraction of a set of data." alt="" coords="235,45,363,351"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="330,364,343,453,357,553,351,554,338,454,325,365"/>
+<area shape="rect" id="Node000005" href="$class__GSDD.html" title=" " alt="" coords="388,5,509,391"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="445,391,444,437,438,437,440,391"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="191,1669,191,1865,186,1865,186,1669"/>
+<area shape="poly" id="edge8_Node000006_Node000006" title=" " alt="" coords="280,1012,290,1030,297,1057,302,1092,304,1136,300,1201,289,1245,283,1244,295,1201,299,1136,297,1093,292,1058,285,1032,275,1014"/>
+</map>

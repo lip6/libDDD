@@ -1,0 +1,9 @@
+<map id="sns::SLocalApply" name="sns::SLocalApply">
+<area shape="rect" id="Node000001" title=" " alt="" coords="15,1521,140,1827"/>
+<area shape="rect" id="Node000002" href="$class__GShom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,5,149,331"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,344,80,1521,75,1521,75,344"/>
+<area shape="rect" id="Node000003" href="$classGShom.html" title="This class is the base class for Homomorphisms over SDD." alt="" coords="94,393,271,1459"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="103,331,109,377,104,377,97,331"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="110,1459,104,1505,98,1504,105,1459"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="274,827,284,842,291,863,296,891,298,926,294,976,283,1010,278,1009,289,975,293,926,291,892,286,864,279,844,269,830"/>
+</map>

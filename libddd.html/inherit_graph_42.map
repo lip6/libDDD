@@ -1,0 +1,13 @@
+<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
+<area shape="rect" id="Node000000" href="$classDataSet.html" title="This class is an abstraction of a set of data." alt="" coords="5,55,80,80"/>
+<area shape="rect" id="Node000001" href="$classDDD.html" title="This class is the public interface for manipulating Data Decision Diagrams." alt="" coords="147,5,199,31"/>
+<area shape="poly" id="edge65_Node000000_Node000001" title=" " alt="" coords="89,47,146,25,148,30,91,52"/>
+<area shape="rect" id="Node000003" href="$classGSDD.html" title="This class is the base class representing a hierarchical Set Decision Diagram." alt="" coords="143,55,203,80"/>
+<area shape="poly" id="edge66_Node000000_Node000003" title=" " alt="" coords="94,65,143,65,143,70,94,70"/>
+<area shape="rect" id="Node000005" href="$classIntDataSet.html" title="This class is a very basic implementation of DataSet interface based on std::std::vector&lt;int&gt; and a u..." alt="" coords="128,104,219,129"/>
+<area shape="poly" id="edge68_Node000000_Node000005" title=" " alt="" coords="90,82,140,101,138,106,89,87"/>
+<area shape="rect" id="Node000004" href="$classSDD.html" title="This class is the public interface for manipulating Data Decision Diagrams." alt="" coords="267,55,317,80"/>
+<area shape="poly" id="edge67_Node000003_Node000004" title=" " alt="" coords="217,65,267,65,267,70,217,70"/>
+<area shape="rect" id="Node000002" href="$classGDDD.html" title="This class is the base class representing a Data Decision Diagram." alt="" coords="11,5,74,31"/>
+<area shape="poly" id="edge69_Node000002_Node000001" title=" " alt="" coords="88,15,147,15,147,21,88,21"/>
+</map>

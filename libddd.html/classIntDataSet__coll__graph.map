@@ -1,0 +1,11 @@
+<map id="IntDataSet" name="IntDataSet">
+<area shape="rect" id="Node000001" title="This class is a very basic implementation of DataSet interface based on std::std::vector&lt;int&gt; and a u..." alt="" coords="29,644,152,989"/>
+<area shape="rect" id="Node000002" href="$classDataSet.html" title="This class is an abstraction of a set of data." alt="" coords="5,276,133,581"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="81,595,84,644,79,644,76,595"/>
+<area shape="rect" id="Node000003" href="$classUniqueTable.html" title="This class implements a unicity table mechanism, based on an STL hash_set." alt="" coords="158,366,290,491"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="205,492,158,629,153,628,200,491"/>
+<area shape="rect" id="Node000004" href="$structd3_1_1hash__set.html" title=" " alt="" coords="134,148,314,213"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="227,214,227,349,221,349,221,214"/>
+<area shape="rect" id="Node000005" href="$structd3_1_1hash__set.html" title=" " alt="" coords="125,5,323,85"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="227,99,227,148,221,148,221,99"/>
+</map>

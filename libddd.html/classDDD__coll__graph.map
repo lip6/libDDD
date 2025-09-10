@@ -1,0 +1,8 @@
+<map id="DDD" name="DDD">
+<area shape="rect" id="Node000001" title="This class is the public interface for manipulating Data Decision Diagrams." alt="" coords="113,1080,241,1785"/>
+<area shape="rect" id="Node000002" href="$classGDDD.html" title="This class is the base class representing a Data Decision Diagram." alt="" coords="5,5,132,1031"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="134,1044,138,1079,132,1080,128,1045"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="134,419,144,431,152,451,157,480,159,518,155,570,145,604,140,602,150,569,153,518,152,481,147,453,139,433,130,422"/>
+<area shape="rect" id="Node000003" href="$classDataSet.html" title="This class is an abstraction of a set of data." alt="" coords="221,365,349,671"/>
+<area shape="poly" id="edge3_Node000001_Node000003" title=" " alt="" coords="268,685,221,1080,216,1079,262,684"/>
+</map>

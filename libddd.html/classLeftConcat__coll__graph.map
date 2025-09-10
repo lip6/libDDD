@@ -1,0 +1,12 @@
+<map id="LeftConcat" name="LeftConcat">
+<area shape="rect" id="Node000001" title=" " alt="" coords="94,1521,210,1727"/>
+<area shape="rect" id="Node000002" href="$class__GHom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,5,149,371"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="57,384,40,606,34,736,32,875,35,1021,43,1168,59,1315,84,1458,103,1520,98,1522,79,1459,54,1316,38,1169,29,1021,27,875,29,736,34,605,51,384"/>
+<area shape="rect" id="Node000004" href="$classGHom.html" title="This class is the base class representing a homomorphism over DDD." alt="" coords="94,693,210,1199"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="98,370,128,677,123,677,93,371"/>
+<area shape="rect" id="Node000003" href="$classGDDD.html" title="This class is the base class representing a Data Decision Diagram." alt="" coords="286,433,413,1459"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="288,1431,277,1460,253,1507,223,1549,218,1546,248,1504,272,1458,283,1429"/>
+<area shape="poly" id="edge3_Node000003_Node000003" title=" " alt="" coords="415,845,425,857,433,878,438,908,439,946,436,999,426,1033,420,1032,430,998,434,946,432,908,427,880,420,860,411,849"/>
+<area shape="poly" id="edge4_Node000001_Node000004" title=" " alt="" coords="155,1199,155,1505,149,1505,149,1199"/>
+<area shape="poly" id="edge6_Node000004_Node000004" title=" " alt="" coords="212,844,222,856,230,876,235,907,237,946,233,1000,223,1034,218,1033,228,999,231,946,230,907,225,878,217,858,208,848"/>
+</map>

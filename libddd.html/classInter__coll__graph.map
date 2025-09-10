@@ -1,0 +1,9 @@
+<map id="Inter" name="Inter">
+<area shape="rect" id="Node000001" title=" " alt="" coords="15,1016,140,1301"/>
+<area shape="rect" id="Node000002" href="$class__GHom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,5,149,371"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="80,385,80,1016,75,1016,75,385"/>
+<area shape="rect" id="Node000003" href="$classGHom.html" title="This class is the base class representing a homomorphism over DDD." alt="" coords="94,433,210,939"/>
+<area shape="poly" id="edge3_Node000003_Node000002" title=" " alt="" coords="107,371,114,417,109,417,102,371"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="115,939,105,1000,100,999,109,938"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="212,632,222,638,230,649,235,665,237,686,234,712,226,729,221,727,229,710,231,686,230,666,225,651,218,642,209,636"/>
+</map>

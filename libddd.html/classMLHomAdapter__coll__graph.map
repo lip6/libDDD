@@ -1,0 +1,10 @@
+<map id="MLHomAdapter" name="MLHomAdapter">
+<area shape="rect" id="Node000001" title=" " alt="" coords="29,721,169,907"/>
+<area shape="rect" id="Node000002" href="$class__GHom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,293,149,659"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,672,96,721,90,721,87,673"/>
+<area shape="rect" id="Node000003" href="$classMLHom.html" title=" " alt="" coords="174,313,290,639"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="176,628,164,660,145,707,140,705,159,658,171,626"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="291,434,301,439,309,448,315,460,317,476,314,495,307,508,302,506,309,493,311,476,310,461,305,450,298,443,289,439"/>
+<area shape="rect" id="Node000004" href="$class__MLHom.html" title=" " alt="" coords="171,5,293,231"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="235,231,235,297,229,297,229,231"/>
+</map>

@@ -1,0 +1,6 @@
+<map id="GShom" name="GShom">
+<area shape="rect" id="Node000001" title="This class is the base class for Homomorphisms over SDD." alt="" coords="5,393,183,1459"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="185,827,195,842,203,863,208,891,209,926,205,976,195,1010,190,1009,200,975,204,926,202,892,197,864,190,844,181,830"/>
+<area shape="rect" id="Node000002" href="$class__GShom.html" title="The concrete data class for Homomorphisms." alt="" coords="22,5,166,331"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="97,331,97,377,91,377,91,331"/>
+</map>

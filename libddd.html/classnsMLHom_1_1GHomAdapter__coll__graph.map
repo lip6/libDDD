@@ -1,0 +1,10 @@
+<map id="nsMLHom::GHomAdapter" name="nsMLHom::GHomAdapter">
+<area shape="rect" id="Node000001" title=" " alt="" coords="23,1001,202,1167"/>
+<area shape="rect" id="Node000002" href="$class__MLHom.html" title=" " alt="" coords="5,573,127,799"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,812,106,1000,100,1001,78,813"/>
+<area shape="rect" id="Node000003" href="$classGHom.html" title="This class is the base class representing a homomorphism over DDD." alt="" coords="151,433,267,939"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="153,927,139,986,134,985,148,926"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="268,632,278,638,286,649,291,665,293,686,290,712,282,729,278,727,285,710,288,686,286,666,282,651,275,642,266,636"/>
+<area shape="rect" id="Node000004" href="$class__GHom.html" title="The concrete data class for Homomorphisms." alt="" coords="137,5,281,371"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="211,371,211,417,206,417,206,371"/>
+</map>

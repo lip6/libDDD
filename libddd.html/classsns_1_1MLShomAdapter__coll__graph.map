@@ -1,0 +1,10 @@
+<map id="sns::MLShomAdapter" name="sns::MLShomAdapter">
+<area shape="rect" id="Node000001" title=" " alt="" coords="23,681,174,867"/>
+<area shape="rect" id="Node000002" href="$class__GShom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,293,149,619"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,632,95,681,90,681,87,632"/>
+<area shape="rect" id="Node000003" href="$classMLShom.html" title=" " alt="" coords="174,293,290,619"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="176,596,146,667,141,665,171,594"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="292,418,309,430,315,441,317,456,314,473,307,485,302,482,309,471,311,456,310,443,305,433,289,423"/>
+<area shape="rect" id="Node000004" href="$class__MLShom.html" title=" " alt="" coords="171,5,293,231"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="235,231,235,277,229,277,229,231"/>
+</map>

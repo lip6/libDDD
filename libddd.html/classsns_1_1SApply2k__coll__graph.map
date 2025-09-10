@@ -1,0 +1,12 @@
+<map id="sns::SApply2k" name="sns::SApply2k">
+<area shape="rect" id="Node000001" title=" " alt="" coords="36,1881,161,2127"/>
+<area shape="rect" id="Node000002" href="$class__GShom.html" title="The concrete data class for Homomorphisms." alt="" coords="5,973,149,1299"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,1313,98,1881,93,1881,79,1313"/>
+<area shape="rect" id="Node000003" href="$classGSDD.html" title="This class is the base class representing a hierarchical Set Decision Diagram." alt="" coords="173,453,301,1819"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="176,1762,164,1819,152,1866,146,1865,159,1818,171,1761"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="304,1005,313,1021,321,1048,326,1086,328,1136,324,1208,313,1252,308,1251,319,1207,323,1136,321,1087,316,1049,309,1023,299,1008"/>
+<area shape="rect" id="Node000004" href="$classDataSet.html" title="This class is an abstraction of a set of data." alt="" coords="99,45,227,351"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="179,365,186,453,180,453,173,365"/>
+<area shape="rect" id="Node000005" href="$class__GSDD.html" title=" " alt="" coords="251,5,373,391"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="299,391,296,437,290,437,294,391"/>
+</map>
