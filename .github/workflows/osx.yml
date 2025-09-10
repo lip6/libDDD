@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     
-    runs-on: macos-latest
+    runs-on: macos-13
     
     
     steps:
@@ -17,13 +17,13 @@ jobs:
     - name: tag version date
       run: /bin/sh ./tag.sh
     - name: Install packages
-      run: brew install gcc@12 autoconf automake libtool binutils ;
+      run: brew install gcc@13 autoconf automake libtool binutils ;
     - name: autoreconf
       run: autoreconf -vfi
     - name: Prepare install folder
       run: mkdir usr && mkdir usr/local
     - name: configure
-      run: ./configure --prefix=$PWD/usr/local/ AR='gcc-ar-12' NM='gcc-nm-12' RANLIB='gcc-ranlib-12' CXX='g++-12' CC='gcc-12' || cat config.log
+      run: ./configure --prefix=$PWD/usr/local/ AR='gcc-ar-13' NM='gcc-nm-13' RANLIB='gcc-ranlib-13' CXX='g++-13' CC='gcc-13' || cat config.log
     - name: make lib
       run: cd ddd ; make -j ; cd ..
     - name: make demo
